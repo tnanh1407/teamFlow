@@ -1,15 +1,16 @@
-import dotenv from "dotenv";
-import prisma from "./config/database.js";
+import pool from "./config/database.js";
 import users from "./data/user.data.js";
 
-dotenv.config();
-
 const seed = async () => {
+  const client = await pool.connect();
   try {
-    await prisma.user.deleteMany();
+    await client.query("DELETE FROM users");
 
     for (const user of users) {
-      await prisma.user.create({ data: user });
+      await client.query(
+        `INSERT INTO users (employee_id, username, password, role, status) VALUES ($1, $2, $3, $4, $5)`,
+        [user.employeeId, user.username, user.password, user.role, user.status]
+      );
     }
 
     console.log("Seeded 2 users successfully");
@@ -21,6 +22,9 @@ const seed = async () => {
   } catch (error) {
     console.error("Seed error:", error);
     process.exit(1);
+  } finally {
+    client.release();
+    await pool.end();
   }
 };
 

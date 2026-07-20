@@ -1,8 +1,13 @@
-import { PrismaClient } from "../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
+import env from "./env.js";
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+const pool = new pg.Pool({
+  connectionString: env.DATABASE_URL,
 });
 
-export default prisma;
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client", err);
+  process.exit(-1);
+});
+
+export default pool;

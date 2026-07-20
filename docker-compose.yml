@@ -1,0 +1,23 @@
+# khai báo các contenner docker tạo ra ( ở đây chỉ có một postgresql)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: teamflow-postgres
+    restart: unless-stopped 
+    # nếu container bị tắt ngoài ý muốn thì docker sẽ tự chạy lại (restart trừ khi chủ đồng dừng container)
+    # no : không tự reset
+    # always : luôn luôn reset
+    # on-failure : restart khi bị lỗi
+    ports:
+      - "5433:5432" 
+    # trái là người dùng , phải là docker
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: teamflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # quan trọng giúp lưu giữ liệu ngoài container
+
+volumes:
+  postgres_data:

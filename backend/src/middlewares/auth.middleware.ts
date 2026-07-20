@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { EUserRole } from "../enums/user-role.enum.js";
+import env from "../config/env.js"
 
 export interface AuthRequest extends Request {
   user?: {
@@ -24,7 +25,7 @@ export const authenticate = (
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "teamflow-secret"
+      env.JWT_SECRET
     ) as { id: string; role: EUserRole };
 
     req.user = decoded;

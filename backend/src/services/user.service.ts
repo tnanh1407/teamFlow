@@ -1,27 +1,51 @@
-import prisma from "../config/database.js";
+import pool from "../config/database.js";
 import bcrypt from "bcryptjs";
 import { EUserRole } from "../enums/user-role.enum.js";
+import { AppError } from "../utils/errors/app-error.js";
+
+interface UserRow {
+  id: string;
+  employeeId: string;
+  username: string;
+  password: string;
+  role: string;
+  status: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const userColumns = `id, employee_id AS "employeeId", username, password, role, status, created_at AS "createdAt", updated_at AS "updatedAt"`;
 
 class UserService {
   async findAll() {
-    return prisma.user.findMany({
-      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
-    });
+    const { rows } = await pool.query<UserRow>(
+      `SELECT ${userColumns} FROM users ORDER BY created_at DESC`
+    );
+    return rows;
   }
 
   async findById(id: string) {
-    return prisma.user.findUnique({
-      where: { id },
-      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
-    });
+    const { rows } = await pool.query<UserRow>(
+      `SELECT ${userColumns} FROM users WHERE id = $1`,
+      [id]
+    );
+    return rows[0] || null;
   }
 
   async findByUsername(username: string) {
-    return prisma.user.findUnique({ where: { username } });
+    const { rows } = await pool.query<UserRow>(
+      `SELECT ${userColumns} FROM users WHERE username = $1`,
+      [username]
+    );
+    return rows[0] || null;
   }
 
   async findByEmployeeId(employeeId: string) {
-    return prisma.user.findUnique({ where: { employeeId } });
+    const { rows } = await pool.query<UserRow>(
+      `SELECT ${userColumns} FROM users WHERE employee_id = $1`,
+      [employeeId]
+    );
+    return rows[0] || null;
   }
 
   async create(data: {
@@ -33,20 +57,21 @@ class UserService {
   }) {
     const existingUser = await this.findByUsername(data.username);
     if (existingUser) {
-      throw new Error("Username already exists");
+      throw new AppError("Username already exists", 409);
     }
 
     const existingEmployee = await this.findByEmployeeId(data.employeeId);
     if (existingEmployee) {
-      throw new Error("Employee ID already exists");
+      throw new AppError("Employee ID already exists", 409);
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    return prisma.user.create({
-      data: { ...data, password: hashedPassword },
-      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
-    });
+    const { rows } = await pool.query<UserRow>(
+      `INSERT INTO users (employee_id, username, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING ${userColumns}`,
+      [data.employeeId, data.username, hashedPassword, data.role || EUserRole.USER, data.status ?? true]
+    );
+    return rows[0];
   }
 
   async update(
@@ -62,14 +87,14 @@ class UserService {
     if (data.username) {
       const existing = await this.findByUsername(data.username);
       if (existing && existing.id !== id) {
-        throw new Error("Username already exists");
+        throw new AppError("Username already exists", 409);
       }
     }
 
     if (data.employeeId) {
       const existing = await this.findByEmployeeId(data.employeeId);
       if (existing && existing.id !== id) {
-        throw new Error("Employee ID already exists");
+        throw new AppError("Employee ID already exists", 409);
       }
     }
 
@@ -77,15 +102,49 @@ class UserService {
       data.password = await bcrypt.hash(data.password, 10);
     }
 
-    return prisma.user.update({
-      where: { id },
-      data,
-      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
-    });
+    const setClauses: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (data.employeeId !== undefined) {
+      setClauses.push(`employee_id = $${idx++}`);
+      values.push(data.employeeId);
+    }
+    if (data.username !== undefined) {
+      setClauses.push(`username = $${idx++}`);
+      values.push(data.username);
+    }
+    if (data.password !== undefined) {
+      setClauses.push(`password = $${idx++}`);
+      values.push(data.password);
+    }
+    if (data.role !== undefined) {
+      setClauses.push(`role = $${idx++}`);
+      values.push(data.role);
+    }
+    if (data.status !== undefined) {
+      setClauses.push(`status = $${idx++}`);
+      values.push(data.status);
+    }
+
+    if (setClauses.length === 0) {
+      return this.findById(id);
+    }
+
+    values.push(id);
+    const { rows } = await pool.query<UserRow>(
+      `UPDATE users SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${userColumns}`,
+      values
+    );
+    return rows[0] || null;
   }
 
   async delete(id: string) {
-    return prisma.user.delete({ where: { id } });
+    const { rows } = await pool.query<UserRow>(
+      `DELETE FROM users WHERE id = $1 RETURNING ${userColumns}`,
+      [id]
+    );
+    return rows[0] || null;
   }
 }
 

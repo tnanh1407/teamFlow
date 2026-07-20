@@ -1,14 +1,13 @@
-import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import prisma from "./config/database.js";
+import pool from "./config/database.js";
+import env from "./config/env.js";
 import userRouter from "./routers/user.router.js";
-
-dotenv.config();
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -22,12 +21,19 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/users", userRouter);
+app.use(errorHandler);
 
 const start = async () => {
-  await prisma.$connect();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  try {
+    await pool.query("SELECT 1");
+    console.log("Database connected");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    process.exit(1);
+  }
 };
 
 start();
