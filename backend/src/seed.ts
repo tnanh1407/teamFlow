@@ -1,21 +1,18 @@
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import connectDB from "./config/database.js";
-import User from "./models/user.model.js";
+import prisma from "./config/database.js";
 import users from "./data/user.data.js";
 
 dotenv.config();
 
 const seed = async () => {
   try {
-    await connectDB();
+    await prisma.user.deleteMany();
 
-    await User.deleteMany();
-    console.log("Cleared existing users");
+    for (const user of users) {
+      await prisma.user.create({ data: user });
+    }
 
-    await User.insertMany(users);
     console.log("Seeded 2 users successfully");
-
     console.log("---");
     console.log("Admin: admin / admin123");
     console.log("User:  user  / user123");

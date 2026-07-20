@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import userService from "../services/user.service.js";
 import jwt from "jsonwebtoken";
+import { comparePassword } from "../utils/auth/auth.comparePassword.js";
 
 class UserController {
   async getAll(_req: Request, res: Response) {
@@ -79,16 +80,13 @@ class UserController {
         return res.status(403).json({ message: "Account is disabled" });
       }
 
-      const isMatch = await userService.comparePassword(
-        password,
-        user.password
-      );
+      const isMatch = await comparePassword(password, user.password);
       if (!isMatch) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       const token = jwt.sign(
-        { id: user._id, role: user.role },
+        { id: user.id, role: user.role },
         process.env.JWT_SECRET || "teamflow-secret",
         { expiresIn: "7d" }
       );
@@ -100,7 +98,7 @@ class UserController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      const { password: _, ...userWithoutPassword } = user.toObject();
+      const { password: _, ...userWithoutPassword } = user;
 
       res.json({
         data: {
@@ -112,6 +110,7 @@ class UserController {
       res.status(500).json({ message: error.message });
     }
   }
+
   async logout(_req: Request, res: Response) {
     res.clearCookie("token");
     res.json({ message: "Logged out successfully" });

@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import connectDB from "./config/database.js";
+import prisma from "./config/database.js";
 import userRouter from "./routers/user.router.js";
 
 dotenv.config();
@@ -24,7 +24,7 @@ app.get("/", (_req, res) => {
 app.use("/api/users", userRouter);
 
 const start = async () => {
-  await connectDB();
+  await prisma.$connect();
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

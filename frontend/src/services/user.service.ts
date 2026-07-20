@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 
 export interface User {
-  _id: string;
+  id: string;
   employeeId: string;
   username: string;
   role: "admin" | "user";
@@ -30,7 +30,7 @@ const userService = {
 
   getById: (id: string) => api.get<{ data: User }>(`/users/${id}`),
 
-  create: (data: Omit<User, "_id" | "createdAt" | "updatedAt"> & { password: string }) =>
+  create: (data: Omit<User, "id" | "createdAt" | "updatedAt"> & { password: string }) =>
     api.post<{ data: User }>("/users", data),
 
   update: (id: string, data: Partial<User>) =>

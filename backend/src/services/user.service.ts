@@ -1,22 +1,27 @@
-import User, { type IUser } from "../models/user.model.js";
+import prisma from "../config/database.js";
 import bcrypt from "bcryptjs";
 import { EUserRole } from "../enums/user-role.enum.js";
 
 class UserService {
-  async findAll(): Promise<IUser[]> {
-    return User.find().select("-password");
+  async findAll() {
+    return prisma.user.findMany({
+      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
+    });
   }
 
-  async findById(id: string): Promise<IUser | null> {
-    return User.findById(id).select("-password");
+  async findById(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
+    });
   }
 
-  async findByUsername(username: string): Promise<IUser | null> {
-    return User.findOne({ username });
+  async findByUsername(username: string) {
+    return prisma.user.findUnique({ where: { username } });
   }
 
-  async findByEmployeeId(employeeId: string): Promise<IUser | null> {
-    return User.findOne({ employeeId });
+  async findByEmployeeId(employeeId: string) {
+    return prisma.user.findUnique({ where: { employeeId } });
   }
 
   async create(data: {
@@ -25,7 +30,7 @@ class UserService {
     password: string;
     role?: EUserRole;
     status?: boolean;
-  }): Promise<IUser> {
+  }) {
     const existingUser = await this.findByUsername(data.username);
     if (existingUser) {
       throw new Error("Username already exists");
@@ -37,14 +42,11 @@ class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = await User.create({
-      ...data,
-      password: hashedPassword,
-    });
 
-    const userObj = user.toObject();
-    const { password: _, ...rest } = userObj;
-    return rest as unknown as IUser;
+    return prisma.user.create({
+      data: { ...data, password: hashedPassword },
+      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
+    });
   }
 
   async update(
@@ -56,17 +58,17 @@ class UserService {
       role: EUserRole;
       status: boolean;
     }>
-  ): Promise<IUser | null> {
+  ) {
     if (data.username) {
       const existing = await this.findByUsername(data.username);
-      if (existing && existing._id.toString() !== id) {
+      if (existing && existing.id !== id) {
         throw new Error("Username already exists");
       }
     }
 
     if (data.employeeId) {
       const existing = await this.findByEmployeeId(data.employeeId);
-      if (existing && existing._id.toString() !== id) {
+      if (existing && existing.id !== id) {
         throw new Error("Employee ID already exists");
       }
     }
@@ -75,20 +77,15 @@ class UserService {
       data.password = await bcrypt.hash(data.password, 10);
     }
 
-    return User.findByIdAndUpdate(id, data, { new: true }).select(
-      "-password"
-    );
+    return prisma.user.update({
+      where: { id },
+      data,
+      select: { id: true, employeeId: true, username: true, role: true, status: true, createdAt: true, updatedAt: true },
+    });
   }
 
-  async delete(id: string): Promise<IUser | null> {
-    return User.findByIdAndDelete(id);
-  }
-
-  async comparePassword(
-    plainPassword: string,
-    hashedPassword: string
-  ): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
+  async delete(id: string) {
+    return prisma.user.delete({ where: { id } });
   }
 }
 
