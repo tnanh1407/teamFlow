@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import { AppError } from "../utils/errors/app-error.js";
+import { EmployeeSchema } from "../schemas/index.js";
 
 interface EmployeeRow {
   id: string;
@@ -18,7 +19,7 @@ interface EmployeeRow {
   updatedAt: Date;
 }
 
-const employeeColumns = `id, department_id AS "departmentId", position_id AS "positionId", employee_code AS "employeeCode", name, email, phone, birth_date AS "birthDate", hire_date AS "hireDate", gender, status, avatar_url AS "avatarURL", created_at AS "createdAt", updated_at AS "updatedAt"`;
+const employeeColumns = EmployeeSchema.columns;
 
 class EmployeeService {
   async findAll() {

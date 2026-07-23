@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import { AppError } from "../utils/errors/app-error.js";
+import { TaskSchema } from "../schemas/index.js";
 
 interface TaskRow {
   id: string;
@@ -21,7 +22,7 @@ interface TaskRow {
   updatedAt: Date;
 }
 
-const taskColumns = `id, title, description, priority, status, progress, start_date AS "startDate", due_date AS "dueDate", assigned_by AS "assignedBy", created_by AS "createdBy", updated_by AS "updatedBy", completed_by AS "completedBy", estimated_hours AS "estimatedHours", actual_hours AS "actualHours", completed_at AS "completedAt", created_at AS "createdAt", updated_at AS "updatedAt"`;
+const taskColumns = TaskSchema.columns;
 
 class TaskService {
   async findAll() {

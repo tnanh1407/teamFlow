@@ -2,6 +2,7 @@ import pool from "../config/database.js";
 import bcrypt from "bcryptjs";
 import { EUserRole } from "../enums/user-role.enum.js";
 import { AppError } from "../utils/errors/app-error.js";
+import { UserSchema } from "../schemas/index.js";
 
 interface UserRow {
   id: string;
@@ -14,7 +15,7 @@ interface UserRow {
   updatedAt: Date;
 }
 
-const userColumns = `id, employee_id AS "employeeId", username, password, role, status, created_at AS "createdAt", updated_at AS "updatedAt"`;
+const userColumns = UserSchema.columns;
 
 class UserService {
   async findAll() {

@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import { AppError } from "../utils/errors/app-error.js";
+import { PositionSchema } from "../schemas/index.js";
 
 interface PositionRow {
   id: string;
@@ -10,7 +11,7 @@ interface PositionRow {
   updatedAt: Date;
 }
 
-const positionColumns = `id, name, description, level, created_at AS "createdAt", updated_at AS "updatedAt"`;
+const positionColumns = PositionSchema.columns;
 
 class PositionService {
   async findAll() {

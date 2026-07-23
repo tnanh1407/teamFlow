@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { TaskLogSchema } from "../schemas/index.js";
 
 interface TaskLogRow {
   id: string;
@@ -9,7 +10,7 @@ interface TaskLogRow {
   createdAt: Date;
 }
 
-const taskLogColumns = `id, task_id AS "taskId", employee_id AS "employeeId", action, description, created_at AS "createdAt"`;
+const taskLogColumns = TaskLogSchema.columns;
 
 class TaskLogService {
   async findAll() {

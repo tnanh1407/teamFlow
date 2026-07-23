@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { TaskDepartmentSchema } from "../schemas/index.js";
 
 interface TaskDepartmentRow {
   taskId: string;
@@ -6,7 +7,7 @@ interface TaskDepartmentRow {
   assignedAt: Date;
 }
 
-const taskDepartmentColumns = `task_id AS "taskId", department_id AS "departmentId", assigned_at AS "assignedAt"`;
+const taskDepartmentColumns = TaskDepartmentSchema.columns;
 
 class TaskDepartmentService {
   async findAll() {

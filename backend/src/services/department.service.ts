@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import { AppError } from "../utils/errors/app-error.js";
+import { DepartmentSchema } from "../schemas/index.js";
 
 interface DepartmentRow {
   id: string;
@@ -12,7 +13,7 @@ interface DepartmentRow {
   updatedAt: Date;
 }
 
-const departmentColumns = `id, name, code, description, manager_id AS "managerId", is_active AS "isActive", created_at AS "createdAt", updated_at AS "updatedAt"`;
+const departmentColumns = DepartmentSchema.columns;
 
 class DepartmentService {
   async findAll() {

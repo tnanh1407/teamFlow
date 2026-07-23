@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { TaskCommentSchema } from "../schemas/index.js";
 
 interface TaskCommentRow {
   id: string;
@@ -10,7 +11,7 @@ interface TaskCommentRow {
   updatedAt: Date;
 }
 
-const taskCommentColumns = `id, task_id AS "taskId", employee_id AS "employeeId", content, attachments, created_at AS "createdAt", updated_at AS "updatedAt"`;
+const taskCommentColumns = TaskCommentSchema.columns;
 
 class TaskCommentService {
   async findAll() {

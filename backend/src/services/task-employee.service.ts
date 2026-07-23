@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { TaskEmployeeSchema } from "../schemas/index.js";
 
 interface TaskEmployeeRow {
   id: string;
@@ -8,7 +9,7 @@ interface TaskEmployeeRow {
   assignedAt: Date;
 }
 
-const taskEmployeeColumns = `id, task_id AS "taskId", employee_id AS "employeeId", role, assigned_at AS "assignedAt"`;
+const taskEmployeeColumns = TaskEmployeeSchema.columns;
 
 class TaskEmployeeService {
   async findAll() {
