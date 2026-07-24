@@ -1,14 +1,16 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
 
 export default function DashboardLayout() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <div className="flex h-screen">
-      <Sidebar />
+    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950">
+      <Sidebar collapsed={collapsed} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="border-b px-6 py-3">
-          <h1 className="text-lg font-semibold">TeamFlow</h1>
-        </header>
+        <Header collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>

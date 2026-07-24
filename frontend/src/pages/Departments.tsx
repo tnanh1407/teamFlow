@@ -1,63 +1,58 @@
 import { useEffect, useState } from "react"
-import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown } from "lucide-react"
-import userService, { type User } from "@/services/user.service"
+import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Building2, CheckCircle, XCircle, FileText } from "lucide-react"
+import departmentService, { type Department } from "@/services/department.service"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
 
 interface FormData {
-  employeeId: string
-  username: string
-  password: string
-  role: "admin" | "user"
-  status: boolean
+  name: string
+  code: string
+  description: string
+  isActive: boolean
 }
 
 const emptyForm: FormData = {
-  employeeId: "",
-  username: "",
-  password: "",
-  role: "user",
-  status: true,
+  name: "",
+  code: "",
+  description: "",
+  isActive: true,
 }
 
-export default function Members() {
-  const [users, setUsers] = useState<User[]>([])
+export default function Departments() {
+  const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 
-  // Dialog state
   const [formOpen, setFormOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<FormData>(emptyForm)
-  const [deleteTarget, setDeleteTarget] = useState<User | null>(null)
-  const [showPassword, setShowPassword] = useState(false)
-  const [roleOpen, setRoleOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<Department | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
 
-  const fetchUsers = async () => {
+  const fetchDepartments = async () => {
     try {
-      const { data } = await userService.getAll()
-      setUsers(data.data)
+      const { data } = await departmentService.getAll()
+      setDepartments(data.data)
     } catch {
-      console.error("Failed to fetch users")
+      console.error("Failed to fetch departments")
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchUsers()
+    fetchDepartments()
   }, [])
 
-  const filtered = users.filter((u) =>
-    u.username.toLowerCase().includes(search.toLowerCase()) ||
-    u.employeeId.toLowerCase().includes(search.toLowerCase())
+  const filtered = departments.filter((d) =>
+    d.name.toLowerCase().includes(search.toLowerCase()) ||
+    d.code.toLowerCase().includes(search.toLowerCase())
   )
 
   const sorted = [...filtered].sort((a, b) => {
     if (!sortDir) return 0
-    const cmp = a.username.localeCompare(b.username)
+    const cmp = a.name.localeCompare(b.name)
     return sortDir === "asc" ? cmp : -cmp
   })
 
@@ -68,70 +63,57 @@ export default function Members() {
   const openCreate = () => {
     setEditingId(null)
     setForm(emptyForm)
-    setShowPassword(true)
     setFormOpen(true)
   }
 
-  const openEdit = (user: User) => {
-    setEditingId(user.id)
+  const openEdit = (department: Department) => {
+    setEditingId(department.id)
     setForm({
-      employeeId: user.employeeId,
-      username: user.username,
-      password: "",
-      role: user.role,
-      status: user.status,
+      name: department.name,
+      code: department.code,
+      description: department.description,
+      isActive: department.isActive,
     })
-    setShowPassword(false)
     setFormOpen(true)
   }
 
   const handleSave = async () => {
     try {
       if (editingId) {
-        const payload: any = {
-          employeeId: form.employeeId,
-          username: form.username,
-          role: form.role,
-          status: form.status,
-        }
-        if (form.password) payload.password = form.password
-        await userService.update(editingId, payload)
+        await departmentService.update(editingId, form)
       } else {
-        await userService.create({
-          ...form,
-          employeeId: form.employeeId,
-          password: form.password,
-        } as any)
+        await departmentService.create(form)
       }
       setFormOpen(false)
-      fetchUsers()
+      fetchDepartments()
     } catch {
-      console.error("Failed to save user")
+      console.error("Failed to save department")
     }
   }
 
-  const confirmDelete = (user: User) => {
-    setDeleteTarget(user)
+  const confirmDelete = (department: Department) => {
+    setDeleteTarget(department)
     setDeleteOpen(true)
   }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
     try {
-      await userService.delete(deleteTarget.id)
+      await departmentService.delete(deleteTarget.id)
       setDeleteOpen(false)
       setDeleteTarget(null)
-      fetchUsers()
+      fetchDepartments()
     } catch {
-      console.error("Failed to delete user")
+      console.error("Failed to delete department")
     }
   }
-
 
   const inputClass =
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
+
+  const activeCount = departments.filter((d) => d.isActive).length
 
   return (
     <div className="space-y-6">
@@ -139,11 +121,48 @@ export default function Members() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Quản lí thành viên
+            Quản lí phòng ban
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Quản lý tài khoản người dùng trong hệ thống
+            Quản lý phòng ban trong hệ thống
           </p>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+              <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{departments.length}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+              <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Đang hoạt động</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{activeCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+              <XCircle size={20} className="text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Vô hiệu</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{departments.length - activeCount}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -153,7 +172,7 @@ export default function Members() {
           <button
             onClick={openCreate}
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
-            title="Thêm thành viên"
+            title="Thêm phòng ban"
           >
             <Plus size={18} />
           </button>
@@ -166,8 +185,9 @@ export default function Members() {
           >
             <ArrowUpDown
               size={16}
-              className={`transition-all duration-200 ${sortDir === "desc" ? "rotate-180" : ""
-                } ${sortDir ? "text-blue-500" : "text-zinc-400"}`}
+              className={`transition-all duration-200 ${
+                sortDir === "desc" ? "rotate-180" : ""
+              } ${sortDir ? "text-blue-500" : "text-zinc-400"}`}
             />
             {sortDir && (
               <span className="text-zinc-600 dark:text-zinc-300">
@@ -183,12 +203,13 @@ export default function Members() {
           />
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên đăng nhập hoặc mã nhân viên..."
+            placeholder="Tìm kiếm theo tên hoặc mã phòng ban..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
-        </div></div>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
@@ -197,13 +218,13 @@ export default function Members() {
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Mã NV
+                  Mã PB
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Tên đăng nhập
+                  Tên phòng ban
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Vai trò
+                  Mô tả
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Trạng thái
@@ -223,58 +244,57 @@ export default function Members() {
               ) : sorted.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Không tìm thấy thành viên nào
+                    Không tìm thấy phòng ban nào
                   </td>
                 </tr>
               ) : (
-                sorted.map((user) => (
+                sorted.map((department) => (
                   <tr
-                    key={user.id}
+                    key={department.id}
                     className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                   >
                     <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      {user.employeeId}
+                      {department.code}
                     </td>
                     <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
-                      {user.username}
+                      <div className="flex items-center gap-2">
+                        <Building2 size={14} className="text-zinc-400 shrink-0" />
+                        {department.name}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400 max-w-[200px] truncate">
+                      <div className="flex items-center gap-1.5">
+                        <FileText size={13} className="shrink-0" />
+                        <span>{department.description || "—"}</span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${user.role === "admin"
-                          ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-                          : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                          }`}
-                      >
-                        {user.role === "admin" ? "Admin" : "User"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.status
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-red-500 dark:text-red-400"
-                          }`}
+                        className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                          department.isActive
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-500 dark:text-red-400"
+                        }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${user.status
-                            ? "bg-emerald-500"
-                            : "bg-red-500"
-                            }`}
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            department.isActive ? "bg-emerald-500" : "bg-red-500"
+                          }`}
                         />
-                        {user.status ? "Hoạt động" : "Vô hiệu"}
+                        {department.isActive ? "Hoạt động" : "Vô hiệu"}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
-                          onClick={() => openEdit(user)}
+                          onClick={() => openEdit(department)}
                           className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
                           title="Sửa"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
-                          onClick={() => confirmDelete(user)}
+                          onClick={() => confirmDelete(department)}
                           className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
                           title="Xoá"
                         >
@@ -294,7 +314,7 @@ export default function Members() {
       <Modal
         open={formOpen}
         onClose={() => setFormOpen(false)}
-        title={editingId ? "Sửa thành viên" : "Thêm thành viên"}
+        title={editingId ? "Sửa phòng ban" : "Thêm phòng ban"}
         width={420}
         footer={
           <div className="flex gap-2">
@@ -315,83 +335,41 @@ export default function Members() {
       >
         <div className="space-y-3">
           <div>
-            <label className={labelClass}>Mã nhân viên</label>
+            <label className={labelClass}>Mã phòng ban</label>
             <input
               type="text"
-              value={form.employeeId}
-              onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
-              placeholder="VD: NV001"
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value })}
+              placeholder="VD: IT, HR, SALES"
               className={inputClass}
             />
           </div>
           <div>
-            <label className={labelClass}>Tên đăng nhập</label>
+            <label className={labelClass}>Tên phòng ban</label>
             <input
               type="text"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="Nhập tên đăng nhập"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Nhập tên phòng ban"
               className={inputClass}
             />
           </div>
           <div>
-            <label className={labelClass}>
-              Mật khẩu {editingId && <span className="text-zinc-400 font-normal">(để trống nếu không đổi)</span>}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder={editingId ? "Để trống nếu không đổi" : "Nhập mật khẩu"}
-                className={inputClass}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer border-none bg-transparent text-xs"
-              >
-                {showPassword ? "Ẩn" : "Hiện"}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Vai trò</label>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setRoleOpen(!roleOpen)}
-                className={`${inputClass} flex items-center justify-between`}
-              >
-                <span>{form.role === "admin" ? "Admin" : "User"}</span>
-                <ChevronDown size={14} className="text-zinc-400" />
-              </button>
-              {roleOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                  {(["user", "admin"] as const).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => {
-                        setForm({ ...form, role: r })
-                        setRoleOpen(false)
-                      }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.role === r ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
-                        }`}
-                    >
-                      {r === "admin" ? "Admin" : "User"}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <label className={labelClass}>Mô tả</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Mô tả phòng ban (không bắt buộc)"
+              rows={3}
+              className={inputClass + " resize-none"}
+            />
           </div>
           <div className="flex items-center gap-2 pt-1">
             <input
               type="checkbox"
               id="status"
-              checked={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.checked })}
+              checked={form.isActive}
+              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
             />
             <label htmlFor="status" className="text-sm text-zinc-700 cursor-pointer">
@@ -407,12 +385,12 @@ export default function Members() {
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDelete}
         title="Xác nhận xoá"
-        variant="warning"
+        variant="danger"
         confirmText="Xoá"
         cancelText="Huỷ"
       >
-        Bạn có chắc muốn xoá thành viên{" "}
-        <strong>{deleteTarget?.username}</strong>? Hành động này không thể hoàn tác.
+        Bạn có chắc muốn xoá phòng ban{" "}
+        <strong>{deleteTarget?.name}</strong>? Hành động này không thể hoàn tác.
       </ConfirmDialog>
     </div>
   )

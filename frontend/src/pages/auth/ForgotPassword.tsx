@@ -2,32 +2,34 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
 import heroImg from "@/assets/hero.png"
-import userService from "@/services/user.service"
-import { useAuth } from "@/contexts/AuthContext"
 
-export default function Login() {
+export default function ForgotPassword() {
   const navigate = useNavigate()
-  const { setUser } = useAuth()
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("")
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!username || !password) {
-      setError("Vui lòng nhập đầy đủ tài khoản và mật khẩu")
+    if (!email) {
+      setError("Vui lòng nhập email")
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Email không hợp lệ")
       return
     }
     setLoading(true)
     setError("")
+    setSuccess("")
     try {
-      const { data } = await userService.login({ username, password })
-      const user = data.data.user
-      setUser(user)
-      navigate(user.role === "admin" ? "/dashboard" : "/")
+      // TODO: call forgot password API
+      console.log("Forgot password email:", email)
+      setSuccess("Vui lòng kiểm tra email để đặt lại mật khẩu")
+      setTimeout(() => navigate("/login"), 2000)
     } catch {
-      setError("Sai tài khoản hoặc mật khẩu")
+      setError("Có lỗi xảy ra, vui lòng thử lại sau")
     } finally {
       setLoading(false)
     }
@@ -36,9 +38,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen">
       {/* Left: Hero image (desktop only) */}
-      <div
-        className="hidden lg:flex flex-1 bg-white overflow-hidden"
-      >
+      <div className="hidden lg:flex flex-1 bg-white overflow-hidden">
         <motion.img
           src={heroImg}
           alt="TeamFlow"
@@ -49,7 +49,7 @@ export default function Login() {
         />
       </div>
 
-      {/* Right: Login form */}
+      {/* Right: Form */}
       <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-zinc-900">
         <div className="w-full max-w-[440px]">
           {/* Logo + Title */}
@@ -63,10 +63,10 @@ export default function Login() {
               TF
             </div>
             <h1 className="text-2xl font-bold mt-6 mb-1 text-zinc-900 dark:text-zinc-100">
-              Đăng nhập
+              Quên mật khẩu
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Đăng nhập để tiếp tục quản lý
+              Nhập email để nhận link đặt lại mật khẩu
             </p>
           </div>
 
@@ -77,42 +77,24 @@ export default function Login() {
                 {error}
               </div>
             )}
+            {success && (
+              <div className="mb-4 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-700 dark:text-green-400">
+                {success}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Tài khoản
+                  Email
                 </label>
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Nhập tên tài khoản"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Nhập email của bạn"
                   className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Mật khẩu
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu"
-                  className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                />
-              </div>
-
-              <div className="flex justify-end -mt-1">
-                <button
-                  type="button"
-                  onClick={() => navigate("/forgot-password")}
-                  className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer bg-transparent border-none"
-                >
-                  Quên mật khẩu?
-                </button>
               </div>
 
               <button
@@ -123,8 +105,18 @@ export default function Login() {
                   background: "linear-gradient(135deg, #2563eb, #7c3aed)",
                 }}
               >
-                {loading ? "Đang xử lý..." : "Đăng nhập"}
+                {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
               </button>
+
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 bg-transparent border-none cursor-pointer"
+                >
+                  Quay lại đăng nhập
+                </button>
+              </div>
             </form>
           </div>
         </div>
