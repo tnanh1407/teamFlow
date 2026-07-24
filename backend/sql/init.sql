@@ -45,10 +45,11 @@ CREATE TABLE IF NOT EXISTS employees (
   status TEXT NOT NULL DEFAULT 'active',
   avatar_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS tasks (
+CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
@@ -68,17 +69,17 @@ CREATE TABLE IF NOT EXISTS tasks (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS task_employees (
+CREATE TABLE IF NOT EXISTS project_employees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  task_id UUID NOT NULL,
+  project_id UUID NOT NULL,
   employee_id UUID NOT NULL,
   role TEXT NOT NULL DEFAULT 'member',
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS task_comments (
+CREATE TABLE IF NOT EXISTS project_comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  task_id UUID NOT NULL,
+  project_id UUID NOT NULL,
   employee_id UUID NOT NULL,
   content TEXT,
   attachments TEXT,
@@ -86,16 +87,16 @@ CREATE TABLE IF NOT EXISTS task_comments (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS task_departments (
-  task_id UUID NOT NULL,
+CREATE TABLE IF NOT EXISTS project_departments (
+  project_id UUID NOT NULL,
   department_id UUID NOT NULL,
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  PRIMARY KEY (task_id, department_id)
+  PRIMARY KEY (project_id, department_id)
 );
 
-CREATE TABLE IF NOT EXISTS task_logs (
+CREATE TABLE IF NOT EXISTS project_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  task_id UUID NOT NULL,
+  project_id UUID NOT NULL,
   employee_id UUID NOT NULL,
   action TEXT,
   description TEXT,
@@ -110,22 +111,22 @@ ALTER TABLE employees ADD CONSTRAINT fk_employees_position FOREIGN KEY (position
 
 ALTER TABLE departments ADD CONSTRAINT fk_departments_manager FOREIGN KEY (manager_id) REFERENCES employees(id);
 
-ALTER TABLE tasks ADD CONSTRAINT fk_tasks_created_by FOREIGN KEY (created_by) REFERENCES employees(id);
-ALTER TABLE tasks ADD CONSTRAINT fk_tasks_updated_by FOREIGN KEY (updated_by) REFERENCES employees(id);
-ALTER TABLE tasks ADD CONSTRAINT fk_tasks_assigned_by FOREIGN KEY (assigned_by) REFERENCES employees(id);
-ALTER TABLE tasks ADD CONSTRAINT fk_tasks_completed_by FOREIGN KEY (completed_by) REFERENCES employees(id);
+ALTER TABLE projects ADD CONSTRAINT fk_projects_created_by FOREIGN KEY (created_by) REFERENCES employees(id);
+ALTER TABLE projects ADD CONSTRAINT fk_projects_updated_by FOREIGN KEY (updated_by) REFERENCES employees(id);
+ALTER TABLE projects ADD CONSTRAINT fk_projects_assigned_by FOREIGN KEY (assigned_by) REFERENCES employees(id);
+ALTER TABLE projects ADD CONSTRAINT fk_projects_completed_by FOREIGN KEY (completed_by) REFERENCES employees(id);
 
-ALTER TABLE task_employees ADD CONSTRAINT fk_task_employees_task FOREIGN KEY (task_id) REFERENCES tasks(id);
-ALTER TABLE task_employees ADD CONSTRAINT fk_task_employees_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
+ALTER TABLE project_employees ADD CONSTRAINT fk_project_employees_project FOREIGN KEY (project_id) REFERENCES projects(id);
+ALTER TABLE project_employees ADD CONSTRAINT fk_project_employees_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
 
-ALTER TABLE task_comments ADD CONSTRAINT fk_task_comments_task FOREIGN KEY (task_id) REFERENCES tasks(id);
-ALTER TABLE task_comments ADD CONSTRAINT fk_task_comments_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
+ALTER TABLE project_comments ADD CONSTRAINT fk_project_comments_project FOREIGN KEY (project_id) REFERENCES projects(id);
+ALTER TABLE project_comments ADD CONSTRAINT fk_project_comments_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
 
-ALTER TABLE task_departments ADD CONSTRAINT fk_task_departments_task FOREIGN KEY (task_id) REFERENCES tasks(id);
-ALTER TABLE task_departments ADD CONSTRAINT fk_task_departments_department FOREIGN KEY (department_id) REFERENCES departments(id);
+ALTER TABLE project_departments ADD CONSTRAINT fk_project_departments_project FOREIGN KEY (project_id) REFERENCES projects(id);
+ALTER TABLE project_departments ADD CONSTRAINT fk_project_departments_department FOREIGN KEY (department_id) REFERENCES departments(id);
 
-ALTER TABLE task_logs ADD CONSTRAINT fk_task_logs_task FOREIGN KEY (task_id) REFERENCES tasks(id);
-ALTER TABLE task_logs ADD CONSTRAINT fk_task_logs_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
+ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_project FOREIGN KEY (project_id) REFERENCES projects(id);
+ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -133,13 +134,13 @@ CREATE INDEX IF NOT EXISTS idx_users_employee_id ON users(employee_id);
 CREATE INDEX IF NOT EXISTS idx_employees_department ON employees(department_id);
 CREATE INDEX IF NOT EXISTS idx_employees_position ON employees(position_id);
 CREATE INDEX IF NOT EXISTS idx_employees_email ON employees(email);
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
-CREATE INDEX IF NOT EXISTS idx_tasks_created_by ON tasks(created_by);
-CREATE INDEX IF NOT EXISTS idx_task_employees_task ON task_employees(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_employees_employee ON task_employees(employee_id);
-CREATE INDEX IF NOT EXISTS idx_task_comments_task ON task_comments(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_logs_task ON task_logs(task_id);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_projects_priority ON projects(priority);
+CREATE INDEX IF NOT EXISTS idx_projects_created_by ON projects(created_by);
+CREATE INDEX IF NOT EXISTS idx_project_employees_project ON project_employees(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_employees_employee ON project_employees(employee_id);
+CREATE INDEX IF NOT EXISTS idx_project_comments_project ON project_comments(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_logs_project ON project_logs(project_id);
 
 -- Updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -170,12 +171,12 @@ CREATE OR REPLACE TRIGGER trg_employees_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
 
-CREATE OR REPLACE TRIGGER trg_tasks_updated_at
-  BEFORE UPDATE ON tasks
+CREATE OR REPLACE TRIGGER trg_projects_updated_at
+  BEFORE UPDATE ON projects
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
 
-CREATE OR REPLACE TRIGGER trg_task_comments_updated_at
-  BEFORE UPDATE ON task_comments
+CREATE OR REPLACE TRIGGER trg_project_comments_updated_at
+  BEFORE UPDATE ON project_comments
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();

@@ -3,6 +3,7 @@ import employeeController from "../controllers/employee.controller.js";
 import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
 import { asyncHandler } from "../middlewares/async.middleware.js";
+import { uploadAvatar } from "../middlewares/upload.middleware.js";
 import {
   createEmployeeSchema,
   updateEmployeeSchema,
@@ -19,6 +20,7 @@ router.post(
   "/",
   authenticate,
   authorize(EUserRole.ADMIN),
+  uploadAvatar.single("avatar"),
   validate(createEmployeeSchema),
   asyncHandler(employeeController.create)
 );
@@ -26,6 +28,7 @@ router.patch(
   "/:id",
   authenticate,
   authorize(EUserRole.ADMIN),
+  uploadAvatar.single("avatar"),
   validate(updateEmployeeSchema),
   asyncHandler(employeeController.update)
 );
@@ -34,6 +37,18 @@ router.delete(
   authenticate,
   authorize(EUserRole.ADMIN),
   asyncHandler(employeeController.delete)
+);
+router.delete(
+  "/:id/hard",
+  authenticate,
+  authorize(EUserRole.ADMIN),
+  asyncHandler(employeeController.deleteHard)
+);
+router.post(
+  "/:id/restore",
+  authenticate,
+  authorize(EUserRole.ADMIN),
+  asyncHandler(employeeController.restore)
 );
 
 export default router;

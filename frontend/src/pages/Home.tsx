@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
+
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
@@ -14,17 +14,17 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-12 text-center">
       <h1 className="text-4xl font-bold mb-4">Welcome to TeamFlow</h1>
-      <p className="text-lg text-muted-foreground">
+      <p className="text-lg text-zinc-500 dark:text-zinc-400">
         Your team collaboration platform.
       </p>
       {user && (
         <div className="mt-8 flex items-center justify-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            Xin chào, <strong>{user.username}</strong> • <span className="uppercase text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{user.role}</span>
+          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            Xin chào, <strong>{user.username}</strong> • <span className="uppercase text-xs bg-zinc-900/10 dark:bg-zinc-100/10 text-zinc-900 dark:text-zinc-100 px-2 py-0.5 rounded-full">{user.role}</span>
           </span>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
+          <button onClick={handleLogout} className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             Đăng xuất
-          </Button>
+          </button>
         </div>
       )}
     </div>

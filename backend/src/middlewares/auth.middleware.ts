@@ -35,6 +35,7 @@ export const authenticate = (
   }
 };
 
+//  xác thực
 export const authorize = (...roles: EUserRole[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
