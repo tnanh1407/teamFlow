@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react"
-import { Search, Plus, Pencil, Trash2, ArrowUpDown, Medal } from "lucide-react"
+import { Search, Plus, Pencil, Trash2, ArrowUpDown, Medal, Fingerprint, Copy } from "lucide-react"
+import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
+import { toast } from "sonner"
+
 
 interface FormData {
   name: string
@@ -25,6 +28,8 @@ const levelLabels: Record<string, string> = {
   Manager: "Manager",
 }
 
+const levelOrder = ["Intern", "Junior", "Middle", "Senior", "Leader", "Manager"]
+
 export default function Positions() {
   const [positions, setPositions] = useState<Position[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,6 +42,7 @@ export default function Positions() {
   const [deleteTarget, setDeleteTarget] = useState<Position | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
   const [levelOpen, setLevelOpen] = useState(false)
+  const [detailTarget, setDetailTarget] = useState<Position | null>(null)
 
   const fetchPositions = async () => {
     try {
@@ -73,7 +79,8 @@ export default function Positions() {
     setFormOpen(true)
   }
 
-  const openEdit = (pos: Position) => {
+  const openEdit = (e: React.MouseEvent, pos: Position) => {
+    e.stopPropagation()
     setEditingId(pos.id)
     setForm({
       name: pos.name,
@@ -81,6 +88,10 @@ export default function Positions() {
       level: pos.level,
     })
     setFormOpen(true)
+  }
+
+  const openDetail = (pos: Position) => {
+    setDetailTarget(pos)
   }
 
   const handleSave = async () => {
@@ -99,7 +110,8 @@ export default function Positions() {
     }
   }
 
-  const confirmDelete = (pos: Position) => {
+  const confirmDelete = (e: React.MouseEvent, pos: Position) => {
+    e.stopPropagation()
     setDeleteTarget(pos)
     setDeleteOpen(true)
   }
@@ -120,8 +132,6 @@ export default function Positions() {
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
-  const levelCount = (level: string) => positions.filter((p) => p.level === level).length
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -135,37 +145,73 @@ export default function Positions() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
+        {(() => {
+          const levelColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
+          const levelData = levelOrder
+            .map((l, i) => ({ name: levelLabels[l], value: positions.filter((p) => p.level === l).length, color: levelColors[i % levelColors.length] }))
+            .filter((d) => d.value > 0)
+          const total = positions.length || 1
+          return (
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Cấp bậc</p>
+              <div className="flex items-start gap-4">
+                <ResponsiveContainer width="55%" height={220}>
+                  <PieChart>
+                    <Pie data={levelData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
+                      {levelData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex-1 flex flex-col gap-2 pt-2">
+                  {levelData.map((entry) => (
+                    <div key={entry.name} className="group cursor-default">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-              <Medal size={20} className="text-blue-600 dark:text-blue-400" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                <Medal size={20} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.length}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.length}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
+                <Medal size={20} className="text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Middle / Senior</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.filter((p) => p.level === "Middle" || p.level === "Senior").length}</p>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
-              <Medal size={20} className="text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Manager</p>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{levelCount("Manager")}</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-              <Medal size={20} className="text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Junior / Intern</p>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{levelCount("Junior") + levelCount("Intern")}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                <Medal size={20} className="text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Junior / Intern</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.filter((p) => p.level === "Junior" || p.level === "Intern").length}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -209,6 +255,7 @@ export default function Positions() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">UUID</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Tên chức vụ</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Cấp bậc</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Mô tả</th>
@@ -218,15 +265,32 @@ export default function Positions() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td>
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy chức vụ nào</td>
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy chức vụ nào</td>
                 </tr>
               ) : (
                 sorted.map((pos) => (
-                  <tr key={pos.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                  <tr key={pos.id} onClick={() => openDetail(pos)} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer">
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
+                        <Fingerprint size={12} className="shrink-0" />
+                        {pos.id.slice(0, 8)}...
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigator.clipboard.writeText(pos.id)
+                            toast.success("Đã sao chép UUID")
+                          }}
+                          className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                          title="Copy UUID"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">{pos.name}</td>
                     <td className="px-4 py-3">
                       {pos.level ? (
@@ -242,10 +306,10 @@ export default function Positions() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sửa">
+                        <button onClick={(e) => openEdit(e, pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sửa">
                           <Pencil size={15} />
                         </button>
-                        <button onClick={() => confirmDelete(pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="Xoá">
+                        <button onClick={(e) => confirmDelete(e, pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="Xoá">
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -258,6 +322,72 @@ export default function Positions() {
         </div>
       </div>
 
+      {/* Detail Modal */}
+      <Modal
+        open={!!detailTarget}
+        onClose={() => setDetailTarget(null)}
+        title="Chi tiết chức vụ"
+        width={420}
+        footer={
+          <button onClick={() => setDetailTarget(null)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
+            Đóng
+          </button>
+        }
+      >
+        {detailTarget && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+                {detailTarget.name.slice(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">{detailTarget.name}</h3>
+                {detailTarget.level && (
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 mt-0.5">
+                    {levelLabels[detailTarget.level] || detailTarget.level}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">UUID</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <code className="text-sm text-zinc-700 dark:text-zinc-300 font-mono break-all">{detailTarget.id}</code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(detailTarget.id)
+                      toast.success("Đã sao chép UUID")
+                    }}
+                    className="p-1 rounded text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent shrink-0"
+                    title="Copy UUID"
+                  >
+                    <Copy size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</p>
+                <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{detailTarget.description || "Chưa có mô tả"}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <div>
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày tạo</p>
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(detailTarget.createdAt).toLocaleDateString("vi-VN")}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cập nhật</p>
+                  <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(detailTarget.updatedAt).toLocaleDateString("vi-VN")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
       <Modal
         open={formOpen}
         onClose={() => setFormOpen(false)}
@@ -268,7 +398,7 @@ export default function Positions() {
             <button onClick={() => setFormOpen(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
               Huỷ
             </button>
-            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
+            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
               {editingId ? "Cập nhật" : "Tạo mới"}
             </button>
           </div>

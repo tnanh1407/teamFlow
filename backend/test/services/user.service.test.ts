@@ -1,5 +1,5 @@
 import pool from "../../src/config/database.js";
-import userService from "../../src/services/user.service.js";
+import userService from "../../src/user/user.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 import bcrypt from "bcryptjs";
 import { EUserRole } from "../../src/enums/user-role.enum.js";

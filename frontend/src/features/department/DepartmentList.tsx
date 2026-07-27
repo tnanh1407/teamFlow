@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, CheckCircle, XCircle, FileText, Copy } from "lucide-react"
+import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import departmentService, { type Department } from "@/services/department.service"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
+import { toast } from "sonner"
+
 
 interface FormData {
   name: string
@@ -20,6 +23,7 @@ const emptyForm: FormData = {
 }
 
 export default function Departments() {
+  const navigate = useNavigate()
   const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -67,7 +71,8 @@ export default function Departments() {
     setFormOpen(true)
   }
 
-  const openEdit = (department: Department) => {
+  const openEdit = (e: React.MouseEvent, department: Department) => {
+    e.stopPropagation()
     setEditingId(department.id)
     setForm({
       name: department.name,
@@ -92,7 +97,8 @@ export default function Departments() {
     }
   }
 
-  const confirmDelete = (department: Department) => {
+  const confirmDelete = (e: React.MouseEvent, department: Department) => {
+    e.stopPropagation()
     setDeleteTarget(department)
     setDeleteOpen(true)
   }
@@ -115,6 +121,7 @@ export default function Departments() {
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
   const activeCount = departments.filter((d) => d.isActive).length
+  const inactiveCount = departments.length - activeCount
 
   return (
     <div className="space-y-6">
@@ -122,7 +129,7 @@ export default function Departments() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Quản lí phòng ban
+            Quản lí Phòng Ban
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
             Quản lý phòng ban trong hệ thống
@@ -130,44 +137,80 @@ export default function Departments() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Stats + PieChart */}
+      <div className="grid grid-cols-2 gap-4">
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-              <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{departments.length}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{departments.length}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Đang hoạt động</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{activeCount}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+                <XCircle size={20} className="text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Vô hiệu</p>
+                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{inactiveCount}</p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
-              <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
+        {(() => {
+          const statusData = [
+            { name: "Hoạt động", value: activeCount, color: "#10b981" },
+            { name: "Vô hiệu", value: inactiveCount, color: "#ef4444" },
+          ].filter(d => d.value > 0)
+          const total = departments.length || 1
+          return (
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Trạng thái</p>
+              <div className="flex items-start gap-4">
+                <ResponsiveContainer width="55%" height={220}>
+                  <PieChart>
+                    <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
+                      {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex-1 flex flex-col gap-2 pt-2">
+                  {statusData.map((entry) => (
+                    <div key={entry.name} className="group cursor-default">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Đang hoạt động</p>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{activeCount}</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
-              <XCircle size={20} className="text-red-600 dark:text-red-400" />
-            </div>
-            <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Vô hiệu</p>
-              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{departments.length - activeCount}</p>
-            </div>
-          </div>
-        </div>
+          )
+        })()}
       </div>
 
-      {/* Search */}
+      {/* Search & Actions */}
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-2">
           <button
@@ -186,9 +229,8 @@ export default function Departments() {
           >
             <ArrowUpDown
               size={16}
-              className={`transition-all duration-200 ${
-                sortDir === "desc" ? "rotate-180" : ""
-              } ${sortDir ? "text-blue-500" : "text-zinc-400"}`}
+              className={`transition-all duration-200 ${sortDir === "desc" ? "rotate-180" : ""
+                } ${sortDir ? "text-blue-500" : "text-zinc-400"}`}
             />
             {sortDir && (
               <span className="text-zinc-600 dark:text-zinc-300">
@@ -219,16 +261,16 @@ export default function Departments() {
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Mã PB
+                  Mã Định Danh
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  Mã CODE
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Tên phòng ban
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Mô tả
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Trạng thái
                 </th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Thao tác
@@ -252,13 +294,34 @@ export default function Departments() {
                 sorted.map((department) => (
                   <tr
                     key={department.id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    onClick={() => navigate(`/departments/${department.id}`)}
+                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                   >
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
+                        {department.id}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigator.clipboard.writeText(department.id)
+                            toast.success("Đã sao chép UUID")
+                          }}
+                          className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                          title="Copy UUID"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
                         {department.code}
                         <button
-                          onClick={() => { navigator.clipboard.writeText(department.code) }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigator.clipboard.writeText(department.code)
+                            toast.success("Đã sao chép mã")
+                          }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy"
                         >
@@ -269,9 +332,9 @@ export default function Departments() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Building2 size={14} className="text-zinc-400 shrink-0" />
-                        <Link to={`/departments/${department.id}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                           {department.name}
-                        </Link>
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400 max-w-[200px] truncate">
@@ -280,33 +343,17 @@ export default function Departments() {
                         <span>{department.description || "—"}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                          department.isActive
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-red-500 dark:text-red-400"
-                        }`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            department.isActive ? "bg-emerald-500" : "bg-red-500"
-                          }`}
-                        />
-                        {department.isActive ? "Hoạt động" : "Vô hiệu"}
-                      </span>
-                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
-                          onClick={() => openEdit(department)}
+                          onClick={(e) => openEdit(e, department)}
                           className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
                           title="Sửa"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
-                          onClick={() => confirmDelete(department)}
+                          onClick={(e) => confirmDelete(e, department)}
                           className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
                           title="Xoá"
                         >
@@ -338,7 +385,7 @@ export default function Departments() {
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
             >
               {editingId ? "Cập nhật" : "Tạo mới"}
             </button>

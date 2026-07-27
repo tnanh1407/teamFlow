@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from "react"
 import { Link } from "react-router-dom"
-import { Search, Plus, Pencil, Trash2, ArrowUpDown, Copy, Camera } from "lucide-react"
+import { Search, Plus, Pencil, Trash2, ArrowUpDown, Copy, Camera, Fingerprint } from "lucide-react"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import employeeService, { type Employee } from "@/services/employee.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
+import { toast } from "sonner"
 
 interface FormData {
   employeeCode: string
@@ -333,6 +334,7 @@ export default function Employees() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">UUID</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Mã NV</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Họ tên</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Email</th>
@@ -345,15 +347,32 @@ export default function Employees() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy nhân viên nào</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy nhân viên nào</td>
                 </tr>
               ) : (
                 sorted.map((emp) => (
                   <tr key={emp.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
+                        <Fingerprint size={12} className="shrink-0" />
+                        {emp.id.slice(0, 8)}...
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigator.clipboard.writeText(emp.id)
+                            toast.success("Đã sao chép UUID")
+                          }}
+                          className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                          title="Copy UUID"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
                         {emp.employeeCode}
@@ -368,13 +387,13 @@ export default function Employees() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        {emp.avatarURL && (
-                          <img
-                            src={emp.avatarURL}
-                            alt={emp.name}
-                            className="w-7 h-7 rounded-full object-cover shrink-0"
-                          />
-                        )}
+                        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                          {emp.avatarURL ? (
+                            <img src={emp.avatarURL} alt={emp.name} className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <span>{emp.name.slice(0, 2).toUpperCase()}</span>
+                          )}
+                        </div>
                         <Link to={`/employees/${emp.id}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
                           {emp.name}
                         </Link>
@@ -397,10 +416,10 @@ export default function Employees() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(emp)} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sửa">
+                        <button onClick={(e) => { e.stopPropagation(); openEdit(emp) }} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sửa">
                           <Pencil size={15} />
                         </button>
-                        <button onClick={() => confirmDelete(emp)} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="Xoá">
+                        <button onClick={(e) => { e.stopPropagation(); confirmDelete(emp) }} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="Xoá">
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -423,7 +442,7 @@ export default function Employees() {
             <button onClick={() => setFormOpen(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
               Huỷ
             </button>
-            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
+            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
               {editingId ? "Cập nhật" : "Tạo mới"}
             </button>
           </div>
@@ -433,7 +452,7 @@ export default function Employees() {
           {/* Avatar upload */}
           <div className="flex items-center gap-4">
             <div
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
+              className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               {avatarPreview ? (

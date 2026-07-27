@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import positionController from "../../src/controllers/position.controller.js";
-import positionService from "../../src/services/position.service.js";
+import positionController from "../../src/position/position.controller.js";
+import positionService from "../../src/position/position.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
-jest.mock("../../src/services/position.service.js");
+jest.mock("../../src/position/position.service.js");
 
 const mockPositionService = jest.mocked(positionService);
 

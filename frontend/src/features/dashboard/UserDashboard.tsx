@@ -64,13 +64,24 @@ export default function UserDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          Xin chào, {user?.username}
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Bảng điều khiển
-        </p>
+      <div className="flex items-center gap-3">
+        {user && (
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+            {user.avatarURL ? (
+              <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span>{user.username.slice(0, 2).toUpperCase()}</span>
+            )}
+          </div>
+        )}
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            Xin chào, {user?.username}
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Bảng điều khiển
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -114,7 +125,7 @@ export default function UserDashboard() {
                   <div className="ml-4 w-20">
                     <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-1.5 rounded-full transition-all"
+                        className="bg-blue-600 h-1.5 rounded-full transition-all"
                         style={{ width: `${p.progress}%` }}
                       />
                     </div>
@@ -136,8 +147,12 @@ export default function UserDashboard() {
             ) : (
               members.filter((m) => m.position === "member").slice(0, 5).map((m) => (
                 <div key={m.id} className="px-5 py-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {m.username.slice(0, 2).toUpperCase()}
+                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    {m.avatarURL ? (
+                      <img src={m.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <span>{m.username.slice(0, 2).toUpperCase()}</span>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{m.username}</p>

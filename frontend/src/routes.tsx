@@ -1,20 +1,20 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import UserDashboard from "@/pages/user/UserDashboard";
-import Login from "@/pages/auth/Login";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
-import Dashboard from "@/pages/admin/Dashboard";
-import Members from "@/pages/user/Members";
-import UserDetail from "@/pages/user/UserDetail";
-import Departments from "@/pages/admin/Departments";
-import Employees from "@/pages/admin/Employees";
-import EmployeeDetail from "@/pages/admin/EmployeeDetail";
-import DepartmentDetail from "@/pages/admin/DepartmentDetail";
-import Positions from "@/pages/admin/Positions";
-import Projects from "@/pages/user/Projects";
-import Settings from "@/pages/user/Settings";
-import NotFound from "@/pages/user/NotFound";
-import ProjectDetail from "@/pages/user/ProjectDetail";
+import UserDashboard from "@/features/dashboard/UserDashboard";
+import Login from "@/features/auth/Login";
+import ForgotPassword from "@/features/auth/ForgotPassword";
+import AdminDashboard from "@/features/dashboard/AdminDashboard";
+import UserList from "@/features/user/UserList";
+import UserDetail from "@/features/user/UserDetail";
+import DepartmentList from "@/features/department/DepartmentList";
+import EmployeeList from "@/features/employee/EmployeeList";
+import EmployeeDetail from "@/features/employee/EmployeeDetail";
+import DepartmentDetail from "@/features/department/DepartmentDetail";
+import PositionList from "@/features/position/PositionList";
+import ProjectList from "@/features/project/ProjectList";
+import Settings from "@/features/user/Settings";
+import NotFound from "@/features/user/NotFound";
+import ProjectDetail from "@/features/project/ProjectDetail";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ReactNode } from "react";
 
@@ -45,15 +45,15 @@ const router = createBrowserRouter([
     element: <DashboardLayout />,
     children: [
       { index: true, element: <RoleRedirect roles={["admin", "user"]}><UserDashboard /></RoleRedirect> },
-      { path: "dashboard", element: <RoleRedirect roles={["admin"]}><Dashboard /></RoleRedirect> },
-      { path: "members", element: <RoleRedirect roles={["admin", "user"]}><Members /></RoleRedirect> },
+      { path: "dashboard", element: <RoleRedirect roles={["admin"]}><AdminDashboard /></RoleRedirect> },
+      { path: "members", element: <RoleRedirect roles={["admin", "user"]}><UserList /></RoleRedirect> },
       { path: "members/:id", element: <RoleRedirect roles={["admin", "user"]}><UserDetail /></RoleRedirect> },
-      { path: "departments", element: <RoleRedirect roles={["admin"]}><Departments /></RoleRedirect> },
+      { path: "departments", element: <RoleRedirect roles={["admin"]}><DepartmentList /></RoleRedirect> },
       { path: "departments/:id", element: <RoleRedirect roles={["admin"]}><DepartmentDetail /></RoleRedirect> },
-      { path: "employees", element: <RoleRedirect roles={["admin"]}><Employees /></RoleRedirect> },
+      { path: "employees", element: <RoleRedirect roles={["admin"]}><EmployeeList /></RoleRedirect> },
       { path: "employees/:id", element: <RoleRedirect roles={["admin"]}><EmployeeDetail /></RoleRedirect> },
-      { path: "positions", element: <RoleRedirect roles={["admin"]}><Positions /></RoleRedirect> },
-      { path: "projects", element: <RoleRedirect roles={["admin", "user"]}><Projects /></RoleRedirect> },
+      { path: "positions", element: <RoleRedirect roles={["admin"]}><PositionList /></RoleRedirect> },
+      { path: "projects", element: <RoleRedirect roles={["admin", "user"]}><ProjectList /></RoleRedirect> },
       { path: "projects/:id", element: <RoleRedirect roles={["admin", "user"]}><ProjectDetail /></RoleRedirect> },
       { path: "settings", element: <RoleRedirect roles={["admin", "user"]}><Settings /></RoleRedirect> },
     ],

@@ -57,7 +57,7 @@ export default function DepartmentDetail() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-sm text-zinc-500">Không tìm thấy phòng ban</p>
-        <button onClick={() => navigate("/departments")} className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">
+        <button onClick={() => navigate("/departments")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">
           Quay lại
         </button>
       </div>
@@ -84,7 +84,7 @@ export default function DepartmentDetail() {
         {/* Info card */}
         <div className="lg:col-span-1">
           <div className="rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">
-            <div className="h-20 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600" />
+            <div className="h-20 bg-blue-600" />
             <div className="px-5 pb-5 -mt-8">
               <div className="w-14 h-14 rounded-xl bg-white dark:bg-zinc-900 shadow-md flex items-center justify-center mb-4">
                 <Building2 size={24} className="text-blue-600" />
@@ -134,8 +134,12 @@ export default function DepartmentDetail() {
                     transition={{ delay: i * 0.04, duration: 0.3 }}
                     className="flex items-center gap-4 px-5 py-3.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                      {m.name.slice(0, 2).toUpperCase()}
+                    <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {m.avatarURL ? (
+                        <img src={m.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <span>{m.name.slice(0, 2).toUpperCase()}</span>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

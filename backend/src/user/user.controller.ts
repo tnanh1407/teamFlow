@@ -7,6 +7,7 @@ import { AppError } from "../utils/errors/app-error.js";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EUserRole, EUserPosition } from "../enums/user-role.enum.js";
 import bcrypt from "bcryptjs";
+import { handleFileUpload, deleteFile } from "../utils/upload.js";
 
 class UserController {
   async getAll(_req: AuthRequest, res: Response) {
@@ -139,6 +140,23 @@ class UserController {
         token,
       },
     });
+  }
+
+  async updateAvatar(req: AuthRequest, res: Response) {
+    const id = req.user!.id;
+    const user = await userService.findById(id);
+    if (!user) throw new AppError("User not found", 404);
+
+    if (!req.file) throw new AppError("No file uploaded", 400);
+
+    if (user.avatarURL) {
+      await deleteFile(user.avatarURL);
+    }
+
+    const avatarURL = handleFileUpload(req.file, "avatars");
+    const updated = await userService.updateAvatar(id, avatarURL!);
+    const { password: _, ...userWithoutPassword } = updated!;
+    res.json({ data: userWithoutPassword });
   }
 
   async logout(_req: AuthRequest, res: Response) {

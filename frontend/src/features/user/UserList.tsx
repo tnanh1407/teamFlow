@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Eye, Copy } from "lucide-react"
+import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
+import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Eye, Copy, Fingerprint } from "lucide-react"
 import userService, { type User, type UserRole, type UserPosition } from "@/services/user.service"
 import { useAuth } from "@/contexts/AuthContext"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
+import { toast } from "sonner"
 
 interface FormData {
   employeeId: string
@@ -196,6 +198,87 @@ export default function Members() {
         </div>
       </div>
 
+      {/* Charts */}
+      <div className="grid grid-cols-2 gap-4">
+        {(() => {
+          const activeUsers = users.filter(u => u.status).length
+          const inactiveUsers = users.filter(u => !u.status).length
+          const adminCount = users.filter(u => u.position === "admin").length
+          const managerCount = users.filter(u => u.position === "manager").length
+          const memberCount = users.filter(u => u.position === "member").length
+          const statusData = [
+            { name: "Hoạt động", value: activeUsers, color: "#10b981" },
+            { name: "Vô hiệu", value: inactiveUsers, color: "#ef4444" },
+          ].filter(d => d.value > 0)
+          const roleData = [
+            { name: "Admin", value: adminCount, color: "#8b5cf6" },
+            { name: "Manager", value: managerCount, color: "#06b6d4" },
+            { name: "Member", value: memberCount, color: "#3b82f6" },
+          ].filter(d => d.value > 0)
+          const total = users.length || 1
+          return (<>
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Trạng thái</p>
+              <div className="flex items-start gap-4">
+                <ResponsiveContainer width="55%" height={220}>
+                  <PieChart>
+                    <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
+                      {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex-1 flex flex-col gap-2 pt-2">
+                  {statusData.map((entry) => (
+                    <div key={entry.name} className="group cursor-default">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Vai trò</p>
+              <div className="flex items-start gap-4">
+                <ResponsiveContainer width="55%" height={220}>
+                  <PieChart>
+                    <Pie data={roleData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
+                      {roleData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex-1 flex flex-col gap-2 pt-2">
+                  {roleData.map((entry) => (
+                    <div key={entry.name} className="group cursor-default">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>)
+        })()}
+      </div>
+
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-2">
           <button
@@ -244,6 +327,7 @@ export default function Members() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">UUID</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Avatar
                 </th>
@@ -267,13 +351,13 @@ export default function Members() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Đang tải...
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Không tìm thấy thành viên nào
                   </td>
                 </tr>
@@ -286,7 +370,24 @@ export default function Members() {
                       className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
+                          <Fingerprint size={12} className="shrink-0" />
+                          {user.id.slice(0, 8)}...
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigator.clipboard.writeText(user.id)
+                              toast.success("Đã sao chép UUID")
+                            }}
+                            className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                            title="Copy UUID"
+                          >
+                            <Copy size={12} />
+                          </button>
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
                           {user.avatarURL ? (
                             <img src={user.avatarURL} alt="" className="w-full h-full object-cover" />
                           ) : (
@@ -348,7 +449,7 @@ export default function Members() {
                           </button>
                           {canEdit(user) && (
                             <button
-                              onClick={() => openEdit(user)}
+                              onClick={(e) => { e.stopPropagation(); openEdit(user) }}
                               className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
                               title="Sửa"
                             >
@@ -357,7 +458,7 @@ export default function Members() {
                           )}
                           {canDelete(user) && (
                             <button
-                              onClick={() => confirmDelete(user)}
+                              onClick={(e) => { e.stopPropagation(); confirmDelete(user) }}
                               className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
                               title="Xoá"
                             >
@@ -390,7 +491,7 @@ export default function Members() {
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
             >
               {editingId ? "Cập nhật" : "Tạo mới"}
             </button>

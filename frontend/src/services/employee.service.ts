@@ -30,14 +30,10 @@ const employeeService = {
     api.get<{ data: Employee[] }>(`/employees/position/${positionId}`),
 
   create: (data: FormData) =>
-    api.post<{ data: Employee }>("/employees", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+    api.post<{ data: Employee }>("/employees", data),
 
   update: (id: string, data: FormData) =>
-    api.patch<{ data: Employee }>(`/employees/${id}`, data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+    api.patch<{ data: Employee }>(`/employees/${id}`, data),
 
   delete: (id: string) => api.delete(`/employees/${id}`),
 };

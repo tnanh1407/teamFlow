@@ -4,10 +4,10 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 
 jest.mock("jsonwebtoken");
-jest.mock("../../src/controllers/user.controller.js");
+jest.mock("../../src/user/user.controller.js");
 
-import userRouter from "../../src/routers/user.router.js";
-import userController from "../../src/controllers/user.controller.js";
+import userRouter from "../../src/user/user.router.js";
+import userController from "../../src/user/user.controller.js";
 import { errorHandler } from "../../src/middlewares/error.middleware.js";
 import { EUserRole } from "../../src/enums/user-role.enum.js";
 

@@ -142,7 +142,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
         }`}
     >
       <div className="flex items-center gap-3 h-14 px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
           TF
         </div>
         {!collapsed && (
@@ -177,13 +177,22 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
 
       <div className="border-t border-zinc-200 dark:border-zinc-800 p-3 shrink-0">
         {!collapsed && user && (
-          <div className="px-1 pb-2">
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-              {user.username}
-            </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              {roleLabel[user.position] || user.position}
-            </p>
+          <div className="flex items-center gap-3 px-1 pb-2">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {user.avatarURL ? (
+                <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span>{user.username.slice(0, 2).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                {user.username}
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {roleLabel[user.position] || user.position}
+              </p>
+            </div>
           </div>
         )}
         <button

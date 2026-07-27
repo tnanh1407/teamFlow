@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import userController from "../../src/controllers/user.controller.js";
-import userService from "../../src/services/user.service.js";
+import userController from "../../src/user/user.controller.js";
+import userService from "../../src/user/user.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 import { EUserRole } from "../../src/enums/user-role.enum.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-jest.mock("../../src/services/user.service.js");
+jest.mock("../../src/user/user.service.js");
 jest.mock("bcryptjs");
 jest.mock("jsonwebtoken");
 

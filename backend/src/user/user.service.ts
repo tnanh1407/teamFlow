@@ -39,7 +39,7 @@ class UserService {
 
   async findByUsername(username: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users WHERE username = $1`,
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE u.username = $1`,
       [username]
     );
     return rows[0] || null;
@@ -47,7 +47,7 @@ class UserService {
 
   async findByEmployeeId(employeeId: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users WHERE employee_id = $1`,
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE u.employee_id = $1`,
       [employeeId]
     );
     return rows[0] || null;
@@ -150,6 +150,17 @@ class UserService {
       values
     );
     return rows[0] || null;
+  }
+
+  async updateAvatar(userId: string, avatarURL: string) {
+    const user = await this.findById(userId);
+    if (!user) throw new AppError("User not found", 404);
+    if (!user.employeeId) throw new AppError("User has no linked employee", 400);
+    await pool.query(
+      `UPDATE employees SET avatar_url = $1 WHERE id = $2`,
+      [avatarURL, user.employeeId]
+    );
+    return this.findById(userId);
   }
 
   async delete(id: string) {

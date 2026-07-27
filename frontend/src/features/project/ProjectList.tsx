@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Trash2, ArrowUpDown, CheckSquare, Calendar, Paperclip, X, File, FileImage, Download, Eye, Copy } from "lucide-react"
+import { Search, Plus, Trash2, ArrowUpDown, CheckSquare, Calendar, Paperclip, X, File, FileImage, Download, Eye, Copy, Fingerprint } from "lucide-react"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import uploadService from "@/services/upload.service"
@@ -340,9 +340,7 @@ export default function Projects() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Mã định danh
-                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">UUID</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Tên dự án
                 </th>
@@ -369,13 +367,13 @@ export default function Projects() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Đang tải...
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Không tìm thấy project nào
                   </td>
                 </tr>
@@ -392,12 +390,17 @@ export default function Projects() {
                       className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
-                          {project.id}
+                        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
+                          <Fingerprint size={12} className="shrink-0" />
+                          {project.id.slice(0, 8)}...
                           <button
-                            onClick={() => { navigator.clipboard.writeText(project.id); toast.success("Đã sao chép mã dự án") }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigator.clipboard.writeText(project.id)
+                              toast.success("Đã sao chép UUID")
+                            }}
                             className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
-                            title="Copy"
+                            title="Copy UUID"
                           >
                             <Copy size={12} />
                           </button>
@@ -512,7 +515,7 @@ export default function Projects() {
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
             >
               {editingId ? "Cập nhật" : "Tạo mới"}
             </button>

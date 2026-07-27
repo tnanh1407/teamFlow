@@ -19,6 +19,13 @@ export default function Home() {
       </p>
       {user && (
         <div className="mt-8 flex items-center justify-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+            {user.avatarURL ? (
+              <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span>{user.username.slice(0, 2).toUpperCase()}</span>
+            )}
+          </div>
           <span className="text-sm text-zinc-500 dark:text-zinc-400">
             Xin chào, <strong>{user.username}</strong>
           </span>

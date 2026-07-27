@@ -1,5 +1,5 @@
 import pool from "../../src/config/database.js";
-import departmentService from "../../src/services/department.service.js";
+import departmentService from "../../src/department/department.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
 const fakeDepartment = {

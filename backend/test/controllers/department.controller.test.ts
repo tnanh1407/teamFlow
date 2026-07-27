@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import departmentController from "../../src/controllers/department.controller.js";
-import departmentService from "../../src/services/department.service.js";
+import departmentController from "../../src/department/department.controller.js";
+import departmentService from "../../src/department/department.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
-jest.mock("../../src/services/department.service.js");
+jest.mock("../../src/department/department.service.js");
 
 const mockDepartmentService = jest.mocked(departmentService);
 

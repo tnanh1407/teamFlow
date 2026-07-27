@@ -82,23 +82,31 @@ const seed = async () => {
     const empIds = {
       emp1: uuid(), emp2: uuid(), emp3: uuid(), emp4: uuid(), emp5: uuid(),
       emp6: uuid(), emp7: uuid(), emp8: uuid(), emp9: uuid(), emp10: uuid(),
+      emp11: uuid(), emp12: uuid(), emp13: uuid(), emp14: uuid(), emp15: uuid(),
     };
+    const strip = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
+    const avatar = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(strip(name)).replace(/%20/g, "+")}&background=random&color=fff&size=128&bold=true`;
     const employees = [
-      { id: empIds.emp1, dept: deptIds.it, pos: posIds.gd, code: "EMP001", name: "Nguyễn Văn Anh", email: "nguyenvananh@teamflow.com", phone: "0901234001", birth: "1985-03-15", hire: "2023-06-01", gender: "male" },
-      { id: empIds.emp2, dept: deptIds.it, pos: posIds.tp, code: "EMP002", name: "Trần Thị Bích", email: "tranthibich@teamflow.com", phone: "0901234002", birth: "1990-07-22", hire: "2023-08-15", gender: "female" },
-      { id: empIds.emp3, dept: deptIds.it, pos: posIds.nv, code: "EMP003", name: "Lê Văn Cường", email: "levancuong@teamflow.com", phone: "0901234003", birth: "1995-11-08", hire: "2024-03-01", gender: "male" },
-      { id: empIds.emp4, dept: deptIds.hr, pos: posIds.tp, code: "EMP004", name: "Phạm Thị Dung", email: "phamthidung@teamflow.com", phone: "0901234004", birth: "1988-05-12", hire: "2023-07-01", gender: "female" },
-      { id: empIds.emp5, dept: deptIds.hr, pos: posIds.nv, code: "EMP005", name: "Hoàng Văn Em", email: "hoangvanem@teamflow.com", phone: "0901234005", birth: "1997-09-25", hire: "2024-06-15", gender: "male" },
-      { id: empIds.emp6, dept: deptIds.acc, pos: posIds.tp, code: "EMP006", name: "Vũ Thị Phương", email: "vuthiphuong@teamflow.com", phone: "0901234006", birth: "1991-02-18", hire: "2023-09-01", gender: "female" },
-      { id: empIds.emp7, dept: deptIds.acc, pos: posIds.nv, code: "EMP007", name: "Đặng Văn Giang", email: "dangvangiang@teamflow.com", phone: "0901234007", birth: "1993-12-30", hire: "2024-04-01", gender: "male" },
-      { id: empIds.emp8, dept: deptIds.mkt, pos: posIds.tp, code: "EMP008", name: "Bùi Thị Hạnh", email: "buithihanh@teamflow.com", phone: "0901234008", birth: "1992-06-14", hire: "2024-01-10", gender: "female" },
-      { id: empIds.emp9, dept: deptIds.mkt, pos: posIds.nv, code: "EMP009", name: "Ngô Văn Inh", email: "ngovaninh@teamflow.com", phone: "0901234009", birth: "1999-08-05", hire: "2025-03-01", gender: "male", status: "probation" },
-      { id: empIds.emp10, dept: deptIds.ops, pos: posIds.nv, code: "EMP010", name: "Dương Thị Kim", email: "duongthikim@teamflow.com", phone: "0901234010", birth: "1994-04-20", hire: "2024-07-01", gender: "female" },
+      { id: empIds.emp1, dept: deptIds.it, pos: posIds.gd, code: "EMP001", name: "Nguyễn Văn Anh", email: "nguyenvananh@teamflow.com", phone: "0901234001", birth: "1985-03-15", hire: "2023-06-01", gender: "male", avatar: avatar("Nguyễn Văn Anh") },
+      { id: empIds.emp2, dept: deptIds.it, pos: posIds.tp, code: "EMP002", name: "Trần Thị Bích", email: "tranthibich@teamflow.com", phone: "0901234002", birth: "1990-07-22", hire: "2023-08-15", gender: "female", avatar: avatar("Trần Thị Bích") },
+      { id: empIds.emp3, dept: deptIds.it, pos: posIds.nv, code: "EMP003", name: "Lê Văn Cường", email: "levancuong@teamflow.com", phone: "0901234003", birth: "1995-11-08", hire: "2024-03-01", gender: "male", avatar: avatar("Lê Văn Cường") },
+      { id: empIds.emp4, dept: deptIds.hr, pos: posIds.tp, code: "EMP004", name: "Phạm Thị Dung", email: "phamthidung@teamflow.com", phone: "0901234004", birth: "1988-05-12", hire: "2023-07-01", gender: "female", avatar: avatar("Phạm Thị Dung") },
+      { id: empIds.emp5, dept: deptIds.hr, pos: posIds.nv, code: "EMP005", name: "Hoàng Văn Em", email: "hoangvanem@teamflow.com", phone: "0901234005", birth: "1997-09-25", hire: "2024-06-15", gender: "male", avatar: avatar("Hoàng Văn Em") },
+      { id: empIds.emp6, dept: deptIds.acc, pos: posIds.tp, code: "EMP006", name: "Vũ Thị Phương", email: "vuthiphuong@teamflow.com", phone: "0901234006", birth: "1991-02-18", hire: "2023-09-01", gender: "female", avatar: avatar("Vũ Thị Phương") },
+      { id: empIds.emp7, dept: deptIds.acc, pos: posIds.nv, code: "EMP007", name: "Đặng Văn Giang", email: "dangvangiang@teamflow.com", phone: "0901234007", birth: "1993-12-30", hire: "2024-04-01", gender: "male", avatar: avatar("Đặng Văn Giang") },
+      { id: empIds.emp8, dept: deptIds.mkt, pos: posIds.tp, code: "EMP008", name: "Bùi Thị Hạnh", email: "buithihanh@teamflow.com", phone: "0901234008", birth: "1992-06-14", hire: "2024-01-10", gender: "female", avatar: avatar("Bùi Thị Hạnh") },
+      { id: empIds.emp9, dept: deptIds.mkt, pos: posIds.nv, code: "EMP009", name: "Ngô Văn Inh", email: "ngovaninh@teamflow.com", phone: "0901234009", birth: "1999-08-05", hire: "2025-03-01", gender: "male", status: "probation", avatar: avatar("Ngô Văn Inh") },
+      { id: empIds.emp10, dept: deptIds.ops, pos: posIds.nv, code: "EMP010", name: "Dương Thị Kim", email: "duongthikim@teamflow.com", phone: "0901234010", birth: "1994-04-20", hire: "2024-07-01", gender: "female", avatar: avatar("Dương Thị Kim") },
+      { id: empIds.emp11, dept: deptIds.ops, pos: posIds.pp, code: "EMP011", name: "Lý Văn Minh", email: "lyvanminh@teamflow.com", phone: "0901234011", birth: "1989-11-03", hire: "2024-02-15", gender: "male", avatar: avatar("Lý Văn Minh") },
+      { id: empIds.emp12, dept: deptIds.mkt, pos: posIds.pp, code: "EMP012", name: "Trịnh Thị Ngọc", email: "trinhthingoc@teamflow.com", phone: "0901234012", birth: "1993-06-28", hire: "2024-05-01", gender: "female", avatar: avatar("Trịnh Thị Ngọc") },
+      { id: empIds.emp13, dept: deptIds.acc, pos: posIds.nv, code: "EMP013", name: "Đỗ Văn Hoàng", email: "dovanhoang@teamflow.com", phone: "0901234013", birth: "1996-01-15", hire: "2025-01-10", gender: "male", status: "probation", avatar: avatar("Đỗ Văn Hoàng") },
+      { id: empIds.emp14, dept: deptIds.hr, pos: posIds.nv, code: "EMP014", name: "Mai Thị Lan", email: "maithilan@teamflow.com", phone: "0901234014", birth: "1998-07-09", hire: "2025-02-01", gender: "female", status: "probation", avatar: avatar("Mai Thị Lan") },
+      { id: empIds.emp15, dept: deptIds.it, pos: posIds.tts, code: "EMP015", name: "Hồ Văn Trung", email: "hovantrung@teamflow.com", phone: "0901234015", birth: "2000-12-20", hire: "2025-06-01", gender: "male", status: "inactive", avatar: avatar("Hồ Văn Trung") },
     ];
     for (const e of employees) {
       await client.query(
-        `INSERT INTO employees (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [e.id, e.dept, e.pos, e.code, e.name, e.email, e.phone, e.birth, e.hire, e.gender, e.status || "active"]
+        `INSERT INTO employees (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [e.id, e.dept, e.pos, e.code, e.name, e.email, e.phone, e.birth, e.hire, e.gender, e.status || "active", e.avatar]
       );
     }
     console.log(`Inserted ${employees.length} employees`);
@@ -108,7 +116,7 @@ const seed = async () => {
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp4, deptIds.hr]);
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp6, deptIds.acc]);
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp8, deptIds.mkt]);
-    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp10, deptIds.ops]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp11, deptIds.ops]);
     console.log("Updated department managers");
 
     // ── Users ──
@@ -119,6 +127,10 @@ const seed = async () => {
       { id: uuid(), empId: empIds.emp4, username: "hr_manager", password: bcrypt.hashSync("user123", 10), role: "user", position: "manager" },
       { id: uuid(), empId: empIds.emp6, username: "acc_user", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
       { id: uuid(), empId: empIds.emp8, username: "member", password: bcrypt.hashSync("member123", 10), role: "user", position: "member" },
+      { id: uuid(), empId: empIds.emp5, username: "hoang.em", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
+      { id: uuid(), empId: empIds.emp7, username: "dang.giang", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
+      { id: uuid(), empId: empIds.emp9, username: "ngo.inh", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
+      { id: uuid(), empId: empIds.emp10, username: "duong.kim", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
     ];
     for (const u of users) {
       await client.query(
@@ -159,6 +171,9 @@ const seed = async () => {
       { pid: projIds.p4, eid: empIds.emp9, role: "member" },
       { pid: projIds.p5, eid: empIds.emp10, role: "leader" },
       { pid: projIds.p5, eid: empIds.emp6, role: "reviewer" },
+      { pid: projIds.p1, eid: empIds.emp11, role: "reviewer" },
+      { pid: projIds.p4, eid: empIds.emp12, role: "member" },
+      { pid: projIds.p2, eid: empIds.emp13, role: "member" },
     ];
     for (const pe of projEmps) {
       await client.query(
@@ -226,11 +241,16 @@ const seed = async () => {
     console.log("\n✅ Seed completed successfully!");
     console.log("---");
     console.log("Accounts:");
-    console.log("  admin      / admin123   (admin)");
+    console.log("  root       / root123    (admin / full access)");
+    console.log("  admin      / admin123   (admin / full access)");
     console.log("  manager    / manager123 (manager)");
     console.log("  hr_manager / user123    (manager)");
     console.log("  acc_user   / 123456     (member)");
     console.log("  member     / member123  (member)");
+    console.log("  hoang.em   / 123456     (member)");
+    console.log("  dang.giang / 123456     (member)");
+    console.log("  ngo.inh    / 123456     (member)");
+    console.log("  duong.kim  / 123456     (member)");
     console.log(`\nSummary: ${departments.length} depts, ${positions.length} positions, ${employees.length} employees, ${users.length} users, ${projects.length} projects`);
     process.exit(0);
   } catch (error) {

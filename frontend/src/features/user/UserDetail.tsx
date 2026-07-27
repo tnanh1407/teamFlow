@@ -135,7 +135,7 @@ export default function UserDetail() {
         <p className="text-sm text-zinc-500">Không tìm thấy người dùng</p>
         <button
           onClick={() => navigate("/members")}
-          className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
+          className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
         >
           Quay lại
         </button>
@@ -169,7 +169,7 @@ export default function UserDetail() {
           {canEdit() && (
             <button
               onClick={() => setEditOpen(true)}
-              className="flex items-center gap-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
             >
               <Pencil size={15} />
               <span>Sửa</span>
@@ -189,7 +189,7 @@ export default function UserDetail() {
 
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
         <div className="flex items-center gap-4 p-6 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden">
+          <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden">
             {avatarUrl ? (
               <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -279,7 +279,7 @@ export default function UserDetail() {
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
             >
               Cập nhật
             </button>

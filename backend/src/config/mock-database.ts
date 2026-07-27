@@ -1,10 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DATA_DIR = path.resolve(__dirname, "../../../data");
+const DATA_DIR = path.resolve(process.cwd(), "data");
 
 const snakeToCamel = (str: string) => str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 

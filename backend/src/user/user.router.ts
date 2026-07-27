@@ -3,6 +3,7 @@ import userController from "./user.controller.js";
 import { authenticate, authorize } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
 import { asyncHandler } from "../middlewares/async.middleware.js";
+import { uploadAvatar } from "../middlewares/upload.middleware.js";
 import {
   createUserSchema,
   updateUserSchema,
@@ -30,6 +31,12 @@ router.patch(
   authenticate,
   validate(updateMeSchema),
   asyncHandler(userController.updateMe)
+);
+router.post(
+  "/me/avatar",
+  authenticate,
+  uploadAvatar.single("avatar"),
+  asyncHandler(userController.updateAvatar)
 );
 router.patch(
   "/:id",

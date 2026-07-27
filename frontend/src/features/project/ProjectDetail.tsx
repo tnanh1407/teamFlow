@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Trash2, Building2, Users, Activity, Pencil, Plus, X, Paperclip, File, FileImage, Download, Check, MessageCircle, Send } from "lucide-react"
+import { ArrowLeft, Trash2, Building2, Users, Pencil, Plus, X, Paperclip, File, FileImage, Download, Check, MessageCircle, Send } from "lucide-react"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
@@ -532,7 +532,7 @@ export default function ProjectDetail() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <p className="text-sm text-zinc-500">Không tìm thấy project</p>
-        <button onClick={() => navigate("/tasks")} className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay lại</button>
+        <button onClick={() => navigate("/tasks")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay lại</button>
       </div>
     )
   }
@@ -638,7 +638,7 @@ export default function ProjectDetail() {
               </div>
               <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${project.progress === 100 ? "bg-emerald-500" : "bg-gradient-to-r from-blue-500 to-purple-600"}`}
+                  className={`h-full rounded-full transition-all ${project.progress === 100 ? "bg-emerald-500" : "bg-blue-500"}`}
                   style={{ width: `${project.progress}%` }}
                 />
               </div>
@@ -660,8 +660,12 @@ export default function ProjectDetail() {
                     <button key={log.id} onClick={() => setLogDetail(log)}
                       className="w-full text-left px-5 py-3 flex items-start gap-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition cursor-pointer border-none border-b border-zinc-50 dark:border-zinc-800/50 last:border-b-0"
                     >
-                      <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mt-0.5">
-                        <Activity size={13} className="text-zinc-500" />
+                      <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 mt-0.5">
+                        {emp?.avatarURL ? (
+                          <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <span>{emp?.name?.slice(0, 2).toUpperCase() || "??"}</span>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm text-zinc-900 dark:text-zinc-100">
@@ -697,8 +701,12 @@ export default function ProjectDetail() {
                   return (
                     <div key={c.id} className={`px-5 py-2.5 flex ${isOwner ? "justify-start" : "justify-end"}`}>
                       <div className="max-w-[80%] min-w-0 flex items-end gap-2">
-                        <div className={`w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${isOwner ? "" : "order-1"}`}>
-                          {initialsC}
+                        <div className={`w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${isOwner ? "" : "order-1"}`}>
+                          {c.employee?.avatarURL ? (
+                            <img src={c.employee.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <span>{initialsC}</span>
+                          )}
                         </div>
                         <div className={`rounded-xl px-3.5 py-2 ${isOwner ? "bg-blue-50 dark:bg-blue-950 rounded-bl-sm" : "bg-zinc-100 dark:bg-zinc-800 rounded-br-sm"}`}>
                           <div className="flex items-center gap-2 mb-0.5">
@@ -756,7 +764,7 @@ export default function ProjectDetail() {
                       <input type="file" multiple onChange={handleCommentFileUpload} className="hidden" disabled={commentUploading} />
                     </label>
                     <button onClick={handleAddComment} disabled={!commentText.trim() && commentFiles.length === 0}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-blue-600 hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none"
                     >
                       {commentUploading ? <span className="text-[10px]">...</span> : <Send size={15} />}
                     </button>
@@ -840,8 +848,12 @@ export default function ProjectDetail() {
                       <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
                         {deptMems.map((pm) => (
                           <div key={pm.id} className="px-5 py-2 flex items-center gap-3 pl-10">
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
-                              {pm.employee?.name?.slice(0, 2).toUpperCase() || "??"}
+                            <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                              {pm.employee?.avatarURL ? (
+                                <img src={pm.employee.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                              ) : (
+                                <span>{pm.employee?.name?.slice(0, 2).toUpperCase() || "??"}</span>
+                              )}
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{pm.employee?.name || "—"}</p>
@@ -909,7 +921,7 @@ export default function ProjectDetail() {
             <button
               onClick={handleAdd}
               disabled={!selectedDeptId || selectedEmpIds.length === 0 || saving}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "Đang thêm..." : "Thêm"}
             </button>
@@ -984,8 +996,12 @@ export default function ProjectDetail() {
                         }`}>
                           {checked && <Check size={12} className="text-white" />}
                         </div>
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                          {emp.name?.slice(0, 2).toUpperCase() || "??"}
+                        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                          {emp.avatarURL ? (
+                            <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <span>{emp.name?.slice(0, 2).toUpperCase() || "??"}</span>
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{emp.name}</p>
@@ -1016,7 +1032,7 @@ export default function ProjectDetail() {
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
             >
               Cập nhật
             </button>
@@ -1230,8 +1246,12 @@ export default function ProjectDetail() {
           return (
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                  {initials}
+                <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                  {emp?.avatarURL ? (
+                    <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span>{initials}</span>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{emp?.name || "—"}</p>

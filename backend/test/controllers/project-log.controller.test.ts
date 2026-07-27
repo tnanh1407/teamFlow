@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import projectLogService from "../../src/services/project-log.service.js";
+import projectLogService from "../../src/project/project-log.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
-jest.mock("../../src/services/project-log.service.js");
+jest.mock("../../src/project/project-log.service.js");
 
-import projectLogController from "../../src/controllers/project-log.controller.js";
+import projectLogController from "../../src/project/project-log.controller.js";
 
 const mockLogService = jest.mocked(projectLogService);
 

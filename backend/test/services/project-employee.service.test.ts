@@ -1,5 +1,5 @@
 import pool from "../../src/config/database.js";
-import projectEmployeeService from "../../src/services/project-employee.service.js";
+import projectEmployeeService from "../../src/project/project-employee.service.js";
 
 const mockQuery = jest.fn();
 pool.query = mockQuery;

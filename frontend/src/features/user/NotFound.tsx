@@ -5,7 +5,7 @@ export default function NotFound() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 gap-4 bg-white dark:bg-zinc-900">
-      <h1 className="text-[120px] font-bold leading-none bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent">
+      <h1 className="text-[120px] font-bold leading-none text-blue-600">
         404
       </h1>
       <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -16,7 +16,7 @@ export default function NotFound() {
       </p>
       <button
         onClick={() => navigate("/")}
-        className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-5 py-2.5 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
+        className="rounded-lg bg-blue-600 text-white px-5 py-2.5 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
       >
         Về trang chủ
       </button>

@@ -157,7 +157,7 @@ export default function EmployeeDetail() {
         <p className="text-sm text-zinc-500">Không tìm thấy nhân viên</p>
         <button
           onClick={() => navigate("/employees")}
-          className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
+          className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
         >
           Quay lại
         </button>
@@ -188,7 +188,7 @@ export default function EmployeeDetail() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setEditOpen(true)}
-              className="flex items-center gap-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
             >
               <Pencil size={15} />
               <span>Sửa</span>
@@ -206,7 +206,7 @@ export default function EmployeeDetail() {
 
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
         <div className="flex items-center gap-4 p-6 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden">
+          <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden">
             {employee.avatarURL ? (
               <img src={employee.avatarURL} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -320,7 +320,7 @@ export default function EmployeeDetail() {
             <button onClick={() => setEditOpen(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
               Huỷ
             </button>
-            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
+            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
               Cập nhật
             </button>
           </div>
@@ -329,7 +329,7 @@ export default function EmployeeDetail() {
         <div className="space-y-3">
           <div className="flex items-center gap-4">
             <div
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
+              className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               {avatarPreview ? (

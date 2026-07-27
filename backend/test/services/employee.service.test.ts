@@ -1,5 +1,5 @@
 import pool from "../../src/config/database.js";
-import employeeService from "../../src/services/employee.service.js";
+import employeeService from "../../src/employee/employee.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
 const fakeEmployee = {

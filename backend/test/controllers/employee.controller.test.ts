@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import employeeController from "../../src/controllers/employee.controller.js";
-import employeeService from "../../src/services/employee.service.js";
+import employeeController from "../../src/employee/employee.controller.js";
+import employeeService from "../../src/employee/employee.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
-jest.mock("../../src/services/employee.service.js");
+jest.mock("../../src/employee/employee.service.js");
 jest.mock("../../src/utils/upload.js", () => ({
   handleFileUpload: jest.fn(() => "/uploads/avatars/test.jpg"),
   deleteFile: jest.fn(),

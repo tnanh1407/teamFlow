@@ -18,7 +18,7 @@ const colors = {
   zinc: "#71717a",
 }
 
-export default function Dashboard() {
+export default function AdminDashboard() {
   const { user } = useAuth()
   const [employees, setEmployees] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
@@ -110,7 +110,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Welcome */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 p-6 sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl bg-blue-700 p-6 sm:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 translate-x-16 -translate-y-16 rounded-full bg-white/5" />
         <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full bg-white/5" />
         <div className="relative">
@@ -123,9 +123,20 @@ export default function Dashboard() {
               <span>{new Date().toLocaleDateString("vi-VN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
-            Xin chào, {user?.username || "Admin"}
-          </h1>
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                {user.avatarURL ? (
+                  <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span>{user.username.slice(0, 2).toUpperCase()}</span>
+                )}
+              </div>
+            )}
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
+              Xin chào, {user?.username || "Admin"}
+            </h1>
+          </div>
           <p className="mt-1 text-sm text-blue-100/80 max-w-xl">
             Chào mừng bạn quay trở lại. Dưới đây là tổng quan về hệ thống TeamFlow của bạn.
           </p>
@@ -144,7 +155,7 @@ export default function Dashboard() {
               transition={{ delay: i * 0.08, duration: 0.4 }}
               className="group relative overflow-hidden rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 p-5 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-200"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${stat.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+              
               <div className="relative flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">

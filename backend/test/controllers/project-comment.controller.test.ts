@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import projectCommentService from "../../src/services/project-comment.service.js";
+import projectCommentService from "../../src/project/project-comment.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
-jest.mock("../../src/services/project-comment.service.js");
+jest.mock("../../src/project/project-comment.service.js");
 
-import projectCommentController from "../../src/controllers/project-comment.controller.js";
+import projectCommentController from "../../src/project/project-comment.controller.js";
 
 const mockCommentService = jest.mocked(projectCommentService);
 

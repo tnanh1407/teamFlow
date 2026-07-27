@@ -127,8 +127,12 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
             onClick={() => setMenuOpen(!menuOpen)}
             className="flex items-center gap-3 rounded-xl px-3 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer border-none"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {initials}
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+              {user.avatarURL ? (
+                <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span>{initials}</span>
+              )}
             </div>
             <div className="text-left hidden sm:block">
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">

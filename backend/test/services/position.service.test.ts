@@ -1,5 +1,5 @@
 import pool from "../../src/config/database.js";
-import positionService from "../../src/services/position.service.js";
+import positionService from "../../src/position/position.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
 const mockQuery = jest.fn();

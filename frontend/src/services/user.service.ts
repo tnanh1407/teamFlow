@@ -51,6 +51,14 @@ const userService = {
 
   updateMe: (data: UpdateMePayload) =>
     api.patch<{ data: User }>("/users/me", data),
+
+  uploadAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    return api.post<{ data: User }>("/users/me/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
 };
 
 export default userService;
