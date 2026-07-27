@@ -1,6 +1,6 @@
-import pool from "../config/database.js";
-import { AppError } from "../utils/errors/app-error.js";
-import { ProjectSchema } from "../schemas/index.js";
+import pool from "../../config/database.js";
+import { AppError } from "../../utils/errors/app-error.js";
+import { ProjectSchema } from "../../schemas/index.js";
 
 interface ProjectRow {
   id: string;
@@ -60,6 +60,21 @@ class ProjectService {
   async findByCreatedBy(employeeId: string) {
     const { rows } = await pool.query<ProjectRow>(
       `SELECT ${projectColumns} FROM projects WHERE created_by = $1 ORDER BY created_at DESC`,
+      [employeeId]
+    );
+    return rows;
+  }
+
+  async findByEmployeeId(employeeId: string) {
+    const cols = projectColumns.split(",").map((c) => `p.${c.trim()}`).join(", ");
+    const { rows } = await pool.query<ProjectRow>(
+      `SELECT DISTINCT ${cols}
+       FROM projects p
+       LEFT JOIN project_employees pe ON pe.project_id = p.id
+       LEFT JOIN employees e ON e.id = $1
+       LEFT JOIN project_departments pd ON pd.project_id = p.id
+       WHERE pe.employee_id = $1 OR p.created_by = $1 OR pd.department_id = e.department_id
+       ORDER BY p.created_at DESC`,
       [employeeId]
     );
     return rows;

@@ -2,6 +2,9 @@ import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
 import userService, { type User, type UserPosition } from "@/services/user.service"
+import employeeService, { type Employee } from "@/services/employee.service"
+import departmentService from "@/services/department.service"
+import positionService from "@/services/position.service"
 import { useAuth } from "@/contexts/AuthContext"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
@@ -35,6 +38,9 @@ export default function UserDetail() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
   const [user, setUser] = useState<User | null>(null)
+  const [employee, setEmployee] = useState<Employee | null>(null)
+  const [deptName, setDeptName] = useState("—")
+  const [posName, setPosName] = useState("—")
   const [loading, setLoading] = useState(true)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -53,14 +59,37 @@ export default function UserDetail() {
     if (!id) return
     try {
       const { data } = await userService.getById(id)
-      setUser(data.data)
+      const u = data.data
+      setUser(u)
       setForm({
-        employeeId: data.data.employeeId,
-        username: data.data.username,
+        employeeId: u.employeeId,
+        username: u.username,
         password: "",
-        position: data.data.position,
-        status: data.data.status,
+        position: u.position,
+        status: u.status,
       })
+
+      if (u.employeeId) {
+        try {
+          const [empRes, deptRes, posRes] = await Promise.all([
+            employeeService.getById(u.employeeId),
+            departmentService.getAll().catch(() => ({ data: { data: [] } })),
+            positionService.getAll().catch(() => ({ data: { data: [] } })),
+          ])
+          const emp = empRes.data.data
+          setEmployee(emp)
+          if (emp?.departmentId) {
+            const d = deptRes.data.data.find((item: any) => item.id === emp.departmentId)
+            if (d) setDeptName(d.name)
+          }
+          if (emp?.positionId) {
+            const p = posRes.data.data.find((item: any) => item.id === emp.positionId)
+            if (p) setPosName(p.name)
+          }
+        } catch {
+          // ignore
+        }
+      }
     } catch {
       console.error("Failed to fetch user")
     } finally {
@@ -78,6 +107,11 @@ export default function UserDetail() {
       if (user.id === currentUser.id) return false
       return true
     }
+    if (currentUser.position === "manager") {
+      if (user.id === currentUser.id) return false
+      if (user.position !== "member") return false
+      return true
+    }
     return false
   }
 
@@ -88,7 +122,7 @@ export default function UserDetail() {
   const handleSave = async () => {
     if (!user) return
     try {
-      const payload: any = {
+      const payload: Partial<User> & { password?: string } = {
         employeeId: form.employeeId,
         username: form.username,
         position: form.position,
@@ -228,11 +262,31 @@ export default function UserDetail() {
               <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">{user.employeeId}</p>
             </div>
             <div>
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Vai trò</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Họ và tên</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{employee?.name || "—"}</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{employee?.email || "—"}</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Số điện thoại</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{employee?.phone || "—"}</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Phòng ban</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{deptName}</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Chức vụ chuyên môn</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{posName}</p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Vai trò tài khoản</label>
               <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{badge.label}</p>
             </div>
             <div>
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Trạng thái</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Trạng thái tài khoản</label>
               <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{user.status ? "Hoạt động" : "Vô hiệu"}</p>
             </div>
             <div>

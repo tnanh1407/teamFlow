@@ -1,12 +1,12 @@
 import { Router } from "express";
 import projectDepartmentController from "./project-department.controller.js";
-import { authenticate, authorize } from "../middlewares/auth.middleware.js";
-import { validate } from "../middlewares/validation.middleware.js";
-import { asyncHandler } from "../middlewares/async.middleware.js";
+import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { validate } from "../../middlewares/validation.middleware.js";
+import { asyncHandler } from "../../middlewares/async.middleware.js";
 import {
   createProjectDepartmentSchema,
 } from "./project-department.validation.js";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EUserRole } from "../../enums/user-role.enum.js";
 
 const router = Router();
 
@@ -16,14 +16,14 @@ router.get("/department/:departmentId", authenticate, asyncHandler(projectDepart
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.USER),
   validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.create)
 );
 router.delete(
   "/:projectId/:departmentId",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.USER),
   asyncHandler(projectDepartmentController.delete)
 );
 

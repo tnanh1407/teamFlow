@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Trash2, Building2, Users, Pencil, Plus, X, Paperclip, File, FileImage, Download, Check, MessageCircle, Send } from "lucide-react"
+import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Check } from "lucide-react"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
@@ -10,6 +10,10 @@ import departmentService, { type Department } from "@/services/department.servic
 import employeeService, { type Employee } from "@/services/employee.service"
 import uploadService from "@/services/upload.service"
 import { useAuth } from "@/contexts/AuthContext"
+import ProjectLogsSection from "./components/ProjectLogsSection"
+import ProjectCommentsSection from "./components/ProjectCommentsSection"
+import ProjectDepartmentsSection from "./components/ProjectDepartmentsSection"
+import ProjectMembersSection from "./components/ProjectMembersSection"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import Modal from "@/components/ui/Modal"
 
@@ -128,7 +132,6 @@ export default function ProjectDetail() {
   const [selectedDeptOpen, setSelectedDeptOpen] = useState(false)
   const [selectedEmpIds, setSelectedEmpIds] = useState<string[]>([])
   const [deptEmps, setDeptEmps] = useState<Employee[]>([])
-  const [expandedDepts, setExpandedDepts] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
   const [logEmployeeMap, setLogEmployeeMap] = useState<Record<string, Employee>>({})
   const [logDetail, setLogDetail] = useState<ProjectLog | null>(null)
@@ -139,8 +142,13 @@ export default function ProjectDetail() {
   const [commentUploading, setCommentUploading] = useState(false)
   const selectDeptRef = useRef<HTMLDivElement>(null)
 
-  const canEdit = user?.role === "admin"
-  const canDelete = user?.role === "admin"
+  const [userDeptId, setUserDeptId] = useState<string | null>(null)
+
+  const isAdmin = user?.role === "admin"
+  const isManager = user?.position === "manager"
+  const canEdit = isAdmin
+  const canDelete = isAdmin
+  const canManageMembers = canEdit || (isManager && !!userDeptId)
 
   const fetchProject = () => {
     if (!id) return
@@ -231,7 +239,10 @@ export default function ProjectDetail() {
     if (user?.employeeId) {
       employeeService.getById(user.employeeId).then((r) => {
         const emp = r.data.data
-        if (emp) setLogEmployeeMap((prev) => ({ ...prev, [emp.id]: emp }))
+        if (emp) {
+          setLogEmployeeMap((prev) => ({ ...prev, [emp.id]: emp }))
+          if (emp.departmentId) setUserDeptId(emp.departmentId)
+        }
       })
     }
   }, [id])
@@ -249,14 +260,18 @@ export default function ProjectDetail() {
   useEffect(() => {
     if (selectedDeptId) {
       employeeService.getByDepartment(selectedDeptId).then((r) => {
-        setDeptEmps(r.data.data)
-        setSelectedEmpIds([])
+        const emps = r.data.data
+        setDeptEmps(emps)
+        // Tích sẵn những thành viên đã có trong dự án
+        const existingEmpIds = projectMembers.map((m) => m.employeeId)
+        const preSelected = emps.filter((e) => existingEmpIds.includes(e.id)).map((e) => e.id)
+        setSelectedEmpIds(preSelected)
       })
     } else {
       setDeptEmps([])
       setSelectedEmpIds([])
     }
-  }, [selectedDeptId])
+  }, [selectedDeptId, projectMembers])
 
   const toggleEmp = (empId: string) => {
     setSelectedEmpIds((prev) =>
@@ -265,35 +280,44 @@ export default function ProjectDetail() {
   }
 
   const handleAdd = async () => {
-    if (!project || !selectedDeptId || selectedEmpIds.length === 0) return
+    if (!project || !selectedDeptId) return
     setSaving(true)
     try {
-      await projectDepartmentService.create({ projectId: project.id, departmentId: selectedDeptId })
-      const newMembers = deptEmps.filter((e) => selectedEmpIds.includes(e.id))
-      await Promise.all(
-        selectedEmpIds.map((empId) =>
-          projectEmployeeService.create({ projectId: project.id, employeeId: empId })
-        )
-      )
-      if (user?.employeeId) {
-        const deptName = allDepartments.find((d) => d.id === selectedDeptId)?.name || ""
+      if (!projectDeptIds.includes(selectedDeptId)) {
+        await projectDepartmentService.create({ projectId: project.id, departmentId: selectedDeptId })
+      }
+
+      const existingEmpIds = projectMembers.map((m) => m.employeeId)
+      // Chỉ tạo mới những thành viên chưa có trong dự án
+      const empIdsToAdd = selectedEmpIds.filter((id) => !existingEmpIds.includes(id))
+      const newMembers = deptEmps.filter((e) => empIdsToAdd.includes(e.id))
+
+      if (empIdsToAdd.length > 0) {
         await Promise.all(
-          newMembers.map((m) =>
-            projectLogService.create({
-              projectId: project.id,
-              employeeId: user.employeeId,
-              action: "assigned",
-              description: `${m.name} - ${deptName}`,
-            })
+          empIdsToAdd.map((empId) =>
+            projectEmployeeService.create({ projectId: project.id, employeeId: empId })
           )
         )
+        if (user?.employeeId) {
+          const deptName = allDepartments.find((d) => d.id === selectedDeptId)?.name || ""
+          await Promise.all(
+            newMembers.map((m) =>
+              projectLogService.create({
+                projectId: project.id,
+                employeeId: user.employeeId,
+                action: "assigned",
+                description: `${m.name} - ${deptName}`,
+              })
+            )
+          )
+        }
       }
       setAddOpen(false)
       setSelectedDeptId("")
       setSelectedEmpIds([])
       fetchProject()
-    } catch {
-      console.error("Failed to add")
+    } catch (err) {
+      console.error("Failed to add member", err)
     } finally {
       setSaving(false)
     }
@@ -459,7 +483,11 @@ export default function ProjectDetail() {
     }
   }
 
-  const availableDepts = allDepartments.filter((d) => !projectDeptIds.includes(d.id))
+  const availableDepts = canEdit
+    ? allDepartments.filter((d) => !projectDeptIds.includes(d.id))
+    : isManager && userDeptId
+    ? allDepartments.filter((d) => d.id === userDeptId)
+    : []
 
   const handleCommentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -511,6 +539,15 @@ export default function ProjectDetail() {
     try {
       await projectCommentService.delete(commentId)
       setComments((prev) => prev.filter((c) => c.id !== commentId))
+      if (project && user?.employeeId) {
+        await projectLogService.create({
+          projectId: project.id,
+          employeeId: user.employeeId,
+          action: "updated",
+          description: "đã xoá một bình luận",
+        })
+      }
+      fetchProject()
     } catch {
       console.error("Failed to delete comment")
     }
@@ -645,238 +682,50 @@ export default function ProjectDetail() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Lịch sử hoạt động</h2>
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              {logs.length === 0 ? (
-                <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có hoạt động nào</p>
-              ) : (
-                logs.map((log) => {
-                  const emp = logEmployeeMap[log.employeeId]
-                  const actorName = emp?.name ? `${emp.name} (${emp.employeeCode})` : "—"
-                  return (
-                    <button key={log.id} onClick={() => setLogDetail(log)}
-                      className="w-full text-left px-5 py-3 flex items-start gap-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition cursor-pointer border-none border-b border-zinc-50 dark:border-zinc-800/50 last:border-b-0"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 mt-0.5">
-                        {emp?.avatarURL ? (
-                          <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          <span>{emp?.name?.slice(0, 2).toUpperCase() || "??"}</span>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm text-zinc-900 dark:text-zinc-100">
-                          <span className="font-medium">{actorName}</span>
-                          <span className="text-zinc-400 mx-1">·</span>
-                          <span className="font-medium">{actionLabels[log.action] || log.action}</span>
-                          {log.description && <span className="text-zinc-500"> — {log.description}</span>}
-                        </p>
-                        <p className="text-xs text-zinc-400 mt-0.5">{new Date(log.createdAt).toLocaleString("vi-VN")}</p>
-                      </div>
-                    </button>
-                  )
-                })
-              )}
-            </div>
-          </div>
+          {isAdmin && (
+            <ProjectLogsSection
+              logs={logs}
+              logEmployeeMap={logEmployeeMap}
+              onSelectLog={(log) => setLogDetail(log)}
+            />
+          )}
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
-              <MessageCircle size={16} className="text-zinc-500" />
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Bình luận</h2>
-              <span className="ml-auto text-xs text-zinc-400">{comments.length} bình luận</span>
-            </div>
-            <div className="max-h-72 overflow-y-auto">
-              {comments.length === 0 ? (
-                <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có bình luận nào</p>
-              ) : (
-                [...comments].reverse().map((c) => {
-                  const initialsC = c.employee?.name?.slice(0, 2).toUpperCase() || "??"
-                  let fileList: FileAttachment[] = []
-                  try { fileList = JSON.parse(c.attachments || "[]") } catch {}
-                  const isOwner = user?.employeeId === c.employeeId
-                  return (
-                    <div key={c.id} className={`px-5 py-2.5 flex ${isOwner ? "justify-start" : "justify-end"}`}>
-                      <div className="max-w-[80%] min-w-0 flex items-end gap-2">
-                        <div className={`w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0 ${isOwner ? "" : "order-1"}`}>
-                          {c.employee?.avatarURL ? (
-                            <img src={c.employee.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
-                          ) : (
-                            <span>{initialsC}</span>
-                          )}
-                        </div>
-                        <div className={`rounded-xl px-3.5 py-2 ${isOwner ? "bg-blue-50 dark:bg-blue-950 rounded-bl-sm" : "bg-zinc-100 dark:bg-zinc-800 rounded-br-sm"}`}>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{c.employee?.name || "—"}</span>
-                            <span className="text-[10px] text-zinc-400">{new Date(c.createdAt).toLocaleString("vi-VN")}</span>
-                            {isOwner && (
-                              <button onClick={() => handleDeleteComment(c.id)} className="ml-auto p-0.5 rounded text-zinc-400 hover:text-red-500 transition cursor-pointer border-none bg-transparent" title="Xoá"><X size={11} /></button>
-                            )}
-                          </div>
-                          {c.content && <p className="text-sm text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap">{c.content}</p>}
-                          {fileList.length > 0 && (
-                            <div className="mt-1 space-y-0.5">
-                              {fileList.map((f, i) => {
-                                const Icon = getFileIcon(f.mimetype)
-                                return (
-                                    <button key={i} onClick={() => downloadFile(f.url, f.originalName)} className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0">
-                                    <Icon size={12} /> {f.originalName}
-                                  </button>
-                                )
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-            {canEdit && (
-              <div className="px-5 py-3 border-t border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-end gap-2">
-                  <div className="flex-1 space-y-1.5">
-                    <textarea value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Nhập bình luận..." rows={2}
-                      className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                    />
-                    {commentFiles.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {commentFiles.map((f, i) => {
-                          const Icon = getFileIcon(f.mimetype)
-                          return (
-                            <div key={i} className="flex items-center gap-1 rounded bg-zinc-100 dark:bg-zinc-800 px-2 py-1 text-xs text-zinc-600 dark:text-zinc-300">
-                              <Icon size={11} />
-                              <span className="truncate max-w-[120px]">{f.originalName}</span>
-                              <button onClick={() => removeCommentFile(i)} className="p-0.5 text-zinc-400 hover:text-red-500 transition cursor-pointer border-none bg-transparent"><X size={10} /></button>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <label className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer border-none">
-                      <Paperclip size={15} />
-                      <input type="file" multiple onChange={handleCommentFileUpload} className="hidden" disabled={commentUploading} />
-                    </label>
-                    <button onClick={handleAddComment} disabled={!commentText.trim() && commentFiles.length === 0}
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-blue-600 hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none"
-                    >
-                      {commentUploading ? <span className="text-[10px]">...</span> : <Send size={15} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <ProjectCommentsSection
+            comments={comments}
+            user={user}
+            commentText={commentText}
+            setCommentText={setCommentText}
+            commentFiles={commentFiles}
+            commentUploading={commentUploading}
+            handleCommentFileUpload={handleCommentFileUpload}
+            removeCommentFile={removeCommentFile}
+            handleAddComment={handleAddComment}
+            handleDeleteComment={handleDeleteComment}
+          />
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
-              <Building2 size={16} className="text-zinc-500" />
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Phòng ban</h2>
-              {canEdit && (
-                <button
-                  onClick={() => setAddOpen(true)}
-                  className="ml-auto w-6 h-6 rounded flex items-center justify-center text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer border-none"
-                  title="Thêm phòng ban"
-                >
-                  <Plus size={14} />
-                </button>
-              )}
-            </div>
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {departments.length === 0 ? (
-                <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có phòng ban</p>
-              ) : (
-                departments.map((dept) => (
-                  <div key={dept.id} className="px-5 py-3 flex items-center justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{dept.name}</p>
-                        <span className="inline-flex items-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2 py-0.5 text-[10px] font-medium">
-                          {deptEmployeeCount[dept.id] ?? 0} người
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-400 mt-0.5">{dept.code}</p>
-                    </div>
-                    {canEdit && (
-                      <button
-                        onClick={() => removeDepartment(dept.id)}
-                        className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer border-none shrink-0"
-                        title="Xoá phòng ban"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <ProjectDepartmentsSection
+            departments={departments}
+            deptEmployeeCount={deptEmployeeCount}
+            canEdit={canEdit}
+            onOpenAddModal={() => setAddOpen(true)}
+            onRemoveDepartment={removeDepartment}
+          />
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
-              <Users size={16} className="text-zinc-500" />
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thành viên</h2>
-              <span className="ml-auto text-xs text-zinc-400">{projectMembers.length} người</span>
-            </div>
-            {projectMembers.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có thành viên</p>
-            ) : (
-              departments.map((dept) => {
-                const deptMems = projectMembers.filter((pm) => pm.employee?.departmentId === dept.id)
-                if (deptMems.length === 0) return null
-                const open = expandedDepts[dept.id] ?? true
-                return (
-                  <div key={dept.id} className="border-b border-zinc-100 dark:border-zinc-800 last:border-b-0">
-                    <button
-                      onClick={() => setExpandedDepts((prev) => ({ ...prev, [dept.id]: !open }))}
-                      className="w-full flex items-center gap-2 px-5 py-2.5 text-left transition cursor-pointer border-none bg-zinc-50/50 dark:bg-zinc-800/30 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    >
-                      <span className={`text-xs text-zinc-400 transition ${open ? "rotate-90" : ""}`}>▸</span>
-                      <Building2 size={13} className="text-zinc-400" />
-                      <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-wider">{dept.name}</span>
-                      <span className="text-[10px] text-zinc-400">({deptMems.length})</span>
-                    </button>
-                    {open && (
-                      <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
-                        {deptMems.map((pm) => (
-                          <div key={pm.id} className="px-5 py-2 flex items-center gap-3 pl-10">
-                            <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
-                              {pm.employee?.avatarURL ? (
-                                <img src={pm.employee.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
-                              ) : (
-                                <span>{pm.employee?.name?.slice(0, 2).toUpperCase() || "??"}</span>
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{pm.employee?.name || "—"}</p>
-                              <p className="text-xs text-zinc-400 truncate">{pm.employee?.email || ""}</p>
-                            </div>
-                            {canEdit && (
-                              <button
-                                onClick={() => removeMember(pm.id)}
-                                className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer border-none"
-                                title="Xoá thành viên"
-                              >
-                                <X size={13} />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )
-              })
-            )}
-          </div>
+          <ProjectMembersSection
+            projectMembers={projectMembers}
+            departments={departments}
+            canManageMembers={canManageMembers}
+            isManager={isManager}
+            canEdit={canEdit}
+            userDeptId={userDeptId}
+            onOpenAddModal={() => {
+              setAddOpen(true)
+              if (isManager && userDeptId) setSelectedDeptId(userDeptId)
+            }}
+            onRemoveMember={removeMember}
+          />
 
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
             <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">

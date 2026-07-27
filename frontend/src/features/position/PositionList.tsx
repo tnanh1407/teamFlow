@@ -20,15 +20,14 @@ const emptyForm: FormData = {
 }
 
 const levelLabels: Record<string, string> = {
-  Intern: "Thực tập",
-  Junior: "Junior",
-  Middle: "Middle",
-  Senior: "Senior",
-  Leader: "Leader",
-  Manager: "Manager",
+  Intern: "Thực tập sinh",
+  Junior: "Mới đi làm",
+  Middle: "Kinh nghiệm",
+  Senior: "Cao cấp",
+  Manager: "Quản lý",
 }
 
-const levelOrder = ["Intern", "Junior", "Middle", "Senior", "Leader", "Manager"]
+const levelOrder = ["Intern", "Junior", "Middle", "Senior", "Manager"]
 
 export default function Positions() {
   const [positions, setPositions] = useState<Position[]>([])
@@ -417,7 +416,7 @@ export default function Positions() {
               </button>
               {levelOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                  {(["Intern", "Junior", "Middle", "Senior", "Leader", "Manager"] as const).map((l) => (
+                  {(["Intern", "Junior", "Middle", "Senior", "Manager"] as const).map((l) => (
                     <button key={l} type="button" onClick={() => { setForm({ ...form, level: l }); setLevelOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.level === l ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
                       {levelLabels[l]}
                     </button>

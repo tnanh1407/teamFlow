@@ -93,7 +93,9 @@ export default function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const { data } = await projectService.getAll()
+      const { data } = user?.role === "admin"
+        ? await projectService.getAll()
+        : await projectService.getMyProjects()
       setProjects(data.data)
     } catch {
       console.error("Failed to fetch projects")
@@ -293,13 +295,15 @@ export default function Projects() {
       {/* Search */}
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-2">
-          <button
-            onClick={openCreate}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
-            title="Thêm project"
-          >
-            <Plus size={18} />
-          </button>
+          {user?.role === "admin" && (
+            <button
+              onClick={openCreate}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
+              title="Thêm project"
+            >
+              <Plus size={18} />
+            </button>
+          )}
           <button
             onClick={toggleSort}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-none hover:bg-white dark:hover:bg-zinc-800"

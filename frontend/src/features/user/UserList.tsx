@@ -56,12 +56,16 @@ function getRoleBadge(position: UserPosition): { label: string; classes: string 
   }
 }
 
+import employeeService from "@/services/employee.service"
+import departmentService from "@/services/department.service"
+
 export default function Members() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
+  const [userDeptId, setUserDeptId] = useState<string | null>(null)
 
   const [formOpen, setFormOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -72,10 +76,31 @@ export default function Members() {
   const [positionOpen, setPositionOpen] = useState(false)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
 
+  const [employees, setEmployees] = useState<any[]>([])
+
   const fetchUsers = async () => {
     try {
-      const { data } = await userService.getAll()
-      setUsers(data.data)
+      const [userRes, empRes, deptRes] = await Promise.all([
+        userService.getAll(),
+        employeeService.getAll(),
+        departmentService.getAll(),
+      ])
+      const allUsers = userRes.data.data
+      const allEmps = empRes.data.data
+      const allDepts = deptRes.data.data
+
+      setUsers(allUsers)
+      setEmployees(allEmps)
+
+      if (currentUser?.employeeId) {
+        const myEmp = allEmps.find((e) => e.id === currentUser.employeeId)
+        if (myEmp?.departmentId) {
+          setUserDeptId(myEmp.departmentId)
+        } else {
+          const managedDept = allDepts.find((d) => d.managerId === currentUser.employeeId)
+          if (managedDept) setUserDeptId(managedDept.id)
+        }
+      }
     } catch {
       console.error("Failed to fetch users")
     } finally {
@@ -85,12 +110,30 @@ export default function Members() {
 
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [currentUser])
 
-  const filtered = users.filter((u) =>
-    u.username.toLowerCase().includes(search.toLowerCase()) ||
-    u.employeeId.toLowerCase().includes(search.toLowerCase())
-  )
+  // Lọc danh sách thành viên:
+  // - Nếu là Admin: xem tất cả
+  // - Nếu là Manager: chỉ hiển thị các thành viên (kể cả chính manager) thuộc phòng ban đó
+  const visible = currentUser?.position === "admin"
+    ? users
+    : currentUser?.position === "manager" && userDeptId
+    ? users.filter((u) => {
+        const targetEmp = employees.find((e) => e.id === u.employeeId)
+        return targetEmp && targetEmp.departmentId === userDeptId
+      })
+    : users
+
+  const filtered = visible.filter((u) => {
+    const empObj = employees.find((e) => e.id === u.employeeId)
+    const empName = empObj?.name?.toLowerCase() || ""
+    const query = search.toLowerCase()
+    return (
+      u.username.toLowerCase().includes(query) ||
+      u.employeeId.toLowerCase().includes(query) ||
+      empName.includes(query)
+    )
+  })
 
   const sorted = [...filtered].sort((a, b) => {
     if (!sortDir) return 0
@@ -106,6 +149,11 @@ export default function Members() {
     if (!currentUser) return false
     if (currentUser.position === "admin") {
       if (target.id === currentUser.id) return false
+      return true
+    }
+    if (currentUser.position === "manager") {
+      if (target.id === currentUser.id) return false
+      if (target.position !== "member") return false
       return true
     }
     return false
@@ -335,6 +383,9 @@ export default function Members() {
                   Mã NV
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  Họ và tên
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Tên đăng nhập
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -351,19 +402,20 @@ export default function Members() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Đang tải...
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Không tìm thấy thành viên nào
                   </td>
                 </tr>
               ) : (
                 sorted.map((user) => {
                   const badge = getRoleBadge(user.position)
+                  const empObj = employees.find((e) => e.id === user.employeeId)
                   return (
                     <tr
                       key={user.id}
@@ -405,6 +457,11 @@ export default function Members() {
                           >
                             <Copy size={12} />
                           </button>
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                          {empObj?.name || "—"}
                         </span>
                       </td>
                       <td className="px-4 py-3">

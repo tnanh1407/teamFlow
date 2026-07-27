@@ -1,12 +1,12 @@
 import { Router } from "express";
 import projectLogController from "./project-log.controller.js";
-import { authenticate, authorize } from "../middlewares/auth.middleware.js";
-import { validate } from "../middlewares/validation.middleware.js";
-import { asyncHandler } from "../middlewares/async.middleware.js";
+import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { validate } from "../../middlewares/validation.middleware.js";
+import { asyncHandler } from "../../middlewares/async.middleware.js";
 import {
   createProjectLogSchema,
 } from "./project-log.validation.js";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EUserRole } from "../../enums/user-role.enum.js";
 
 const router = Router();
 

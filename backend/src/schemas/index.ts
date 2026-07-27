@@ -26,6 +26,11 @@ export const EmployeeSchema = {
   gender,
   status,
   avatar_url,
+  username,
+  password,
+  role,
+  position,
+  account_status,
   created_at,
   updated_at,
   deleted_at`,
@@ -47,15 +52,16 @@ export const ProjectSchema = {
 } as const;
 
 export const UserSchema = {
-  table: "users",
+  table: "employees",
   columns:
     `id,
-  employee_id,
+  id AS employee_id,
   username,
   password,
   role,
   position,
-  status,
+  account_status AS status,
+  avatar_url,
   created_at,
   updated_at`,
 } as const;

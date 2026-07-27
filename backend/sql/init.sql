@@ -1,17 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  employee_id TEXT NOT NULL UNIQUE,
-  username TEXT NOT NULL UNIQUE,
-  password TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'user',
-  position TEXT NOT NULL DEFAULT 'member',
-  status BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 CREATE TABLE IF NOT EXISTS departments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
@@ -45,6 +33,11 @@ CREATE TABLE IF NOT EXISTS employees (
   gender TEXT NOT NULL DEFAULT 'other',
   status TEXT NOT NULL DEFAULT 'active',
   avatar_url TEXT,
+  username TEXT UNIQUE,
+  password TEXT,
+  role TEXT NOT NULL DEFAULT 'user',
+  position TEXT NOT NULL DEFAULT 'member',
+  account_status BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   deleted_at TIMESTAMPTZ
@@ -106,8 +99,6 @@ CREATE TABLE IF NOT EXISTS project_logs (
 );
 
 -- Foreign keys
-ALTER TABLE users ADD CONSTRAINT fk_users_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
-
 ALTER TABLE employees ADD CONSTRAINT fk_employees_department FOREIGN KEY (department_id) REFERENCES departments(id);
 ALTER TABLE employees ADD CONSTRAINT fk_employees_position FOREIGN KEY (position_id) REFERENCES positions(id);
 
@@ -134,8 +125,7 @@ ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_employee FOREIGN KEY (em
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS attachments TEXT DEFAULT '[]';
 
 -- Indexes
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_employee_id ON users(employee_id);
+CREATE INDEX IF NOT EXISTS idx_employees_username ON employees(username);
 CREATE INDEX IF NOT EXISTS idx_employees_department ON employees(department_id);
 CREATE INDEX IF NOT EXISTS idx_employees_position ON employees(position_id);
 CREATE INDEX IF NOT EXISTS idx_employees_email ON employees(email);
@@ -155,11 +145,6 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trg_users_updated_at
-  BEFORE UPDATE ON users
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at();
 
 CREATE OR REPLACE TRIGGER trg_departments_updated_at
   BEFORE UPDATE ON departments

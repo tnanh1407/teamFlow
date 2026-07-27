@@ -17,21 +17,20 @@ interface UserRow {
   updatedAt: Date;
 }
 
-const userColumns = UserSchema.columns;
-const userColumnsWithAvatar = `u.id, u.employee_id, u.username, u.password, u.role, COALESCE(u.position, CASE WHEN u.role = 'super_admin' THEN 'admin' WHEN u.role = 'admin' THEN 'admin' WHEN u.role = 'manager' THEN 'manager' ELSE 'member' END) AS position, u.status, e.avatar_url, u.created_at, u.updated_at`;
-const userJoin = `FROM users u LEFT JOIN employees e ON u.employee_id::uuid = e.id`;
+const userColumnsWithAvatar = `id, id AS employee_id, username, password, role, position, account_status AS status, avatar_url, created_at, updated_at`;
+const userJoin = `FROM employees`;
 
 class UserService {
   async findAll() {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumnsWithAvatar} ${userJoin} ORDER BY u.created_at DESC`
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE deleted_at IS NULL ORDER BY created_at DESC`
     );
     return rows;
   }
 
   async findById(id: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE u.id = $1`,
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE id = $1 AND deleted_at IS NULL`,
       [id]
     );
     return rows[0] || null;
@@ -39,7 +38,7 @@ class UserService {
 
   async findByUsername(username: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE u.username = $1`,
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE username = $1 AND deleted_at IS NULL`,
       [username]
     );
     return rows[0] || null;
@@ -47,7 +46,7 @@ class UserService {
 
   async findByEmployeeId(employeeId: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE u.employee_id = $1`,
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE id = $1 AND deleted_at IS NULL`,
       [employeeId]
     );
     return rows[0] || null;
@@ -66,18 +65,13 @@ class UserService {
       throw new AppError("Username already exists", 409);
     }
 
-    const existingEmployee = await this.findByEmployeeId(data.employeeId);
-    if (existingEmployee) {
-      throw new AppError("Employee ID already exists", 409);
-    }
-
     const hashedPassword = await bcrypt.hash(data.password, 10);
-
     const role = data.role || EUserRole.USER;
     const position = data.position || EUserPosition.MEMBER;
+
     const { rows } = await pool.query<UserRow>(
-      `INSERT INTO users (employee_id, username, password, role, position, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING ${userColumns}`,
-      [data.employeeId, data.username, hashedPassword, role, position, data.status ?? true]
+      `UPDATE employees SET username = $1, password = $2, role = $3, position = $4, account_status = $5 WHERE id = $6 RETURNING ${userColumnsWithAvatar}`,
+      [data.username, hashedPassword, role, position, data.status ?? true, data.employeeId]
     );
     return rows[0];
   }
@@ -100,13 +94,6 @@ class UserService {
       }
     }
 
-    if (data.employeeId) {
-      const existing = await this.findByEmployeeId(data.employeeId);
-      if (existing && existing.id !== id) {
-        throw new AppError("Employee ID already exists", 409);
-      }
-    }
-
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10);
     }
@@ -115,10 +102,6 @@ class UserService {
     const values: any[] = [];
     let idx = 1;
 
-    if (data.employeeId !== undefined) {
-      setClauses.push(`employee_id = $${idx++}`);
-      values.push(data.employeeId);
-    }
     if (data.username !== undefined) {
       setClauses.push(`username = $${idx++}`);
       values.push(data.username);
@@ -136,7 +119,7 @@ class UserService {
       values.push(data.position);
     }
     if (data.status !== undefined) {
-      setClauses.push(`status = $${idx++}`);
+      setClauses.push(`account_status = $${idx++}`);
       values.push(data.status);
     }
 
@@ -146,7 +129,7 @@ class UserService {
 
     values.push(id);
     const { rows } = await pool.query<UserRow>(
-      `UPDATE users SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${userColumns}`,
+      `UPDATE employees SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${userColumnsWithAvatar}`,
       values
     );
     return rows[0] || null;
@@ -155,17 +138,16 @@ class UserService {
   async updateAvatar(userId: string, avatarURL: string) {
     const user = await this.findById(userId);
     if (!user) throw new AppError("User not found", 404);
-    if (!user.employeeId) throw new AppError("User has no linked employee", 400);
     await pool.query(
       `UPDATE employees SET avatar_url = $1 WHERE id = $2`,
-      [avatarURL, user.employeeId]
+      [avatarURL, userId]
     );
     return this.findById(userId);
   }
 
   async delete(id: string) {
     const { rows } = await pool.query<UserRow>(
-      `DELETE FROM users WHERE id = $1 RETURNING ${userColumns}`,
+      `UPDATE employees SET username = NULL, password = NULL, account_status = false WHERE id = $1 RETURNING ${userColumnsWithAvatar}`,
       [id]
     );
     return rows[0] || null;

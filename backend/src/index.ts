@@ -9,11 +9,11 @@ import userRouter from "./user/user.router.js";
 import departmentRouter from "./department/department.router.js";
 import employeeRouter from "./employee/employee.router.js";
 import positionRouter from "./position/position.router.js";
-import projectRouter from "./project/project.router.js";
-import projectEmployeeRouter from "./project/project-employee.router.js";
-import projectCommentRouter from "./project/project-comment.router.js";
-import projectDepartmentRouter from "./project/project-department.router.js";
-import projectLogRouter from "./project/project-log.router.js";
+import projectRouter from "./project/core/project.router.js";
+import projectEmployeeRouter from "./project/employee/project-employee.router.js";
+import projectCommentRouter from "./project/comment/project-comment.router.js";
+import projectDepartmentRouter from "./project/department/project-department.router.js";
+import projectLogRouter from "./project/log/project-log.router.js";
 import uploadRouter from "./upload/upload.router.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 

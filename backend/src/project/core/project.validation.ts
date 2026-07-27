@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { EPriority } from "../enums/priority.enum.js";
-import { EProjectStatus } from "../enums/project-status.enum.js";
+import { EPriority } from "../../enums/priority.enum.js";
+import { EProjectStatus } from "../../enums/project-status.enum.js";
 
 export const createProjectSchema = z.object({
   title: z.string().min(1, "Title is required"),

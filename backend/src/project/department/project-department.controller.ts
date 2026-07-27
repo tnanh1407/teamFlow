@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import projectDepartmentService from "./project-department.service.js";
-import { AppError } from "../utils/errors/app-error.js";
+import { AppError } from "../../utils/errors/app-error.js";
 
 class ProjectDepartmentController {
   async getAll(_req: Request, res: Response) {

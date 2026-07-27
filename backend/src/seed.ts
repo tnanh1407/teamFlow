@@ -1,6 +1,7 @@
 import pool from "./config/database.js";
 import bcrypt from "bcryptjs";
 
+// uuid() chỉ dùng cho dữ liệu mới tạo runtime, không dùng cho seed data
 const uuid = () => {
   const hex = "0123456789abcdef";
   let s = "";
@@ -24,26 +25,83 @@ const seed = async () => {
     await client.query("DELETE FROM project_departments");
     await client.query("DELETE FROM project_employees");
     await client.query("DELETE FROM projects");
-    await client.query("DELETE FROM users");
     await client.query("UPDATE departments SET manager_id = NULL");
     await client.query("DELETE FROM employees");
     await client.query("DELETE FROM departments");
     await client.query("DELETE FROM positions");
 
+    // ══════════════════════════════════════════════════════════
+    //  ID CỐ ĐỊNH cho dữ liệu mẫu (valid UUID v4)
+    //  Quy ước prefix: 1x=dept, 2x=pos, 3x=emp, 4x=user,
+    //                   5x=proj, 6x=pe,  7x=cmt, 8x=log
+    // ══════════════════════════════════════════════════════════
+
+    // ── Department IDs ──
+    const DEPT_IT  = "10000000-0000-4000-a000-000000000001";
+    const DEPT_HR  = "10000000-0000-4000-a000-000000000002";
+    const DEPT_ACC = "10000000-0000-4000-a000-000000000003";
+    const DEPT_MKT = "10000000-0000-4000-a000-000000000004";
+    const DEPT_OPS = "10000000-0000-4000-a000-000000000005";
+    const DEPT_ENG = "10000000-0000-4000-a000-000000000006";
+    const DEPT_DSG = "10000000-0000-4000-a000-000000000007";
+
+    // ── Position IDs ──
+    const POS_GD  = "20000000-0000-4000-a000-000000000001";
+    const POS_PGD = "20000000-0000-4000-a000-000000000002";
+    const POS_TP  = "20000000-0000-4000-a000-000000000003";
+    const POS_PP  = "20000000-0000-4000-a000-000000000004";
+    const POS_NV  = "20000000-0000-4000-a000-000000000005";
+    const POS_TTS = "20000000-0000-4000-a000-000000000006";
+
+    // ── Employee IDs (40 employees) ──
+    const EMP: string[] = [];
+    for (let i = 1; i <= 40; i++) {
+      EMP[i] = `30000000-0000-4000-a000-${String(i).padStart(12, '0')}`;
+    }
+
+    // ── User IDs (40 users) ──
+    const USER: string[] = [];
+    for (let i = 1; i <= 40; i++) {
+      USER[i] = `40000000-0000-4000-a000-${String(i).padStart(12, '0')}`;
+    }
+
+    // ── Project IDs ──
+    const PROJ1 = "50000000-0000-4000-a000-000000000001";
+    const PROJ2 = "50000000-0000-4000-a000-000000000002";
+    const PROJ3 = "50000000-0000-4000-a000-000000000003";
+    const PROJ4 = "50000000-0000-4000-a000-000000000004";
+    const PROJ5 = "50000000-0000-4000-a000-000000000005";
+
+    // ── Project Employee IDs ──
+    const PE1  = "60000000-0000-4000-a000-000000000001";
+    const PE2  = "60000000-0000-4000-a000-000000000002";
+    const PE3  = "60000000-0000-4000-a000-000000000003";
+    const PE4  = "60000000-0000-4000-a000-000000000004";
+    const PE5  = "60000000-0000-4000-a000-000000000005";
+    const PE6  = "60000000-0000-4000-a000-000000000006";
+    const PE7  = "60000000-0000-4000-a000-000000000007";
+    const PE8  = "60000000-0000-4000-a000-000000000008";
+    const PE9  = "60000000-0000-4000-a000-000000000009";
+    const PE10 = "60000000-0000-4000-a000-000000000010";
+
+    // ── Comment IDs ──
+    const CMT1 = "70000000-0000-4000-a000-000000000001";
+    const CMT2 = "70000000-0000-4000-a000-000000000002";
+    const CMT3 = "70000000-0000-4000-a000-000000000003";
+
+    // ── Log IDs ──
+    const LOG1 = "80000000-0000-4000-a000-000000000001";
+    const LOG2 = "80000000-0000-4000-a000-000000000002";
+
     // ── Departments ──
-    const deptIds = {
-      it: uuid(),
-      hr: uuid(),
-      acc: uuid(),
-      mkt: uuid(),
-      ops: uuid(),
-    };
     const departments = [
-      { id: deptIds.it, name: "Công nghệ thông tin", code: "IT", desc: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT" },
-      { id: deptIds.hr, name: "Nhân sự", code: "HR", desc: "Phòng Nhân sự - phụ trách tuyển dụng, đào tạo và quản lý nhân viên" },
-      { id: deptIds.acc, name: "Kế toán", code: "ACC", desc: "Phòng Kế toán - phụ trách tài chính và kế toán công ty" },
-      { id: deptIds.mkt, name: "Marketing", code: "MKT", desc: "Phòng Marketing - phụ trách truyền thông và quảng bá thương hiệu" },
-      { id: deptIds.ops, name: "Vận hành", code: "OPS", desc: "Phòng Vận hành - phụ trách quy trình và vận hành doanh nghiệp" },
+      { id: DEPT_IT,  name: "Công nghệ thông tin", code: "IT",  desc: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT" },
+      { id: DEPT_HR,  name: "Nhân sự",             code: "HR",  desc: "Phòng Nhân sự - phụ trách tuyển dụng, đào tạo và quản lý nhân viên" },
+      { id: DEPT_ACC, name: "Kế toán",             code: "ACC", desc: "Phòng Kế toán - phụ trách tài chính và kế toán công ty" },
+      { id: DEPT_MKT, name: "Marketing",           code: "MKT", desc: "Phòng Marketing - phụ trách truyền thông và quảng bá thương hiệu" },
+      { id: DEPT_OPS, name: "Vận hành",            code: "OPS", desc: "Phòng Vận hành - phụ trách quy trình và vận hành doanh nghiệp" },
+      { id: DEPT_ENG, name: "Kỹ thuật",            code: "ENG", desc: "Phòng Kỹ thuật - phụ trách nghiên cứu và phát triển sản phẩm" },
+      { id: DEPT_DSG, name: "Thiết kế",            code: "DSG", desc: "Phòng Thiết kế - phụ trách thiết kế UI/UX, đồ họa và trải nghiệm người dùng" },
     ];
     for (const d of departments) {
       await client.query(
@@ -54,21 +112,13 @@ const seed = async () => {
     console.log(`Inserted ${departments.length} departments`);
 
     // ── Positions ──
-    const posIds = {
-      gd: uuid(),
-      pgd: uuid(),
-      tp: uuid(),
-      pp: uuid(),
-      nv: uuid(),
-      tts: uuid(),
-    };
     const positions = [
-      { id: posIds.gd, name: "Giám đốc", desc: "Giám đốc điều hành - quản lý chiến lược và định hướng phát triển", level: "Manager" },
-      { id: posIds.pgd, name: "Phó Giám đốc", desc: "Phó Giám đốc - hỗ trợ điều hành và quản lý các phòng ban", level: "Senior" },
-      { id: posIds.tp, name: "Trưởng phòng", desc: "Trưởng phòng - quản lý và điều phối hoạt động phòng ban", level: "Leader" },
-      { id: posIds.pp, name: "Phó phòng", desc: "Phó phòng - hỗ trợ trưởng phòng trong quản lý phòng ban", level: "Middle" },
-      { id: posIds.nv, name: "Nhân viên", desc: "Nhân viên chính thức - thực hiện các nhiệm vụ được giao", level: "Junior" },
-      { id: posIds.tts, name: "Thực tập sinh", desc: "Thực tập sinh - học việc và hỗ trợ các công việc cơ bản", level: "Intern" },
+      { id: POS_GD,  name: "Giám đốc",      desc: "Giám đốc điều hành - quản lý chiến lược và định hướng phát triển", level: "Manager" },
+      { id: POS_PGD, name: "Phó Giám đốc",  desc: "Phó Giám đốc - hỗ trợ điều hành và quản lý các phòng ban",        level: "Senior" },
+      { id: POS_TP,  name: "Trưởng phòng",   desc: "Trưởng phòng - quản lý và điều phối hoạt động phòng ban",          level: "Manager" },
+      { id: POS_PP,  name: "Phó phòng",      desc: "Phó phòng - hỗ trợ trưởng phòng trong quản lý phòng ban",          level: "Middle" },
+      { id: POS_NV,  name: "Nhân viên",      desc: "Nhân viên chính thức - thực hiện các nhiệm vụ được giao",           level: "Junior" },
+      { id: POS_TTS, name: "Thực tập sinh",  desc: "Thực tập sinh - học việc và hỗ trợ các công việc cơ bản",           level: "Intern" },
     ];
     for (const p of positions) {
       await client.query(
@@ -78,76 +128,119 @@ const seed = async () => {
     }
     console.log(`Inserted ${positions.length} positions`);
 
-    // ── Employees (without manager_id for departments) ──
-    const empIds = {
-      emp1: uuid(), emp2: uuid(), emp3: uuid(), emp4: uuid(), emp5: uuid(),
-      emp6: uuid(), emp7: uuid(), emp8: uuid(), emp9: uuid(), emp10: uuid(),
-      emp11: uuid(), emp12: uuid(), emp13: uuid(), emp14: uuid(), emp15: uuid(),
-    };
+    // ── Employees (40 Employees across 7 departments) ──
     const strip = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
     const avatar = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(strip(name)).replace(/%20/g, "+")}&background=random&color=fff&size=128&bold=true`;
-    const employees = [
-      { id: empIds.emp1, dept: deptIds.it, pos: posIds.gd, code: "EMP001", name: "Nguyễn Văn Anh", email: "nguyenvananh@teamflow.com", phone: "0901234001", birth: "1985-03-15", hire: "2023-06-01", gender: "male", avatar: avatar("Nguyễn Văn Anh") },
-      { id: empIds.emp2, dept: deptIds.it, pos: posIds.tp, code: "EMP002", name: "Trần Thị Bích", email: "tranthibich@teamflow.com", phone: "0901234002", birth: "1990-07-22", hire: "2023-08-15", gender: "female", avatar: avatar("Trần Thị Bích") },
-      { id: empIds.emp3, dept: deptIds.it, pos: posIds.nv, code: "EMP003", name: "Lê Văn Cường", email: "levancuong@teamflow.com", phone: "0901234003", birth: "1995-11-08", hire: "2024-03-01", gender: "male", avatar: avatar("Lê Văn Cường") },
-      { id: empIds.emp4, dept: deptIds.hr, pos: posIds.tp, code: "EMP004", name: "Phạm Thị Dung", email: "phamthidung@teamflow.com", phone: "0901234004", birth: "1988-05-12", hire: "2023-07-01", gender: "female", avatar: avatar("Phạm Thị Dung") },
-      { id: empIds.emp5, dept: deptIds.hr, pos: posIds.nv, code: "EMP005", name: "Hoàng Văn Em", email: "hoangvanem@teamflow.com", phone: "0901234005", birth: "1997-09-25", hire: "2024-06-15", gender: "male", avatar: avatar("Hoàng Văn Em") },
-      { id: empIds.emp6, dept: deptIds.acc, pos: posIds.tp, code: "EMP006", name: "Vũ Thị Phương", email: "vuthiphuong@teamflow.com", phone: "0901234006", birth: "1991-02-18", hire: "2023-09-01", gender: "female", avatar: avatar("Vũ Thị Phương") },
-      { id: empIds.emp7, dept: deptIds.acc, pos: posIds.nv, code: "EMP007", name: "Đặng Văn Giang", email: "dangvangiang@teamflow.com", phone: "0901234007", birth: "1993-12-30", hire: "2024-04-01", gender: "male", avatar: avatar("Đặng Văn Giang") },
-      { id: empIds.emp8, dept: deptIds.mkt, pos: posIds.tp, code: "EMP008", name: "Bùi Thị Hạnh", email: "buithihanh@teamflow.com", phone: "0901234008", birth: "1992-06-14", hire: "2024-01-10", gender: "female", avatar: avatar("Bùi Thị Hạnh") },
-      { id: empIds.emp9, dept: deptIds.mkt, pos: posIds.nv, code: "EMP009", name: "Ngô Văn Inh", email: "ngovaninh@teamflow.com", phone: "0901234009", birth: "1999-08-05", hire: "2025-03-01", gender: "male", status: "probation", avatar: avatar("Ngô Văn Inh") },
-      { id: empIds.emp10, dept: deptIds.ops, pos: posIds.nv, code: "EMP010", name: "Dương Thị Kim", email: "duongthikim@teamflow.com", phone: "0901234010", birth: "1994-04-20", hire: "2024-07-01", gender: "female", avatar: avatar("Dương Thị Kim") },
-      { id: empIds.emp11, dept: deptIds.ops, pos: posIds.pp, code: "EMP011", name: "Lý Văn Minh", email: "lyvanminh@teamflow.com", phone: "0901234011", birth: "1989-11-03", hire: "2024-02-15", gender: "male", avatar: avatar("Lý Văn Minh") },
-      { id: empIds.emp12, dept: deptIds.mkt, pos: posIds.pp, code: "EMP012", name: "Trịnh Thị Ngọc", email: "trinhthingoc@teamflow.com", phone: "0901234012", birth: "1993-06-28", hire: "2024-05-01", gender: "female", avatar: avatar("Trịnh Thị Ngọc") },
-      { id: empIds.emp13, dept: deptIds.acc, pos: posIds.nv, code: "EMP013", name: "Đỗ Văn Hoàng", email: "dovanhoang@teamflow.com", phone: "0901234013", birth: "1996-01-15", hire: "2025-01-10", gender: "male", status: "probation", avatar: avatar("Đỗ Văn Hoàng") },
-      { id: empIds.emp14, dept: deptIds.hr, pos: posIds.nv, code: "EMP014", name: "Mai Thị Lan", email: "maithilan@teamflow.com", phone: "0901234014", birth: "1998-07-09", hire: "2025-02-01", gender: "female", status: "probation", avatar: avatar("Mai Thị Lan") },
-      { id: empIds.emp15, dept: deptIds.it, pos: posIds.tts, code: "EMP015", name: "Hồ Văn Trung", email: "hovantrung@teamflow.com", phone: "0901234015", birth: "2000-12-20", hire: "2025-06-01", gender: "male", status: "inactive", avatar: avatar("Hồ Văn Trung") },
+
+    const rawEmployeesData = [
+      // IT (6)
+      { idx: 1,  dept: DEPT_IT,  pos: POS_GD,  name: "Nguyễn Văn Anh",    username: "root",       role: "admin",  position: "admin",   gender: "male",   status: "active" },
+      { idx: 2,  dept: DEPT_IT,  pos: POS_TP,  name: "Trần Thị Bích",     username: "admin",      role: "admin",  position: "admin",   gender: "female", status: "active" },
+      { idx: 3,  dept: DEPT_IT,  pos: POS_PP,  name: "Lê Văn Cường",      username: "manager",    role: "user",   position: "manager", gender: "male",   status: "active" },
+      { idx: 4,  dept: DEPT_IT,  pos: POS_NV,  name: "Phạm Hải Đăng",     username: "hai.dang",   role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 5,  dept: DEPT_IT,  pos: POS_NV,  name: "Hoàng Minh Tuấn",   username: "minh.tuan",  role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 6,  dept: DEPT_IT,  pos: POS_TTS, name: "Hồ Văn Trung",      username: "van.trung",  role: "user",   position: "member",  gender: "male",   status: "probation" },
+
+      // HR (6)
+      { idx: 7,  dept: DEPT_HR,  pos: POS_TP,  name: "Phạm Thị Dung",     username: "hr_manager", role: "user",   position: "manager", gender: "female", status: "active" },
+      { idx: 8,  dept: DEPT_HR,  pos: POS_PP,  name: "Hoàng Văn Em",      username: "hoang.em",   role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 9,  dept: DEPT_HR,  pos: POS_NV,  name: "Mai Thị Lan",       username: "mai.lan",    role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 10, dept: DEPT_HR,  pos: POS_NV,  name: "Đặng Thu Thảo",     username: "thu.thao",   role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 11, dept: DEPT_HR,  pos: POS_NV,  name: "Vũ Phương Thảo",    username: "phuong.thao",role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 12, dept: DEPT_HR,  pos: POS_TTS, name: "Nguyễn Bảo Châu",   username: "bao.chau",   role: "user",   position: "member",  gender: "female", status: "probation" },
+
+      // Kế toán (6)
+      { idx: 13, dept: DEPT_ACC, pos: POS_TP,  name: "Vũ Thị Phương",     username: "acc_manager",role: "user",   position: "manager", gender: "female", status: "active" },
+      { idx: 14, dept: DEPT_ACC, pos: POS_PP,  name: "Đặng Văn Giang",    username: "dang.giang", role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 15, dept: DEPT_ACC, pos: POS_NV,  name: "Đỗ Văn Hoàng",      username: "do.hoang",   role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 16, dept: DEPT_ACC, pos: POS_NV,  name: "Ngô Thị Minh",      username: "thi.minh",   role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 17, dept: DEPT_ACC, pos: POS_NV,  name: "Bùi Thị Mai",       username: "thi.mai",    role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 18, dept: DEPT_ACC, pos: POS_TTS, name: "Trịnh Văn An",      username: "van.an",     role: "user",   position: "member",  gender: "male",   status: "probation" },
+
+      // Marketing (6)
+      { idx: 19, dept: DEPT_MKT, pos: POS_TP,  name: "Bùi Thị Hạnh",      username: "mkt_manager",role: "user",   position: "manager", gender: "female", status: "active" },
+      { idx: 20, dept: DEPT_MKT, pos: POS_PP,  name: "Trịnh Thị Ngọc",    username: "trinh.ngoc", role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 21, dept: DEPT_MKT, pos: POS_NV,  name: "Ngô Văn Inh",       username: "ngo.inh",    role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 22, dept: DEPT_MKT, pos: POS_NV,  name: "Lê Mỹ Duyên",       username: "my.duyen",   role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 23, dept: DEPT_MKT, pos: POS_NV,  name: "Phan Văn Nam",      username: "van.nam",    role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 24, dept: DEPT_MKT, pos: POS_TTS, name: "Nguyễn Khánh Linh", username: "khanh.linh", role: "user",   position: "member",  gender: "female", status: "probation" },
+
+      // Vận hành (5)
+      { idx: 25, dept: DEPT_OPS, pos: POS_TP,  name: "Lý Văn Minh",       username: "ops_manager",role: "user",   position: "manager", gender: "male",   status: "active" },
+      { idx: 26, dept: DEPT_OPS, pos: POS_PP,  name: "Dương Thị Kim",     username: "duong.kim",  role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 27, dept: DEPT_OPS, pos: POS_NV,  name: "Trần Bảo Nam",      username: "bao.nam",    role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 28, dept: DEPT_OPS, pos: POS_NV,  name: "Vũ Hải Yến",        username: "hai.yen",    role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 29, dept: DEPT_OPS, pos: POS_NV,  name: "Hoàng Gia Bảo",     username: "gia.bao",    role: "user",   position: "member",  gender: "male",   status: "active" },
+
+      // Kỹ thuật (5)
+      { idx: 30, dept: DEPT_ENG, pos: POS_TP,  name: "Phan Văn Quốc",     username: "eng_manager",role: "user",   position: "manager", gender: "male",   status: "active" },
+      { idx: 31, dept: DEPT_ENG, pos: POS_PP,  name: "Đỗ Quốc Việt",      username: "quoc.viet",  role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 32, dept: DEPT_ENG, pos: POS_NV,  name: "Nguyễn Thành Long", username: "thanh.long", role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 33, dept: DEPT_ENG, pos: POS_NV,  name: "Trần Thu Trang",    username: "thu.trang",  role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 34, dept: DEPT_ENG, pos: POS_NV,  name: "Lê Đức Thắng",      username: "duc.thang",  role: "user",   position: "member",  gender: "male",   status: "active" },
+
+      // Thiết kế (6)
+      { idx: 35, dept: DEPT_DSG, pos: POS_TP,  name: "Nguyễn Thị Hồng",   username: "dsg_manager",role: "user",   position: "manager", gender: "female", status: "active" },
+      { idx: 36, dept: DEPT_DSG, pos: POS_PP,  name: "Trần Đức Huy",      username: "tran.huy",   role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 37, dept: DEPT_DSG, pos: POS_NV,  name: "Lê Thị Thanh Tâm",  username: "le.tam",     role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 38, dept: DEPT_DSG, pos: POS_NV,  name: "Võ Minh Khôi",      username: "vo.khoi",    role: "user",   position: "member",  gender: "male",   status: "active" },
+      { idx: 39, dept: DEPT_DSG, pos: POS_NV,  name: "Phạm Hà Phương",    username: "ha.phuong",  role: "user",   position: "member",  gender: "female", status: "active" },
+      { idx: 40, dept: DEPT_DSG, pos: POS_TTS, name: "Đặng Hoàng Anh",    username: "hoang.anh",  role: "user",   position: "member",  gender: "male",   status: "probation" },
     ];
+
+    const employees = rawEmployeesData.map((item) => {
+      const codeNum = String(item.idx).padStart(3, '0');
+      let pwd = "123456";
+      if (item.username === "root") pwd = "root123";
+      else if (item.username === "admin") pwd = "admin123";
+      else if (item.username === "manager") pwd = "manager123";
+
+      return {
+        id: EMP[item.idx],
+        dept: item.dept,
+        pos: item.pos,
+        code: `EMP${codeNum}`,
+        name: item.name,
+        email: `${strip(item.username).toLowerCase()}@teamflow.com`,
+        phone: `0901234${codeNum}`,
+        birth: `199${(item.idx % 9)}-05-15`,
+        hire: "2024-01-15",
+        gender: item.gender,
+        status: item.status,
+        avatar: avatar(item.name),
+        username: item.username,
+        password: bcrypt.hashSync(pwd, 10),
+        role: item.role,
+        position: item.position,
+        accountStatus: true,
+      };
+    });
+
     for (const e of employees) {
       await client.query(
-        `INSERT INTO employees (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-        [e.id, e.dept, e.pos, e.code, e.name, e.email, e.phone, e.birth, e.hire, e.gender, e.status || "active", e.avatar]
+        `INSERT INTO employees (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, status, avatar_url, username, password, role, position, account_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+        [e.id, e.dept, e.pos, e.code, e.name, e.email, e.phone, e.birth, e.hire, e.gender, e.status, e.avatar, e.username, e.password, e.role, e.position, e.accountStatus]
       );
     }
-    console.log(`Inserted ${employees.length} employees`);
+    console.log(`Inserted ${employees.length} employees (with account credentials)`);
 
     // ── Update departments with manager_id ──
-    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp2, deptIds.it]);
-    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp4, deptIds.hr]);
-    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp6, deptIds.acc]);
-    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp8, deptIds.mkt]);
-    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [empIds.emp11, deptIds.ops]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[2],  DEPT_IT]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[7],  DEPT_HR]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[13], DEPT_ACC]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[19], DEPT_MKT]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[25], DEPT_OPS]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[30], DEPT_ENG]);
+    await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[35], DEPT_DSG]);
     console.log("Updated department managers");
 
-    // ── Users ──
-    const users = [
-      { id: uuid(), empId: empIds.emp1, username: "root", password: bcrypt.hashSync("root123", 10), role: "admin", position: "admin" },
-      { id: uuid(), empId: empIds.emp2, username: "admin", password: bcrypt.hashSync("admin123", 10), role: "admin", position: "admin" },
-      { id: uuid(), empId: empIds.emp3, username: "manager", password: bcrypt.hashSync("manager123", 10), role: "user", position: "manager" },
-      { id: uuid(), empId: empIds.emp4, username: "hr_manager", password: bcrypt.hashSync("user123", 10), role: "user", position: "manager" },
-      { id: uuid(), empId: empIds.emp6, username: "acc_user", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
-      { id: uuid(), empId: empIds.emp8, username: "member", password: bcrypt.hashSync("member123", 10), role: "user", position: "member" },
-      { id: uuid(), empId: empIds.emp5, username: "hoang.em", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
-      { id: uuid(), empId: empIds.emp7, username: "dang.giang", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
-      { id: uuid(), empId: empIds.emp9, username: "ngo.inh", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
-      { id: uuid(), empId: empIds.emp10, username: "duong.kim", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
-    ];
-    for (const u of users) {
-      await client.query(
-        `INSERT INTO users (id, employee_id, username, password, role, position, status) VALUES ($1, $2, $3, $4, $5, $6, true)`,
-        [u.id, u.empId, u.username, u.password, u.role, u.position]
-      );
-    }
-    console.log(`Inserted ${users.length} users`);
-
     // ── Projects ──
-    const projIds = { p1: uuid(), p2: uuid(), p3: uuid(), p4: uuid(), p5: uuid() };
     const projects = [
-      { id: projIds.p1, title: "Xây dựng website TeamFlow", desc: "Dự án xây dựng website quản lý công việc nội bộ cho công ty", priority: "high", status: "in_progress", progress: 60, start: "2025-06-01", due: "2025-09-30", createdBy: empIds.emp1, assignedBy: empIds.emp1, updatedBy: empIds.emp2, est: 500, actual: 280 },
-      { id: projIds.p2, title: "Phát triển ứng dụng di động", desc: "Dự án phát triển ứng dụng di động cho khách hàng trên nền tảng iOS và Android", priority: "medium", status: "todo", progress: 0, start: "2025-08-01", due: "2025-12-31", createdBy: empIds.emp1, assignedBy: empIds.emp1, est: 800, actual: 0 },
-      { id: projIds.p3, title: "Nâng cấp hệ thống bảo mật", desc: "Dự án nâng cấp bảo mật toàn hệ thống CNTT", priority: "critical", status: "review", progress: 90, start: "2025-05-01", due: "2025-07-31", createdBy: empIds.emp2, assignedBy: empIds.emp2, updatedBy: empIds.emp1, est: 200, actual: 180 },
-      { id: projIds.p4, title: "Chiến dịch Marketing Quý 4", desc: "Chiến dịch truyền thông và quảng bá sản phẩm mới trong quý 4 năm 2025", priority: "high", status: "in_progress", progress: 35, start: "2025-09-01", due: "2025-11-30", createdBy: empIds.emp8, assignedBy: empIds.emp8, updatedBy: empIds.emp8, est: 300, actual: 100 },
-      { id: projIds.p5, title: "Tối ưu quy trình vận hành", desc: "Dự án tối ưu hóa quy trình vận hành doanh nghiệp", priority: "low", status: "completed", progress: 100, start: "2025-03-01", due: "2025-06-30", createdBy: empIds.emp10, assignedBy: empIds.emp1, updatedBy: empIds.emp6, completedBy: empIds.emp10, est: 150, actual: 140, completedAt: "2025-06-28T00:00:00.000Z" },
+      { id: PROJ1, title: "Xây dựng website TeamFlow",       desc: "Dự án xây dựng website quản lý công việc nội bộ cho công ty",                              priority: "high",     status: "in_progress", progress: 60,  start: "2025-06-01", due: "2025-09-30", createdBy: EMP[1],  assignedBy: EMP[1],  updatedBy: EMP[2],  est: 500, actual: 280 },
+      { id: PROJ2, title: "Phát triển ứng dụng di động",     desc: "Dự án phát triển ứng dụng di động cho khách hàng trên nền tảng iOS và Android",             priority: "medium",   status: "todo",        progress: 0,   start: "2025-08-01", due: "2025-12-31", createdBy: EMP[1],  assignedBy: EMP[1],  est: 800, actual: 0 },
+      { id: PROJ3, title: "Nâng cấp hệ thống bảo mật",      desc: "Dự án nâng cấp bảo mật toàn hệ thống CNTT",                                                priority: "critical", status: "review",      progress: 90,  start: "2025-05-01", due: "2025-07-31", createdBy: EMP[2],  assignedBy: EMP[2],  updatedBy: EMP[1],  est: 200, actual: 180 },
+      { id: PROJ4, title: "Chiến dịch Marketing Quý 4",      desc: "Chiến dịch truyền thông và quảng bá sản phẩm mới trong quý 4 năm 2025",                    priority: "high",     status: "in_progress", progress: 35,  start: "2025-09-01", due: "2025-11-30", createdBy: EMP[19], assignedBy: EMP[19], updatedBy: EMP[19], est: 300, actual: 100 },
+      { id: PROJ5, title: "Tối ưu quy trình vận hành",       desc: "Dự án tối ưu hóa quy trình vận hành doanh nghiệp",                                        priority: "low",      status: "completed",   progress: 100, start: "2025-03-01", due: "2025-06-30", createdBy: EMP[25], assignedBy: EMP[1],  updatedBy: EMP[13], completedBy: EMP[25], est: 150, actual: 140, completedAt: "2025-06-28T00:00:00.000Z" },
     ];
     for (const p of projects) {
       await client.query(
@@ -159,38 +252,37 @@ const seed = async () => {
 
     // ── Project Employees ──
     const projEmps = [
-      { pid: projIds.p1, eid: empIds.emp1, role: "leader" },
-      { pid: projIds.p1, eid: empIds.emp2, role: "reviewer" },
-      { pid: projIds.p1, eid: empIds.emp3, role: "member" },
-      { pid: projIds.p2, eid: empIds.emp1, role: "leader" },
-      { pid: projIds.p2, eid: empIds.emp3, role: "member" },
-      { pid: projIds.p3, eid: empIds.emp2, role: "leader" },
-      { pid: projIds.p3, eid: empIds.emp1, role: "reviewer" },
-      { pid: projIds.p3, eid: empIds.emp3, role: "member" },
-      { pid: projIds.p4, eid: empIds.emp8, role: "leader" },
-      { pid: projIds.p4, eid: empIds.emp9, role: "member" },
-      { pid: projIds.p5, eid: empIds.emp10, role: "leader" },
-      { pid: projIds.p5, eid: empIds.emp6, role: "reviewer" },
-      { pid: projIds.p1, eid: empIds.emp11, role: "reviewer" },
-      { pid: projIds.p4, eid: empIds.emp12, role: "member" },
-      { pid: projIds.p2, eid: empIds.emp13, role: "member" },
+      { id: PE1,  pid: PROJ1, eid: EMP[1],  role: "manager" },
+      { id: PE2,  pid: PROJ1, eid: EMP[2],  role: "reviewer" },
+      { id: PE3,  pid: PROJ1, eid: EMP[3],  role: "member" },
+      { id: PE4,  pid: PROJ1, eid: EMP[7],  role: "member" },
+      { id: PE5,  pid: PROJ2, eid: EMP[1],  role: "manager" },
+      { id: PE6,  pid: PROJ2, eid: EMP[3],  role: "member" },
+      { id: PE7,  pid: PROJ2, eid: EMP[30], role: "member" },
+      { id: PE8,  pid: PROJ3, eid: EMP[2],  role: "manager" },
+      { id: PE9,  pid: PROJ3, eid: EMP[1],  role: "reviewer" },
+      { id: PE10, pid: PROJ3, eid: EMP[3],  role: "member" },
     ];
     for (const pe of projEmps) {
       await client.query(
         `INSERT INTO project_employees (id, project_id, employee_id, role) VALUES ($1, $2, $3, $4)`,
-        [uuid(), pe.pid, pe.eid, pe.role]
+        [pe.id, pe.pid, pe.eid, pe.role]
       );
     }
     console.log(`Inserted ${projEmps.length} project_employees`);
 
     // ── Project Departments ──
     const projDepts = [
-      { pid: projIds.p1, did: deptIds.it },
-      { pid: projIds.p2, did: deptIds.it },
-      { pid: projIds.p3, did: deptIds.it },
-      { pid: projIds.p4, did: deptIds.mkt },
-      { pid: projIds.p5, did: deptIds.ops },
-      { pid: projIds.p5, did: deptIds.acc },
+      { pid: PROJ1, did: DEPT_IT },
+      { pid: PROJ1, did: DEPT_HR },
+      { pid: PROJ2, did: DEPT_IT },
+      { pid: PROJ2, did: DEPT_ENG },
+      { pid: PROJ3, did: DEPT_IT },
+      { pid: PROJ4, did: DEPT_MKT },
+      { pid: PROJ4, did: DEPT_ENG },
+      { pid: PROJ5, did: DEPT_OPS },
+      { pid: PROJ5, did: DEPT_ACC },
+      { pid: PROJ5, did: DEPT_HR },
     ];
     for (const pd of projDepts) {
       await client.query(
@@ -201,37 +293,28 @@ const seed = async () => {
     console.log(`Inserted ${projDepts.length} project_departments`);
 
     // ── Project Comments ──
-    const comments = [
-      { pid: projIds.p1, eid: empIds.emp1, content: "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản. Cần review trước khi sang giai đoạn 2." },
-      { pid: projIds.p1, eid: empIds.emp2, content: "Đã review giao diện. Có một số điểm cần chỉnh sửa về UX. Sẽ gửi feedback chi tiết sau." },
-      { pid: projIds.p3, eid: empIds.emp2, content: "Đã nâng cấp firewall và cập nhật chứng chỉ SSL. Cần kiểm tra lại toàn bộ hệ thống." },
-      { pid: projIds.p4, eid: empIds.emp8, content: "Đã hoàn thành kế hoạch chi tiết cho chiến dịch. Đang chờ duyệt ngân sách.", attachments: "ke-hoach-mkt-q4.pdf" },
-      { pid: projIds.p5, eid: empIds.emp10, content: "Dự án đã hoàn thành đúng tiến độ. Quy trình vận hành mới đã được áp dụng thành công." },
+    const comments: { id: string; pid: string; eid: string; content: string; attachments?: string }[] = [
+      { id: CMT1, pid: PROJ1, eid: EMP[1],  content: "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản. Cần review trước khi sang giai đoạn 2." },
+      { id: CMT2, pid: PROJ1, eid: EMP[2],  content: "Đã review giao diện. Có một số điểm cần chỉnh sửa về UX. Sẽ gửi feedback chi tiết sau." },
+      { id: CMT3, pid: PROJ3, eid: EMP[2],  content: "Đã nâng cấp firewall và cập nhật chứng chỉ SSL. Cần kiểm tra lại toàn bộ hệ thống." },
     ];
     for (const c of comments) {
       await client.query(
         `INSERT INTO project_comments (id, project_id, employee_id, content, attachments) VALUES ($1, $2, $3, $4, $5)`,
-        [uuid(), c.pid, c.eid, c.content, c.attachments || null]
+        [c.id, c.pid, c.eid, c.content, c.attachments || null]
       );
     }
     console.log(`Inserted ${comments.length} project_comments`);
 
     // ── Project Logs ──
     const logs = [
-      { pid: projIds.p1, eid: empIds.emp1, action: "created", desc: "Dự án được tạo bởi Nguyễn Văn Anh" },
-      { pid: projIds.p1, eid: empIds.emp1, action: "assigned", desc: "Phân công Trần Thị Bích và Lê Văn Cường vào dự án" },
-      { pid: projIds.p1, eid: empIds.emp1, action: "updated", desc: "Cập nhật tiến độ dự án lên 60%" },
-      { pid: projIds.p3, eid: empIds.emp2, action: "created", desc: "Dự án nâng cấp bảo mật được khởi tạo" },
-      { pid: projIds.p3, eid: empIds.emp2, action: "updated", desc: "Cập nhật tiến độ lên 90% - đang chờ review" },
-      { pid: projIds.p4, eid: empIds.emp8, action: "created", desc: "Chiến dịch Marketing Q4 được khởi tạo" },
-      { pid: projIds.p4, eid: empIds.emp8, action: "assigned", desc: "Phân công Ngô Văn Inh tham gia chiến dịch" },
-      { pid: projIds.p5, eid: empIds.emp10, action: "created", desc: "Dự án tối ưu quy trình vận hành được khởi tạo" },
-      { pid: projIds.p5, eid: empIds.emp10, action: "completed", desc: "Dự án hoàn thành trước thời hạn 2 ngày" },
+      { id: LOG1, pid: PROJ1, eid: EMP[1],  action: "created",   desc: "Dự án được tạo bởi Nguyễn Văn Anh" },
+      { id: LOG2, pid: PROJ1, eid: EMP[1],  action: "assigned",  desc: "Phân công Trần Thị Bích và Lê Văn Cường vào dự án" },
     ];
     for (const l of logs) {
       await client.query(
         `INSERT INTO project_logs (id, project_id, employee_id, action, description) VALUES ($1, $2, $3, $4, $5)`,
-        [uuid(), l.pid, l.eid, l.action, l.desc]
+        [l.id, l.pid, l.eid, l.action, l.desc]
       );
     }
     console.log(`Inserted ${logs.length} project_logs`);
@@ -240,18 +323,7 @@ const seed = async () => {
 
     console.log("\n✅ Seed completed successfully!");
     console.log("---");
-    console.log("Accounts:");
-    console.log("  root       / root123    (admin / full access)");
-    console.log("  admin      / admin123   (admin / full access)");
-    console.log("  manager    / manager123 (manager)");
-    console.log("  hr_manager / user123    (manager)");
-    console.log("  acc_user   / 123456     (member)");
-    console.log("  member     / member123  (member)");
-    console.log("  hoang.em   / 123456     (member)");
-    console.log("  dang.giang / 123456     (member)");
-    console.log("  ngo.inh    / 123456     (member)");
-    console.log("  duong.kim  / 123456     (member)");
-    console.log(`\nSummary: ${departments.length} depts, ${positions.length} positions, ${employees.length} employees, ${users.length} users, ${projects.length} projects`);
+    console.log(`Summary: ${departments.length} depts, ${positions.length} positions, ${employees.length} employees, ${projects.length} projects`);
     process.exit(0);
   } catch (error) {
     await client.query("ROLLBACK");

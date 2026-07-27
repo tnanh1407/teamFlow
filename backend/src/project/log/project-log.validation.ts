@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EProjectAction } from "../enums/project-action.enum.js";
+import { EProjectAction } from "../../enums/project-action.enum.js";
 
 export const createProjectLogSchema = z.object({
   projectId: z.string().min(1, "Project ID is required"),

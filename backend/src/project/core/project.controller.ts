@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import projectService from "./project.service.js";
-import { AppError } from "../utils/errors/app-error.js";
+import userService from "../../user/user.service.js";
+import { AppError } from "../../utils/errors/app-error.js";
+import { AuthRequest } from "../../middlewares/auth.middleware.js";
 
 class ProjectController {
   async getAll(_req: Request, res: Response) {
@@ -30,6 +32,14 @@ class ProjectController {
   async getByCreatedBy(req: Request, res: Response) {
     const employeeId = req.params.employeeId as string;
     const projects = await projectService.findByCreatedBy(employeeId);
+    res.json({ data: projects });
+  }
+
+  async getMyProjects(req: AuthRequest, res: Response) {
+    const user = await userService.findById(req.user!.id);
+    if (!user) throw new AppError("User not found", 404);
+    if (!user.employeeId) throw new AppError("User has no linked employee", 400);
+    const projects = await projectService.findByEmployeeId(user.employeeId);
     res.json({ data: projects });
   }
 

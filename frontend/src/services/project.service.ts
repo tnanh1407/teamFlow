@@ -47,6 +47,8 @@ export type UpdateProjectPayload = Partial<CreateProjectPayload>;
 const projectService = {
   getAll: () => api.get<{ data: Project[] }>("/projects"),
 
+  getMyProjects: () => api.get<{ data: Project[] }>("/projects/my"),
+
   getById: (id: string) => api.get<{ data: Project }>(`/projects/${id}`),
 
   getByStatus: (status: string) =>

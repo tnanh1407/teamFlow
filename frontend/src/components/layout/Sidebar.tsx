@@ -10,7 +10,6 @@ import {
   Building2,
   Briefcase,
   Medal,
-  UserCog,
   CheckSquare,
   Settings,
 } from "lucide-react"
@@ -48,7 +47,6 @@ function getNavItems(user: User | null): NavEntry[] {
           { to: "/employees", label: "Quản lí Nhân Viên", icon: Briefcase },
           { to: "/departments", label: "Quản lí Phòng Ban", icon: Building2 },
           { to: "/positions", label: "Quản lí Chức Vụ", icon: Medal },
-          { to: "/members", label: "Quản lí Tài Khoản", icon: UserCog },
           { to: "/projects", label: "Quản lí Dự án", icon: CheckSquare },
         ],
       },

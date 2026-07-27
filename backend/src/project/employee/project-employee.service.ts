@@ -1,5 +1,5 @@
-import pool from "../config/database.js";
-import { ProjectEmployeeSchema } from "../schemas/index.js";
+import pool from "../../config/database.js";
+import { ProjectEmployeeSchema } from "../../schemas/index.js";
 
 interface ProjectEmployeeRow {
   id: string;

@@ -1,13 +1,13 @@
 import { Router } from "express";
 import projectCommentController from "./project-comment.controller.js";
-import { authenticate, authorize } from "../middlewares/auth.middleware.js";
-import { validate } from "../middlewares/validation.middleware.js";
-import { asyncHandler } from "../middlewares/async.middleware.js";
+import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { validate } from "../../middlewares/validation.middleware.js";
+import { asyncHandler } from "../../middlewares/async.middleware.js";
 import {
   createProjectCommentSchema,
   updateProjectCommentSchema,
 } from "./project-comment.validation.js";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EUserRole } from "../../enums/user-role.enum.js";
 
 const router = Router();
 

@@ -3,6 +3,7 @@ import env from "./env.js";
 import MockPool from "./mock-database.js";
 
 function snakeToCamel(s: string): string {
+  if (s === "avatar_url") return "avatarURL";
   return s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 }
 
@@ -34,9 +35,9 @@ if (useMock) {
   // Wrap query to convert snake_case to camelCase
   const origQuery = pool.query.bind(pool);
   pool.query = function (this: pg.Pool, ...args: any[]): any {
-    const result = origQuery(...args);
+    const result = (origQuery as any)(...args);
     if (result instanceof Promise) {
-      return result.then((res) => {
+      return result.then((res: any) => {
         if (res?.rows) {
           res.rows = res.rows.map(transformRow as any);
         }

@@ -1,5 +1,5 @@
-import pool from "../config/database.js";
-import { ProjectCommentSchema } from "../schemas/index.js";
+import pool from "../../config/database.js";
+import { ProjectCommentSchema } from "../../schemas/index.js";
 
 interface ProjectCommentRow {
   id: string;
@@ -55,6 +55,13 @@ class ProjectCommentService {
       `INSERT INTO project_comments (project_id, employee_id, content, attachments) VALUES ($1, $2, $3, $4) RETURNING ${projectCommentColumns}`,
       [data.projectId, data.employeeId, data.content || null, data.attachments || null]
     );
+
+    // Tự động ghi log hoạt động khi bình luận
+    await pool.query(
+      `INSERT INTO project_logs (project_id, employee_id, action, description) VALUES ($1, $2, $3, $4)`,
+      [data.projectId, data.employeeId, "commented", data.content ? `Bình luận: "${data.content.slice(0, 50)}${data.content.length > 50 ? "..." : ""}"` : "đã đăng một bình luận"]
+    );
+
     return rows[0];
   }
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EProjectRole } from "../enums/project-role.enum.js";
+import { EProjectRole } from "../../enums/project-role.enum.js";
 
 export const createProjectEmployeeSchema = z.object({
   projectId: z.string().min(1, "Project ID is required"),

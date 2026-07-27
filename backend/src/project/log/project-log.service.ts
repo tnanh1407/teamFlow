@@ -1,5 +1,5 @@
-import pool from "../config/database.js";
-import { ProjectLogSchema } from "../schemas/index.js";
+import pool from "../../config/database.js";
+import { ProjectLogSchema } from "../../schemas/index.js";
 
 interface ProjectLogRow {
   id: string;

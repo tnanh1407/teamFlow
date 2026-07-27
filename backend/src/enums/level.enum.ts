@@ -3,6 +3,5 @@ export enum ELevel {
   JUNIOR = "Junior",
   MIDDLE = "Middle",
   SENIOR = "Senior",
-  LEADER = "Leader",
   MANAGER = "Manager",
 }

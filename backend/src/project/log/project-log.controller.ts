@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import projectLogService from "./project-log.service.js";
-import { AppError } from "../utils/errors/app-error.js";
+import { AppError } from "../../utils/errors/app-error.js";
 
 class ProjectLogController {
   async getAll(_req: Request, res: Response) {

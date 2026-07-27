@@ -44,9 +44,29 @@
     "name": "Vận hành",
     "code": "OPS",
     "description": "Phòng Vận hành - phụ trách quy trình và vận hành doanh nghiệp",
-    "managerId": "emp10",
+    "managerId": "emp11",
     "isActive": true,
     "createdAt": "2025-03-01T00:00:00.000Z",
     "updatedAt": "2025-03-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept_eng",
+    "name": "Kỹ thuật",
+    "code": "ENG",
+    "description": "Phòng Kỹ thuật - phụ trách nghiên cứu và phát triển sản phẩm",
+    "managerId": "emp16",
+    "isActive": true,
+    "createdAt": "2025-03-15T00:00:00.000Z",
+    "updatedAt": "2025-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "dept_dsg",
+    "name": "Thiết kế",
+    "code": "DSG",
+    "description": "Phòng Thiết kế - phụ trách thiết kế UI/UX, đồ họa và trải nghiệm người dùng",
+    "managerId": "emp17",
+    "isActive": true,
+    "createdAt": "2025-04-01T00:00:00.000Z",
+    "updatedAt": "2025-04-01T00:00:00.000Z"
   }
 ]

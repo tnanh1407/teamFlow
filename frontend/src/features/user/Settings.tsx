@@ -1,11 +1,15 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import {
   User, Shield, Calendar, Save, Eye, EyeOff,
-  Copy, CheckCircle, XCircle, Clock, Fingerprint, Lock, Camera
+  Copy, CheckCircle, XCircle, Clock, Fingerprint, Lock, Camera,
+  Mail, Phone, Building2, Briefcase
 } from "lucide-react"
 import { toast } from "sonner"
 import userService from "@/services/user.service"
+import employeeService, { type Employee } from "@/services/employee.service"
+import departmentService from "@/services/department.service"
+import positionService from "@/services/position.service"
 import Modal from "@/components/ui/Modal"
 
 const passwordChecks = (v: string) => ({
@@ -29,6 +33,18 @@ const roleLabel: Record<string, string> = {
   member: "Thành viên",
 }
 
+const genderLabels: Record<string, string> = {
+  male: "Nam",
+  female: "Nữ",
+  other: "Khác",
+}
+
+const statusLabels: Record<string, string> = {
+  active: "Đang làm việc",
+  probation: "Thử việc",
+  inactive: "Đã nghỉ việc",
+}
+
 const positionBadge: Record<string, string> = {
   admin: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
   manager: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
@@ -46,6 +62,40 @@ export default function Settings() {
   const [newPw, setNewPw] = useState("")
   const [cfmPw, setCfmPw] = useState("")
   const [saving, setSaving] = useState(false)
+
+  const [employee, setEmployee] = useState<Employee | null>(null)
+  const [empLoading, setEmpLoading] = useState(false)
+  const [deptName, setDeptName] = useState("—")
+  const [posName, setPosName] = useState("—")
+
+  useEffect(() => {
+    if (!user?.employeeId) return
+    const fetchEmployeeDetails = async () => {
+      setEmpLoading(true)
+      try {
+        const [empRes, deptRes, posRes] = await Promise.all([
+          employeeService.getById(user.employeeId),
+          departmentService.getAll().catch(() => ({ data: { data: [] } })),
+          positionService.getAll().catch(() => ({ data: { data: [] } })),
+        ])
+        const emp = empRes.data.data
+        setEmployee(emp)
+        if (emp?.departmentId) {
+          const dept = deptRes.data.data.find((d: any) => d.id === emp.departmentId)
+          if (dept) setDeptName(dept.name)
+        }
+        if (emp?.positionId) {
+          const pos = posRes.data.data.find((p: any) => p.id === emp.positionId)
+          if (pos) setPosName(pos.name)
+        }
+      } catch (err) {
+        console.error("Failed to fetch linked employee data", err)
+      } finally {
+        setEmpLoading(false)
+      }
+    }
+    fetchEmployeeDetails()
+  }, [user?.employeeId])
 
   const checks = passwordChecks(newPw)
   const score = [checks.min, checks.upper, checks.lower, checks.digit, checks.special].filter(Boolean).length - 1
@@ -68,6 +118,10 @@ export default function Settings() {
     try {
       const { data } = await userService.uploadAvatar(file)
       setUser(data.data)
+      if (user?.employeeId) {
+        const empRes = await employeeService.getById(user.employeeId)
+        setEmployee(empRes.data.data)
+      }
       toast.success("Cập nhật ảnh đại diện thành công")
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Cập nhật ảnh thất bại")
@@ -142,17 +196,57 @@ export default function Settings() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-          <InfoRow icon={Fingerprint} label="ID" value={user?.id || "—"} copy />
+          <InfoRow icon={Fingerprint} label="ID Tài khoản" value={user?.id || "—"} copy />
           <InfoRow icon={User} label="Tên đăng nhập" value={user?.username || "—"} />
-          <InfoRow icon={Shield} label="Vai trò" value={user?.role || "—"} />
-          <InfoRow icon={Shield} label="Chức vụ" value={roleLabel[user?.position || "member"]} />
-          <InfoRow icon={Calendar} label="Ngày tạo" value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "—"} />
+          <InfoRow icon={Shield} label="Quyền hệ thống (Role)" value={user?.role || "—"} />
+          <InfoRow icon={Shield} label="Cấp độ tài khoản" value={roleLabel[user?.position || "member"]} />
+          <InfoRow icon={Calendar} label="Ngày tạo tài khoản" value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN") : "—"} />
           <InfoRow
             icon={user?.status ? CheckCircle : XCircle}
-            label="Trạng thái"
+            label="Trạng thái tài khoản"
             value={user?.status ? "Hoạt động" : "Vô hiệu"}
             valueClass={user?.status ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}
           />
+        </div>
+
+        {/* Thông tin nhân viên liên kết */}
+        <div className="mt-6 pt-5 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2 mb-4">
+            <Briefcase size={18} className="text-blue-600 dark:text-blue-400" />
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Thông tin nhân viên liên kết</h3>
+          </div>
+
+          {empLoading ? (
+            <div className="py-4 text-center text-xs text-zinc-400">Đang tải thông tin hồ sơ nhân viên...</div>
+          ) : employee ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-50/50 dark:bg-zinc-800/50 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800">
+              <InfoRow icon={Fingerprint} label="Mã nhân viên" value={employee.employeeCode || "—"} copy />
+              <InfoRow icon={User} label="Họ và tên" value={employee.name || "—"} />
+              <InfoRow icon={Mail} label="Email nhân viên" value={employee.email || "—"} />
+              <InfoRow icon={Phone} label="Số điện thoại" value={employee.phone || "—"} />
+              <InfoRow icon={Building2} label="Phòng ban" value={deptName} />
+              <InfoRow icon={Briefcase} label="Chức vụ chuyên môn" value={posName} />
+              <InfoRow icon={User} label="Giới tính" value={genderLabels[employee.gender] || employee.gender || "—"} />
+              <InfoRow icon={Calendar} label="Ngày sinh" value={employee.birthDate ? new Date(employee.birthDate).toLocaleDateString("vi-VN") : "—"} />
+              <InfoRow icon={Calendar} label="Ngày vào làm" value={employee.hireDate ? new Date(employee.hireDate).toLocaleDateString("vi-VN") : "—"} />
+              <InfoRow
+                icon={employee.status === "active" ? CheckCircle : employee.status === "probation" ? Clock : XCircle}
+                label="Trạng thái làm việc"
+                value={statusLabels[employee.status] || employee.status}
+                valueClass={
+                  employee.status === "active"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : employee.status === "probation"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-red-500"
+                }
+              />
+            </div>
+          ) : (
+            <div className="py-3 px-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-xs">
+              Chưa tìm thấy thông tin hồ sơ nhân viên liên kết với tài khoản này.
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800 mt-4">
