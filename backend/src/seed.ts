@@ -113,15 +113,17 @@ const seed = async () => {
 
     // ── Users ──
     const users = [
-      { id: uuid(), empId: empIds.emp1, username: "root", password: bcrypt.hashSync("root123", 10), role: "super_admin" },
-      { id: uuid(), empId: empIds.emp1, username: "admin", password: bcrypt.hashSync("admin123", 10), role: "admin" },
-      { id: uuid(), empId: empIds.emp4, username: "hr_manager", password: bcrypt.hashSync("user123", 10), role: "user" },
-      { id: uuid(), empId: empIds.emp6, username: "acc_user", password: bcrypt.hashSync("123456", 10), role: "user" },
+      { id: uuid(), empId: empIds.emp1, username: "root", password: bcrypt.hashSync("root123", 10), role: "admin", position: "admin" },
+      { id: uuid(), empId: empIds.emp2, username: "admin", password: bcrypt.hashSync("admin123", 10), role: "admin", position: "admin" },
+      { id: uuid(), empId: empIds.emp3, username: "manager", password: bcrypt.hashSync("manager123", 10), role: "user", position: "manager" },
+      { id: uuid(), empId: empIds.emp4, username: "hr_manager", password: bcrypt.hashSync("user123", 10), role: "user", position: "manager" },
+      { id: uuid(), empId: empIds.emp6, username: "acc_user", password: bcrypt.hashSync("123456", 10), role: "user", position: "member" },
+      { id: uuid(), empId: empIds.emp8, username: "member", password: bcrypt.hashSync("member123", 10), role: "user", position: "member" },
     ];
     for (const u of users) {
       await client.query(
-        `INSERT INTO users (id, employee_id, username, password, role, status) VALUES ($1, $2, $3, $4, $5, true)`,
-        [u.id, u.empId, u.username, u.password, u.role]
+        `INSERT INTO users (id, employee_id, username, password, role, position, status) VALUES ($1, $2, $3, $4, $5, $6, true)`,
+        [u.id, u.empId, u.username, u.password, u.role, u.position]
       );
     }
     console.log(`Inserted ${users.length} users`);
@@ -224,10 +226,11 @@ const seed = async () => {
     console.log("\n✅ Seed completed successfully!");
     console.log("---");
     console.log("Accounts:");
-    console.log("  root       / root123   (super admin)");
-    console.log("  admin      / admin123  (admin)");
-    console.log("  hr_manager / user123");
-    console.log("  acc_user   / 123456");
+    console.log("  admin      / admin123   (admin)");
+    console.log("  manager    / manager123 (manager)");
+    console.log("  hr_manager / user123    (manager)");
+    console.log("  acc_user   / 123456     (member)");
+    console.log("  member     / member123  (member)");
     console.log(`\nSummary: ${departments.length} depts, ${positions.length} positions, ${employees.length} employees, ${users.length} users, ${projects.length} projects`);
     process.exit(0);
   } catch (error) {

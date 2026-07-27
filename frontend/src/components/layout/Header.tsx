@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { LogOut, Bell, ChevronDown, ChevronRight, LayoutDashboard, Shield, Users, Building2, Briefcase, Medal, UserCog, Settings, PanelLeftClose, PanelLeft, CheckSquare } from "lucide-react"
+import { LogOut, Bell, ChevronDown, ChevronRight, LayoutDashboard, Shield, Building2, Briefcase, Medal, UserCog, Settings, CheckSquare, PanelLeft, PanelLeftClose } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 
@@ -11,6 +11,7 @@ interface Breadcrumb {
 }
 
 const breadcrumbMap: Record<string, Breadcrumb[]> = {
+  "/": [{ label: "Tổng quan", icon: LayoutDashboard }],
   "/dashboard": [{ label: "Tổng quan", icon: LayoutDashboard }],
   "/employees": [
     { label: "Quản trị", icon: Shield },
@@ -25,12 +26,10 @@ const breadcrumbMap: Record<string, Breadcrumb[]> = {
     { label: "Quản lí chức vụ", icon: Medal },
   ],
   "/members": [
-    { label: "Quản trị", icon: Shield },
     { label: "Quản lí tài khoản", icon: UserCog },
   ],
-  "/tasks": [
-    { label: "Quản trị", icon: Shield },
-    { label: "Quản lí project", icon: CheckSquare },
+  "/projects": [
+    { label: "Dự án", icon: CheckSquare },
   ],
   "/settings": [{ label: "Cài đặt", icon: Settings }],
 }
@@ -44,8 +43,14 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
 
   const crumbs = breadcrumbMap[location.pathname] ||
     (location.pathname.startsWith("/members/")
-      ? [{ label: "Quản trị", icon: Shield }, { label: "Quản lí tài khoản", icon: UserCog }, { label: "Chi tiết", icon: UserCog }]
-      : [{ label: "TeamFlow", icon: LayoutDashboard }])
+      ? [{ label: "Quản lí tài khoản", icon: UserCog }, { label: "Chi tiết", icon: UserCog }]
+      : location.pathname.startsWith("/projects/")
+        ? [{ label: "Dự án", icon: CheckSquare }, { label: "Chi tiết", icon: CheckSquare }]
+        : location.pathname.startsWith("/employees/")
+          ? [{ label: "Quản lí nhân viên", icon: Briefcase }, { label: "Chi tiết", icon: Briefcase }]
+          : location.pathname.startsWith("/departments/")
+            ? [{ label: "Phòng ban", icon: Building2 }, { label: "Chi tiết", icon: Building2 }]
+            : [{ label: "TeamFlow", icon: LayoutDashboard }])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -60,6 +65,12 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
   const handleLogout = async () => {
     await logout()
     navigate("/login")
+  }
+
+  const roleLabel: Record<string, string> = {
+    admin: "Admin",
+    manager: "Manager",
+    member: "Member",
   }
 
   const initials = user?.username
@@ -124,7 +135,7 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
                 {user.username}
               </p>
               <p className="text-[11px] text-zinc-500 dark:text-zinc-400 uppercase leading-tight">
-                {user.role}
+                {roleLabel[user.position] || user.position}
               </p>
             </div>
             <ChevronDown
@@ -142,7 +153,7 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
                   {user.username}
                 </p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase">
-                  {user.role}
+                  {roleLabel[user.position] || user.position}
                 </p>
               </div>
               <button

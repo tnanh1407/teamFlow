@@ -54,6 +54,7 @@ export const UserSchema = {
   username,
   password,
   role,
+  position,
   status,
   created_at,
   updated_at`,

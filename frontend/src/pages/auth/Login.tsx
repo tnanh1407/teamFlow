@@ -28,7 +28,10 @@ export default function Login() {
       const user = data.data.user
       setUser(user)
       toast.success(`Xin chào ${user.username}!`)
-      navigate(user.role === "admin" || user.role === "super_admin" ? "/dashboard" : "/")
+      const home: Record<string, string> = {
+        admin: "/dashboard",
+      }
+      navigate(home[user.position] || "/")
     } catch {
       Swal.fire({ icon: "error", title: "Lỗi", text: "Sai tài khoản hoặc mật khẩu", confirmButtonColor: "#2563eb" })
     } finally {
@@ -54,17 +57,10 @@ export default function Login() {
 
       {/* Right: Login form */}
       <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-zinc-900">
-        <div className="w-full max-w-[440px]">
+        <div className="w-full max-w-110">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
-            <div
-              className="lg:hidden flex items-center justify-center w-12 h-12 rounded-xl font-extrabold text-lg text-white"
-              style={{
-                background: "linear-gradient(135deg, #2563eb, #7c3aed)",
-              }}
-            >
-              TF
-            </div>
+
             <h1 className="text-2xl font-bold mt-6 mb-1 text-zinc-900 dark:text-zinc-100">
               Đăng nhập
             </h1>
@@ -126,7 +122,7 @@ export default function Login() {
                 disabled={loading}
                 className="w-full h-11 rounded-lg text-white font-medium text-base border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed transition"
                 style={{
-                  background: "linear-gradient(135deg, #2563eb, #7c3aed)",
+                  background: "#2563eb",
                 }}
               >
                 {loading ? "Đang xử lý..." : "Đăng nhập"}

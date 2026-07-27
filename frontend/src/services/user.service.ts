@@ -1,12 +1,15 @@
 import api from "@/lib/axios";
 
-export type UserRole = "super_admin" | "admin" | "user";
+export type UserRole = "admin" | "user";
+
+export type UserPosition = "admin" | "manager" | "member";
 
 export interface User {
   id: string;
   employeeId: string;
   username: string;
   role: UserRole;
+  position: UserPosition;
   status: boolean;
   avatarURL?: string;
   createdAt: string;

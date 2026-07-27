@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EUserRole, EUserPosition } from "../enums/user-role.enum.js";
 import env from "../config/env.js"
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     role: EUserRole;
+    position: EUserPosition;
   };
 }
 
@@ -26,7 +27,7 @@ export const authenticate = (
     const decoded = jwt.verify(
       token,
       env.JWT_SECRET
-    ) as { id: string; role: EUserRole };
+    ) as { id: string; role: EUserRole; position: EUserPosition };
 
     req.user = decoded;
     next();
