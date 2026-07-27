@@ -16,14 +16,14 @@ router.get("/department/:departmentId", authenticate, asyncHandler(projectDepart
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.create)
 );
 router.delete(
   "/:projectId/:departmentId",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(projectDepartmentController.delete)
 );
 

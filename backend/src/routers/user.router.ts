@@ -6,6 +6,7 @@ import { asyncHandler } from "../middlewares/async.middleware.js";
 import {
   createUserSchema,
   updateUserSchema,
+  updateMeSchema,
   loginSchema,
 } from "../validations/user.validation.js";
 import { EUserRole } from "../enums/user-role.enum.js";
@@ -20,21 +21,27 @@ router.get("/:id", authenticate, asyncHandler(userController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(createUserSchema),
   asyncHandler(userController.create)
 );
 router.patch(
+  "/me",
+  authenticate,
+  validate(updateMeSchema),
+  asyncHandler(userController.updateMe)
+);
+router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(updateUserSchema),
   asyncHandler(userController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(userController.delete)
 );
 

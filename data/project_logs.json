@@ -1,0 +1,74 @@
+[
+  {
+    "id": "log1",
+    "projectId": "proj1",
+    "employeeId": "emp1",
+    "action": "created",
+    "description": "Dự án được tạo bởi Nguyễn Văn Anh",
+    "createdAt": "2025-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "log2",
+    "projectId": "proj1",
+    "employeeId": "emp1",
+    "action": "assigned",
+    "description": "Phân công Trần Thị Bích và Lê Văn Cường vào dự án",
+    "createdAt": "2025-06-05T00:00:00.000Z"
+  },
+  {
+    "id": "log3",
+    "projectId": "proj1",
+    "employeeId": "emp1",
+    "action": "updated",
+    "description": "Cập nhật tiến độ dự án lên 60%",
+    "createdAt": "2025-07-15T00:00:00.000Z"
+  },
+  {
+    "id": "log4",
+    "projectId": "proj3",
+    "employeeId": "emp2",
+    "action": "created",
+    "description": "Dự án nâng cấp bảo mật được khởi tạo",
+    "createdAt": "2025-05-01T00:00:00.000Z"
+  },
+  {
+    "id": "log5",
+    "projectId": "proj3",
+    "employeeId": "emp2",
+    "action": "updated",
+    "description": "Cập nhật tiến độ lên 90% - đang chờ review",
+    "createdAt": "2025-07-25T00:00:00.000Z"
+  },
+  {
+    "id": "log6",
+    "projectId": "proj4",
+    "employeeId": "emp8",
+    "action": "created",
+    "description": "Chiến dịch Marketing Q4 được khởi tạo",
+    "createdAt": "2025-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "log7",
+    "projectId": "proj4",
+    "employeeId": "emp8",
+    "action": "assigned",
+    "description": "Phân công Ngô Văn Inh tham gia chiến dịch",
+    "createdAt": "2025-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "log8",
+    "projectId": "proj5",
+    "employeeId": "emp10",
+    "action": "created",
+    "description": "Dự án tối ưu quy trình vận hành được khởi tạo",
+    "createdAt": "2025-03-01T00:00:00.000Z"
+  },
+  {
+    "id": "log9",
+    "projectId": "proj5",
+    "employeeId": "emp10",
+    "action": "completed",
+    "description": "Dự án hoàn thành trước thời hạn 2 ngày",
+    "createdAt": "2025-06-28T00:00:00.000Z"
+  }
+]

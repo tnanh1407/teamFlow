@@ -1,0 +1,550 @@
+import { useEffect, useState, useRef } from "react"
+import { Search, Plus, Pencil, Trash2, ArrowUpDown, Briefcase, CheckCircle, XCircle, Clock, Copy, Camera } from "lucide-react"
+import employeeService, { type Employee } from "@/services/employee.service"
+import departmentService, { type Department } from "@/services/department.service"
+import positionService, { type Position } from "@/services/position.service"
+import Modal from "@/components/ui/Modal"
+import ConfirmDialog from "@/components/ui/ConfirmDialog"
+
+interface FormData {
+  employeeCode: string
+  name: string
+  email: string
+  phone: string
+  departmentId: string
+  positionId: string
+  gender: string
+  status: string
+  birthDate: string
+  hireDate: string
+}
+
+const emptyForm: FormData = {
+  employeeCode: "",
+  name: "",
+  email: "",
+  phone: "",
+  departmentId: "",
+  positionId: "",
+  gender: "male",
+  status: "active",
+  birthDate: "",
+  hireDate: "",
+}
+
+const genderLabels: Record<string, string> = {
+  male: "Nam",
+  female: "Nữ",
+  other: "Khác",
+}
+
+const statusLabels: Record<string, string> = {
+  active: "Đang làm",
+  probation: "Thử việc",
+  inactive: "Đã nghỉ",
+}
+
+export default function Employees() {
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [positions, setPositions] = useState<Position[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState("")
+
+  const [formOpen, setFormOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState<FormData>(emptyForm)
+  const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null)
+  const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
+  const [statusOpen, setStatusOpen] = useState(false)
+  const [genderOpen, setGenderOpen] = useState(false)
+  const [deptOpen, setDeptOpen] = useState(false)
+  const [posOpen, setPosOpen] = useState(false)
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [existingAvatar, setExistingAvatar] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const fetchEmployees = async () => {
+    try {
+      const { data } = await employeeService.getAll()
+      setEmployees(data.data)
+    } catch {
+      console.error("Failed to fetch employees")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchDepartments = async () => {
+    try {
+      const { data } = await departmentService.getAll()
+      setDepartments(data.data)
+    } catch {}
+  }
+
+  const fetchPositions = async () => {
+    try {
+      const { data } = await positionService.getAll()
+      setPositions(data.data)
+    } catch {}
+  }
+
+  useEffect(() => {
+    Promise.all([fetchEmployees(), fetchDepartments(), fetchPositions()])
+  }, [])
+
+  const getDeptName = (id: string) => departments.find((d) => d.id === id)?.name || id
+  const getPosName = (id: string) => positions.find((p) => p.id === id)?.name || id
+
+  const filtered = employees.filter((e) =>
+    e.name.toLowerCase().includes(search.toLowerCase()) ||
+    e.employeeCode.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sortDir) return 0
+    const cmp = a.name.localeCompare(b.name)
+    return sortDir === "asc" ? cmp : -cmp
+  })
+
+  const toggleSort = () => {
+    setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
+  }
+
+  const openCreate = () => {
+    setEditingId(null)
+    setForm(emptyForm)
+    setAvatarFile(null)
+    setAvatarPreview(null)
+    setExistingAvatar(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (emp: Employee) => {
+    setEditingId(emp.id)
+    setForm({
+      employeeCode: emp.employeeCode,
+      name: emp.name,
+      email: emp.email,
+      phone: emp.phone || "",
+      departmentId: emp.departmentId,
+      positionId: emp.positionId,
+      gender: emp.gender,
+      status: emp.status,
+      birthDate: emp.birthDate ? emp.birthDate.slice(0, 10) : "",
+      hireDate: emp.hireDate ? emp.hireDate.slice(0, 10) : "",
+    })
+    setAvatarFile(null)
+    setAvatarPreview(null)
+    setExistingAvatar(emp.avatarURL || null)
+    setFormOpen(true)
+  }
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setAvatarFile(file)
+      setAvatarPreview(URL.createObjectURL(file))
+    }
+  }
+
+  const handleSave = async () => {
+    try {
+      const fd = new FormData()
+      fd.append("employeeCode", form.employeeCode)
+      fd.append("name", form.name)
+      fd.append("email", form.email)
+      if (form.phone) fd.append("phone", form.phone)
+      fd.append("departmentId", form.departmentId)
+      fd.append("positionId", form.positionId)
+      fd.append("gender", form.gender)
+      fd.append("status", form.status)
+      if (form.birthDate) fd.append("birthDate", form.birthDate)
+      if (form.hireDate) fd.append("hireDate", form.hireDate)
+      if (avatarFile) fd.append("avatar", avatarFile)
+
+      if (editingId) {
+        await employeeService.update(editingId, fd)
+      } else {
+        await employeeService.create(fd)
+      }
+      setFormOpen(false)
+      fetchEmployees()
+    } catch {
+      console.error("Failed to save employee")
+    }
+  }
+
+  const confirmDelete = (emp: Employee) => {
+    setDeleteTarget(emp)
+    setDeleteOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try {
+      await employeeService.delete(deleteTarget.id)
+      setDeleteOpen(false)
+      setDeleteTarget(null)
+      fetchEmployees()
+    } catch {
+      console.error("Failed to delete employee")
+    }
+  }
+
+  const inputClass =
+    "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
+
+  const activeCount = employees.filter((e) => e.status === "active").length
+  const probationCount = employees.filter((e) => e.status === "probation").length
+  const inactiveCount = employees.filter((e) => e.status === "inactive").length
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            Quản lí nhân viên
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Quản lý thông tin nhân viên trong hệ thống
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4">
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+              <Briefcase size={20} className="text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{employees.length}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+              <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Đang làm</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{activeCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+              <Clock size={20} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Thử việc</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{probationCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+              <XCircle size={20} className="text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Đã nghỉ</p>
+              <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{inactiveCount}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openCreate}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
+            title="Thêm nhân viên"
+          >
+            <Plus size={18} />
+          </button>
+          <button
+            onClick={toggleSort}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-none hover:bg-white dark:hover:bg-zinc-800"
+          >
+            <ArrowUpDown size={16} className={`transition-all duration-200 ${sortDir === "desc" ? "rotate-180" : ""} ${sortDir ? "text-blue-500" : "text-zinc-400"}`} />
+            {sortDir && (
+              <span className="text-zinc-600 dark:text-zinc-300">
+                {sortDir === "asc" ? "A-Z" : "Z-A"}
+              </span>
+            )}
+          </button>
+        </div>
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên hoặc mã nhân viên..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Mã NV</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Họ tên</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Email</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Phòng ban</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Chức vụ</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Trạng thái</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td>
+                </tr>
+              ) : sorted.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy nhân viên nào</td>
+                </tr>
+              ) : (
+                sorted.map((emp) => (
+                  <tr key={emp.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
+                        {emp.employeeCode}
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(emp.employeeCode) }}
+                          className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                          title="Copy"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {emp.avatarURL && (
+                          <img
+                            src={emp.avatarURL}
+                            alt={emp.name}
+                            className="w-7 h-7 rounded-full object-cover shrink-0"
+                          />
+                        )}
+                        <span className="text-sm text-zinc-700 dark:text-zinc-300">{emp.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-zinc-500">{emp.email}</td>
+                    <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{getDeptName(emp.departmentId)}</td>
+                    <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{getPosName(emp.positionId)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                        emp.status === "active" ? "text-emerald-600 dark:text-emerald-400" :
+                        emp.status === "probation" ? "text-amber-600 dark:text-amber-400" :
+                        "text-red-500 dark:text-red-400"
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          emp.status === "active" ? "bg-emerald-500" :
+                          emp.status === "probation" ? "bg-amber-500" :
+                          "bg-red-500"
+                        }`} />
+                        {statusLabels[emp.status] || emp.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => openEdit(emp)} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sửa">
+                          <Pencil size={15} />
+                        </button>
+                        <button onClick={() => confirmDelete(emp)} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="Xoá">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        title={editingId ? "Sửa nhân viên" : "Thêm nhân viên"}
+        width={520}
+        footer={
+          <div className="flex gap-2">
+            <button onClick={() => setFormOpen(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
+              Huỷ
+            </button>
+            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-br from-blue-500 to-purple-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
+              {editingId ? "Cập nhật" : "Tạo mới"}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          {/* Avatar upload */}
+          <div className="flex items-center gap-4">
+            <div
+              className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : existingAvatar ? (
+                <img src={existingAvatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <Camera size={20} />
+              )}
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer border-none bg-transparent font-medium"
+              >
+                Chọn ảnh đại diện
+              </button>
+              <p className="text-xs text-zinc-400 mt-0.5">JPG, PNG, GIF, WEBP. Tối đa 5MB.</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Mã nhân viên</label>
+              <input type="text" value={form.employeeCode} onChange={(e) => setForm({ ...form, employeeCode: e.target.value })} placeholder="VD: EMP011" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Họ tên</label>
+              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nhập họ tên" className={inputClass} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Email</label>
+            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="example@teamflow.com" className={inputClass} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Số điện thoại</label>
+              <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="090xxxxxxx" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Phòng ban</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setDeptOpen(!deptOpen); setPosOpen(false); setGenderOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span className={form.departmentId ? "text-zinc-900" : "text-zinc-400"}>{form.departmentId ? getDeptName(form.departmentId) : "Chọn phòng ban"}</span>
+                </button>
+                {deptOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
+                    {departments.map((d) => (
+                      <button key={d.id} type="button" onClick={() => { setForm({ ...form, departmentId: d.id }); setDeptOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.departmentId === d.id ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {d.name} ({d.code})
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Chức vụ</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setPosOpen(!posOpen); setDeptOpen(false); setGenderOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span className={form.positionId ? "text-zinc-900" : "text-zinc-400"}>{form.positionId ? getPosName(form.positionId) : "Chọn chức vụ"}</span>
+                </button>
+                {posOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
+                    {positions.map((p) => (
+                      <button key={p.id} type="button" onClick={() => { setForm({ ...form, positionId: p.id }); setPosOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.positionId === p.id ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Giới tính</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setGenderOpen(!genderOpen); setDeptOpen(false); setPosOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span>{genderLabels[form.gender] || form.gender}</span>
+                </button>
+                {genderOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+                    {(["male", "female", "other"] as const).map((g) => (
+                      <button key={g} type="button" onClick={() => { setForm({ ...form, gender: g }); setGenderOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.gender === g ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {genderLabels[g]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Trạng thái</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setStatusOpen(!statusOpen); setDeptOpen(false); setPosOpen(false); setGenderOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span>{statusLabels[form.status] || form.status}</span>
+                </button>
+                {statusOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+                    {(["active", "probation", "inactive"] as const).map((s) => (
+                      <button key={s} type="button" onClick={() => { setForm({ ...form, status: s }); setStatusOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.status === s ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {statusLabels[s]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Ngày sinh</label>
+              <input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} className={inputClass} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Ngày vào làm</label>
+            <input type="date" value={form.hireDate} onChange={(e) => setForm({ ...form, hireDate: e.target.value })} className={inputClass} />
+          </div>
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
+        title="Xác nhận xoá"
+        variant="danger"
+        confirmText="Xoá"
+        cancelText="Huỷ"
+      >
+        Bạn có chắc muốn xoá nhân viên <strong>{deleteTarget?.name}</strong>? Nhân viên sẽ được chuyển vào thùng rác.
+      </ConfirmDialog>
+    </div>
+  )
+}

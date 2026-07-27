@@ -19,7 +19,7 @@ router.get("/:id", authenticate, asyncHandler(employeeController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   uploadAvatar.single("avatar"),
   validate(createEmployeeSchema),
   asyncHandler(employeeController.create)
@@ -27,7 +27,7 @@ router.post(
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   uploadAvatar.single("avatar"),
   validate(updateEmployeeSchema),
   asyncHandler(employeeController.update)
@@ -35,19 +35,19 @@ router.patch(
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(employeeController.delete)
 );
 router.delete(
   "/:id/hard",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(employeeController.deleteHard)
 );
 router.post(
   "/:id/restore",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(employeeController.restore)
 );
 

@@ -14,6 +14,7 @@ export const createProjectSchema = z.object({
   createdBy: z.string().min(1, "Created by is required"),
   estimatedHours: z.number().optional(),
   actualHours: z.number().optional(),
+  attachments: z.string().optional(),
 });
 
 export const updateProjectSchema = createProjectSchema.partial();

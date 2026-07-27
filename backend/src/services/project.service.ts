@@ -17,6 +17,7 @@ interface ProjectRow {
   completedBy: string;
   estimatedHours: number;
   actualHours: number;
+  attachments: string;
   completedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -76,14 +77,16 @@ class ProjectService {
     createdBy: string;
     estimatedHours?: number;
     actualHours?: number;
+    attachments?: string;
   }) {
     const { rows } = await pool.query<ProjectRow>(
-      `INSERT INTO projects (title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ${projectColumns}`,
+      `INSERT INTO projects (title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, attachments) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING ${projectColumns}`,
       [
         data.title, data.description || null, data.priority || "medium",
         data.status || "todo", data.progress ?? 0, data.startDate || null,
         data.dueDate || null, data.assignedBy || null, data.createdBy,
         data.estimatedHours || null, data.actualHours || null,
+        data.attachments || '[]',
       ]
     );
     return rows[0];
@@ -103,6 +106,7 @@ class ProjectService {
     completedBy: string;
     estimatedHours: number;
     actualHours: number;
+    attachments: string;
     completedAt: Date;
   }>) {
     const setClauses: string[] = [];
@@ -121,6 +125,7 @@ class ProjectService {
     if (data.completedBy !== undefined) { setClauses.push(`completed_by = $${idx++}`); values.push(data.completedBy); }
     if (data.estimatedHours !== undefined) { setClauses.push(`estimated_hours = $${idx++}`); values.push(data.estimatedHours); }
     if (data.actualHours !== undefined) { setClauses.push(`actual_hours = $${idx++}`); values.push(data.actualHours); }
+    if (data.attachments !== undefined) { setClauses.push(`attachments = $${idx++}`); values.push(data.attachments); }
     if (data.completedAt !== undefined) { setClauses.push(`completed_at = $${idx++}`); values.push(data.completedAt); }
 
     if (setClauses.length === 0) return this.findById(id);

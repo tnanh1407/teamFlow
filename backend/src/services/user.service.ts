@@ -11,23 +11,26 @@ interface UserRow {
   password: string;
   role: string;
   status: boolean;
+  avatarURL?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const userColumns = UserSchema.columns;
+const userColumnsWithAvatar = `u.id, u.employee_id, u.username, u.password, u.role, u.status, e.avatar_url, u.created_at, u.updated_at`;
+const userJoin = `FROM users u LEFT JOIN employees e ON u.employee_id = e.id`;
 
 class UserService {
   async findAll() {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users ORDER BY created_at DESC`
+      `SELECT ${userColumnsWithAvatar} ${userJoin} ORDER BY u.created_at DESC`
     );
     return rows;
   }
 
   async findById(id: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users WHERE id = $1`,
+      `SELECT ${userColumnsWithAvatar} ${userJoin} WHERE u.id = $1`,
       [id]
     );
     return rows[0] || null;

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "pe1",
+    "projectId": "proj1",
+    "employeeId": "emp1",
+    "role": "leader",
+    "assignedAt": "2025-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe2",
+    "projectId": "proj1",
+    "employeeId": "emp2",
+    "role": "reviewer",
+    "assignedAt": "2025-06-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe3",
+    "projectId": "proj1",
+    "employeeId": "emp3",
+    "role": "member",
+    "assignedAt": "2025-06-05T00:00:00.000Z"
+  },
+  {
+    "id": "pe4",
+    "projectId": "proj2",
+    "employeeId": "emp1",
+    "role": "leader",
+    "assignedAt": "2025-08-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe5",
+    "projectId": "proj2",
+    "employeeId": "emp3",
+    "role": "member",
+    "assignedAt": "2025-08-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe6",
+    "projectId": "proj3",
+    "employeeId": "emp2",
+    "role": "leader",
+    "assignedAt": "2025-05-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe7",
+    "projectId": "proj3",
+    "employeeId": "emp1",
+    "role": "reviewer",
+    "assignedAt": "2025-05-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe8",
+    "projectId": "proj3",
+    "employeeId": "emp3",
+    "role": "member",
+    "assignedAt": "2025-05-10T00:00:00.000Z"
+  },
+  {
+    "id": "pe9",
+    "projectId": "proj4",
+    "employeeId": "emp8",
+    "role": "leader",
+    "assignedAt": "2025-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe10",
+    "projectId": "proj4",
+    "employeeId": "emp9",
+    "role": "member",
+    "assignedAt": "2025-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe11",
+    "projectId": "proj5",
+    "employeeId": "emp10",
+    "role": "leader",
+    "assignedAt": "2025-03-01T00:00:00.000Z"
+  },
+  {
+    "id": "pe12",
+    "projectId": "proj5",
+    "employeeId": "emp6",
+    "role": "reviewer",
+    "assignedAt": "2025-03-05T00:00:00.000Z"
+  }
+]

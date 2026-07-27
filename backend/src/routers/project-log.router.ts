@@ -17,7 +17,7 @@ router.get("/:id", authenticate, asyncHandler(projectLogController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(createProjectLogSchema),
   asyncHandler(projectLogController.create)
 );

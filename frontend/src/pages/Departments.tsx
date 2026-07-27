@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Building2, CheckCircle, XCircle, FileText } from "lucide-react"
+import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Building2, CheckCircle, XCircle, FileText, Copy } from "lucide-react"
 import departmentService, { type Department } from "@/services/department.service"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
@@ -253,8 +253,17 @@ export default function Departments() {
                     key={department.id}
                     className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                   >
-                    <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      {department.code}
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
+                        {department.code}
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(department.code) }}
+                          className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                          title="Copy"
+                        >
+                          <Copy size={12} />
+                        </button>
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
                       <div className="flex items-center gap-2">

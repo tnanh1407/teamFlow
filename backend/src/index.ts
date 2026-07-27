@@ -14,6 +14,7 @@ import projectEmployeeRouter from "./routers/project-employee.router.js";
 import projectCommentRouter from "./routers/project-comment.router.js";
 import projectDepartmentRouter from "./routers/project-department.router.js";
 import projectLogRouter from "./routers/project-log.router.js";
+import uploadRouter from "./routers/upload.router.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ app.use("/api/project-employees", projectEmployeeRouter);
 app.use("/api/project-comments", projectCommentRouter);
 app.use("/api/project-departments", projectDepartmentRouter);
 app.use("/api/project-logs", projectLogRouter);
+app.use("/api/upload", uploadRouter);
 app.use(errorHandler);
 
 const start = async () => {

@@ -1,10 +1,12 @@
 import "dotenv/config";
 import { z } from "zod";
 
+const useMock = process.env.USE_MOCK_DB === "true";
+
 const envSchema = z.object({
   NODE_ENV: z.string().optional(),
   PORT: z.coerce.number().optional().default(5000),
-  DATABASE_URL: z.string(),
+  DATABASE_URL: useMock ? z.string().optional().default("") : z.string(),
   JWT_SECRET: z.string(),
   JWT_ACCESS_SECRET: z.string(),
   JWT_REFRESH_SECRET: z.string().optional(),

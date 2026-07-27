@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
-import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown } from "lucide-react"
-import userService, { type User } from "@/services/user.service"
+import { useNavigate } from "react-router-dom"
+import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Eye, Copy } from "lucide-react"
+import userService, { type User, type UserRole } from "@/services/user.service"
+import { useAuth } from "@/contexts/AuthContext"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
 
@@ -8,7 +10,7 @@ interface FormData {
   employeeId: string
   username: string
   password: string
-  role: "admin" | "user"
+  role: UserRole
   status: boolean
 }
 
@@ -20,12 +22,35 @@ const emptyForm: FormData = {
   status: true,
 }
 
+const roleOptions: { value: UserRole; label: string }[] = [
+  { value: "user", label: "User" },
+  { value: "admin", label: "Admin" },
+  { value: "super_admin", label: "Super Admin" },
+]
+
+function getRoleOptions(currentRole: UserRole): { value: UserRole; label: string }[] {
+  if (currentRole === "super_admin") return roleOptions
+  return [roleOptions[0]]
+}
+
+function getRoleBadge(role: UserRole): { label: string; classes: string } {
+  switch (role) {
+    case "super_admin":
+      return { label: "Super Admin", classes: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" }
+    case "admin":
+      return { label: "Admin", classes: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" }
+    case "user":
+      return { label: "User", classes: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" }
+  }
+}
+
 export default function Members() {
+  const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 
-  // Dialog state
   const [formOpen, setFormOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -63,6 +88,21 @@ export default function Members() {
 
   const toggleSort = () => {
     setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
+  }
+
+  const canEdit = (target: User): boolean => {
+    if (!currentUser) return false
+    if (currentUser.role === "super_admin") return true
+    if (currentUser.role === "admin") {
+      if (target.id === currentUser.id) return false
+      if (target.role === "admin" || target.role === "super_admin") return false
+      return true
+    }
+    return false
+  }
+
+  const canDelete = (target: User): boolean => {
+    return canEdit(target)
   }
 
   const openCreate = () => {
@@ -127,15 +167,15 @@ export default function Members() {
     }
   }
 
-
   const inputClass =
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
+  const availableRoles = getRoleOptions(currentUser?.role ?? "user")
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -147,7 +187,6 @@ export default function Members() {
         </div>
       </div>
 
-      {/* Search */}
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-2">
           <button
@@ -188,14 +227,17 @@ export default function Members() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
           />
-        </div></div>
+        </div>
+      </div>
 
-      {/* Table */}
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  Avatar
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Mã NV
                 </th>
@@ -216,81 +258,114 @@ export default function Members() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Đang tải...
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Không tìm thấy thành viên nào
                   </td>
                 </tr>
               ) : (
-                sorted.map((user) => (
-                  <tr
-                    key={user.id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      {user.employeeId}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
-                      {user.username}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${user.role === "admin"
-                          ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-                          : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                          }`}
-                      >
-                        {user.role === "admin" ? "Admin" : "User"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.status
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-red-500 dark:text-red-400"
-                          }`}
-                      >
+                sorted.map((user) => {
+                  const badge = getRoleBadge(user.role)
+                  return (
+                    <tr
+                      key={user.id}
+                      className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
+                          {user.avatarURL ? (
+                            <img src={user.avatarURL} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            user.username.slice(0, 2).toUpperCase()
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
+                          {user.employeeId}
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(user.employeeId) }}
+                            className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
+                            title="Copy"
+                          >
+                            <Copy size={12} />
+                          </button>
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => navigate(`/members/${user.id}`)}
+                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent"
+                        >
+                          {user.username}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${user.status
-                            ? "bg-emerald-500"
-                            : "bg-red-500"
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.classes}`}
+                        >
+                          {badge.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.status
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-500 dark:text-red-400"
                             }`}
-                        />
-                        {user.status ? "Hoạt động" : "Vô hiệu"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => openEdit(user)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
-                          title="Sửa"
                         >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(user)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
-                          title="Xoá"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${user.status
+                              ? "bg-emerald-500"
+                              : "bg-red-500"
+                              }`}
+                          />
+                          {user.status ? "Hoạt động" : "Vô hiệu"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => navigate(`/members/${user.id}`)}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
+                            title="Xem chi tiết"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          {canEdit(user) && (
+                            <button
+                              onClick={() => openEdit(user)}
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
+                              title="Sửa"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                          )}
+                          {canDelete(user) && (
+                            <button
+                              onClick={() => confirmDelete(user)}
+                              className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
+                              title="Xoá"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Create/Edit Modal */}
       <Modal
         open={formOpen}
         onClose={() => setFormOpen(false)}
@@ -363,23 +438,23 @@ export default function Members() {
                 onClick={() => setRoleOpen(!roleOpen)}
                 className={`${inputClass} flex items-center justify-between`}
               >
-                <span>{form.role === "admin" ? "Admin" : "User"}</span>
+                <span>{form.role === "super_admin" ? "Super Admin" : form.role === "admin" ? "Admin" : "User"}</span>
                 <ChevronDown size={14} className="text-zinc-400" />
               </button>
               {roleOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                  {(["user", "admin"] as const).map((r) => (
+                  {availableRoles.map((r) => (
                     <button
-                      key={r}
+                      key={r.value}
                       type="button"
                       onClick={() => {
-                        setForm({ ...form, role: r })
+                        setForm({ ...form, role: r.value })
                         setRoleOpen(false)
                       }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.role === r ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.role === r.value ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
                         }`}
                     >
-                      {r === "admin" ? "Admin" : "User"}
+                      {r.label}
                     </button>
                   ))}
                 </div>
@@ -401,7 +476,6 @@ export default function Members() {
         </div>
       </Modal>
 
-      {/* Delete Confirm */}
       <ConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}

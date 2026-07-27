@@ -1,6 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
+import { Eye, EyeOff } from "lucide-react"
+import Swal from "sweetalert2"
+import { toast } from "sonner"
 import heroImg from "@/assets/hero.png"
 import userService from "@/services/user.service"
 import { useAuth } from "@/contexts/AuthContext"
@@ -10,24 +13,24 @@ export default function Login() {
   const { setUser } = useAuth()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username || !password) {
-      setError("Vui lòng nhập đầy đủ tài khoản và mật khẩu")
+      Swal.fire({ icon: "error", title: "Lỗi", text: "Vui lòng nhập đầy đủ tài khoản và mật khẩu", confirmButtonColor: "#2563eb" })
       return
     }
     setLoading(true)
-    setError("")
     try {
       const { data } = await userService.login({ username, password })
       const user = data.data.user
       setUser(user)
-      navigate(user.role === "admin" ? "/dashboard" : "/")
+      toast.success(`Xin chào ${user.username}!`)
+      navigate(user.role === "admin" || user.role === "super_admin" ? "/dashboard" : "/")
     } catch {
-      setError("Sai tài khoản hoặc mật khẩu")
+      Swal.fire({ icon: "error", title: "Lỗi", text: "Sai tài khoản hoặc mật khẩu", confirmButtonColor: "#2563eb" })
     } finally {
       setLoading(false)
     }
@@ -72,12 +75,6 @@ export default function Login() {
 
           {/* Card */}
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6">
-            {error && (
-              <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400">
-                {error}
-              </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
@@ -96,13 +93,22 @@ export default function Login() {
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Mật khẩu
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu"
-                  className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu"
+                    className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 pr-10 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer bg-transparent border-none p-0"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-end -mt-1">
@@ -129,6 +135,7 @@ export default function Login() {
           </div>
         </div>
       </div>
+
     </div>
   )
 }

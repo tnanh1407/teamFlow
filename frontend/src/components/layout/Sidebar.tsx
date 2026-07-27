@@ -10,8 +10,11 @@ import {
   Shield,
   Users,
   Building2,
-  Settings,
+  Briefcase,
+  Medal,
+  UserCog,
   CheckSquare,
+  Settings,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
@@ -40,8 +43,10 @@ const navItems: NavEntry[] = [
     label: "Quản trị",
     icon: Shield,
     children: [
-      { to: "/members", label: "Quản lí thành viên", icon: Users },
+      { to: "/employees", label: "Quản lí nhân viên", icon: Briefcase },
       { to: "/departments", label: "Quản lí phòng ban", icon: Building2 },
+      { to: "/positions", label: "Quản lí chức vụ", icon: Medal },
+      { to: "/members", label: "Quản lí tài khoản", icon: UserCog },
       { to: "/tasks", label: "Quản lí project", icon: CheckSquare },
     ],
   },
@@ -153,8 +158,8 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
               {user.username}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase">
-              {user.role}
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Admin" : "User"}
             </p>
           </div>
         )}

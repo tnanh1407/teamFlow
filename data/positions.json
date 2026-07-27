@@ -1,0 +1,50 @@
+[
+  {
+    "id": "pos_gd",
+    "name": "Giám đốc",
+    "description": "Giám đốc điều hành - quản lý chiến lược và định hướng phát triển",
+    "level": "Manager",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pos_pgd",
+    "name": "Phó Giám đốc",
+    "description": "Phó Giám đốc - hỗ trợ điều hành và quản lý các phòng ban",
+    "level": "Senior",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pos_tp",
+    "name": "Trưởng phòng",
+    "description": "Trưởng phòng - quản lý và điều phối hoạt động phòng ban",
+    "level": "Leader",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pos_pp",
+    "name": "Phó phòng",
+    "description": "Phó phòng - hỗ trợ trưởng phòng trong quản lý phòng ban",
+    "level": "Middle",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pos_nv",
+    "name": "Nhân viên",
+    "description": "Nhân viên chính thức - thực hiện các nhiệm vụ được giao",
+    "level": "Junior",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "pos_tts",
+    "name": "Thực tập sinh",
+    "description": "Thực tập sinh - học việc và hỗ trợ các công việc cơ bản",
+    "level": "Intern",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+]

@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { User, Shield, Calendar, KeyRound, Save } from "lucide-react"
+import { toast } from "sonner"
+import userService from "@/services/user.service"
 
 export default function Settings() {
   const { user } = useAuth()
@@ -8,6 +10,7 @@ export default function Settings() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [saving, setSaving] = useState(false)
 
   const initials = user?.username
     ? user.username.slice(0, 2).toUpperCase()
@@ -17,6 +20,43 @@ export default function Settings() {
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Vui lòng điền đầy đủ thông tin")
+      return
+    }
+    if (newPassword.length < 6) {
+      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự")
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Mật khẩu xác nhận không khớp")
+      return
+    }
+    setSaving(true)
+    try {
+      await userService.updateMe({
+        currentPassword,
+        newPassword,
+      })
+      toast.success("Đổi mật khẩu thành công")
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+    } catch (err: any) {
+      const message = err?.response?.data?.message || "Đổi mật khẩu thất bại"
+      toast.error(message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleChangePassword()
+    }
+  }
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -43,7 +83,11 @@ export default function Settings() {
               </h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
                 <Shield size={13} />
-                {user?.role === "admin" ? "Quản trị viên" : "Người dùng"}
+                {user?.role === "super_admin"
+                  ? "Super Admin"
+                  : user?.role === "admin"
+                  ? "Quản trị viên"
+                  : "Người dùng"}
               </p>
             </div>
           </div>
@@ -67,7 +111,11 @@ export default function Settings() {
               <label className={labelClass}>Vai trò</label>
               <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800 rounded px-3 py-1.5">
                 <Shield size={14} className="text-zinc-400" />
-                {user?.role === "admin" ? "Admin" : "User"}
+                {user?.role === "super_admin"
+                  ? "Super Admin"
+                  : user?.role === "admin"
+                  ? "Admin"
+                  : "User"}
               </div>
             </div>
             <div>
@@ -91,7 +139,7 @@ export default function Settings() {
             Đổi mật khẩu
           </h2>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3" onKeyDown={handleKeyDown}>
           <div>
             <label className={labelClass}>Mật khẩu hiện tại</label>
             <input
@@ -125,9 +173,13 @@ export default function Settings() {
             </div>
           </div>
           <div className="flex justify-end pt-1">
-            <button className="flex items-center gap-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">
+            <button
+              onClick={handleChangePassword}
+              disabled={saving}
+              className="flex items-center gap-2 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Save size={15} />
-              Cập nhật mật khẩu
+              {saving ? "Đang lưu..." : "Cập nhật mật khẩu"}
             </button>
           </div>
         </div>

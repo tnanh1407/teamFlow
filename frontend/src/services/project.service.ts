@@ -1,5 +1,12 @@
 import api from "@/lib/axios";
 
+export interface FileAttachment {
+  originalName: string;
+  url: string;
+  size: number;
+  mimetype: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -15,6 +22,7 @@ export interface Project {
   completedBy: string;
   estimatedHours: number;
   actualHours: number;
+  attachments: string;
   completedAt: string;
   createdAt: string;
   updatedAt: string;

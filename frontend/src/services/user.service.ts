@@ -1,11 +1,14 @@
 import api from "@/lib/axios";
 
+export type UserRole = "super_admin" | "admin" | "user";
+
 export interface User {
   id: string;
   employeeId: string;
   username: string;
-  role: "admin" | "user";
+  role: UserRole;
   status: boolean;
+  avatarURL?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +21,11 @@ export interface LoginPayload {
 export interface LoginResponse {
   user: User;
   token: string;
+}
+
+export interface UpdateMePayload {
+  currentPassword: string;
+  newPassword: string;
 }
 
 const userService = {
@@ -37,6 +45,9 @@ const userService = {
     api.patch<{ data: User }>(`/users/${id}`, data),
 
   delete: (id: string) => api.delete(`/users/${id}`),
+
+  updateMe: (data: UpdateMePayload) =>
+    api.patch<{ data: User }>("/users/me", data),
 };
 
 export default userService;

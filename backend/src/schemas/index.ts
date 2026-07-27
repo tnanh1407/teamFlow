@@ -1,34 +1,34 @@
 export const DepartmentSchema = {
   table: "departments",
-  columns: 
-  `id,
+  columns:
+    `id,
   name,
   code,
   description,
-  managerId,
-  isActive,
-  createdAt, 
-  updatedAt`,
+  manager_id,
+  is_active,
+  created_at,
+  updated_at`,
 } as const;
 
 export const EmployeeSchema = {
   table: "employees",
-  columns: 
-  `id, 
-  departmentId,
-  positionId,
-  employeeCode,
+  columns:
+    `id,
+  department_id,
+  position_id,
+  employee_code,
   name,
   email,
   phone,
-  birthDate,
-  hireDate,
-  gender, 
-  status, 
-  avatarURL,
-  createdAt,
-  updatedAt,
-  deletedAt`,
+  birth_date,
+  hire_date,
+  gender,
+  status,
+  avatar_url,
+  created_at,
+  updated_at,
+  deleted_at`,
 } as const;
 
 export const PositionSchema = {
@@ -36,45 +36,45 @@ export const PositionSchema = {
   columns: `
   id,
   name,
-  description, 
-  level, 
-  createdAt, updatedAt`,
+  description,
+  level,
+  created_at, updated_at`,
 } as const;
 
 export const ProjectSchema = {
   table: "projects",
-  columns: `id, title, description, priority, status, progress, startDate, dueDate, assignedBy, createdBy, updatedBy, completedBy, estimatedHours, actualHours, completedAt, createdAt, updatedAt`,
+  columns: `id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, updated_by, completed_by, estimated_hours, actual_hours, attachments, completed_at, created_at, updated_at`,
 } as const;
 
 export const UserSchema = {
   table: "users",
-  columns: 
-  `id, 
-  employeeId,
-  username, 
+  columns:
+    `id,
+  employee_id,
+  username,
   password,
   role,
   status,
-  createdAt,
-  updatedAt`,
+  created_at,
+  updated_at`,
 } as const;
 
 export const ProjectCommentSchema = {
   table: "project_comments",
-  columns: `id, projectId, employeeId, content, attachments, createdAt, updatedAt`,
+  columns: `id, project_id, employee_id, content, attachments, created_at, updated_at`,
 } as const;
 
 export const ProjectDepartmentSchema = {
   table: "project_departments",
-  columns: `projectId, departmentId, assignedAt`,
+  columns: `project_id, department_id, assigned_at`,
 } as const;
 
 export const ProjectEmployeeSchema = {
   table: "project_employees",
-  columns: `id, projectId, employeeId, role, assignedAt`,
+  columns: `id, project_id, employee_id, role, assigned_at`,
 } as const;
 
 export const ProjectLogSchema = {
   table: "project_logs",
-  columns: `id, projectId, employeeId, action, description, createdAt`,
+  columns: `id, project_id, employee_id, action, description, created_at`,
 } as const;

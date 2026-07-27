@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
-import { Search, Plus, Pencil, Trash2, ArrowUpDown, CheckSquare, Calendar, Clock, Gauge } from "lucide-react"
-import projectService, { type Project } from "@/services/project.service"
+import { Search, Plus, Pencil, Trash2, ArrowUpDown, CheckSquare, Calendar, Clock, Gauge, Paperclip, X, File, FileImage, Download } from "lucide-react"
+import projectService, { type Project, type FileAttachment } from "@/services/project.service"
+import uploadService from "@/services/upload.service"
 import Modal from "@/components/ui/Modal"
 import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import { useAuth } from "@/contexts/AuthContext"
@@ -57,6 +58,17 @@ const statusLabels: Record<string, string> = {
   cancelled: "Đã huỷ",
 }
 
+function getFileIcon(mimetype: string) {
+  if (mimetype.startsWith("image/")) return FileImage
+  return File
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return bytes + " B"
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB"
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB"
+}
+
 export default function Tasks() {
   const { user } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
@@ -71,6 +83,9 @@ export default function Tasks() {
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
   const [priorityOpen, setPriorityOpen] = useState(false)
   const [statusOpen, setStatusOpen] = useState(false)
+
+  const [attachments, setAttachments] = useState<FileAttachment[]>([])
+  const [uploading, setUploading] = useState(false)
 
   const fetchProjects = async () => {
     try {
@@ -104,6 +119,7 @@ export default function Tasks() {
   const openCreate = () => {
     setEditingId(null)
     setForm(emptyForm)
+    setAttachments([])
     setFormOpen(true)
   }
 
@@ -119,7 +135,32 @@ export default function Tasks() {
       dueDate: project.dueDate ? project.dueDate.slice(0, 10) : "",
       estimatedHours: project.estimatedHours || 0,
     })
+    try {
+      setAttachments(JSON.parse(project.attachments || "[]"))
+    } catch {
+      setAttachments([])
+    }
     setFormOpen(true)
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    try {
+      const { data } = await uploadService.uploadFiles(Array.from(files))
+      setAttachments((prev) => [...prev, ...data.data])
+    } catch {
+      console.error("Failed to upload files")
+    } finally {
+      setUploading(false)
+      e.target.value = ""
+    }
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handleSave = async () => {
@@ -133,11 +174,12 @@ export default function Tasks() {
         startDate: form.startDate || undefined,
         dueDate: form.dueDate || undefined,
         estimatedHours: form.estimatedHours || undefined,
+        attachments: JSON.stringify(attachments),
       }
       if (editingId) {
         await projectService.update(editingId, payload)
       } else {
-        payload.createdBy = user?.id || ""
+        payload.createdBy = user?.employeeId || ""
         await projectService.create(payload)
       }
       setFormOpen(false)
@@ -289,6 +331,9 @@ export default function Tasks() {
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Hạn chót
                 </th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  Tệp
+                </th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Thao tác
                 </th>
@@ -297,97 +342,114 @@ export default function Tasks() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Đang tải...
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-zinc-400">
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-zinc-400">
                     Không tìm thấy project nào
                   </td>
                 </tr>
               ) : (
-                sorted.map((project) => (
-                  <tr
-                    key={project.id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <CheckSquare size={14} className="text-zinc-400 shrink-0" />
-                        <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                          {project.title}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          priorityColors[project.priority] || ""
-                        }`}
-                      >
-                        {priorityLabels[project.priority] || project.priority}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          statusColors[project.status] || ""
-                        }`}
-                      >
-                        {statusLabels[project.status] || project.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              project.progress === 100
-                                ? "bg-emerald-500"
-                                : project.progress > 0
-                                ? "bg-blue-500"
-                                : ""
-                            }`}
-                            style={{ width: `${project.progress}%` }}
-                          />
+                sorted.map((project) => {
+                  let fileCount = 0
+                  try {
+                    const parsed = JSON.parse(project.attachments || "[]")
+                    fileCount = Array.isArray(parsed) ? parsed.length : 0
+                  } catch {}
+                  return (
+                    <tr
+                      key={project.id}
+                      className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <CheckSquare size={14} className="text-zinc-400 shrink-0" />
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                            {project.title}
+                          </span>
                         </div>
-                        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 w-8">
-                          {project.progress}%
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            priorityColors[project.priority] || ""
+                          }`}
+                        >
+                          {priorityLabels[project.priority] || project.priority}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {project.dueDate ? (
-                        <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                          <Calendar size={12} />
-                          {new Date(project.dueDate).toLocaleDateString("vi-VN")}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            statusColors[project.status] || ""
+                          }`}
+                        >
+                          {statusLabels[project.status] || project.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                project.progress === 100
+                                  ? "bg-emerald-500"
+                                  : project.progress > 0
+                                  ? "bg-blue-500"
+                                  : ""
+                              }`}
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 w-8">
+                            {project.progress}%
+                          </span>
                         </div>
-                      ) : (
-                        <span className="text-xs text-zinc-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => openEdit(project)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
-                          title="Sửa"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(project)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
-                          title="Xoá"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-4 py-3">
+                        {project.dueDate ? (
+                          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                            <Calendar size={12} />
+                            {new Date(project.dueDate).toLocaleDateString("vi-VN")}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-zinc-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {fileCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                            <Paperclip size={12} />
+                            {fileCount}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => openEdit(project)}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
+                            title="Sửa"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            onClick={() => confirmDelete(project)}
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
+                            title="Xoá"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
@@ -399,7 +461,7 @@ export default function Tasks() {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         title={editingId ? "Sửa project" : "Thêm project"}
-        width={480}
+        width={560}
         footer={
           <div className="flex gap-2">
             <button
@@ -417,7 +479,7 @@ export default function Tasks() {
           </div>
         }
       >
-        <div className="space-y-3">
+        <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
           <div>
             <label className={labelClass}>Tiêu đề</label>
             <input
@@ -553,6 +615,68 @@ export default function Tasks() {
               placeholder="VD: 8"
               className={inputClass}
             />
+          </div>
+
+          {/* File attachments */}
+          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <label className={labelClass}>Tệp đính kèm</label>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1.5 text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition cursor-pointer border border-blue-200 dark:border-blue-800">
+                <Paperclip size={14} />
+                {uploading ? "Đang tải..." : "Chọn tệp"}
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </label>
+              <span className="text-xs text-zinc-400">Hình ảnh, PDF, DOC, XLS, ZIP... Tối đa 50MB/tệp</span>
+            </div>
+            {attachments.length > 0 && (
+              <div className="space-y-1.5">
+                {attachments.map((att, index) => {
+                  const Icon = getFileIcon(att.mimetype)
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2"
+                    >
+                      <Icon size={16} className="text-zinc-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate block"
+                        >
+                          {att.originalName}
+                        </a>
+                        <p className="text-xs text-zinc-400">{formatFileSize(att.size)}</p>
+                      </div>
+                      <a
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 rounded text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer"
+                        title="Tải xuống"
+                      >
+                        <Download size={14} />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer border-none"
+                        title="Xoá"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       </Modal>

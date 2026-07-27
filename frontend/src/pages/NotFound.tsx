@@ -4,24 +4,21 @@ export default function NotFound() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 gap-4">
-      <h1
-        className="text-[80px] font-bold leading-none m-0"
-        style={{ color: "#d9d9d9" }}
-      >
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 gap-4 bg-white dark:bg-zinc-900">
+      <h1 className="text-[120px] font-bold leading-none bg-gradient-to-br from-blue-500 to-purple-600 bg-clip-text text-transparent">
         404
       </h1>
-      <h2 className="text-xl font-semibold m-0 text-zinc-900 dark:text-zinc-100">
-        Page not found
+      <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+        Trang không tồn tại
       </h2>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 m-0">
-        The page you are looking for does not exist.
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm text-center">
+        Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
       </p>
       <button
         onClick={() => navigate("/")}
-        className="rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
+        className="rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white px-5 py-2.5 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none"
       >
-        Back to Home
+        Về trang chủ
       </button>
     </div>
   )

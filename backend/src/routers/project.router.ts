@@ -19,21 +19,21 @@ router.get("/:id", authenticate, asyncHandler(projectController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(createProjectSchema),
   asyncHandler(projectController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(updateProjectSchema),
   asyncHandler(projectController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(projectController.delete)
 );
 

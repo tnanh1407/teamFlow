@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { LogOut, Bell, ChevronDown, ChevronRight, LayoutDashboard, Shield, Users, Building2, Settings, PanelLeftClose, PanelLeft, CheckSquare } from "lucide-react"
+import { LogOut, Bell, ChevronDown, ChevronRight, LayoutDashboard, Shield, Users, Building2, Briefcase, Medal, UserCog, Settings, PanelLeftClose, PanelLeft, CheckSquare } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 
@@ -12,13 +12,21 @@ interface Breadcrumb {
 
 const breadcrumbMap: Record<string, Breadcrumb[]> = {
   "/dashboard": [{ label: "Tổng quan", icon: LayoutDashboard }],
-  "/members": [
+  "/employees": [
     { label: "Quản trị", icon: Shield },
-    { label: "Quản lí thành viên", icon: Users },
+    { label: "Quản lí nhân viên", icon: Briefcase },
   ],
   "/departments": [
     { label: "Quản trị", icon: Shield },
     { label: "Quản lí phòng ban", icon: Building2 },
+  ],
+  "/positions": [
+    { label: "Quản trị", icon: Shield },
+    { label: "Quản lí chức vụ", icon: Medal },
+  ],
+  "/members": [
+    { label: "Quản trị", icon: Shield },
+    { label: "Quản lí tài khoản", icon: UserCog },
   ],
   "/tasks": [
     { label: "Quản trị", icon: Shield },
@@ -34,7 +42,10 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const crumbs = breadcrumbMap[location.pathname] || [{ label: "TeamFlow", icon: LayoutDashboard }]
+  const crumbs = breadcrumbMap[location.pathname] ||
+    (location.pathname.startsWith("/members/")
+      ? [{ label: "Quản trị", icon: Shield }, { label: "Quản lí tài khoản", icon: UserCog }, { label: "Chi tiết", icon: UserCog }]
+      : [{ label: "TeamFlow", icon: LayoutDashboard }])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {

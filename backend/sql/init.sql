@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS projects (
   completed_by UUID,
   estimated_hours INT,
   actual_hours INT,
+  attachments TEXT DEFAULT '[]',
   completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -127,6 +128,9 @@ ALTER TABLE project_departments ADD CONSTRAINT fk_project_departments_department
 
 ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_project FOREIGN KEY (project_id) REFERENCES projects(id);
 ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_employee FOREIGN KEY (employee_id) REFERENCES employees(id);
+
+-- Add attachments column for existing databases
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS attachments TEXT DEFAULT '[]';
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);

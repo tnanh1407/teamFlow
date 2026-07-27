@@ -1,0 +1,52 @@
+[
+  {
+    "id": "dept_it",
+    "name": "Công nghệ thông tin",
+    "code": "IT",
+    "description": "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+    "managerId": "emp2",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept_hr",
+    "name": "Nhân sự",
+    "code": "HR",
+    "description": "Phòng Nhân sự - phụ trách tuyển dụng, đào tạo và quản lý nhân viên",
+    "managerId": "emp4",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept_acc",
+    "name": "Kế toán",
+    "code": "ACC",
+    "description": "Phòng Kế toán - phụ trách tài chính và kế toán công ty",
+    "managerId": "emp6",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept_mkt",
+    "name": "Marketing",
+    "code": "MKT",
+    "description": "Phòng Marketing - phụ trách truyền thông và quảng bá thương hiệu",
+    "managerId": "emp8",
+    "isActive": true,
+    "createdAt": "2025-02-01T00:00:00.000Z",
+    "updatedAt": "2025-02-01T00:00:00.000Z"
+  },
+  {
+    "id": "dept_ops",
+    "name": "Vận hành",
+    "code": "OPS",
+    "description": "Phòng Vận hành - phụ trách quy trình và vận hành doanh nghiệp",
+    "managerId": "emp10",
+    "isActive": true,
+    "createdAt": "2025-03-01T00:00:00.000Z",
+    "updatedAt": "2025-03-01T00:00:00.000Z"
+  }
+]

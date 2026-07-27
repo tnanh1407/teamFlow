@@ -18,21 +18,21 @@ router.get("/:id", authenticate, asyncHandler(projectCommentController.getById))
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(createProjectCommentSchema),
   asyncHandler(projectCommentController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   validate(updateProjectCommentSchema),
   asyncHandler(projectCommentController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.SUPER_ADMIN),
   asyncHandler(projectCommentController.delete)
 );
 
