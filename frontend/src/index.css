@@ -17,6 +17,8 @@
   --border: oklch(0.922 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
+  --danger: #dc2626; 
+  --success: #16a34a; 
 }
 
 .dark {
@@ -27,7 +29,9 @@
   --muted-foreground: oklch(0.708 0 0);
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
   overflow: hidden;

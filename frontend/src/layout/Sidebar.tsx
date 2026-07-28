@@ -1,8 +1,6 @@
 import { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
-  ChevronDown,
-  ChevronRight,
   LogOut,
   LayoutDashboard,
   Shield,
@@ -12,10 +10,14 @@ import {
   Medal,
   CheckSquare,
   Settings,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import type { UserPosition, UserRole } from "@/services/user.service"
+import dashboardImg from "@/assets/dashboard.png"
+
 interface IUserSideBar {
   id: string;
   departmentId: string;
@@ -75,52 +77,88 @@ const sidebarItems: ISidebarItem[] = [
     ],
   },
 ];
+interface SidebarItemProps {
+  item: ISidebarItem;
+  collapsed: boolean;
+}
+interface SidebarProps {
+  collapsed: boolean;
+}
 
-function NavGroupItem({ group, collapsed }: { group: NavGroup; collapsed: boolean }) {
-  const [open, setOpen] = useState(true)
-  const Icon = group.icon
+
+function SidebarItem({ item, collapsed }: SidebarItemProps) {
+  const [open, setOpen] = useState(true);
+
+  const Icon = item.icon;
+
+  if (!item.children) {
+    return (
+      <NavLink
+        to={item.to!}
+        className={({ isActive }) =>
+          `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${collapsed ? "justify-center px-0" : ""
+          } ${isActive
+            ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          }`
+        }
+      >
+        <Icon size={18} className="shrink-0" />
+        {!collapsed && <span>{item.label}</span>}
+      </NavLink>
+    );
+  }
 
   return (
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer border-none text-left"
+        className="flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
       >
-        <Icon size={18} className="shrink-0" />
+        <Icon size={18} />
+
         {!collapsed && (
           <>
-            <span className="flex-1 truncate">{group.label}</span>
-            {open ? <ChevronDown size={14} className="shrink-0" /> : <ChevronRight size={14} className="shrink-0" />}
+            <span className="flex-1 text-left">{item.label}</span>
+
+            {open ? (
+              <ChevronDown size={14} />
+            ) : (
+              <ChevronRight size={14} />
+            )}
           </>
         )}
       </button>
+
       {open && !collapsed && (
-        <div className="ml-4 flex flex-col gap-0.5 mt-0.5">
-          {group.children.map((child) => {
-            const ChildIcon = child.icon
+        <div className="ml-4 mt-1 flex flex-col gap-1">
+          {item.children.map((child) => {
+            const ChildIcon = child.icon;
+
             return (
               <NavLink
                 key={child.to}
-                to={child.to}
+                to={child.to!}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive
+                  `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${isActive
                     ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                    : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   }`
                 }
               >
-                <ChildIcon size={14} className="shrink-0" />
-                <span className="truncate">{child.label}</span>
+                <ChildIcon size={15} />
+                <span>{child.label}</span>
               </NavLink>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default function Sidebar({ collapsed }: { collapsed: boolean }) {
+
+export default function Sidebar({ collapsed }: SidebarProps) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -129,51 +167,28 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
     navigate("/login")
   }
 
-  const navItems = getNavItems(user)
-
-  const roleLabel: Record<string, string> = {
-    admin: "Admin",
-    manager: "Manager",
-    member: "Member",
-  }
-
   return (
     <aside
       className={`flex flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 shrink-0 transition-all duration-200 min-h-0 overflow-hidden ${collapsed ? "w-14" : "w-[20%] min-w-[200px] max-w-[280px]"
         }`}
     >
       <div className="flex items-center gap-3 h-14 px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-          TF
-        </div>
+      <img src={dashboardImg} alt="dashboard_img" className="h-10"></img>
         {!collapsed && (
-          <span className="text-base font-bold text-zinc-900 dark:text-zinc-100 truncate">
-            TeamFlow
+          <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate capitalize">
+            Trang Quản Lý
           </span>
         )}
       </div>
 
-      <nav className="flex-1 p-3 flex flex-col gap-0.5 overflow-y-auto">
-        {navItems.map((entry) =>
-          isGroup(entry) ? (
-            <NavGroupItem key={entry.label} group={entry} collapsed={collapsed} />
-          ) : (
-            <NavLink
-              key={entry.to}
-              to={entry.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${collapsed ? "justify-center px-0" : ""
-                } ${isActive
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
-                }`
-              }
-            >
-              <entry.icon size={18} className="shrink-0" />
-              {!collapsed && <span className="truncate">{entry.label}</span>}
-            </NavLink>
-          )
-        )}
+      <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
+        {sidebarItems.map((item) => (
+          <SidebarItem
+            key={item.label}
+            item={item}
+            collapsed={collapsed}
+          />
+        ))}
       </nav>
 
       <div className="border-t border-zinc-200 dark:border-zinc-800 p-3 shrink-0">
@@ -191,7 +206,7 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
                 {user.username}
               </p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                {roleLabel[user.position] || user.position}
+                HELLO
               </p>
             </div>
           </div>

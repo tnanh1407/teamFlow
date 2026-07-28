@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react"
 import { useLocation } from "react-router-dom"
-import { ChevronRight, PanelLeft, PanelLeftClose } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRight, PanelLeft, PanelLeftClose, Search } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+import useQuickSearch from "@/hooks/useQuickSearch"
 
-
-// định nghĩa breadcrumbs
 const routes = [
   {
     path: "/dashboard",
@@ -47,18 +46,20 @@ const routes = [
   },
   {
     path: "/settings",
-    breadcrumbs: [
-      { label: "Cài đặt" },
-    ],
+    breadcrumbs: [{ label: "Cài đặt" }],
   },
-];
+]
 
-export default function Header({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+interface HeaderProps {
+  collapsed: boolean
+  onToggle: () => void
+}
+
+export default function Header({ collapsed, onToggle }: HeaderProps) {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  //  xử lí collapsed
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -69,37 +70,29 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
     return () => document.removeEventListener("mousedown", handleClick)
   }, [menuOpen])
 
-  // Định nghĩa router
-  const route = routes.find((r) => location.pathname.startsWith(r.path));
-  let crumbs = route?.breadcrumbs ?? [{ label: 'TeamFlow' }];
+  const route = routes.find((r) => location.pathname.startsWith(r.path))
+  let crumbs = route?.breadcrumbs ?? [{ label: "TeamFlow" }]
 
   if (route && location.pathname !== route.path) {
-    crumbs = [...crumbs, { label: "Chi tiết" }];
+    crumbs = [...crumbs, { label: "Chi tiết" }]
   }
 
-
+  const {handleQuickSearch} = useQuickSearch(console.log)
   return (
-    <header className="h-14 shrink-0 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 flex items-center justify-between">
+    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur px-6 flex items-center justify-between">
       <div className="flex items-center gap-3">
-
-        {/* MenuOption */}
         <motion.button
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           animate={{ rotate: collapsed ? 0 : 180 }}
           transition={{ duration: 0.25 }}
           onClick={onToggle}
-          className="flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:shadow-sm"
         >
-          {collapsed ? (
-            <PanelLeft size={20} />
-          ) : (
-            <PanelLeftClose size={20} />
-          )}
+          {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
         </motion.button>
 
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-sm overflow-hidden">
+        <nav className="flex items-center gap-2 overflow-hidden">
           <AnimatePresence mode="wait">
             {crumbs.map((crumb, index) => (
               <motion.span
@@ -108,23 +101,16 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 8 }}
-                transition={{
-                  duration: 0.25,
-                  delay: index * 0.05,
-                }}
+                transition={{ duration: 0.25, delay: index * 0.05 }}
               >
                 {index > 0 && (
-                  <ChevronRight
-                    size={14}
-                    className="text-zinc-400 dark:text-zinc-500"
-                  />
+                  <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600" />
                 )}
-
                 <span
                   className={
                     index === crumbs.length - 1
-                      ? "font-semibold text-zinc-900 dark:text-zinc-100"
-                      : "text-zinc-500 dark:text-zinc-400"
+                      ? "font-sm text-zinc-900 dark:text-zinc-100"
+                      : "text-zinc-500 dark:text-zinc-400 text-sm"
                   }
                 >
                   {crumb.label}
@@ -134,6 +120,13 @@ export default function Header({ collapsed, onToggle }: { collapsed: boolean; on
           </AnimatePresence>
         </nav>
       </div>
+
+      <button className="flex items-center gap-2 h-10 w-72 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 text-sm text-zinc-500 hover:bg-white dark:hover:bg-zinc-700 transition"
+      onClick={handleQuickSearch}>
+        <Search size={16} className="text-zinc-400" />
+        <span className="flex-1 text-left">Tìm kiếm...</span>
+        <span className="rounded-md border border-zinc-300 dark:border-zinc-600 px-1.5 py-0.5 text-sm text-zinc-400">Ctrl K</span>
+      </button>
     </header>
   )
 }

@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "@/components/layout/Sidebar";
-import Header from "@/components/layout/Header";
+import Sidebar from "@/layout/Sidebar";
+import {useHotkeys} from "react-hotkeys-hook";
+import Header from "@/layout/Header";
+
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
+  useHotkeys("ctrl+b" , (e) => {
+    e.preventDefault()
+    setCollapsed(c => !c)
+  })
 
   return (
     <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950">
