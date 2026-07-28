@@ -1,26 +1,11 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, CheckCircle, XCircle, FileText, Copy } from "lucide-react"
+import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, FileText, Copy } from "lucide-react"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
+import { motion } from "motion/react"
 import departmentService, { type Department } from "@/services/department.service"
-import Modal from "@/components/ui/Modal"
-import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import { toast } from "sonner"
-
-
-interface FormData {
-  name: string
-  code: string
-  description: string
-  isActive: boolean
-}
-
-const emptyForm: FormData = {
-  name: "",
-  code: "",
-  description: "",
-  isActive: true,
-}
+import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
 export default function Departments() {
   const navigate = useNavigate()
@@ -28,11 +13,6 @@ export default function Departments() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
 
-  const [formOpen, setFormOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
-  const [deleteTarget, setDeleteTarget] = useState<Department | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
 
   const fetchDepartments = async () => {
@@ -66,53 +46,12 @@ export default function Departments() {
   }
 
   const openCreate = () => {
-    setEditingId(null)
-    setForm(emptyForm)
-    setFormOpen(true)
+    openFormDialog()
   }
 
   const openEdit = (e: React.MouseEvent, department: Department) => {
     e.stopPropagation()
-    setEditingId(department.id)
-    setForm({
-      name: department.name,
-      code: department.code,
-      description: department.description,
-      isActive: department.isActive,
-    })
-    setFormOpen(true)
-  }
-
-  const handleSave = async () => {
-    try {
-      if (editingId) {
-        await departmentService.update(editingId, form)
-      } else {
-        await departmentService.create(form)
-      }
-      setFormOpen(false)
-      fetchDepartments()
-    } catch {
-      console.error("Failed to save department")
-    }
-  }
-
-  const confirmDelete = (e: React.MouseEvent, department: Department) => {
-    e.stopPropagation()
-    setDeleteTarget(department)
-    setDeleteOpen(true)
-  }
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return
-    try {
-      await departmentService.delete(deleteTarget.id)
-      setDeleteOpen(false)
-      setDeleteTarget(null)
-      fetchDepartments()
-    } catch {
-      console.error("Failed to delete department")
-    }
+    openFormDialog(department)
   }
 
   const inputClass =
@@ -123,12 +62,95 @@ export default function Departments() {
   const activeCount = departments.filter((d) => d.isActive).length
   const inactiveCount = departments.length - activeCount
 
+  const openFormDialog = async (editingDept?: Department) => {
+    const isEdit = !!editingDept
+    const dataRef: { current: { code: string; name: string; description: string; isActive: boolean } | null } = { current: null }
+
+    function FormComponent() {
+      const [f, setF] = useState(
+        isEdit
+          ? { code: editingDept!.code, name: editingDept!.name, description: editingDept!.description, isActive: editingDept!.isActive }
+          : { code: "", name: "", description: "", isActive: true }
+      )
+      dataRef.current = f
+      return (
+        <div className="space-y-3" style={{ textAlign: "left" }}>
+          <div>
+            <label className={labelClass}>Mã phòng ban</label>
+            <input type="text" value={f.code} onChange={(e) => setF((p) => ({ ...p, code: e.target.value }))} placeholder="VD: IT, HR, SALES" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Tên phòng ban</label>
+            <input type="text" value={f.name} onChange={(e) => setF((p) => ({ ...p, name: e.target.value }))} placeholder="Nhập tên phòng ban" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Mô tả</label>
+            <textarea value={f.description} onChange={(e) => setF((p) => ({ ...p, description: e.target.value }))} placeholder="Mô tả phòng ban (không bắt buộc)" rows={3} className={inputClass + " resize-none"} />
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="swal-status" checked={f.isActive} onChange={(e) => setF((p) => ({ ...p, isActive: e.target.checked }))} className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+            <label htmlFor="swal-status" className="text-sm text-zinc-700 cursor-pointer">Kích hoạt</label>
+          </div>
+        </div>
+      )
+    }
+
+    const result = await MySwal.fire({
+      title: isEdit ? "Sửa phòng ban" : "Thêm phòng ban",
+      width: 420,
+      html: <FormComponent />,
+      showCancelButton: true,
+      confirmButtonText: isEdit ? "Cập nhật" : "Tạo mới",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: () => {
+        const d = dataRef.current
+        if (!d) return false
+        if (!d.code.trim()) { MySwal.showValidationMessage("Vui lòng nhập mã phòng ban"); return false }
+        if (!d.name.trim()) { MySwal.showValidationMessage("Vui lòng nhập tên phòng ban"); return false }
+        return d
+      },
+    })
+
+    if (result.isConfirmed && result.value) {
+      try {
+        if (isEdit) {
+          await departmentService.update(editingDept!.id, result.value)
+          toast.success("Cập nhật thành công")
+        } else {
+          await departmentService.create(result.value)
+          toast.success("Tạo mới thành công")
+        }
+        fetchDepartments()
+      } catch {
+        toast.error("Lưu thất bại")
+      }
+    }
+  }
+
+  const confirmDelete = async (e: React.MouseEvent, department: Department) => {
+    e.stopPropagation()
+    const confirmed = await showDeleteConfirm({
+      name: department.name,
+      html: `Bạn có chắc muốn xoá phòng ban <strong>${department.name}</strong>? Hành động này không thể hoàn tác.`,
+    })
+    if (confirmed) {
+      try {
+        await departmentService.delete(department.id)
+        toast.success("Xoá thành công")
+        fetchDepartments()
+      } catch {
+        toast.error("Xoá thất bại")
+      }
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 capitalize   ">
             Quản lí Phòng Ban
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -138,77 +160,93 @@ export default function Departments() {
       </div>
 
       {/* Stats + PieChart */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+      {(() => {
+        const statusData = [
+          { name: "Hoạt động", value: activeCount, color: "#10b981" },
+          { name: "Vô hiệu", value: inactiveCount, color: "#ef4444" },
+        ].filter(d => d.value > 0)
+        const total = departments.length || 1
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden"
+          >
+            <div className="h-1.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-red-400" />
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                    <Building2 size={18} className="text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Trạng thái phòng ban
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 leading-none">{departments.length}</p>
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium mt-0.5">Tổng số</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
-                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{departments.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
-                <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Đang hoạt động</p>
-                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{activeCount}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
-                <XCircle size={20} className="text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Vô hiệu</p>
-                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{inactiveCount}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        {(() => {
-          const statusData = [
-            { name: "Hoạt động", value: activeCount, color: "#10b981" },
-            { name: "Vô hiệu", value: inactiveCount, color: "#ef4444" },
-          ].filter(d => d.value > 0)
-          const total = departments.length || 1
-          return (
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Trạng thái</p>
-              <div className="flex items-start gap-4">
-                <ResponsiveContainer width="55%" height={220}>
-                  <PieChart>
-                    <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                      {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex-1 flex flex-col gap-2 pt-2">
+              <div className="flex items-start gap-6">
+                <div className="relative shrink-0">
+                  <ResponsiveContainer width={190} height={190}>
+                    <PieChart>
+                      <Pie data={statusData} cx="50%" cy="50%" innerRadius={58} outerRadius={88} paddingAngle={4} dataKey="value" stroke="none">
+                        {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "8px",
+                          border: "1px solid #e4e4e7",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                          fontSize: "13px",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-none">{departments.length}</p>
+                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mt-0.5">Tổng</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-4 pt-1">
                   {statusData.map((entry) => (
-                    <div key={entry.name} className="group cursor-default">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                    <div key={entry.name}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: entry.color }} />
+                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{entry.name}</span>
                         </div>
-                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                            {Math.round((entry.value / total) * 100)}%
+                          </span>
+                        </div>
                       </div>
-                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
+                      <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(entry.value / total) * 100}%` }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
+                          className="h-full rounded-full"
+                          style={{ backgroundColor: entry.color }}
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          )
-        })()}
-      </div>
+          </motion.div>
+        )
+      })()}
 
       {/* Search & Actions */}
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
@@ -368,89 +406,6 @@ export default function Departments() {
           </table>
         </div>
       </div>
-
-      {/* Create/Edit Modal */}
-      <Modal
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        title={editingId ? "Sửa phòng ban" : "Thêm phòng ban"}
-        width={420}
-        footer={
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFormOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none"
-            >
-              Huỷ
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
-            >
-              {editingId ? "Cập nhật" : "Tạo mới"}
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-3">
-          <div>
-            <label className={labelClass}>Mã phòng ban</label>
-            <input
-              type="text"
-              value={form.code}
-              onChange={(e) => setForm({ ...form, code: e.target.value })}
-              placeholder="VD: IT, HR, SALES"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Tên phòng ban</label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Nhập tên phòng ban"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Mô tả</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Mô tả phòng ban (không bắt buộc)"
-              rows={3}
-              className={inputClass + " resize-none"}
-            />
-          </div>
-          <div className="flex items-center gap-2 pt-1">
-            <input
-              type="checkbox"
-              id="status"
-              checked={form.isActive}
-              onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-              className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="status" className="text-sm text-zinc-700 cursor-pointer">
-              Kích hoạt
-            </label>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Delete Confirm */}
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Xác nhận xoá"
-        variant="danger"
-        confirmText="Xoá"
-        cancelText="Huỷ"
-      >
-        Bạn có chắc muốn xoá phòng ban{" "}
-        <strong>{deleteTarget?.name}</strong>? Hành động này không thể hoàn tác.
-      </ConfirmDialog>
     </div>
   )
 }

@@ -9,7 +9,7 @@ import projectService from "@/services/project.service"
 import userService from "@/services/user.service"
 import { useAuth } from "@/contexts/AuthContext"
 
-const colors = {
+const colors  = {
   blue: "#3b82f6",
   emerald: "#10b981",
   amber: "#f59e0b",

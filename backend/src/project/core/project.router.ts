@@ -27,7 +27,7 @@ router.post(
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EUserRole.ADMIN, EUserRole.USER),
   validate(updateProjectSchema),
   asyncHandler(projectController.update)
 );

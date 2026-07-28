@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Check } from "lucide-react"
+import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Check, UserPlus } from "lucide-react"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
@@ -14,8 +14,7 @@ import ProjectLogsSection from "./components/ProjectLogsSection"
 import ProjectCommentsSection from "./components/ProjectCommentsSection"
 import ProjectDepartmentsSection from "./components/ProjectDepartmentsSection"
 import ProjectMembersSection from "./components/ProjectMembersSection"
-import ConfirmDialog from "@/components/ui/ConfirmDialog"
-import Modal from "@/components/ui/Modal"
+import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
 interface FormData {
   title: string
@@ -26,17 +25,6 @@ interface FormData {
   startDate: string
   dueDate: string
   estimatedHours: number
-}
-
-const emptyForm: FormData = {
-  title: "",
-  description: "",
-  priority: "medium",
-  status: "todo",
-  progress: 0,
-  startDate: "",
-  dueDate: "",
-  estimatedHours: 0,
 }
 
 const priorityLabels: Record<string, string> = {
@@ -114,41 +102,25 @@ export default function ProjectDetail() {
   const [deptEmployeeCount, setDeptEmployeeCount] = useState<Record<string, number>>({})
   const [, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-
-  const [formOpen, setFormOpen] = useState(false)
-  const [form, setForm] = useState<FormData>(emptyForm)
-  const [attachments, setAttachments] = useState<FileAttachment[]>([])
-  const [uploading, setUploading] = useState(false)
-  const [priorityOpen, setPriorityOpen] = useState(false)
-  const [statusOpen, setStatusOpen] = useState(false)
 
   const [allDepartments, setAllDepartments] = useState<Department[]>([])
   const [projectDeptIds, setProjectDeptIds] = useState<string[]>([])
   const [projectMembers, setProjectMembers] = useState<(ProjectEmployee & { employee?: Employee })[]>([])
-
-  const [addOpen, setAddOpen] = useState(false)
-  const [selectedDeptId, setSelectedDeptId] = useState("")
-  const [selectedDeptOpen, setSelectedDeptOpen] = useState(false)
-  const [selectedEmpIds, setSelectedEmpIds] = useState<string[]>([])
-  const [deptEmps, setDeptEmps] = useState<Employee[]>([])
-  const [saving, setSaving] = useState(false)
   const [logEmployeeMap, setLogEmployeeMap] = useState<Record<string, Employee>>({})
-  const [logDetail, setLogDetail] = useState<ProjectLog | null>(null)
-  const [formSnapshot, setFormSnapshot] = useState<FormData | null>(null)
   const [comments, setComments] = useState<(ProjectComment & { employee?: Employee })[]>([])
   const [commentText, setCommentText] = useState("")
   const [commentFiles, setCommentFiles] = useState<FileAttachment[]>([])
   const [commentUploading, setCommentUploading] = useState(false)
-  const selectDeptRef = useRef<HTMLDivElement>(null)
-
   const [userDeptId, setUserDeptId] = useState<string | null>(null)
 
   const isAdmin = user?.role === "admin"
   const isManager = user?.position === "manager"
-  const canEdit = isAdmin
+  const canEdit = isAdmin || isManager
   const canDelete = isAdmin
   const canManageMembers = canEdit || (isManager && !!userDeptId)
+
+  const inputClass = "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
   const fetchProject = () => {
     if (!id) return
@@ -247,536 +219,65 @@ export default function ProjectDetail() {
     }
   }, [id])
 
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (selectDeptRef.current && !selectDeptRef.current.contains(e.target as Node)) {
-        setSelectedDeptOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [])
-
-  useEffect(() => {
-    if (selectedDeptId) {
-      employeeService.getByDepartment(selectedDeptId).then((r) => {
-        const emps = r.data.data
-        setDeptEmps(emps)
-        // Tích sẵn những thành viên đã có trong dự án
-        const existingEmpIds = projectMembers.map((m) => m.employeeId)
-        const preSelected = emps.filter((e) => existingEmpIds.includes(e.id)).map((e) => e.id)
-        setSelectedEmpIds(preSelected)
-      })
-    } else {
-      setDeptEmps([])
-      setSelectedEmpIds([])
-    }
-  }, [selectedDeptId, projectMembers])
-
-  const toggleEmp = (empId: string) => {
-    setSelectedEmpIds((prev) =>
-      prev.includes(empId) ? prev.filter((id) => id !== empId) : [...prev, empId]
-    )
-  }
-
-  const handleAdd = async () => {
-    if (!project || !selectedDeptId) return
-    setSaving(true)
-    try {
-      if (!projectDeptIds.includes(selectedDeptId)) {
-        await projectDepartmentService.create({ projectId: project.id, departmentId: selectedDeptId })
-      }
-
-      const existingEmpIds = projectMembers.map((m) => m.employeeId)
-      // Chỉ tạo mới những thành viên chưa có trong dự án
-      const empIdsToAdd = selectedEmpIds.filter((id) => !existingEmpIds.includes(id))
-      const newMembers = deptEmps.filter((e) => empIdsToAdd.includes(e.id))
-
-      if (empIdsToAdd.length > 0) {
-        await Promise.all(
-          empIdsToAdd.map((empId) =>
-            projectEmployeeService.create({ projectId: project.id, employeeId: empId })
-          )
-        )
-        if (user?.employeeId) {
-          const deptName = allDepartments.find((d) => d.id === selectedDeptId)?.name || ""
-          await Promise.all(
-            newMembers.map((m) =>
-              projectLogService.create({
-                projectId: project.id,
-                employeeId: user.employeeId,
-                action: "assigned",
-                description: `${m.name} - ${deptName}`,
-              })
-            )
-          )
-        }
-      }
-      setAddOpen(false)
-      setSelectedDeptId("")
-      setSelectedEmpIds([])
-      fetchProject()
-    } catch (err) {
-      console.error("Failed to add member", err)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const openEdit = () => {
+  const handleOpenAddMember = async () => {
     if (!project) return
-    const snap: FormData = {
-      title: project.title,
-      description: project.description,
-      priority: project.priority,
-      status: project.status,
-      progress: project.progress,
-      startDate: project.startDate ? project.startDate.slice(0, 10) : "",
-      dueDate: project.dueDate ? project.dueDate.slice(0, 10) : "",
-      estimatedHours: project.estimatedHours || 0,
-    }
-    setFormSnapshot(snap)
-    setForm(snap)
-    try {
-      setAttachments(JSON.parse(project.attachments || "[]"))
-    } catch {
-      setAttachments([])
-    }
-    setFormOpen(true)
-  }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-    setUploading(true)
-    try {
-      const { data } = await uploadService.uploadFiles(Array.from(files))
-      setAttachments((prev) => [...prev, ...data.data])
-    } catch {
-      console.error("Failed to upload files")
-    } finally {
-      setUploading(false)
-      e.target.value = ""
-    }
-  }
+    const initialDeptId = isManager && userDeptId ? userDeptId : ""
+    let currentDeptId = initialDeptId
+    let currentEmpIds: string[] = []
+    let currentDeptEmps: Employee[] = []
 
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index))
-  }
+    const AddMemberContent = () => {
+      const [selectedDeptId, setSelectedDeptId] = useState(initialDeptId)
+      const [selectedEmpIds, setSelectedEmpIds] = useState<string[]>([])
+      const [selectedDeptOpen, setSelectedDeptOpen] = useState(false)
+      const [deptEmps, setDeptEmps] = useState<Employee[]>([])
+      const selectDeptRef = useRef<HTMLDivElement>(null)
 
-  const handleSave = async () => {
-    if (!project) return
-    try {
-      const payload: any = {
-        title: form.title,
-        description: form.description || undefined,
-        priority: form.priority,
-        status: form.status,
-        progress: form.progress,
-        startDate: form.startDate || undefined,
-        dueDate: form.dueDate || undefined,
-        estimatedHours: form.estimatedHours || undefined,
-        attachments: JSON.stringify(attachments),
-      }
-      await projectService.update(project.id, payload)
+      useEffect(() => {
+        currentDeptId = selectedDeptId
+        currentEmpIds = selectedEmpIds
+        currentDeptEmps = deptEmps
+      }, [selectedDeptId, selectedEmpIds, deptEmps])
 
-      const fieldLabels: Record<string, string> = {
-        title: "tiêu đề",
-        description: "mô tả",
-        priority: "mức độ",
-        status: "trạng thái",
-        progress: "tiến độ",
-        startDate: "ngày bắt đầu",
-        dueDate: "hạn chót",
-        estimatedHours: "giờ dự kiến",
-      }
-
-      const formatVal = (key: string, val: string): string => {
-        if (!val) return "trống"
-        if (key === "priority") return priorityLabels[val] || val
-        if (key === "status") return statusLabels[val] || val
-        if (key === "startDate" || key === "dueDate") return new Date(val).toLocaleDateString("vi-VN")
-        return val
-      }
-
-      const roleLabel: Record<string, string> = {
-        admin: "Admin",
-        manager: "Manager",
-        member: "Member",
-      }
-
-      const changed: string[] = []
-      if (formSnapshot) {
-        for (const [key, label] of Object.entries(fieldLabels)) {
-          const oldVal = String(formSnapshot[key as keyof FormData] ?? "")
-          const newVal = String(form[key as keyof FormData] ?? "")
-          if (oldVal !== newVal) {
-            changed.push(`${label}: ${formatVal(key, oldVal)} → ${formatVal(key, newVal)}`)
+      useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+          if (selectDeptRef.current && !selectDeptRef.current.contains(e.target as Node)) {
+            setSelectedDeptOpen(false)
           }
         }
-      }
+        document.addEventListener("mousedown", handleClick)
+        return () => document.removeEventListener("mousedown", handleClick)
+      }, [])
 
-      if (user?.employeeId) {
-        const roleStr = roleLabel[user.position] || user.position
-        await projectLogService.create({
-          projectId: project.id,
-          employeeId: user.employeeId,
-          action: "updated",
-          description: changed.length > 0
-            ? `[${roleStr}] ${changed.join("; ")}`
-            : `[${roleStr}] thông tin project`,
-        })
-      }
-      setFormOpen(false)
-      fetchProject()
-    } catch {
-      console.error("Failed to save project")
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!project) return
-    try {
-      await projectService.delete(project.id)
-      setDeleteOpen(false)
-      navigate("/tasks")
-    } catch {
-      console.error("Failed to delete project")
-    }
-  }
-
-  const removeDepartment = async (departmentId: string) => {
-    if (!project) return
-    try {
-      await projectDepartmentService.delete(project.id, departmentId)
-      if (user?.employeeId) {
-        const dept = departments.find((d) => d.id === departmentId)
-        await projectLogService.create({
-          projectId: project.id,
-          employeeId: user.employeeId,
-          action: "updated",
-          description: `Phòng ban ${dept?.name || ""}`,
-        })
-      }
-      fetchProject()
-    } catch {
-      console.error("Failed to remove department")
-    }
-  }
-
-  const removeMember = async (id: string) => {
-    if (!project) return
-    try {
-      const pm = projectMembers.find((m) => m.id === id)
-      await projectEmployeeService.delete(id)
-      if (user?.employeeId && pm?.employee?.name) {
-        await projectLogService.create({
-          projectId: project.id,
-          employeeId: user.employeeId,
-          action: "updated",
-          description: pm.employee.name,
-        })
-      }
-      fetchProject()
-    } catch {
-      console.error("Failed to remove member")
-    }
-  }
-
-  const availableDepts = canEdit
-    ? allDepartments.filter((d) => !projectDeptIds.includes(d.id))
-    : isManager && userDeptId
-    ? allDepartments.filter((d) => d.id === userDeptId)
-    : []
-
-  const handleCommentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-    setCommentUploading(true)
-    try {
-      const { data } = await uploadService.uploadFiles(Array.from(files))
-      setCommentFiles((prev) => [...prev, ...data.data])
-    } catch {
-      console.error("Failed to upload comment files")
-    } finally {
-      setCommentUploading(false)
-      e.target.value = ""
-    }
-  }
-
-  const removeCommentFile = (index: number) => {
-    setCommentFiles((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const handleAddComment = async () => {
-    if (!project || !user?.employeeId || (!commentText.trim() && commentFiles.length === 0)) return
-    try {
-      const { data } = await projectCommentService.create({
-        projectId: project.id,
-        employeeId: user.employeeId,
-        content: commentText.trim() || undefined,
-        attachments: commentFiles.length > 0 ? JSON.stringify(commentFiles) : undefined,
-      })
-      const emp = await employeeService.getById(user.employeeId)
-      setComments((prev) => [{ ...data.data, employee: emp.data.data }, ...prev])
-      if (user.employeeId) {
-        await projectLogService.create({
-          projectId: project.id,
-          employeeId: user.employeeId,
-          action: "commented",
-          description: commentText.trim() || "đã bình luận",
-        })
-      }
-      setCommentText("")
-      setCommentFiles([])
-      fetchProject()
-    } catch {
-      console.error("Failed to add comment")
-    }
-  }
-
-  const handleDeleteComment = async (commentId: string) => {
-    try {
-      await projectCommentService.delete(commentId)
-      setComments((prev) => prev.filter((c) => c.id !== commentId))
-      if (project && user?.employeeId) {
-        await projectLogService.create({
-          projectId: project.id,
-          employeeId: user.employeeId,
-          action: "updated",
-          description: "đã xoá một bình luận",
-        })
-      }
-      fetchProject()
-    } catch {
-      console.error("Failed to delete comment")
-    }
-  }
-
-  const inputClass =
-    "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-zinc-400">Đang tải...</p>
-      </div>
-    )
-  }
-
-  if (!project) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-sm text-zinc-500">Không tìm thấy project</p>
-        <button onClick={() => navigate("/tasks")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay lại</button>
-      </div>
-    )
-  }
-
-  let fileCount = 0
-  try {
-    const parsed = JSON.parse(project.attachments || "[]")
-    fileCount = Array.isArray(parsed) ? parsed.length : 0
-  } catch {}
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/tasks")} className="w-9 h-9 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer border-none">
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{project.title}</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Chi tiết project</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {canEdit && (
-            <button onClick={openEdit} className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-4 py-2 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition cursor-pointer bg-transparent">
-              <Pencil size={15} />
-              <span>Sửa</span>
-            </button>
-          )}
-          {canDelete && (
-            <button onClick={() => setDeleteOpen(true)} className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer bg-transparent">
-              <Trash2 size={15} />
-              <span>Xoá</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thông tin project</h2>
-            </div>
-            <div className="p-5 space-y-4">
-              {project.description && (
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</label>
-                  <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100">{project.description}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mức độ</label>
-                  <p className="mt-1">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${priorityColors[project.priority] || ""}`}>
-                      {priorityLabels[project.priority] || project.priority}
-                    </span>
-                  </p>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Trạng thái</label>
-                  <p className="mt-1">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[project.status] || ""}`}>
-                      {statusLabels[project.status] || project.status}
-                    </span>
-                  </p>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tiến độ</label>
-                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.progress}%</p>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tệp đính kèm</label>
-                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{fileCount} tệp</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {project.startDate && (
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày bắt đầu</label>
-                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.startDate).toLocaleDateString("vi-VN")}</p>
-                  </div>
-                )}
-                {project.dueDate && (
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hạn chót</label>
-                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.dueDate).toLocaleDateString("vi-VN")}</p>
-                  </div>
-                )}
-                {project.estimatedHours && (
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giờ dự kiến</label>
-                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.estimatedHours}h</p>
-                  </div>
-                )}
-                {project.actualHours && (
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giờ thực tế</label>
-                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.actualHours}h</p>
-                  </div>
-                )}
-              </div>
-              <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${project.progress === 100 ? "bg-emerald-500" : "bg-blue-500"}`}
-                  style={{ width: `${project.progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {isAdmin && (
-            <ProjectLogsSection
-              logs={logs}
-              logEmployeeMap={logEmployeeMap}
-              onSelectLog={(log) => setLogDetail(log)}
-            />
-          )}
-
-          <ProjectCommentsSection
-            comments={comments}
-            user={user}
-            commentText={commentText}
-            setCommentText={setCommentText}
-            commentFiles={commentFiles}
-            commentUploading={commentUploading}
-            handleCommentFileUpload={handleCommentFileUpload}
-            removeCommentFile={removeCommentFile}
-            handleAddComment={handleAddComment}
-            handleDeleteComment={handleDeleteComment}
-          />
-        </div>
-
-        <div className="space-y-6">
-          <ProjectDepartmentsSection
-            departments={departments}
-            deptEmployeeCount={deptEmployeeCount}
-            canEdit={canEdit}
-            onOpenAddModal={() => setAddOpen(true)}
-            onRemoveDepartment={removeDepartment}
-          />
-
-          <ProjectMembersSection
-            projectMembers={projectMembers}
-            departments={departments}
-            canManageMembers={canManageMembers}
-            isManager={isManager}
-            canEdit={canEdit}
-            userDeptId={userDeptId}
-            onOpenAddModal={() => {
-              setAddOpen(true)
-              if (isManager && userDeptId) setSelectedDeptId(userDeptId)
-            }}
-            onRemoveMember={removeMember}
-          />
-
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thông tin khác</h2>
-            </div>
-            <div className="p-5 space-y-3">
-              <div>
-                <label className="text-xs text-zinc-400">Ngày tạo</label>
-                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.createdAt).toLocaleString("vi-VN")}</p>
-              </div>
-              {project.updatedAt && (
-                <div>
-                  <label className="text-xs text-zinc-400">Cập nhật lần cuối</label>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.updatedAt).toLocaleString("vi-VN")}</p>
-                </div>
-              )}
-              {project.completedAt && (
-                <div>
-                  <label className="text-xs text-zinc-400">Hoàn thành lúc</label>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.completedAt).toLocaleString("vi-VN")}</p>
-                </div>
-              )}
-            </div>
-            </div>
-          </div>
-
-        </div>
-
-      <Modal
-        open={addOpen}
-        onClose={() => { setAddOpen(false); setSelectedDeptId(""); setSelectedEmpIds([]) }}
-        title="Thêm phòng ban và thành viên"
-        width={500}
-        footer={
-          <div className="flex gap-2">
-            <button
-              onClick={() => { setAddOpen(false); setSelectedDeptId(""); setSelectedEmpIds([]) }}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none"
-            >
-              Huỷ
-            </button>
-            <button
-              onClick={handleAdd}
-              disabled={!selectedDeptId || selectedEmpIds.length === 0 || saving}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? "Đang thêm..." : "Thêm"}
-            </button>
-          </div>
+      useEffect(() => {
+        if (selectedDeptId) {
+          employeeService.getByDepartment(selectedDeptId).then((r) => {
+            const emps = r.data.data
+            setDeptEmps(emps)
+            const existingEmpIds = projectMembers.map((m) => m.employeeId)
+            const preSelected = emps.filter((e) => existingEmpIds.includes(e.id)).map((e) => e.id)
+            setSelectedEmpIds(preSelected)
+          })
+        } else {
+          setDeptEmps([])
+          setSelectedEmpIds([])
         }
-      >
+      }, [selectedDeptId, projectMembers])
+
+      const availableDepts = isAdmin
+        ? allDepartments.filter((d) => !projectDeptIds.includes(d.id))
+        : isManager && userDeptId
+        ? allDepartments.filter((d) => d.id === userDeptId)
+        : []
+
+      const toggleEmp = (empId: string) => {
+        setSelectedEmpIds((prev) =>
+          prev.includes(empId) ? prev.filter((id) => id !== empId) : [...prev, empId]
+        )
+      }
+
+      return (
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Chọn phòng ban</label>
@@ -818,76 +319,169 @@ export default function ProjectDetail() {
             </div>
           </div>
 
-          {selectedDeptId && (
-            <div>
-              <label className={labelClass}>Chọn thành viên ({deptEmps.length} người)</label>
-              <div className="max-h-56 overflow-y-auto space-y-1 rounded-lg border border-zinc-200 dark:border-zinc-700 p-1">
-                {deptEmps.length === 0 ? (
-                  <p className="px-3 py-4 text-sm text-zinc-400 text-center">Phòng ban không có nhân viên</p>
-                ) : (
-                  deptEmps.map((emp) => {
-                    const checked = selectedEmpIds.includes(emp.id)
-                    return (
-                      <button
-                        key={emp.id}
-                        type="button"
-                        onClick={() => toggleEmp(emp.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition cursor-pointer border-none ${
-                          checked
-                            ? "bg-blue-50 dark:bg-blue-950"
-                            : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition ${
-                          checked
-                            ? "bg-blue-600 border-blue-600"
-                            : "border-zinc-300 dark:border-zinc-600"
-                        }`}>
-                          {checked && <Check size={12} className="text-white" />}
-                        </div>
-                        <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                          {emp.avatarURL ? (
-                            <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
-                          ) : (
-                            <span>{emp.name?.slice(0, 2).toUpperCase() || "??"}</span>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{emp.name}</p>
-                          <p className="text-xs text-zinc-400 truncate">{emp.email}</p>
-                        </div>
-                      </button>
-                    )
-                  })
-                )}
+          {selectedDeptId && (() => {
+            const existingEmpIds = projectMembers.map((m) => m.employeeId)
+            const availableEmps = deptEmps.filter((e) => !existingEmpIds.includes(e.id))
+            return (
+              <div>
+                <label className={labelClass}>Chọn thành viên ({availableEmps.length} người)</label>
+                <div className="max-h-56 overflow-y-auto space-y-1 rounded-lg border border-zinc-200 dark:border-zinc-700 p-1">
+                  {availableEmps.length === 0 ? (
+                    <p className="px-3 py-4 text-sm text-zinc-400 text-center">Tất cả nhân viên phòng ban này đã ở trong dự án</p>
+                  ) : (
+                    availableEmps.map((emp) => {
+                      const checked = selectedEmpIds.includes(emp.id)
+                      return (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onClick={() => toggleEmp(emp.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition cursor-pointer border-none ${
+                            checked
+                              ? "bg-blue-50 dark:bg-blue-950"
+                              : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition ${
+                            checked
+                              ? "bg-blue-600 border-blue-600"
+                              : "border-zinc-300 dark:border-zinc-600"
+                          }`}>
+                            {checked && <Check size={12} className="text-white" />}
+                          </div>
+                          <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                            {emp.avatarURL ? (
+                              <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                            ) : (
+                              <span>{emp.name?.slice(0, 2).toUpperCase() || "??"}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{emp.name}</p>
+                            <p className="text-xs text-zinc-400 truncate">{emp.email}</p>
+                          </div>
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
         </div>
-      </Modal>
+      )
+    }
 
-      <Modal
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        title="Sửa project"
-        width={560}
-        footer={
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFormOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none"
-            >
-              Huỷ
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
-            >
-              Cập nhật
-            </button>
-          </div>
+    const result = await MySwal.fire({
+      title: "Thêm phòng ban và thành viên",
+      html: <AddMemberContent />,
+      showCancelButton: true,
+      confirmButtonText: "Thêm",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: () => {
+        if (!currentDeptId) {
+          MySwal.showValidationMessage("Vui lòng chọn phòng ban")
+          return false
         }
-      >
+        if (currentEmpIds.length === 0) {
+          MySwal.showValidationMessage("Vui lòng chọn thành viên")
+          return false
+        }
+        return { departmentId: currentDeptId, employeeIds: currentEmpIds }
+      },
+    })
+
+    if (!result.isConfirmed) return
+
+    const { departmentId, employeeIds } = result.value
+    try {
+      if (!projectDeptIds.includes(departmentId)) {
+        await projectDepartmentService.create({ projectId: project.id, departmentId })
+      }
+
+      const existingEmpIds = projectMembers.map((m) => m.employeeId)
+      const empIdsToAdd = employeeIds.filter((id: string) => !existingEmpIds.includes(id))
+      const newMembers = currentDeptEmps.filter((e) => empIdsToAdd.includes(e.id))
+
+      if (empIdsToAdd.length > 0) {
+        await Promise.all(
+          empIdsToAdd.map((empId: string) =>
+            projectEmployeeService.create({ projectId: project.id, employeeId: empId })
+          )
+        )
+        if (user?.employeeId) {
+          const deptName = allDepartments.find((d) => d.id === departmentId)?.name || ""
+          await Promise.all(
+            newMembers.map((m) =>
+              projectLogService.create({
+                projectId: project.id,
+                employeeId: user.employeeId,
+                action: "assigned",
+                description: `${m.name} - ${deptName}`,
+              })
+            )
+          )
+        }
+      }
+      fetchProject()
+    } catch (err) {
+      console.error("Failed to add member", err)
+    }
+  }
+
+  const handleOpenEdit = async () => {
+    if (!project) return
+
+    const snap: FormData = {
+      title: project.title,
+      description: project.description,
+      priority: project.priority,
+      status: project.status,
+      progress: project.progress,
+      startDate: project.startDate ? project.startDate.slice(0, 10) : "",
+      dueDate: project.dueDate ? project.dueDate.slice(0, 10) : "",
+      estimatedHours: project.estimatedHours || 0,
+    }
+
+    let initialAttachments: FileAttachment[] = []
+    try {
+      initialAttachments = JSON.parse(project.attachments || "[]")
+    } catch {}
+
+    let currentForm = { ...snap }
+    let currentAttachments = [...initialAttachments]
+
+    const EditFormContent = () => {
+      const [form, setForm] = useState<FormData>(snap)
+      const [attachments, setAttachments] = useState<FileAttachment[]>(initialAttachments)
+      const [uploading, setUploading] = useState(false)
+      const [priorityOpen, setPriorityOpen] = useState(false)
+      const [statusOpen, setStatusOpen] = useState(false)
+
+      useEffect(() => { currentForm = form }, [form])
+      useEffect(() => { currentAttachments = attachments }, [attachments])
+
+      const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+        setUploading(true)
+        try {
+          const { data } = await uploadService.uploadFiles(Array.from(files))
+          setAttachments((prev) => [...prev, ...data.data])
+        } catch {
+          console.error("Failed to upload files")
+        } finally {
+          setUploading(false)
+          e.target.value = ""
+        }
+      }
+
+      const removeAttachment = (index: number) => {
+        setAttachments((prev) => prev.filter((_, i) => i !== index))
+      }
+
+      return (
         <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
           <div>
             <label className={labelClass}>Tiêu đề</label>
@@ -1081,75 +675,466 @@ export default function ProjectDetail() {
             )}
           </div>
         </div>
-      </Modal>
+      )
+    }
 
-      <Modal
-        open={!!logDetail}
-        onClose={() => setLogDetail(null)}
-        title="Chi tiết hoạt động"
-        width={480}
-      >
-        {logDetail && (() => {
-          const emp = logEmployeeMap[logDetail.employeeId]
-          const initials = emp?.name?.slice(0, 2).toUpperCase() || "??"
-          return (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                  {emp?.avatarURL ? (
-                    <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <span>{initials}</span>
-                  )}
-                </div>
+    const result = await MySwal.fire({
+      title: "Sửa project",
+      html: <EditFormContent />,
+      showCancelButton: true,
+      confirmButtonText: "Cập nhật",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: () => {
+        if (!currentForm.title.trim()) {
+          MySwal.showValidationMessage("Vui lòng nhập tiêu đề")
+          return false
+        }
+        return { form: currentForm, attachments: currentAttachments }
+      },
+    })
+
+    if (!result.isConfirmed) return
+
+    const { form, attachments } = result.value
+
+    try {
+      const payload: any = {
+        title: form.title,
+        description: form.description || undefined,
+        priority: form.priority,
+        status: form.status,
+        progress: form.progress,
+        startDate: form.startDate || undefined,
+        dueDate: form.dueDate || undefined,
+        estimatedHours: form.estimatedHours || undefined,
+        attachments: JSON.stringify(attachments),
+      }
+      await projectService.update(project.id, payload)
+
+      const fieldLabels: Record<string, string> = {
+        title: "tiêu đề",
+        description: "mô tả",
+        priority: "mức độ",
+        status: "trạng thái",
+        progress: "tiến độ",
+        startDate: "ngày bắt đầu",
+        dueDate: "hạn chót",
+        estimatedHours: "giờ dự kiến",
+      }
+
+      const formatVal = (key: string, val: string): string => {
+        if (!val) return "trống"
+        if (key === "priority") return priorityLabels[val] || val
+        if (key === "status") return statusLabels[val] || val
+        if (key === "startDate" || key === "dueDate") return new Date(val).toLocaleDateString("vi-VN")
+        return val
+      }
+
+      const roleLabel: Record<string, string> = {
+        admin: "Admin",
+        manager: "Manager",
+        member: "Member",
+      }
+
+      const changed: string[] = []
+      for (const [key, label] of Object.entries(fieldLabels)) {
+        const oldVal = String((snap as any)[key] ?? "")
+        const newVal = String((form as any)[key] ?? "")
+        if (oldVal !== newVal) {
+          changed.push(`${label}: ${formatVal(key, oldVal)} → ${formatVal(key, newVal)}`)
+        }
+      }
+
+      if (user?.employeeId) {
+        const roleStr = roleLabel[user.position] || user.position
+        await projectLogService.create({
+          projectId: project.id,
+          employeeId: user.employeeId,
+          action: "updated",
+          description: changed.length > 0
+            ? `[${roleStr}] ${changed.join("; ")}`
+            : `[${roleStr}] thông tin project`,
+        })
+      }
+
+      fetchProject()
+    } catch {
+      console.error("Failed to save project")
+    }
+  }
+
+  const handleLogDetail = (log: ProjectLog) => {
+    const emp = logEmployeeMap[log.employeeId]
+    const initials = emp?.name?.slice(0, 2).toUpperCase() || "??"
+
+    MySwal.fire({
+      title: "Chi tiết hoạt động",
+      html: (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
+            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+              {emp?.avatarURL ? (
+                <img src={emp.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{emp?.name || "—"}</p>
+              <p className="text-xs text-zinc-400">{emp?.employeeCode ? `Mã NV: ${emp.employeeCode}` : ""}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hành động</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  log.action === "assigned" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" :
+                  log.action === "updated" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" :
+                  log.action === "completed" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" :
+                  "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                }`}>
+                  {actionLabels[log.action] || log.action}
+                </span>
+              </p>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Thời gian</label>
+              <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                {new Date(log.createdAt).toLocaleString("vi-VN")}
+              </p>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Chi tiết</label>
+            <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3">
+              {log.description || "—"}
+            </p>
+          </div>
+        </div>
+      ),
+      confirmButtonText: "Đóng",
+    })
+  }
+
+  const handleDelete = async () => {
+    if (!project) return
+    const confirmed = await showDeleteConfirm({
+      name: project.title,
+    })
+    if (!confirmed) return
+    try {
+      await projectService.delete(project.id)
+      navigate("/tasks")
+    } catch {
+      console.error("Failed to delete project")
+    }
+  }
+
+  const removeDepartment = async (departmentId: string) => {
+    if (!project) return
+    try {
+      await projectDepartmentService.delete(project.id, departmentId)
+      if (user?.employeeId) {
+        const dept = departments.find((d) => d.id === departmentId)
+        await projectLogService.create({
+          projectId: project.id,
+          employeeId: user.employeeId,
+          action: "updated",
+          description: `Phòng ban ${dept?.name || ""}`,
+        })
+      }
+      fetchProject()
+    } catch {
+      console.error("Failed to remove department")
+    }
+  }
+
+  const removeMember = async (id: string) => {
+    if (!project) return
+    try {
+      const pm = projectMembers.find((m) => m.id === id)
+      await projectEmployeeService.delete(id)
+      if (user?.employeeId && pm?.employee?.name) {
+        await projectLogService.create({
+          projectId: project.id,
+          employeeId: user.employeeId,
+          action: "updated",
+          description: pm.employee.name,
+        })
+      }
+      fetchProject()
+    } catch {
+      console.error("Failed to remove member")
+    }
+  }
+
+  const handleCommentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setCommentUploading(true)
+    try {
+      const { data } = await uploadService.uploadFiles(Array.from(files))
+      setCommentFiles((prev) => [...prev, ...data.data])
+    } catch {
+      console.error("Failed to upload comment files")
+    } finally {
+      setCommentUploading(false)
+      e.target.value = ""
+    }
+  }
+
+  const removeCommentFile = (index: number) => {
+    setCommentFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleAddComment = async () => {
+    if (!project || !user?.employeeId || (!commentText.trim() && commentFiles.length === 0)) return
+    try {
+      const { data } = await projectCommentService.create({
+        projectId: project.id,
+        employeeId: user.employeeId,
+        content: commentText.trim() || undefined,
+        attachments: commentFiles.length > 0 ? JSON.stringify(commentFiles) : undefined,
+      })
+      const emp = await employeeService.getById(user.employeeId)
+      setComments((prev) => [{ ...data.data, employee: emp.data.data }, ...prev])
+      if (user.employeeId) {
+        await projectLogService.create({
+          projectId: project.id,
+          employeeId: user.employeeId,
+          action: "commented",
+          description: commentText.trim() || "đã bình luận",
+        })
+      }
+      setCommentText("")
+      setCommentFiles([])
+      fetchProject()
+    } catch {
+      console.error("Failed to add comment")
+    }
+  }
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await projectCommentService.delete(commentId)
+      setComments((prev) => prev.filter((c) => c.id !== commentId))
+      if (project && user?.employeeId) {
+        await projectLogService.create({
+          projectId: project.id,
+          employeeId: user.employeeId,
+          action: "updated",
+          description: "đã xoá một bình luận",
+        })
+      }
+      fetchProject()
+    } catch {
+      console.error("Failed to delete comment")
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-sm text-zinc-400">Đang tải...</p>
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <p className="text-sm text-zinc-500">Không tìm thấy project</p>
+        <button onClick={() => navigate("/tasks")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay lại</button>
+      </div>
+    )
+  }
+
+  let fileCount = 0
+  try {
+    const parsed = JSON.parse(project.attachments || "[]")
+    fileCount = Array.isArray(parsed) ? parsed.length : 0
+  } catch {}
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate("/tasks")} className="w-9 h-9 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer border-none">
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{project.title}</h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Chi tiết project</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {canManageMembers && (
+            <button
+              onClick={handleOpenAddMember}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition cursor-pointer border-none shadow-sm"
+            >
+              <UserPlus size={15} />
+              <span>Thêm thành viên</span>
+            </button>
+          )}
+          {canEdit && (
+            <button onClick={handleOpenEdit} className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-4 py-2 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition cursor-pointer bg-transparent">
+              <Pencil size={15} />
+              <span>Sửa</span>
+            </button>
+          )}
+          {canDelete && (
+            <button onClick={handleDelete} className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer bg-transparent">
+              <Trash2 size={15} />
+              <span>Xoá</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thông tin project</h2>
+            </div>
+            <div className="p-5 space-y-4">
+              {project.description && (
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{emp?.name || "—"}</p>
-                  <p className="text-xs text-zinc-400">{emp?.employeeCode ? `Mã NV: ${emp.employeeCode}` : ""}</p>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</label>
+                  <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100">{project.description}</p>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+              )}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hành động</label>
-                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      logDetail.action === "assigned" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" :
-                      logDetail.action === "updated" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" :
-                      logDetail.action === "completed" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" :
-                      "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                    }`}>
-                      {actionLabels[logDetail.action] || logDetail.action}
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mức độ</label>
+                  <p className="mt-1">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${priorityColors[project.priority] || ""}`}>
+                      {priorityLabels[project.priority] || project.priority}
                     </span>
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Thời gian</label>
-                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {new Date(logDetail.createdAt).toLocaleString("vi-VN")}
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Trạng thái</label>
+                  <p className="mt-1">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[project.status] || ""}`}>
+                      {statusLabels[project.status] || project.status}
+                    </span>
                   </p>
                 </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tiến độ</label>
+                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.progress}%</p>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tệp đính kèm</label>
+                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{fileCount} tệp</p>
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Chi tiết</label>
-                <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3">
-                  {logDetail.description || "—"}
-                </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {project.startDate && (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày bắt đầu</label>
+                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.startDate).toLocaleDateString("vi-VN")}</p>
+                  </div>
+                )}
+                {project.dueDate && (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hạn chót</label>
+                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.dueDate).toLocaleDateString("vi-VN")}</p>
+                  </div>
+                )}
+                {project.estimatedHours && (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giờ dự kiến</label>
+                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.estimatedHours}h</p>
+                  </div>
+                )}
+                {project.actualHours && (
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giờ thực tế</label>
+                    <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.actualHours}h</p>
+                  </div>
+                )}
+              </div>
+              <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${project.progress === 100 ? "bg-emerald-500" : "bg-blue-500"}`}
+                  style={{ width: `${project.progress}%` }}
+                />
               </div>
             </div>
-          )
-        })()}
-      </Modal>
+          </div>
 
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Xác nhận xoá"
-        variant="danger"
-        confirmText="Xoá"
-        cancelText="Huỷ"
-      >
-        Bạn có chắc muốn xoá project <strong>{project.title}</strong>? Hành động này không thể hoàn tác.
-      </ConfirmDialog>
+          {isAdmin && (
+            <ProjectLogsSection
+              logs={logs}
+              logEmployeeMap={logEmployeeMap}
+              onSelectLog={handleLogDetail}
+            />
+          )}
+
+          <ProjectCommentsSection
+            comments={comments}
+            user={user}
+            commentText={commentText}
+            setCommentText={setCommentText}
+            commentFiles={commentFiles}
+            commentUploading={commentUploading}
+            handleCommentFileUpload={handleCommentFileUpload}
+            removeCommentFile={removeCommentFile}
+            handleAddComment={handleAddComment}
+            handleDeleteComment={handleDeleteComment}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <ProjectDepartmentsSection
+            departments={departments}
+            deptEmployeeCount={deptEmployeeCount}
+            canEdit={canEdit}
+            onOpenAddModal={handleOpenAddMember}
+            onRemoveDepartment={removeDepartment}
+          />
+
+          <ProjectMembersSection
+            projectMembers={projectMembers}
+            departments={departments}
+            canManageMembers={canManageMembers}
+            isManager={isManager}
+            canEdit={canEdit}
+            userDeptId={userDeptId}
+            onOpenAddModal={handleOpenAddMember}
+            onRemoveMember={removeMember}
+          />
+
+          <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thông tin khác</h2>
+            </div>
+            <div className="p-5 space-y-3">
+              <div>
+                <label className="text-xs text-zinc-400">Ngày tạo</label>
+                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.createdAt).toLocaleString("vi-VN")}</p>
+              </div>
+              {project.updatedAt && (
+                <div>
+                  <label className="text-xs text-zinc-400">Cập nhật lần cuối</label>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.updatedAt).toLocaleString("vi-VN")}</p>
+                </div>
+              )}
+              {project.completedAt && (
+                <div>
+                  <label className="text-xs text-zinc-400">Hoàn thành lúc</label>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.completedAt).toLocaleString("vi-VN")}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

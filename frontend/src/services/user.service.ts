@@ -2,7 +2,7 @@ import api from "@/lib/axios";
 
 export type UserRole = "admin" | "user";
 
-export type UserPosition = "admin" | "manager" | "member";
+export type UserPosition ="manager" | "member";
 
 export interface User {
   id: string;

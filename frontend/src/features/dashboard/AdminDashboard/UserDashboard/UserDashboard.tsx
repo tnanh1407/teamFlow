@@ -52,7 +52,6 @@ export default function UserDashboard() {
             setDeptMembers(deptUsers)
           }
         } else {
-          // Manager: tìm phòng ban mà manager quản lý (qua managerId)
           const [projRes, userRes, empRes, deptRes] = await Promise.all([
             projectService.getMyProjects(),
             userService.getAll(),
@@ -65,13 +64,11 @@ export default function UserDashboard() {
           const myEmp = empRes.data.data.find((e) => e.id === user!.employeeId)
           setEmp(myEmp || null)
 
-          // Tìm phòng ban mà manager này quản lý (departments.managerId === employeeId)
           const managedDept = deptRes.data.data.find((d) => d.managerId === user!.employeeId)
           if (managedDept) {
             setDept(managedDept)
             setDeptManager(myEmp || null)
 
-            // Lấy tất cả thành viên thuộc phòng ban mà manager quản lý
             const deptEmpIds = empRes.data.data
               .filter((e) => e.departmentId === managedDept.id)
               .map((e) => e.id)
@@ -80,7 +77,6 @@ export default function UserDashboard() {
             )
             setDeptMembers(deptUsers)
           } else if (myEmp?.departmentId) {
-            // Fallback: nếu không quản lý phòng ban nào, hiển thị phòng ban mà employee thuộc về
             const myDept = deptRes.data.data.find((d) => d.id === myEmp.departmentId)
             setDept(myDept || null)
 
@@ -159,7 +155,7 @@ export default function UserDashboard() {
             {user.avatarURL ? (
               <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
             ) : (
-              <span>{user.username.slice(0, 2).toUpperCase()}</span>
+              <span>{(user.username ?? "").slice(0, 2).toUpperCase()}</span>
             )}
           </div>
         )}
@@ -351,7 +347,7 @@ export default function UserDashboard() {
                       {deptManager.avatarURL ? (
                         <img src={deptManager.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
-                        <span>{deptManager.name?.slice(0, 2).toUpperCase()}</span>
+                        <span>{(deptManager.name ?? "").slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -366,12 +362,12 @@ export default function UserDashboard() {
                       {m.avatarURL ? (
                         <img src={m.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
                       ) : (
-                        <span>{m.username.slice(0, 2).toUpperCase()}</span>
+                        <span>{(m.username ?? "").slice(0, 2).toUpperCase()}</span>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{m.username}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{m.employeeId.slice(0, 8)}...</p>
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{(m.username ?? "")}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.employeeId ?? "").slice(0, 8)}...</p>
                     </div>
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${m.status ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"}`}>
                       {m.status ? "Hoạt động" : "Vô hiệu"}
@@ -393,12 +389,12 @@ export default function UserDashboard() {
                         {m.avatarURL ? (
                           <img src={m.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
                         ) : (
-                          <span>{m.username.slice(0, 2).toUpperCase()}</span>
+                          <span>{(m.username ?? "").slice(0, 2).toUpperCase()}</span>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{m.username}</p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{m.employeeId.slice(0, 8)}...</p>
+                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{(m.username ?? "")}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.employeeId ?? "").slice(0, 8)}...</p>
                       </div>
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${m.status ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"}`}>
                         {m.status ? "Hoạt động" : "Vô hiệu"}

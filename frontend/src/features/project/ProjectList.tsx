@@ -4,8 +4,7 @@ import { Search, Plus, Trash2, ArrowUpDown, CheckSquare, Calendar, Paperclip, X,
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import uploadService from "@/services/upload.service"
-import Modal from "@/components/ui/Modal"
-import ConfirmDialog from "@/components/ui/ConfirmDialog"
+import { MySwal, showDeleteConfirm } from "@/lib/swal"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 
@@ -78,18 +77,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-
-  const [formOpen, setFormOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
-  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
-  const [priorityOpen, setPriorityOpen] = useState(false)
-  const [statusOpen, setStatusOpen] = useState(false)
-
-  const [attachments, setAttachments] = useState<FileAttachment[]>([])
-  const [uploading, setUploading] = useState(false)
 
   const fetchProjects = async () => {
     try {
@@ -124,73 +112,309 @@ export default function Projects() {
   }
 
   const openCreate = () => {
-    setEditingId(null)
-    setForm(emptyForm)
-    setAttachments([])
-    setFormOpen(true)
+    openFormDialog(null)
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    setUploading(true)
+  const confirmDelete = async (project: Project) => {
+    const confirmed = await showDeleteConfirm({
+      name: project.title,
+    })
+    if (!confirmed) return
     try {
-      const { data } = await uploadService.uploadFiles(Array.from(files))
-      setAttachments((prev) => [...prev, ...data.data])
-    } catch {
-      console.error("Failed to upload files")
-    } finally {
-      setUploading(false)
-      e.target.value = ""
-    }
-  }
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const handleSave = async () => {
-    try {
-      const payload: any = {
-        title: form.title,
-        description: form.description || undefined,
-        priority: form.priority,
-        status: form.status,
-        progress: form.progress,
-        startDate: form.startDate || undefined,
-        dueDate: form.dueDate || undefined,
-        estimatedHours: form.estimatedHours || undefined,
-        attachments: JSON.stringify(attachments),
-      }
-      if (editingId) {
-        await projectService.update(editingId, payload)
-      } else {
-        payload.createdBy = user?.employeeId || ""
-        await projectService.create(payload)
-      }
-      setFormOpen(false)
+      await projectService.delete(project.id)
       fetchProjects()
+      toast.success("Đã xoá project")
     } catch {
-      console.error("Failed to save project")
+      toast.error("Xoá thất bại")
     }
   }
 
-  const confirmDelete = (project: Project) => {
-    setDeleteTarget(project)
-    setDeleteOpen(true)
-  }
+  const openFormDialog = (editingProject: Project | null) => {
+    const editingId = editingProject?.id ?? null
+    const initialForm: FormData = editingProject
+      ? {
+          title: editingProject.title,
+          description: editingProject.description || "",
+          priority: editingProject.priority,
+          status: editingProject.status,
+          progress: editingProject.progress,
+          startDate: editingProject.startDate || "",
+          dueDate: editingProject.dueDate || "",
+          estimatedHours: editingProject.estimatedHours || 0,
+        }
+      : { ...emptyForm }
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return
+    let initialAttachments: FileAttachment[] = []
     try {
-      await projectService.delete(deleteTarget.id)
-      setDeleteOpen(false)
-      setDeleteTarget(null)
-      fetchProjects()
-    } catch {
-      console.error("Failed to delete project")
+      const parsed = JSON.parse(editingProject?.attachments || "[]")
+      initialAttachments = Array.isArray(parsed) ? parsed : []
+    } catch {}
+
+    const formDataRef = { current: initialForm }
+    const attachmentsRef = { current: initialAttachments }
+
+    const FormComponent = () => {
+      const [form, setForm] = useState<FormData>(initialForm)
+      const [localAttachments, setLocalAttachments] = useState<FileAttachment[]>(initialAttachments)
+      const [uploading, setUploading] = useState(false)
+      const [priorityOpen, setPriorityOpen] = useState(false)
+      const [statusOpen, setStatusOpen] = useState(false)
+
+      useEffect(() => { formDataRef.current = form }, [form])
+      useEffect(() => { attachmentsRef.current = localAttachments }, [localAttachments])
+
+      const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files
+        if (!files || files.length === 0) return
+        setUploading(true)
+        try {
+          const { data } = await uploadService.uploadFiles(Array.from(files))
+          setLocalAttachments((prev) => [...prev, ...data.data])
+        } catch {
+          console.error("Failed to upload files")
+        } finally {
+          setUploading(false)
+          e.target.value = ""
+        }
+      }
+
+      const removeAttachment = (index: number) => {
+        setLocalAttachments((prev) => prev.filter((_, i) => i !== index))
+      }
+
+      return (
+        <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
+          <div>
+            <label className={labelClass}>Tiêu đề</label>
+            <input
+              type="text"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="Nhập tiêu đề project"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Mô tả</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Mô tả project (không bắt buộc)"
+              rows={2}
+              className={inputClass + " resize-none"}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Mức độ</label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => { setPriorityOpen(!priorityOpen); setStatusOpen(false) }}
+                  className={`${inputClass} flex items-center justify-between`}
+                >
+                  <span>{priorityLabels[form.priority] || form.priority}</span>
+                  <span
+                    className={`w-2 h-2 rounded-full ${form.priority === "critical" ? "bg-red-500" :
+                        form.priority === "high" ? "bg-orange-500" :
+                          form.priority === "medium" ? "bg-blue-500" :
+                            "bg-slate-400"
+                      }`}
+                  />
+                </button>
+                {priorityOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+                    {(["low", "medium", "high", "critical"] as const).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => { setForm({ ...form, priority: p }); setPriorityOpen(false) }}
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none flex items-center gap-2 ${form.priority === p ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
+                          }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${p === "critical" ? "bg-red-500" :
+                            p === "high" ? "bg-orange-500" :
+                              p === "medium" ? "bg-blue-500" :
+                                "bg-slate-400"
+                          }`} />
+                        {priorityLabels[p]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Trạng thái</label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => { setStatusOpen(!statusOpen); setPriorityOpen(false) }}
+                  className={`${inputClass} flex items-center justify-between`}
+                >
+                  <span>{statusLabels[form.status] || form.status}</span>
+                </button>
+                {statusOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
+                    {(["todo", "in_progress", "review", "completed", "cancelled"] as const).map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => { setForm({ ...form, status: s }); setStatusOpen(false) }}
+                        className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.status === s ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
+                          }`}
+                      >
+                        {statusLabels[s]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>
+              Tiến độ: <span className="text-blue-600 font-bold">{form.progress}%</span>
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={form.progress}
+              onChange={(e) => setForm({ ...form, progress: Number(e.target.value) })}
+              className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-zinc-200 dark:bg-zinc-700 accent-blue-500"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Ngày bắt đầu</label>
+              <input
+                type="date"
+                value={form.startDate}
+                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Ngày kết thúc</label>
+              <input
+                type="date"
+                value={form.dueDate}
+                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+                className={inputClass}
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Thời gian dự kiến (giờ)</label>
+            <input
+              type="number"
+              min={0}
+              value={form.estimatedHours}
+              onChange={(e) => setForm({ ...form, estimatedHours: Number(e.target.value) })}
+              placeholder="VD: 8"
+              className={inputClass}
+            />
+          </div>
+
+          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <label className={labelClass}>Tệp đính kèm</label>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1.5 text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition cursor-pointer border border-blue-200 dark:border-blue-800">
+                <Paperclip size={14} />
+                {uploading ? "Đang tải..." : "Chọn tệp"}
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </label>
+              <span className="text-xs text-zinc-400">Hình ảnh, PDF, DOC, XLS, ZIP... Tối đa 50MB/tệp</span>
+            </div>
+            {localAttachments.length > 0 && (
+              <div className="space-y-1.5">
+                {localAttachments.map((att, index) => {
+                  const Icon = getFileIcon(att.mimetype)
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2"
+                    >
+                      <Icon size={16} className="text-zinc-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate block"
+                        >
+                          {att.originalName}
+                        </a>
+                        <p className="text-xs text-zinc-400">{formatFileSize(att.size)}</p>
+                      </div>
+                      <a
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 rounded text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer"
+                        title="Tải xuống"
+                      >
+                        <Download size={14} />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer border-none"
+                        title="Xoá"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )
     }
+
+    MySwal.fire({
+      title: editingId ? "Sửa project" : "Thêm project",
+      html: <FormComponent />,
+      showCancelButton: true,
+      confirmButtonText: editingId ? "Cập nhật" : "Tạo mới",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: async () => {
+        const form = formDataRef.current
+        const attachments = attachmentsRef.current
+        const payload: any = {
+          title: form.title,
+          description: form.description || undefined,
+          priority: form.priority,
+          status: form.status,
+          progress: form.progress,
+          startDate: form.startDate || undefined,
+          dueDate: form.dueDate || undefined,
+          estimatedHours: form.estimatedHours || undefined,
+          attachments: JSON.stringify(attachments),
+        }
+        try {
+          if (editingId) {
+            await projectService.update(editingId, payload)
+          } else {
+            payload.createdBy = user?.employeeId || ""
+            await projectService.create(payload)
+          }
+          fetchProjects()
+        } catch {
+          throw new Error("Lưu thất bại")
+        }
+      },
+    })
   }
 
   const inputClass =
@@ -502,241 +726,6 @@ export default function Projects() {
           </table>
         </div>
       </div>
-
-      {/* Create/Edit Modal */}
-      <Modal
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        title={editingId ? "Sửa project" : "Thêm project"}
-        width={560}
-        footer={
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFormOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none"
-            >
-              Huỷ
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
-            >
-              {editingId ? "Cập nhật" : "Tạo mới"}
-            </button>
-          </div>
-        }
-      >
-        <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
-          <div>
-            <label className={labelClass}>Tiêu đề</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Nhập tiêu đề project"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Mô tả</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Mô tả project (không bắt buộc)"
-              rows={2}
-              className={inputClass + " resize-none"}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Mức độ</label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setPriorityOpen(!priorityOpen); setStatusOpen(false) }}
-                  className={`${inputClass} flex items-center justify-between`}
-                >
-                  <span>{priorityLabels[form.priority] || form.priority}</span>
-                  <span
-                    className={`w-2 h-2 rounded-full ${form.priority === "critical" ? "bg-red-500" :
-                        form.priority === "high" ? "bg-orange-500" :
-                          form.priority === "medium" ? "bg-blue-500" :
-                            "bg-slate-400"
-                      }`}
-                  />
-                </button>
-                {priorityOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                    {(["low", "medium", "high", "critical"] as const).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => { setForm({ ...form, priority: p }); setPriorityOpen(false) }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none flex items-center gap-2 ${form.priority === p ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
-                          }`}
-                      >
-                        <span className={`w-2 h-2 rounded-full ${p === "critical" ? "bg-red-500" :
-                            p === "high" ? "bg-orange-500" :
-                              p === "medium" ? "bg-blue-500" :
-                                "bg-slate-400"
-                          }`} />
-                        {priorityLabels[p]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Trạng thái</label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setStatusOpen(!statusOpen); setPriorityOpen(false) }}
-                  className={`${inputClass} flex items-center justify-between`}
-                >
-                  <span>{statusLabels[form.status] || form.status}</span>
-                </button>
-                {statusOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
-                    {(["todo", "in_progress", "review", "completed", "cancelled"] as const).map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => { setForm({ ...form, status: s }); setStatusOpen(false) }}
-                        className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.status === s ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
-                          }`}
-                      >
-                        {statusLabels[s]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>
-              Tiến độ: <span className="text-blue-600 font-bold">{form.progress}%</span>
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={form.progress}
-              onChange={(e) => setForm({ ...form, progress: Number(e.target.value) })}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-zinc-200 dark:bg-zinc-700 accent-blue-500"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Ngày bắt đầu</label>
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Ngày kết thúc</label>
-              <input
-                type="date"
-                value={form.dueDate}
-                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                className={inputClass}
-              />
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Thời gian dự kiến (giờ)</label>
-            <input
-              type="number"
-              min={0}
-              value={form.estimatedHours}
-              onChange={(e) => setForm({ ...form, estimatedHours: Number(e.target.value) })}
-              placeholder="VD: 8"
-              className={inputClass}
-            />
-          </div>
-
-          {/* File attachments */}
-          <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
-            <label className={labelClass}>Tệp đính kèm</label>
-            <div className="flex items-center gap-2 mb-2">
-              <label className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1.5 text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition cursor-pointer border border-blue-200 dark:border-blue-800">
-                <Paperclip size={14} />
-                {uploading ? "Đang tải..." : "Chọn tệp"}
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
-              </label>
-              <span className="text-xs text-zinc-400">Hình ảnh, PDF, DOC, XLS, ZIP... Tối đa 50MB/tệp</span>
-            </div>
-            {attachments.length > 0 && (
-              <div className="space-y-1.5">
-                {attachments.map((att, index) => {
-                  const Icon = getFileIcon(att.mimetype)
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2"
-                    >
-                      <Icon size={16} className="text-zinc-400 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <a
-                          href={att.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate block"
-                        >
-                          {att.originalName}
-                        </a>
-                        <p className="text-xs text-zinc-400">{formatFileSize(att.size)}</p>
-                      </div>
-                      <a
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1 rounded text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer"
-                        title="Tải xuống"
-                      >
-                        <Download size={14} />
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => removeAttachment(index)}
-                        className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer border-none"
-                        title="Xoá"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      </Modal>
-
-      {/* Delete Confirm */}
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Xác nhận xoá"
-        variant="danger"
-        confirmText="Xoá"
-        cancelText="Huỷ"
-      >
-        Bạn có chắc muốn xoá project{" "}
-        <strong>{deleteTarget?.title}</strong>? Hành động này không thể hoàn tác.
-      </ConfirmDialog>
     </div>
   )
 }

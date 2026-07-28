@@ -1,15 +1,11 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import UserDashboard from "@/features/dashboard/UserDashboard";
 import Login from "@/features/auth/Login";
 import ForgotPassword from "@/features/auth/ForgotPassword";
-import AdminDashboard from "@/features/dashboard/AdminDashboard";
 import UserList from "@/features/user/UserList";
 import UserDetail from "@/features/user/UserDetail";
-import DepartmentList from "@/features/department/DepartmentList";
 import EmployeeList from "@/features/employee/EmployeeList";
 import EmployeeDetail from "@/features/employee/EmployeeDetail";
-import DepartmentDetail from "@/features/department/DepartmentDetail";
 import PositionList from "@/features/position/PositionList";
 import ProjectList from "@/features/project/ProjectList";
 import Settings from "@/features/user/Settings";
@@ -17,6 +13,10 @@ import NotFound from "@/features/user/NotFound";
 import ProjectDetail from "@/features/project/ProjectDetail";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ReactNode } from "react";
+import DepartmentList from "./features/department/DepartmentList/DepartmentList";
+import DepartmentDetail from "./features/department/DepartmentDetail/DepartmentDetail";
+import UserDashboard from "./features/dashboard/AdminDashboard/UserDashboard/UserDashboard";
+import AdminDashboard from "./features/dashboard/AdminDashboard/AdminDashboard";
 
 const positionHome: Record<string, string> = {
   admin: "/dashboard",

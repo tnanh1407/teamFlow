@@ -15,63 +15,66 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import type { User } from "@/services/user.service"
-
-interface NavGroup {
-  label: string
-  icon: LucideIcon
-  children: { to: string; label: string; icon: LucideIcon }[]
+import type { UserPosition, UserRole } from "@/services/user.service"
+interface IUserSideBar {
+  id: string;
+  departmentId: string;
+  name: string;
+  userPosition: UserPosition;
+  role: UserRole;
 }
 
-interface NavItem {
-  to: string
-  label: string
-  icon: LucideIcon
+interface ISidebarItem {
+  label: string;
+  icon: LucideIcon;
+  to?: string;
+  children?: ISidebarItem[];
 }
 
-type NavEntry = NavItem | NavGroup
-
-function isGroup(entry: NavEntry): entry is NavGroup {
-  return "children" in entry
-}
-
-function getNavItems(user: User | null): NavEntry[] {
-  if (!user) return []
-  if (user.role === "admin") {
-    return [
-      { to: "/dashboard", label: "Tổng quan", icon: LayoutDashboard },
+const sidebarItems: ISidebarItem[] = [
+  {
+    label: "Tổng quan",
+    to: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Quản trị",
+    icon: Shield,
+    children: [
       {
-        label: "Quản trị",
-        icon: Shield,
-        children: [
-          { to: "/employees", label: "Quản lí Nhân Viên", icon: Briefcase },
-          { to: "/departments", label: "Quản lí Phòng Ban", icon: Building2 },
-          { to: "/positions", label: "Quản lí Chức Vụ", icon: Medal },
-          { to: "/projects", label: "Quản lí Dự án", icon: CheckSquare },
-        ],
+        label: "Nhân viên",
+        to: "/employees",
+        icon: Briefcase,
       },
       {
-        label: "Cài đặt",
-        icon: Settings,
-        children: [
-          { to: "/settings", label: "Thông tin cá nhân", icon: Briefcase },
-        ],
+        label: "Phòng ban",
+        to: "/departments",
+        icon: Building2,
       },
-    ]
-  }
-
-  const items: NavEntry[] = [
-    { to: "/", label: "Tổng quan", icon: LayoutDashboard },
-    { to: "/projects", label: "Dự án", icon: CheckSquare },
-    { to: "/settings", label: "Cài đặt", icon: Settings },
-  ]
-
-  if (user.position === "manager") {
-    items.splice(2, 0, { to: "/members", label: "Quản lí thành viên", icon: Users })
-  }
-
-  return items
-}
+      {
+        label: "Chức vụ",
+        to: "/positions",
+        icon: Medal,
+      },
+      {
+        label: "Dự án",
+        to: "/projects",
+        icon: CheckSquare,
+      },
+    ],
+  },
+  {
+    label: "Cài đặt",
+    icon: Settings,
+    children: [
+      {
+        label: "Thông tin cá nhân",
+        to: "/settings",
+        icon: Users,
+      },
+    ],
+  },
+];
 
 function NavGroupItem({ group, collapsed }: { group: NavGroup; collapsed: boolean }) {
   const [open, setOpen] = useState(true)

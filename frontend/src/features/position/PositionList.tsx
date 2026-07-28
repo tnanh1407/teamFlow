@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Medal, Fingerprint, Copy } from "lucide-react"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
-import Modal from "@/components/ui/Modal"
-import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import { toast } from "sonner"
+import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
 
 interface FormData {
@@ -29,19 +28,88 @@ const levelLabels: Record<string, string> = {
 
 const levelOrder = ["Intern", "Junior", "Middle", "Senior", "Manager"]
 
+function FormContent({
+  dataRef,
+}: {
+  dataRef: React.MutableRefObject<FormData>
+}) {
+  const [form, setForm] = useState<FormData>(dataRef.current)
+  const [levelOpen, setLevelOpen] = useState(false)
+
+  const inputClass =
+    "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
+
+  React.useEffect(() => {
+    dataRef.current = form
+  }, [form, dataRef])
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className={labelClass}>Tên chức vụ</label>
+        <input
+          type="text"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          placeholder="VD: Trưởng phòng"
+          className={inputClass}
+        />
+      </div>
+      <div>
+        <label className={labelClass}>Cấp bậc</label>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setLevelOpen(!levelOpen)}
+            className={`${inputClass} flex items-center justify-between text-left`}
+          >
+            <span className={form.level ? "text-zinc-900" : "text-zinc-400"}>
+              {form.level ? levelLabels[form.level] : "Chọn cấp bậc"}
+            </span>
+          </button>
+          {levelOpen && (
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+              {(["Intern", "Junior", "Middle", "Senior", "Manager"] as const).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => {
+                    setForm({ ...form, level: l })
+                    setLevelOpen(false)
+                  }}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${
+                    form.level === l ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
+                  }`}
+                >
+                  {levelLabels[l]}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <div>
+        <label className={labelClass}>Mô tả</label>
+        <textarea
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          placeholder="Mô tả chức vụ (không bắt buộc)"
+          rows={3}
+          className={inputClass + " resize-none"}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function Positions() {
   const [positions, setPositions] = useState<Position[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-
-  const [formOpen, setFormOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
-  const [deleteTarget, setDeleteTarget] = useState<Position | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
-  const [levelOpen, setLevelOpen] = useState(false)
-  const [detailTarget, setDetailTarget] = useState<Position | null>(null)
+
+  const formDataRef = useRef<FormData>(emptyForm)
 
   const fetchPositions = async () => {
     try {
@@ -72,64 +140,140 @@ export default function Positions() {
     setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
   }
 
-  const openCreate = () => {
-    setEditingId(null)
-    setForm(emptyForm)
-    setFormOpen(true)
-  }
-
-  const openEdit = (e: React.MouseEvent, pos: Position) => {
-    e.stopPropagation()
-    setEditingId(pos.id)
-    setForm({
-      name: pos.name,
-      description: pos.description,
-      level: pos.level,
+  const openCreate = async () => {
+    formDataRef.current = emptyForm
+    await MySwal.fire({
+      title: "Thêm chức vụ",
+      width: 420,
+      html: <FormContent dataRef={formDataRef} />,
+      showCancelButton: true,
+      confirmButtonText: "Tạo mới",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: async () => {
+        const data = formDataRef.current
+        if (!data.name.trim()) {
+          MySwal.showValidationMessage("Vui lòng nhập tên chức vụ")
+          return false
+        }
+        try {
+          const payload: any = { name: data.name, description: data.description || undefined }
+          if (data.level) payload.level = data.level
+          await positionService.create(payload)
+          await fetchPositions()
+        } catch {
+          MySwal.showValidationMessage("Không thể lưu chức vụ")
+          return false
+        }
+      },
     })
-    setFormOpen(true)
   }
 
-  const openDetail = (pos: Position) => {
-    setDetailTarget(pos)
-  }
-
-  const handleSave = async () => {
-    try {
-      const payload: any = { name: form.name, description: form.description || undefined }
-      if (form.level) payload.level = form.level
-      if (editingId) {
-        await positionService.update(editingId, payload)
-      } else {
-        await positionService.create(payload)
-      }
-      setFormOpen(false)
-      fetchPositions()
-    } catch {
-      console.error("Failed to save position")
-    }
-  }
-
-  const confirmDelete = (e: React.MouseEvent, pos: Position) => {
+  const openEdit = async (e: React.MouseEvent, pos: Position) => {
     e.stopPropagation()
-    setDeleteTarget(pos)
-    setDeleteOpen(true)
+    formDataRef.current = { name: pos.name, description: pos.description, level: pos.level }
+    await MySwal.fire({
+      title: "Sửa chức vụ",
+      width: 420,
+      html: <FormContent dataRef={formDataRef} />,
+      showCancelButton: true,
+      confirmButtonText: "Cập nhật",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: async () => {
+        const data = formDataRef.current
+        if (!data.name.trim()) {
+          MySwal.showValidationMessage("Vui lòng nhập tên chức vụ")
+          return false
+        }
+        try {
+          const payload: any = { name: data.name, description: data.description || undefined }
+          if (data.level) payload.level = data.level
+          await positionService.update(pos.id, payload)
+          await fetchPositions()
+        } catch {
+          MySwal.showValidationMessage("Không thể lưu chức vụ")
+          return false
+        }
+      },
+    })
   }
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return
+  const openDetail = async (pos: Position) => {
+    await MySwal.fire({
+      title: "Chi tiết chức vụ",
+      width: 420,
+      html: (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+              {pos.name.slice(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">{pos.name}</h3>
+              {pos.level && (
+                <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 mt-0.5">
+                  {levelLabels[pos.level] || pos.level}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">UUID</p>
+              <div className="flex items-center gap-2 mt-1">
+                <code className="text-sm text-zinc-700 dark:text-zinc-300 font-mono break-all">{pos.id}</code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(pos.id)
+                    toast.success("Đã sao chép UUID")
+                  }}
+                  className="p-1 rounded text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent shrink-0"
+                  title="Copy UUID"
+                >
+                  <Copy size={14} />
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</p>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{pos.description || "Chưa có mô tả"}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày tạo</p>
+                <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(pos.createdAt).toLocaleDateString("vi-VN")}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cập nhật</p>
+                <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(pos.updatedAt).toLocaleDateString("vi-VN")}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      showConfirmButton: true,
+      confirmButtonText: "Đóng",
+    })
+  }
+
+  const confirmDelete = async (e: React.MouseEvent, pos: Position) => {
+    e.stopPropagation()
+    const confirmed = await showDeleteConfirm({
+      name: pos.name,
+    })
+    if (!confirmed) return
     try {
-      await positionService.delete(deleteTarget.id)
-      setDeleteOpen(false)
-      setDeleteTarget(null)
-      fetchPositions()
+      await positionService.delete(pos.id)
+      await fetchPositions()
     } catch {
       console.error("Failed to delete position")
     }
   }
 
-  const inputClass =
-    "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
   return (
     <div className="space-y-6">
@@ -144,7 +288,7 @@ export default function Positions() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="">
         {(() => {
           const levelColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
           const levelData = levelOrder
@@ -183,37 +327,6 @@ export default function Positions() {
             </div>
           )
         })()}
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                <Medal size={20} className="text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Tổng số</p>
-                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
-                <Medal size={20} className="text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Middle / Senior</p>
-                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.filter((p) => p.level === "Middle" || p.level === "Senior").length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                <Medal size={20} className="text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Junior / Intern</p>
-                <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{positions.filter((p) => p.level === "Junior" || p.level === "Intern").length}</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
@@ -320,129 +433,6 @@ export default function Positions() {
           </table>
         </div>
       </div>
-
-      {/* Detail Modal */}
-      <Modal
-        open={!!detailTarget}
-        onClose={() => setDetailTarget(null)}
-        title="Chi tiết chức vụ"
-        width={420}
-        footer={
-          <button onClick={() => setDetailTarget(null)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
-            Đóng
-          </button>
-        }
-      >
-        {detailTarget && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
-                {detailTarget.name.slice(0, 2).toUpperCase()}
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">{detailTarget.name}</h3>
-                {detailTarget.level && (
-                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 mt-0.5">
-                    {levelLabels[detailTarget.level] || detailTarget.level}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">UUID</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <code className="text-sm text-zinc-700 dark:text-zinc-300 font-mono break-all">{detailTarget.id}</code>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(detailTarget.id)
-                      toast.success("Đã sao chép UUID")
-                    }}
-                    className="p-1 rounded text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent shrink-0"
-                    title="Copy UUID"
-                  >
-                    <Copy size={14} />
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</p>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{detailTarget.description || "Chưa có mô tả"}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <div>
-                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày tạo</p>
-                  <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(detailTarget.createdAt).toLocaleDateString("vi-VN")}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cập nhật</p>
-                  <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(detailTarget.updatedAt).toLocaleDateString("vi-VN")}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      <Modal
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        title={editingId ? "Sửa chức vụ" : "Thêm chức vụ"}
-        width={420}
-        footer={
-          <div className="flex gap-2">
-            <button onClick={() => setFormOpen(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
-              Huỷ
-            </button>
-            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
-              {editingId ? "Cập nhật" : "Tạo mới"}
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-3">
-          <div>
-            <label className={labelClass}>Tên chức vụ</label>
-            <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="VD: Trưởng phòng" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Cấp bậc</label>
-            <div className="relative">
-              <button type="button" onClick={() => setLevelOpen(!levelOpen)} className={`${inputClass} flex items-center justify-between text-left`}>
-                <span className={form.level ? "text-zinc-900" : "text-zinc-400"}>{form.level ? levelLabels[form.level] : "Chọn cấp bậc"}</span>
-              </button>
-              {levelOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                  {(["Intern", "Junior", "Middle", "Senior", "Manager"] as const).map((l) => (
-                    <button key={l} type="button" onClick={() => { setForm({ ...form, level: l }); setLevelOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.level === l ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
-                      {levelLabels[l]}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Mô tả</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Mô tả chức vụ (không bắt buộc)" rows={3} className={inputClass + " resize-none"} />
-          </div>
-        </div>
-      </Modal>
-
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Xác nhận xoá"
-        variant="danger"
-        confirmText="Xoá"
-        cancelText="Huỷ"
-      >
-        Bạn có chắc muốn xoá chức vụ <strong>{deleteTarget?.name}</strong>? Hành động này không thể hoàn tác.
-      </ConfirmDialog>
     </div>
   )
 }

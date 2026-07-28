@@ -5,9 +5,8 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import employeeService, { type Employee } from "@/services/employee.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
-import Modal from "@/components/ui/Modal"
-import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import { toast } from "sonner"
+import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
 interface FormData {
   employeeCode: string
@@ -53,22 +52,7 @@ export default function Employees() {
   const [positions, setPositions] = useState<Position[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-
-  const [formOpen, setFormOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
-  const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
-  const [statusOpen, setStatusOpen] = useState(false)
-  const [genderOpen, setGenderOpen] = useState(false)
-  const [deptOpen, setDeptOpen] = useState(false)
-  const [posOpen, setPosOpen] = useState(false)
-
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [existingAvatar, setExistingAvatar] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchEmployees = async () => {
     try {
@@ -117,90 +101,265 @@ export default function Employees() {
     setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
   }
 
-  const openCreate = () => {
-    setEditingId(null)
-    setForm(emptyForm)
-    setAvatarFile(null)
-    setAvatarPreview(null)
-    setExistingAvatar(null)
-    setFormOpen(true)
-  }
-
-  const openEdit = (emp: Employee) => {
-    setEditingId(emp.id)
-    setForm({
-      employeeCode: emp.employeeCode,
-      name: emp.name,
-      email: emp.email,
-      phone: emp.phone || "",
-      departmentId: emp.departmentId,
-      positionId: emp.positionId,
-      gender: emp.gender,
-      status: emp.status,
-      birthDate: emp.birthDate ? emp.birthDate.slice(0, 10) : "",
-      hireDate: emp.hireDate ? emp.hireDate.slice(0, 10) : "",
-    })
-    setAvatarFile(null)
-    setAvatarPreview(null)
-    setExistingAvatar(emp.avatarURL || null)
-    setFormOpen(true)
-  }
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setAvatarFile(file)
-      setAvatarPreview(URL.createObjectURL(file))
-    }
-  }
-
-  const handleSave = async () => {
-    try {
-      const fd = new FormData()
-      fd.append("employeeCode", form.employeeCode)
-      fd.append("name", form.name)
-      fd.append("email", form.email)
-      if (form.phone) fd.append("phone", form.phone)
-      fd.append("departmentId", form.departmentId)
-      fd.append("positionId", form.positionId)
-      fd.append("gender", form.gender)
-      fd.append("status", form.status)
-      if (form.birthDate) fd.append("birthDate", form.birthDate)
-      if (form.hireDate) fd.append("hireDate", form.hireDate)
-      if (avatarFile) fd.append("avatar", avatarFile)
-
-      if (editingId) {
-        await employeeService.update(editingId, fd)
-      } else {
-        await employeeService.create(fd)
-      }
-      setFormOpen(false)
-      fetchEmployees()
-    } catch {
-      console.error("Failed to save employee")
-    }
-  }
-
-  const confirmDelete = (emp: Employee) => {
-    setDeleteTarget(emp)
-    setDeleteOpen(true)
-  }
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return
-    try {
-      await employeeService.delete(deleteTarget.id)
-      setDeleteOpen(false)
-      setDeleteTarget(null)
-      fetchEmployees()
-    } catch {
-      console.error("Failed to delete employee")
-    }
-  }
-
   const inputClass =
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
+
+  const openFormDialog = async (editingEmp?: Employee) => {
+    const isEdit = !!editingEmp
+    const dataRef: {
+      current: { f: FormData; avatarFile: File | null } | null
+    } = { current: null }
+
+    function FormComponent() {
+      const [f, setF] = useState<FormData>(
+        isEdit
+          ? {
+              employeeCode: editingEmp!.employeeCode,
+              name: editingEmp!.name,
+              email: editingEmp!.email,
+              phone: editingEmp!.phone || "",
+              departmentId: editingEmp!.departmentId,
+              positionId: editingEmp!.positionId,
+              gender: editingEmp!.gender,
+              status: editingEmp!.status,
+              birthDate: editingEmp!.birthDate ? editingEmp!.birthDate.slice(0, 10) : "",
+              hireDate: editingEmp!.hireDate ? editingEmp!.hireDate.slice(0, 10) : "",
+            }
+          : { ...emptyForm }
+      )
+      const [avatarFile, setAvatarFile] = useState<File | null>(null)
+      const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+      const [existingAvatar, setExistingAvatar] = useState<string | null>(
+        editingEmp?.avatarURL || null
+      )
+      const fileInputRef = useRef<HTMLInputElement>(null)
+      const [deptOpen, setDeptOpen] = useState(false)
+      const [posOpen, setPosOpen] = useState(false)
+      const [genderOpen, setGenderOpen] = useState(false)
+      const [statusOpen, setStatusOpen] = useState(false)
+
+      dataRef.current = { f, avatarFile }
+
+      const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+          setAvatarFile(file)
+          setAvatarPreview(URL.createObjectURL(file))
+        }
+      }
+
+      return (
+        <div className="space-y-3">
+          <div className="flex items-center gap-4">
+            <div
+              className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : existingAvatar ? (
+                <img src={existingAvatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <Camera size={20} />
+              )}
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer border-none bg-transparent font-medium"
+              >
+                Chọn ảnh đại diện
+              </button>
+              <p className="text-xs text-zinc-400 mt-0.5">JPG, PNG, GIF, WEBP. Tối đa 5MB.</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Mã nhân viên</label>
+              <input type="text" value={f.employeeCode} onChange={(e) => setF({ ...f, employeeCode: e.target.value })} placeholder="VD: EMP011" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Họ tên</label>
+              <input type="text" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Nhập họ tên" className={inputClass} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Email</label>
+            <input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="example@teamflow.com" className={inputClass} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Số điện thoại</label>
+              <input type="text" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} placeholder="090xxxxxxx" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Phòng ban</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setDeptOpen(!deptOpen); setPosOpen(false); setGenderOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span className={f.departmentId ? "text-zinc-900" : "text-zinc-400"}>{f.departmentId ? getDeptName(f.departmentId) : "Chọn phòng ban"}</span>
+                </button>
+                {deptOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
+                    {departments.map((d) => (
+                      <button key={d.id} type="button" onClick={() => { setF({ ...f, departmentId: d.id }); setDeptOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${f.departmentId === d.id ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {d.name} ({d.code})
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Chức vụ</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setPosOpen(!posOpen); setDeptOpen(false); setGenderOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span className={f.positionId ? "text-zinc-900" : "text-zinc-400"}>{f.positionId ? getPosName(f.positionId) : "Chọn chức vụ"}</span>
+                </button>
+                {posOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
+                    {positions.map((p) => (
+                      <button key={p.id} type="button" onClick={() => { setF({ ...f, positionId: p.id }); setPosOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${f.positionId === p.id ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Giới tính</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setGenderOpen(!genderOpen); setDeptOpen(false); setPosOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span>{genderLabels[f.gender] || f.gender}</span>
+                </button>
+                {genderOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+                    {(["male", "female", "other"] as const).map((g) => (
+                      <button key={g} type="button" onClick={() => { setF({ ...f, gender: g }); setGenderOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${f.gender === g ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {genderLabels[g]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Trạng thái</label>
+              <div className="relative">
+                <button type="button" onClick={() => { setStatusOpen(!statusOpen); setDeptOpen(false); setPosOpen(false); setGenderOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
+                  <span>{statusLabels[f.status] || f.status}</span>
+                </button>
+                {statusOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+                    {(["active", "probation", "inactive"] as const).map((s) => (
+                      <button key={s} type="button" onClick={() => { setF({ ...f, status: s }); setStatusOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${f.status === s ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                        {statusLabels[s]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>Ngày sinh</label>
+              <input type="date" value={f.birthDate} onChange={(e) => setF({ ...f, birthDate: e.target.value })} className={inputClass} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Ngày vào làm</label>
+            <input type="date" value={f.hireDate} onChange={(e) => setF({ ...f, hireDate: e.target.value })} className={inputClass} />
+          </div>
+        </div>
+      )
+    }
+
+    const result = await MySwal.fire({
+      title: isEdit ? "Sửa nhân viên" : "Thêm nhân viên",
+      width: 520,
+      html: <FormComponent />,
+      showCancelButton: true,
+      confirmButtonText: isEdit ? "Cập nhật" : "Tạo mới",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: () => {
+        const d = dataRef.current
+        if (!d) return false
+        if (!d.f.employeeCode.trim()) { MySwal.showValidationMessage("Vui lòng nhập mã nhân viên"); return false }
+        if (!d.f.name.trim()) { MySwal.showValidationMessage("Vui lòng nhập họ tên"); return false }
+        if (!d.f.email.trim()) { MySwal.showValidationMessage("Vui lòng nhập email"); return false }
+        if (!d.f.departmentId) { MySwal.showValidationMessage("Vui lòng chọn phòng ban"); return false }
+        if (!d.f.positionId) { MySwal.showValidationMessage("Vui lòng chọn chức vụ"); return false }
+        return d
+      },
+    })
+
+    if (result.isConfirmed && result.value) {
+      const { f, avatarFile } = result.value
+      const fd = new FormData()
+      fd.append("employeeCode", f.employeeCode)
+      fd.append("name", f.name)
+      fd.append("email", f.email)
+      if (f.phone) fd.append("phone", f.phone)
+      fd.append("departmentId", f.departmentId)
+      fd.append("positionId", f.positionId)
+      fd.append("gender", f.gender)
+      fd.append("status", f.status)
+      if (f.birthDate) fd.append("birthDate", f.birthDate)
+      if (f.hireDate) fd.append("hireDate", f.hireDate)
+      if (avatarFile) fd.append("avatar", avatarFile)
+
+      try {
+        if (isEdit) {
+          await employeeService.update(editingEmp!.id, fd)
+          toast.success("Cập nhật thành công")
+        } else {
+          await employeeService.create(fd)
+          toast.success("Tạo mới thành công")
+        }
+        fetchEmployees()
+      } catch {
+        toast.error("Lưu thất bại")
+      }
+    }
+  }
+
+  const openCreate = () => {
+    openFormDialog()
+  }
+
+  const openEdit = (emp: Employee) => {
+    openFormDialog(emp)
+  }
+
+  const confirmDelete = async (emp: Employee) => {
+    const confirmed = await showDeleteConfirm({
+      name: emp.name,
+      html: `Bạn có chắc muốn xoá nhân viên <strong>${emp.name}</strong>? Nhân viên sẽ được chuyển vào thùng rác.`,
+    })
+    if (confirmed) {
+      try {
+        await employeeService.delete(emp.id)
+        toast.success("Xoá thành công")
+        fetchEmployees()
+      } catch {
+        toast.error("Xoá thất bại")
+      }
+    }
+  }
 
   const activeCount = employees.filter((e) => e.status === "active").length
   const probationCount = employees.filter((e) => e.status === "probation").length
@@ -431,171 +590,6 @@ export default function Employees() {
           </table>
         </div>
       </div>
-
-      <Modal
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        title={editingId ? "Sửa nhân viên" : "Thêm nhân viên"}
-        width={520}
-        footer={
-          <div className="flex gap-2">
-            <button onClick={() => setFormOpen(false)} className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none">
-              Huỷ
-            </button>
-            <button onClick={handleSave} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none">
-              {editingId ? "Cập nhật" : "Tạo mới"}
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-3">
-          {/* Avatar upload */}
-          <div className="flex items-center gap-4">
-            <div
-              className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 overflow-hidden cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {avatarPreview ? (
-                <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
-              ) : existingAvatar ? (
-                <img src={existingAvatar} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <Camera size={20} />
-              )}
-            </div>
-            <div>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer border-none bg-transparent font-medium"
-              >
-                Chọn ảnh đại diện
-              </button>
-              <p className="text-xs text-zinc-400 mt-0.5">JPG, PNG, GIF, WEBP. Tối đa 5MB.</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
-                onChange={handleAvatarChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Mã nhân viên</label>
-              <input type="text" value={form.employeeCode} onChange={(e) => setForm({ ...form, employeeCode: e.target.value })} placeholder="VD: EMP011" className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Họ tên</label>
-              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nhập họ tên" className={inputClass} />
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Email</label>
-            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="example@teamflow.com" className={inputClass} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Số điện thoại</label>
-              <input type="text" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="090xxxxxxx" className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Phòng ban</label>
-              <div className="relative">
-                <button type="button" onClick={() => { setDeptOpen(!deptOpen); setPosOpen(false); setGenderOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
-                  <span className={form.departmentId ? "text-zinc-900" : "text-zinc-400"}>{form.departmentId ? getDeptName(form.departmentId) : "Chọn phòng ban"}</span>
-                </button>
-                {deptOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
-                    {departments.map((d) => (
-                      <button key={d.id} type="button" onClick={() => { setForm({ ...form, departmentId: d.id }); setDeptOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.departmentId === d.id ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
-                        {d.name} ({d.code})
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Chức vụ</label>
-              <div className="relative">
-                <button type="button" onClick={() => { setPosOpen(!posOpen); setDeptOpen(false); setGenderOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
-                  <span className={form.positionId ? "text-zinc-900" : "text-zinc-400"}>{form.positionId ? getPosName(form.positionId) : "Chọn chức vụ"}</span>
-                </button>
-                {posOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden max-h-48 overflow-y-auto">
-                    {positions.map((p) => (
-                      <button key={p.id} type="button" onClick={() => { setForm({ ...form, positionId: p.id }); setPosOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.positionId === p.id ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
-                        {p.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Giới tính</label>
-              <div className="relative">
-                <button type="button" onClick={() => { setGenderOpen(!genderOpen); setDeptOpen(false); setPosOpen(false); setStatusOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
-                  <span>{genderLabels[form.gender] || form.gender}</span>
-                </button>
-                {genderOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                    {(["male", "female", "other"] as const).map((g) => (
-                      <button key={g} type="button" onClick={() => { setForm({ ...form, gender: g }); setGenderOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.gender === g ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
-                        {genderLabels[g]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelClass}>Trạng thái</label>
-              <div className="relative">
-                <button type="button" onClick={() => { setStatusOpen(!statusOpen); setDeptOpen(false); setPosOpen(false); setGenderOpen(false) }} className={`${inputClass} flex items-center justify-between text-left`}>
-                  <span>{statusLabels[form.status] || form.status}</span>
-                </button>
-                {statusOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                    {(["active", "probation", "inactive"] as const).map((s) => (
-                      <button key={s} type="button" onClick={() => { setForm({ ...form, status: s }); setStatusOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.status === s ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
-                        {statusLabels[s]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Ngày sinh</label>
-              <input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} className={inputClass} />
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Ngày vào làm</label>
-            <input type="date" value={form.hireDate} onChange={(e) => setForm({ ...form, hireDate: e.target.value })} className={inputClass} />
-          </div>
-        </div>
-      </Modal>
-
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Xác nhận xoá"
-        variant="danger"
-        confirmText="Xoá"
-        cancelText="Huỷ"
-      >
-        Bạn có chắc muốn xoá nhân viên <strong>{deleteTarget?.name}</strong>? Nhân viên sẽ được chuyển vào thùng rác.
-      </ConfirmDialog>
     </div>
   )
 }

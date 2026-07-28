@@ -4,9 +4,8 @@ import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Eye, Copy, Fingerprint } from "lucide-react"
 import userService, { type User, type UserRole, type UserPosition } from "@/services/user.service"
 import { useAuth } from "@/contexts/AuthContext"
-import Modal from "@/components/ui/Modal"
-import ConfirmDialog from "@/components/ui/ConfirmDialog"
 import { toast } from "sonner"
+import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
 interface FormData {
   employeeId: string
@@ -67,13 +66,6 @@ export default function Members() {
   const [search, setSearch] = useState("")
   const [userDeptId, setUserDeptId] = useState<string | null>(null)
 
-  const [formOpen, setFormOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<FormData>(emptyForm)
-  const [deleteTarget, setDeleteTarget] = useState<User | null>(null)
-  const [showPassword, setShowPassword] = useState(false)
-  const [positionOpen, setPositionOpen] = useState(false)
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
 
   const [employees, setEmployees] = useState<any[]>([])
@@ -112,9 +104,6 @@ export default function Members() {
     fetchUsers()
   }, [currentUser])
 
-  // Lọc danh sách thành viên:
-  // - Nếu là Admin: xem tất cả
-  // - Nếu là Manager: chỉ hiển thị các thành viên (kể cả chính manager) thuộc phòng ban đó
   const visible = currentUser?.position === "admin"
     ? users
     : currentUser?.position === "manager" && userDeptId
@@ -163,75 +152,133 @@ export default function Members() {
     return canEdit(target)
   }
 
-  const openCreate = () => {
-    setEditingId(null)
-    setForm(emptyForm)
-    setShowPassword(true)
-    setFormOpen(true)
-  }
-
-  const openEdit = (user: User) => {
-    setEditingId(user.id)
-    setForm({
-      employeeId: user.employeeId,
-      username: user.username,
-      password: "",
-      position: user.position,
-      status: user.status,
-    })
-    setShowPassword(false)
-    setFormOpen(true)
-  }
-
-  const handleSave = async () => {
-    try {
-      if (editingId) {
-        const payload: any = {
-          employeeId: form.employeeId,
-          username: form.username,
-          position: form.position,
-          status: form.status,
-        }
-        if (form.password) payload.password = form.password
-        await userService.update(editingId, payload)
-      } else {
-        await userService.create({
-          ...form,
-          employeeId: form.employeeId,
-          password: form.password,
-          role: positionToRole(form.position),
-        })
-      }
-      setFormOpen(false)
-      fetchUsers()
-    } catch {
-      console.error("Failed to save user")
-    }
-  }
-
-  const confirmDelete = (user: User) => {
-    setDeleteTarget(user)
-    setDeleteOpen(true)
-  }
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return
-    try {
-      await userService.delete(deleteTarget.id)
-      setDeleteOpen(false)
-      setDeleteTarget(null)
-      fetchUsers()
-    } catch {
-      console.error("Failed to delete user")
-    }
-  }
-
   const inputClass =
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
-  const availablePositions = getPositionOptions(currentUser?.position ?? "member")
+  const openFormDialog = async (editingUser?: User) => {
+    const isEdit = !!editingUser
+    const dataRef: { current: FormData | null } = { current: null }
+
+    function FormComponent() {
+      const [f, setF] = useState<FormData>(
+        isEdit
+          ? { employeeId: editingUser!.employeeId, username: editingUser!.username, password: "", position: editingUser!.position, status: editingUser!.status }
+          : emptyForm
+      )
+      const [showPwd, setShowPwd] = useState(isEdit ? false : true)
+      const [posOpen, setPosOpen] = useState(false)
+      dataRef.current = f
+
+      const posOptions = getPositionOptions(currentUser?.position ?? "member")
+
+      return (
+        <div className="space-y-3" style={{ textAlign: "left" }}>
+          <div>
+            <label className={labelClass}>Mã nhân viên</label>
+            <input type="text" value={f.employeeId} onChange={(e) => setF((p) => ({ ...p, employeeId: e.target.value }))} placeholder="VD: NV001" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Tên đăng nhập</label>
+            <input type="text" value={f.username} onChange={(e) => setF((p) => ({ ...p, username: e.target.value }))} placeholder="Nhập tên đăng nhập" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>
+              Mật khẩu {isEdit && <span className="text-zinc-400 font-normal">(để trống nếu không đổi)</span>}
+            </label>
+            <div className="relative">
+              <input type={showPwd ? "text" : "password"} value={f.password} onChange={(e) => setF((p) => ({ ...p, password: e.target.value }))} placeholder={isEdit ? "Để trống nếu không đổi" : "Nhập mật khẩu"} className={inputClass} />
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer border-none bg-transparent text-xs">
+                {showPwd ? "Ẩn" : "Hiện"}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Vai trò</label>
+            <div className="relative">
+              <button type="button" onClick={() => setPosOpen(!posOpen)} className={`${inputClass} flex items-center justify-between`}>
+                <span>{positionLabels[f.position]}</span>
+                <ChevronDown size={14} className="text-zinc-400" />
+              </button>
+              {posOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
+                  {posOptions.map((r) => (
+                    <button key={r.value} type="button" onClick={() => { setF((p) => ({ ...p, position: r.value })); setPosOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${f.position === r.value ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="swal-status" checked={f.status} onChange={(e) => setF((p) => ({ ...p, status: e.target.checked }))} className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+            <label htmlFor="swal-status" className="text-sm text-zinc-700 cursor-pointer">Kích hoạt</label>
+          </div>
+        </div>
+      )
+    }
+
+    const result = await MySwal.fire({
+      title: isEdit ? "Sửa thành viên" : "Thêm thành viên",
+      width: 420,
+      html: <FormComponent />,
+      showCancelButton: true,
+      confirmButtonText: isEdit ? "Cập nhật" : "Tạo mới",
+      cancelButtonText: "Huỷ",
+      reverseButtons: true,
+      preConfirm: () => {
+        const d = dataRef.current
+        if (!d) return false
+        if (!d.employeeId.trim()) { MySwal.showValidationMessage("Vui lòng nhập mã nhân viên"); return false }
+        if (!d.username.trim()) { MySwal.showValidationMessage("Vui lòng nhập tên đăng nhập"); return false }
+        if (!isEdit && !d.password.trim()) { MySwal.showValidationMessage("Vui lòng nhập mật khẩu"); return false }
+        return d
+      },
+    })
+
+    if (result.isConfirmed && result.value) {
+      try {
+        if (isEdit) {
+          const payload: any = {
+            employeeId: result.value.employeeId,
+            username: result.value.username,
+            position: result.value.position,
+            status: result.value.status,
+          }
+          if (result.value.password) payload.password = result.value.password
+          await userService.update(editingUser!.id, payload)
+        } else {
+          await userService.create({
+            ...result.value,
+            role: positionToRole(result.value.position),
+          })
+        }
+        toast.success(isEdit ? "Cập nhật thành công" : "Tạo mới thành công")
+        fetchUsers()
+      } catch {
+        toast.error("Lưu thất bại")
+      }
+    }
+  }
+
+  const confirmDelete = async (e: React.MouseEvent, user: User) => {
+    e.stopPropagation()
+    const confirmed = await showDeleteConfirm({
+      name: user.username,
+      html: `Bạn có chắc muốn xoá thành viên <strong>${user.username}</strong>? Hành động này không thể hoàn tác.`,
+    })
+    if (confirmed) {
+      try {
+        await userService.delete(user.id)
+        toast.success("Xoá thành công")
+        fetchUsers()
+      } catch {
+        toast.error("Xoá thất bại")
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -330,7 +377,7 @@ export default function Members() {
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
         <div className="flex items-center gap-2">
           <button
-            onClick={openCreate}
+            onClick={() => openFormDialog()}
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
             title="Thêm thành viên"
           >
@@ -506,7 +553,7 @@ export default function Members() {
                           </button>
                           {canEdit(user) && (
                             <button
-                              onClick={(e) => { e.stopPropagation(); openEdit(user) }}
+                              onClick={(e) => { e.stopPropagation(); openFormDialog(user) }}
                               className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
                               title="Sửa"
                             >
@@ -515,7 +562,7 @@ export default function Members() {
                           )}
                           {canDelete(user) && (
                             <button
-                              onClick={(e) => { e.stopPropagation(); confirmDelete(user) }}
+                              onClick={(e) => confirmDelete(e, user)}
                               className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
                               title="Xoá"
                             >
@@ -532,129 +579,6 @@ export default function Members() {
           </table>
         </div>
       </div>
-
-      <Modal
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        title={editingId ? "Sửa thành viên" : "Thêm thành viên"}
-        width={420}
-        footer={
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFormOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition cursor-pointer border-none"
-            >
-              Huỷ
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:opacity-90 rounded-lg transition cursor-pointer border-none"
-            >
-              {editingId ? "Cập nhật" : "Tạo mới"}
-            </button>
-          </div>
-        }
-      >
-        <div className="space-y-3">
-          <div>
-            <label className={labelClass}>Mã nhân viên</label>
-            <input
-              type="text"
-              value={form.employeeId}
-              onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
-              placeholder="VD: NV001"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Tên đăng nhập</label>
-            <input
-              type="text"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="Nhập tên đăng nhập"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>
-              Mật khẩu {editingId && <span className="text-zinc-400 font-normal">(để trống nếu không đổi)</span>}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder={editingId ? "Để trống nếu không đổi" : "Nhập mật khẩu"}
-                className={inputClass}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer border-none bg-transparent text-xs"
-              >
-                {showPassword ? "Ẩn" : "Hiện"}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Vai trò</label>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setPositionOpen(!positionOpen)}
-                className={`${inputClass} flex items-center justify-between`}
-              >
-                <span>{positionLabels[form.position]}</span>
-                <ChevronDown size={14} className="text-zinc-400" />
-              </button>
-              {positionOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                  {availablePositions.map((r) => (
-                    <button
-                      key={r.value}
-                      type="button"
-                      onClick={() => {
-                        setForm({ ...form, position: r.value })
-                        setPositionOpen(false)
-                      }}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${form.position === r.value ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"
-                        }`}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 pt-1">
-            <input
-              type="checkbox"
-              id="status"
-              checked={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.checked })}
-              className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="status" className="text-sm text-zinc-700 cursor-pointer">
-              Kích hoạt
-            </label>
-          </div>
-        </div>
-      </Modal>
-
-      <ConfirmDialog
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
-        title="Xác nhận xoá"
-        variant="warning"
-        confirmText="Xoá"
-        cancelText="Huỷ"
-      >
-        Bạn có chắc muốn xoá thành viên{" "}
-        <strong>{deleteTarget?.username}</strong>? Hành động này không thể hoàn tác.
-      </ConfirmDialog>
     </div>
   )
 }
