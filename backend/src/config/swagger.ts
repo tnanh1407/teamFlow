@@ -15,11 +15,19 @@ const options: swaggerJsdoc.Options = {
         bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
       },
       schemas: {
-        Account: {
+        User: {
           type: "object",
           properties: {
             id: { type: "string", format: "uuid" },
-            employeeId: { type: "string", format: "uuid" },
+            departmentId: { type: "string", format: "uuid" },
+            positionId: { type: "string", format: "uuid" },
+            employeeCode: { type: "string" },
+            name: { type: "string" },
+            email: { type: "string" },
+            phone: { type: "string", nullable: true },
+            birthDate: { type: "string", format: "date", nullable: true },
+            hireDate: { type: "string", format: "date", nullable: true },
+            gender: { type: "string", enum: ["male", "female", "other"] },
             username: { type: "string" },
             role: { type: "string", enum: ["user", "admin"] },
             position: { type: "string", nullable: true, enum: ["member", "manager", null] },
@@ -30,11 +38,19 @@ const options: swaggerJsdoc.Options = {
             updatedAt: { type: "string", format: "date-time" },
           },
         },
-        AccountInput: {
+        UserInput: {
           type: "object",
-          required: ["employeeId", "username", "password"],
+          required: ["departmentId", "positionId", "employeeCode", "name", "email", "username", "password"],
           properties: {
-            employeeId: { type: "string", description: "Employee UUID" },
+            departmentId: { type: "string", description: "Department UUID" },
+            positionId: { type: "string", description: "Position UUID" },
+            employeeCode: { type: "string" },
+            name: { type: "string" },
+            email: { type: "string" },
+            phone: { type: "string" },
+            birthDate: { type: "string", format: "date" },
+            hireDate: { type: "string", format: "date" },
+            gender: { type: "string", enum: ["male", "female", "other"], default: "other" },
             username: { type: "string" },
             password: { type: "string", minLength: 6 },
             position: { type: "string", enum: ["member", "manager"], default: "member" },
@@ -55,7 +71,7 @@ const options: swaggerJsdoc.Options = {
             data: {
               type: "object",
               properties: {
-                user: { $ref: "#/components/schemas/Account" },
+                user: { $ref: "#/components/schemas/User" },
                 token: { type: "string" },
               },
             },
@@ -75,21 +91,21 @@ const options: swaggerJsdoc.Options = {
             message: { type: "string" },
           },
         },
-        PaginatedAccounts: {
+        PaginatedUsers: {
           type: "object",
           properties: {
             data: {
               type: "array",
-              items: { $ref: "#/components/schemas/Account" },
+              items: { $ref: "#/components/schemas/User" },
             },
           },
         },
       },
     },
     paths: {
-      "/api/accounts/login": {
+      "/api/users/login": {
         post: {
-          tags: ["Accounts"],
+          tags: ["Users"],
           summary: "Đăng nhập",
           requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/LoginInput" } } } },
           responses: {
@@ -99,57 +115,57 @@ const options: swaggerJsdoc.Options = {
           },
         },
       },
-      "/api/accounts/logout": {
+      "/api/users/logout": {
         post: {
-          tags: ["Accounts"],
+          tags: ["Users"],
           summary: "Đăng xuất",
           security: [{ cookieAuth: [] }],
           responses: { 200: { description: "Đăng xuất thành công" } },
         },
       },
-      "/api/accounts": {
+      "/api/users": {
         get: {
-          tags: ["Accounts"],
-          summary: "Lấy danh sách tài khoản",
+          tags: ["Users"],
+          summary: "Lấy danh sách người dùng",
           security: [{ cookieAuth: [] }],
-          responses: { 200: { description: "Danh sách tài khoản", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedAccounts" } } } } },
+          responses: { 200: { description: "Danh sách người dùng", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
         },
         post: {
-          tags: ["Accounts"],
-          summary: "Tạo tài khoản mới",
+          tags: ["Users"],
+          summary: "Tạo người dùng mới",
           security: [{ cookieAuth: [] }],
-          requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/AccountInput" } } } },
+          requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
           responses: {
-            201: { description: "Tạo thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Account" } } } } } },
+            201: { description: "Tạo thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } } } } },
             409: { description: "Username đã tồn tại" },
           },
         },
       },
-      "/api/accounts/{id}": {
+      "/api/users/{id}": {
         get: {
-          tags: ["Accounts"],
-          summary: "Lấy tài khoản theo ID",
+          tags: ["Users"],
+          summary: "Lấy người dùng theo ID",
           security: [{ cookieAuth: [] }],
           parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
           responses: {
-            200: { description: "Thông tin tài khoản", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Account" } } } } } },
+            200: { description: "Thông tin người dùng", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } } } } },
             404: { description: "Không tìm thấy" },
           },
         },
         patch: {
-          tags: ["Accounts"],
-          summary: "Cập nhật tài khoản",
+          tags: ["Users"],
+          summary: "Cập nhật người dùng",
           security: [{ cookieAuth: [] }],
           parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-          requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/AccountInput" } } } },
+          requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
           responses: {
             200: { description: "Cập nhật thành công" },
             404: { description: "Không tìm thấy" },
           },
         },
         delete: {
-          tags: ["Accounts"],
-          summary: "Vô hiệu hoá tài khoản",
+          tags: ["Users"],
+          summary: "Vô hiệu hoá người dùng",
           security: [{ cookieAuth: [] }],
           parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
           responses: {
@@ -158,18 +174,18 @@ const options: swaggerJsdoc.Options = {
           },
         },
       },
-      "/api/accounts/me": {
+      "/api/users/me": {
         patch: {
-          tags: ["Accounts"],
+          tags: ["Users"],
           summary: "Đổi mật khẩu cá nhân",
           security: [{ cookieAuth: [] }],
           requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UpdateMeInput" } } } },
           responses: { 200: { description: "Đổi mật khẩu thành công" } },
         },
       },
-      "/api/accounts/me/avatar": {
+      "/api/users/me/avatar": {
         post: {
-          tags: ["Accounts"],
+          tags: ["Users"],
           summary: "Cập nhật avatar",
           security: [{ cookieAuth: [] }],
           requestBody: { content: { "multipart/form-data": { schema: { type: "object", properties: { avatar: { type: "string", format: "binary" } } } } } },

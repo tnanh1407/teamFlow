@@ -11,24 +11,6 @@ export const DepartmentSchema = {
   updated_at`,
 } as const;
 
-export const EmployeeSchema = {
-  table: "employees",
-  columns: `id,
-  department_id,
-  position_id,
-  employee_code,
-  name,
-  email,
-  phone,
-  birth_date,
-  hire_date,
-  gender,
-  status,
-  avatar_url,
-  created_at,
-  updated_at`,
-} as const;
-
 export const PositionSchema = {
   table: "positions",
   columns: `
@@ -39,16 +21,24 @@ export const PositionSchema = {
   created_at, updated_at`,
 } as const;
 
-export const AccountSchema = {
-  table: "accounts",
+export const UserSchema = {
+  table: "users",
   columns: `id,
-  employee_id,
+  department_id,
+  position_id,
+  employee_code,
+  name,
+  email,
+  phone,
+  birth_date,
+  hire_date,
+  gender,
   username,
   password,
   role,
-  avatar_url,
   position,
   status,
+  avatar_url,
   last_login,
   created_at,
   updated_at`,

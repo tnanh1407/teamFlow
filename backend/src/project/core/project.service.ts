@@ -69,7 +69,7 @@ class ProjectService {
       `SELECT DISTINCT ${cols}
        FROM tasks t
        LEFT JOIN task_employees te ON te.task_id = t.id
-       LEFT JOIN employees e ON e.id = $1
+       LEFT JOIN accounts e ON e.id = $1
        LEFT JOIN task_departments td ON td.task_id = t.id
        WHERE te.employee_id = $1 OR t.created_by = $1 OR td.department_id = e.department_id
        ORDER BY t.created_at DESC`,

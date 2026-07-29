@@ -1,18 +1,6 @@
 import pool from "./config/database.js";
 import bcrypt from "bcryptjs";
 
-const uuid = () => {
-  const hex = "0123456789abcdef";
-  let s = "";
-  for (let i = 0; i < 36; i++) {
-    if (i === 8 || i === 13 || i === 18 || i === 23) s += "-";
-    else if (i === 14) s += "4";
-    else if (i === 19) s += hex[(Math.random() * 4) | 8];
-    else s += hex[(Math.random() * 16) | 0];
-  }
-  return s;
-};
-
 const seed = async () => {
   const client = await pool.connect();
   try {
@@ -23,9 +11,8 @@ const seed = async () => {
     await client.query("DELETE FROM task_departments");
     await client.query("DELETE FROM task_employees");
     await client.query("DELETE FROM tasks");
-    await client.query("DELETE FROM accounts");
     await client.query("UPDATE departments SET manager_id = NULL");
-    await client.query("DELETE FROM employees");
+    await client.query("DELETE FROM users");
     await client.query("DELETE FROM departments");
     await client.query("DELETE FROM positions");
 
@@ -47,11 +34,6 @@ const seed = async () => {
     const EMP: string[] = [];
     for (let i = 1; i <= 40; i++) {
       EMP[i] = `30000000-0000-4000-a000-${String(i).padStart(12, '0')}`;
-    }
-
-    const USER: string[] = [];
-    for (let i = 1; i <= 40; i++) {
-      USER[i] = `40000000-0000-4000-a000-${String(i).padStart(12, '0')}`;
     }
 
     const TSK1 = "50000000-0000-4000-a000-000000000001";
@@ -114,51 +96,57 @@ const seed = async () => {
     const strip = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
     const avatar = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(strip(name)).replace(/%20/g, "+")}&background=random&color=fff&size=128&bold=true`;
 
-    const rawEmployeesData = [
-      { idx: 1,  dept: DEPT_IT,  pos: POS_GD,  name: "Nguyễn Văn Anh",    gender: "male",   status: true },
-      { idx: 2,  dept: DEPT_IT,  pos: POS_TP,  name: "Trần Thị Bích",     gender: "female", status: true },
-      { idx: 3,  dept: DEPT_IT,  pos: POS_PP,  name: "Lê Văn Cường",      gender: "male",   status: true },
-      { idx: 4,  dept: DEPT_IT,  pos: POS_NV,  name: "Phạm Hải Đăng",     gender: "male",   status: true },
-      { idx: 5,  dept: DEPT_IT,  pos: POS_NV,  name: "Hoàng Minh Tuấn",   gender: "male",   status: true },
-      { idx: 6,  dept: DEPT_IT,  pos: POS_TTS, name: "Hồ Văn Trung",      gender: "male",   status: true },
-      { idx: 7,  dept: DEPT_HR,  pos: POS_TP,  name: "Phạm Thị Dung",     gender: "female", status: true },
-      { idx: 8,  dept: DEPT_HR,  pos: POS_PP,  name: "Hoàng Văn Em",      gender: "male",   status: true },
-      { idx: 9,  dept: DEPT_HR,  pos: POS_NV,  name: "Mai Thị Lan",       gender: "female", status: true },
-      { idx: 10, dept: DEPT_HR,  pos: POS_NV,  name: "Đặng Thu Thảo",     gender: "female", status: true },
-      { idx: 11, dept: DEPT_HR,  pos: POS_NV,  name: "Vũ Phương Thảo",    gender: "female", status: true },
-      { idx: 12, dept: DEPT_HR,  pos: POS_TTS, name: "Nguyễn Bảo Châu",   gender: "female", status: true },
-      { idx: 13, dept: DEPT_ACC, pos: POS_TP,  name: "Vũ Thị Phương",     gender: "female", status: true },
-      { idx: 14, dept: DEPT_ACC, pos: POS_PP,  name: "Đặng Văn Giang",    gender: "male",   status: true },
-      { idx: 15, dept: DEPT_ACC, pos: POS_NV,  name: "Đỗ Văn Hoàng",      gender: "male",   status: true },
-      { idx: 16, dept: DEPT_ACC, pos: POS_NV,  name: "Ngô Thị Minh",      gender: "female", status: true },
-      { idx: 17, dept: DEPT_ACC, pos: POS_NV,  name: "Bùi Thị Mai",       gender: "female", status: true },
-      { idx: 18, dept: DEPT_ACC, pos: POS_TTS, name: "Trịnh Văn An",      gender: "male",   status: true },
-      { idx: 19, dept: DEPT_MKT, pos: POS_TP,  name: "Bùi Thị Hạnh",      gender: "female", status: true },
-      { idx: 20, dept: DEPT_MKT, pos: POS_PP,  name: "Trịnh Thị Ngọc",    gender: "female", status: true },
-      { idx: 21, dept: DEPT_MKT, pos: POS_NV,  name: "Ngô Văn Inh",       gender: "male",   status: true },
-      { idx: 22, dept: DEPT_MKT, pos: POS_NV,  name: "Lê Mỹ Duyên",       gender: "female", status: true },
-      { idx: 23, dept: DEPT_MKT, pos: POS_NV,  name: "Phan Văn Nam",      gender: "male",   status: true },
-      { idx: 24, dept: DEPT_MKT, pos: POS_TTS, name: "Nguyễn Khánh Linh", gender: "female", status: true },
-      { idx: 25, dept: DEPT_OPS, pos: POS_TP,  name: "Lý Văn Minh",       gender: "male",   status: true },
-      { idx: 26, dept: DEPT_OPS, pos: POS_PP,  name: "Dương Thị Kim",     gender: "female", status: true },
-      { idx: 27, dept: DEPT_OPS, pos: POS_NV,  name: "Trần Bảo Nam",      gender: "male",   status: true },
-      { idx: 28, dept: DEPT_OPS, pos: POS_NV,  name: "Vũ Hải Yến",        gender: "female", status: true },
-      { idx: 29, dept: DEPT_OPS, pos: POS_NV,  name: "Hoàng Gia Bảo",     gender: "male",   status: true },
-      { idx: 30, dept: DEPT_ENG, pos: POS_TP,  name: "Phan Văn Quốc",     gender: "male",   status: true },
-      { idx: 31, dept: DEPT_ENG, pos: POS_PP,  name: "Đỗ Quốc Việt",      gender: "male",   status: true },
-      { idx: 32, dept: DEPT_ENG, pos: POS_NV,  name: "Nguyễn Thành Long", gender: "male",   status: true },
-      { idx: 33, dept: DEPT_ENG, pos: POS_NV,  name: "Trần Thu Trang",    gender: "female", status: true },
-      { idx: 34, dept: DEPT_ENG, pos: POS_NV,  name: "Lê Đức Thắng",      gender: "male",   status: true },
-      { idx: 35, dept: DEPT_DSG, pos: POS_TP,  name: "Nguyễn Thị Hồng",   gender: "female", status: true },
-      { idx: 36, dept: DEPT_DSG, pos: POS_PP,  name: "Trần Đức Huy",      gender: "male",   status: true },
-      { idx: 37, dept: DEPT_DSG, pos: POS_NV,  name: "Lê Thị Thanh Tâm",  gender: "female", status: true },
-      { idx: 38, dept: DEPT_DSG, pos: POS_NV,  name: "Võ Minh Khôi",      gender: "male",   status: true },
-      { idx: 39, dept: DEPT_DSG, pos: POS_NV,  name: "Phạm Hà Phương",    gender: "female", status: true },
-      { idx: 40, dept: DEPT_DSG, pos: POS_TTS, name: "Đặng Hoàng Anh",    gender: "male",   status: true },
+    const rawData = [
+      { idx: 1,  dept: DEPT_IT,  pos: POS_GD,  name: "Nguyễn Văn Anh",    gender: "male",   status: true,  pwd: "root123",    role: "admin",   acctPos: null },
+      { idx: 2,  dept: DEPT_IT,  pos: POS_TP,  name: "Trần Thị Bích",     gender: "female", status: true,  pwd: "admin123",   role: "admin",   acctPos: null },
+      { idx: 3,  dept: DEPT_IT,  pos: POS_PP,  name: "Lê Văn Cường",      gender: "male",   status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 4,  dept: DEPT_IT,  pos: POS_NV,  name: "Phạm Hải Đăng",     gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 5,  dept: DEPT_IT,  pos: POS_NV,  name: "Hoàng Minh Tuấn",   gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 6,  dept: DEPT_IT,  pos: POS_TTS, name: "Hồ Văn Trung",      gender: "male",   status: false, pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 7,  dept: DEPT_HR,  pos: POS_TP,  name: "Phạm Thị Dung",     gender: "female", status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 8,  dept: DEPT_HR,  pos: POS_PP,  name: "Hoàng Văn Em",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 9,  dept: DEPT_HR,  pos: POS_NV,  name: "Mai Thị Lan",       gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 10, dept: DEPT_HR,  pos: POS_NV,  name: "Đặng Thu Thảo",     gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 11, dept: DEPT_HR,  pos: POS_NV,  name: "Vũ Phương Thảo",    gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 12, dept: DEPT_HR,  pos: POS_TTS, name: "Nguyễn Bảo Châu",   gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 13, dept: DEPT_ACC, pos: POS_TP,  name: "Vũ Thị Phương",     gender: "female", status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 14, dept: DEPT_ACC, pos: POS_PP,  name: "Đặng Văn Giang",    gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 15, dept: DEPT_ACC, pos: POS_NV,  name: "Đỗ Văn Hoàng",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 16, dept: DEPT_ACC, pos: POS_NV,  name: "Ngô Thị Minh",      gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 17, dept: DEPT_ACC, pos: POS_NV,  name: "Bùi Thị Mai",       gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 18, dept: DEPT_ACC, pos: POS_TTS, name: "Trịnh Văn An",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 19, dept: DEPT_MKT, pos: POS_TP,  name: "Bùi Thị Hạnh",      gender: "female", status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 20, dept: DEPT_MKT, pos: POS_PP,  name: "Trịnh Thị Ngọc",    gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 21, dept: DEPT_MKT, pos: POS_NV,  name: "Ngô Văn Inh",       gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 22, dept: DEPT_MKT, pos: POS_NV,  name: "Lê Mỹ Duyên",       gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 23, dept: DEPT_MKT, pos: POS_NV,  name: "Phan Văn Nam",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 24, dept: DEPT_MKT, pos: POS_TTS, name: "Nguyễn Khánh Linh", gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 25, dept: DEPT_OPS, pos: POS_TP,  name: "Lý Văn Minh",       gender: "male",   status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 26, dept: DEPT_OPS, pos: POS_PP,  name: "Dương Thị Kim",     gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 27, dept: DEPT_OPS, pos: POS_NV,  name: "Trần Bảo Nam",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 28, dept: DEPT_OPS, pos: POS_NV,  name: "Vũ Hải Yến",        gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 29, dept: DEPT_OPS, pos: POS_NV,  name: "Hoàng Gia Bảo",     gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 30, dept: DEPT_ENG, pos: POS_TP,  name: "Phan Văn Quốc",     gender: "male",   status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 31, dept: DEPT_ENG, pos: POS_PP,  name: "Đỗ Quốc Việt",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 32, dept: DEPT_ENG, pos: POS_NV,  name: "Nguyễn Thành Long", gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 33, dept: DEPT_ENG, pos: POS_NV,  name: "Trần Thu Trang",    gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 34, dept: DEPT_ENG, pos: POS_NV,  name: "Lê Đức Thắng",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 35, dept: DEPT_DSG, pos: POS_TP,  name: "Nguyễn Thị Hồng",   gender: "female", status: true,  pwd: "manager123", role: "user",    acctPos: "manager" },
+      { idx: 36, dept: DEPT_DSG, pos: POS_PP,  name: "Trần Đức Huy",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 37, dept: DEPT_DSG, pos: POS_NV,  name: "Lê Thị Thanh Tâm",  gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 38, dept: DEPT_DSG, pos: POS_NV,  name: "Võ Minh Khôi",      gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 39, dept: DEPT_DSG, pos: POS_NV,  name: "Phạm Hà Phương",    gender: "female", status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
+      { idx: 40, dept: DEPT_DSG, pos: POS_TTS, name: "Đặng Hoàng Anh",    gender: "male",   status: true,  pwd: "123456",     role: "user",    acctPos: "member" },
     ];
 
-    const employees = rawEmployeesData.map((item) => {
+    const nameToUsername: Record<number, string> = {
+      1: "root", 2: "admin", 3: "manager", 7: "hr_manager", 13: "acc_manager",
+      19: "mkt_manager", 25: "ops_manager", 30: "eng_manager", 35: "dsg_manager",
+    };
+
+    const users = rawData.map((item) => {
       const codeNum = String(item.idx).padStart(3, '0');
+      const usn = nameToUsername[item.idx] || `${strip(item.name).toLowerCase().replace(/\s+/g, ".")}`;
       return {
         id: EMP[item.idx],
         dept: item.dept,
@@ -170,18 +158,22 @@ const seed = async () => {
         birth: `199${(item.idx % 9)}-05-15`,
         hire: "2024-01-15",
         gender: item.gender,
+        username: usn,
+        password: bcrypt.hashSync(item.pwd, 10),
+        role: item.role,
+        position: item.acctPos,
         status: item.status,
         avatar: avatar(item.name),
       };
     });
 
-    for (const e of employees) {
+    for (const u of users) {
       await client.query(
-        `INSERT INTO employees (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-        [e.id, e.dept, e.pos, e.code, e.name, e.email, e.phone, e.birth, e.hire, e.gender, e.status, e.avatar]
+        `INSERT INTO users (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, username, password, role, position, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        [u.id, u.dept, u.pos, u.code, u.name, u.email, u.phone, u.birth, u.hire, u.gender, u.username, u.password, u.role, u.position, u.status, u.avatar]
       );
     }
-    console.log(`Inserted ${employees.length} employees`);
+    console.log(`Inserted ${users.length} users`);
 
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[1],  DEPT_IT]);
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[7],  DEPT_HR]);
@@ -191,50 +183,6 @@ const seed = async () => {
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[30], DEPT_ENG]);
     await client.query(`UPDATE departments SET manager_id = $1 WHERE id = $2`, [EMP[35], DEPT_DSG]);
     console.log("Updated department managers");
-
-    const users = rawEmployeesData.map((item) => {
-      let pwd = "123456";
-      let role = "user";
-      let position: string | null = "member";
-      switch (item.idx) {
-        case 1: pwd = "root123"; role = "admin"; position = null; break;
-        case 2: pwd = "admin123"; role = "admin"; position = null; break;
-        case 3: pwd = "manager123"; role = "user"; position = "manager"; break;
-        case 7: pwd = "manager123"; role = "user"; position = "manager"; break;
-        case 13: pwd = "manager123"; role = "user"; position = "manager"; break;
-        case 19: pwd = "manager123"; role = "user"; position = "manager"; break;
-        case 25: pwd = "manager123"; role = "user"; position = "manager"; break;
-        case 30: pwd = "manager123"; role = "user"; position = "manager"; break;
-        case 35: pwd = "manager123"; role = "user"; position = "manager"; break;
-      }
-      return {
-        id: USER[item.idx],
-        employeeId: EMP[item.idx],
-        username: strip(item.name).toLowerCase().replace(/\s+/g, "."),
-        password: bcrypt.hashSync(pwd, 10),
-        role,
-        position,
-        status: true,
-      };
-    });
-    // Override specific usernames to match old seed
-    const nameToUsername: Record<number, string> = {
-      1: "root", 2: "admin", 3: "manager", 7: "hr_manager", 13: "acc_manager",
-      19: "mkt_manager", 25: "ops_manager", 30: "eng_manager", 35: "dsg_manager",
-    };
-    for (const u of users) {
-      if (nameToUsername[users.indexOf(u) + 1]) {
-        u.username = nameToUsername[users.indexOf(u) + 1];
-      }
-    }
-
-    for (const u of users) {
-      await client.query(
-        `INSERT INTO accounts (id, employee_id, username, password, role, position, status) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [u.id, u.employeeId, u.username, u.password, u.role, u.position, u.status]
-      );
-    }
-    console.log(`Inserted ${users.length} accounts`);
 
     const tasks = [
       { id: TSK1, title: "Xây dựng website TeamFlow",       desc: "Dự án xây dựng website quản lý công việc nội bộ cho công ty",                              priority: "high",     status: "in_progress", progress: 60,  start: "2025-06-01", due: "2025-09-30", createdBy: EMP[1],  assignedBy: EMP[1],  est: 500, actual: 280 },
@@ -320,7 +268,7 @@ const seed = async () => {
 
     console.log("\n✅ Seed completed successfully!");
     console.log("---");
-    console.log(`Summary: ${departments.length} depts, ${positions.length} positions, ${employees.length} employees, ${users.length} accounts, ${tasks.length} tasks`);
+    console.log(`Summary: ${departments.length} depts, ${positions.length} positions, ${users.length} users, ${tasks.length} tasks`);
     process.exit(0);
   } catch (error) {
     await client.query("ROLLBACK");

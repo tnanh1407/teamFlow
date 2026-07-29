@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import projectService from "./project.service.js";
-import accountService from "../../account/account.service.js";
+import userService from "../../user/user.service.js";
 import { AppError } from "../../utils/errors/app-error.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 
@@ -36,10 +36,9 @@ class ProjectController {
   }
 
   async getMyProjects(req: AuthRequest, res: Response) {
-    const user = await accountService.findById(req.user!.id);
-    if (!user) throw new AppError("Account not found", 404);
-    if (!user.employeeId) throw new AppError("Account has no linked employee", 400);
-    const projects = await projectService.findByEmployeeId(user.employeeId);
+    const user = await userService.findById(req.user!.id);
+    if (!user) throw new AppError("User not found", 404);
+    const projects = await projectService.findByEmployeeId(user.id);
     res.json({ data: projects });
   }
 

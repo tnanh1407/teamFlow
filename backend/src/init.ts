@@ -13,15 +13,13 @@ const dropAll = async () => {
     DROP TABLE IF EXISTS task_departments CASCADE;
     DROP TABLE IF EXISTS task_employees CASCADE;
     DROP TABLE IF EXISTS tasks CASCADE;
-    DROP TABLE IF EXISTS accounts CASCADE;
-    DROP TABLE IF EXISTS employees CASCADE;
+    DROP TABLE IF EXISTS users CASCADE;
     DROP TABLE IF EXISTS departments CASCADE;
     DROP TABLE IF EXISTS positions CASCADE;
     DROP TYPE IF EXISTS EUserRole;
     DROP TYPE IF EXISTS Eposition;
     DROP TYPE IF EXISTS ETaskStatus;
     DROP TYPE IF EXISTS ENotificationType;
-    DROP TYPE IF EXISTS EEmployeeStatus;
     DROP TYPE IF EXISTS EPriority;
     DROP TYPE IF EXISTS EGender;
     DROP TYPE IF EXISTS ETaskRole;
