@@ -85,11 +85,21 @@ export default function Header({ collapsed, onToggle }: HeaderProps) {
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           animate={{ rotate: collapsed ? 0 : 180 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           onClick={onToggle}
           className="flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:shadow-sm"
         >
-          {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={collapsed ? "open" : "close"}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.15 }}
+            >
+              {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+            </motion.div>
+          </AnimatePresence>
         </motion.button>
 
         <nav className="flex items-center gap-2 overflow-hidden">

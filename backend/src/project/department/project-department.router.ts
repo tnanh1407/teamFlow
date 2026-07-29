@@ -6,24 +6,24 @@ import { asyncHandler } from "../../middlewares/async.middleware.js";
 import {
   createProjectDepartmentSchema,
 } from "./project-department.validation.js";
-import { EUserRole } from "../../enums/user-role.enum.js";
+import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
 router.get("/", authenticate, asyncHandler(projectDepartmentController.getAll));
-router.get("/project/:projectId", authenticate, asyncHandler(projectDepartmentController.getByProject));
+router.get("/task/:taskId", authenticate, asyncHandler(projectDepartmentController.getByTask));
 router.get("/department/:departmentId", authenticate, asyncHandler(projectDepartmentController.getByDepartment));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.create)
 );
 router.delete(
-  "/:projectId/:departmentId",
+  "/:taskId/:departmentId",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   asyncHandler(projectDepartmentController.delete)
 );
 

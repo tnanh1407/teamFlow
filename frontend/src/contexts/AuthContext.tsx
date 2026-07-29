@@ -1,16 +1,16 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import userService, { type User } from "@/services/user.service";
+import accountService, { type Account } from "@/services/account.service";
 
 interface AuthContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: Account | null;
+  setUser: (user: Account | null) => void;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
+  const [user, setUser] = useState<Account | null>(() => {
     const saved = localStorage.getItem("user");
     return saved ? JSON.parse(saved) : null;
   });
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await userService.logout();
+      await accountService.logout();
     } catch {
       // ignore
     } finally {

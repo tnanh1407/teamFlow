@@ -19,9 +19,9 @@ class MockPool {
 
   private loadAll() {
     const files = [
-      "users", "departments", "employees", "positions",
-      "projects", "project_logs", "project_employees",
-      "project_departments", "project_comments",
+      "accounts", "departments", "employees", "positions",
+      "tasks", "task_logs", "task_employees",
+      "task_departments", "task_comments",
     ];
     for (const name of files) {
       const filePath = path.join(DATA_DIR, `${name}.json`);
@@ -98,16 +98,9 @@ class MockPool {
     conditions: { col: string; paramIdx: number }[],
     params: any[],
     orderBy: { col: string; dir: string } | null,
-    sql: string
   ): any[] {
     let rows = this.tables.get(table) || [];
 
-    // Handle soft delete: if WHERE contains deleted_at IS NULL
-    if (sql.includes("deleted_at IS NULL")) {
-      rows = rows.filter((r) => r.deletedAt === null || r.deletedAt === undefined);
-    }
-
-    // Normal WHERE conditions
     for (const cond of conditions) {
       const paramValue = params[cond.paramIdx - 1];
       rows = rows.filter((r) => r[cond.col] === paramValue);
@@ -147,21 +140,17 @@ class MockPool {
       newRow[camelCols[i]] = params[i] ?? null;
     }
 
-    // Add timestamps if they exist in the table schema
     if (camelCols.includes("createdAt") === false && this.tables.get(table)?.[0]?.createdAt !== undefined) {
       newRow.createdAt = now;
     }
     if (camelCols.includes("updatedAt") === false && this.tables.get(table)?.[0]?.updatedAt !== undefined) {
       newRow.updatedAt = now;
     }
-    if (table === "project_departments") {
+    if (table === "task_departments") {
       newRow.assignedAt = now;
     }
-    if (table === "project_employees") {
+    if (table === "task_employees") {
       newRow.assignedAt = now;
-    }
-    if (table === "employees") {
-      newRow.deletedAt = null;
     }
 
     const rows = this.tables.get(table) || [];
@@ -243,19 +232,16 @@ class MockPool {
     const sql = text.trim();
     const table = this.getTable(sql);
     if (!table) {
-      // Handle SELECT 1 (connection test)
       if (/^SELECT\s+1/i.test(sql)) return { rows: [{}], rowCount: 1 };
       return { rows: [], rowCount: 0 };
     }
 
     const normalizedTable = table;
 
-    // Ensure table exists
     if (!this.tables.has(normalizedTable)) {
       this.tables.set(normalizedTable, []);
     }
 
-    // SELECT
     if (/^SELECT/i.test(sql)) {
       const columns: string[] = [];
       const colsMatch = sql.match(/SELECT\s+(.+?)\s+FROM/i);
@@ -272,8 +258,8 @@ class MockPool {
       const conditions = this.getWhereConditions(sql);
 
       let rows: any[];
-      if (conditions.length > 0 || sql.includes("deleted_at IS NULL")) {
-        rows = this.selectWhere(normalizedTable, columns, conditions, params || [], orderBy, sql);
+      if (conditions.length > 0) {
+        rows = this.selectWhere(normalizedTable, columns, conditions, params || [], orderBy);
       } else {
         rows = this.selectAll(normalizedTable, columns, orderBy);
       }
@@ -281,19 +267,16 @@ class MockPool {
       return { rows, rowCount: rows.length };
     }
 
-    // INSERT
     if (/^INSERT/i.test(sql)) {
       const rows = this.insertReturning(normalizedTable, sql, params || []);
       return { rows, rowCount: rows.length };
     }
 
-    // UPDATE
     if (/^UPDATE/i.test(sql)) {
       const rows = this.updateReturning(normalizedTable, sql, params || []);
       return { rows, rowCount: rows.length };
     }
 
-    // DELETE
     if (/^DELETE/i.test(sql)) {
       const rows = this.deleteReturning(normalizedTable, sql, params || []);
       return { rows, rowCount: rows.length };
@@ -303,7 +286,6 @@ class MockPool {
   }
 
   on(_event: string, _callback: (err: Error) => void) {
-    // no-op for mock
   }
 
   connect() {

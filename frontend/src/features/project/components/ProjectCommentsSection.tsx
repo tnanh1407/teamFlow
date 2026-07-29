@@ -3,13 +3,13 @@ import { MessageCircle, X, Paperclip, Send, File, FileImage } from "lucide-react
 import type { ProjectComment } from "@/services/project-comment.service"
 import type { FileAttachment } from "@/services/project.service"
 import type { Employee } from "@/services/employee.service"
-import type { User } from "@/services/user.service"
+import type { Account } from "@/services/account.service"
 
 export type CommentWithEmployee = ProjectComment & { employee?: Employee }
 
 interface ProjectCommentsProps {
   comments: CommentWithEmployee[]
-  user: User | null
+  user: Account | null
   commentText: string
   setCommentText: (v: string) => void
   commentFiles: FileAttachment[]

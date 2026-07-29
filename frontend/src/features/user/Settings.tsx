@@ -6,7 +6,7 @@ import {
   Mail, Phone, Building2, Briefcase
 } from "lucide-react"
 import { toast } from "sonner"
-import userService from "@/services/user.service"
+import accountService from "@/services/account.service"
 import employeeService, { type Employee } from "@/services/employee.service"
 import departmentService from "@/services/department.service"
 import positionService from "@/services/position.service"
@@ -102,7 +102,7 @@ export default function Settings() {
     }
     setUploading(true)
     try {
-      const { data } = await userService.uploadAvatar(file)
+      const { data } = await accountService.uploadAvatar(file)
       setUser(data.data)
       if (user?.employeeId) {
         const empRes = await employeeService.getById(user.employeeId)
@@ -150,7 +150,7 @@ export default function Settings() {
       if (newPw !== cfmPw) { toast.error("Mật khẩu xác nhận không khớp"); return }
       setSaving(true)
       try {
-        await userService.updateMe({ currentPassword: curPw, newPassword: newPw })
+        await accountService.updateMe({ currentPassword: curPw, newPassword: newPw })
         toast.success("Đổi mật khẩu thành công")
         MySwal.close()
       } catch (err: any) {

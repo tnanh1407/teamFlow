@@ -1,9 +1,9 @@
-export enum EUserRole {
+export enum EAccountRole {
   ADMIN = "admin",
   USER = "user",
 }
 
-export enum EUserPosition {
+export enum EAccountPosition {
   ADMIN = "admin",
   MANAGER = "manager",
   MEMBER = "member",

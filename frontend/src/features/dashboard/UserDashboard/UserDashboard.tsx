@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 import { Users, CheckSquare, Activity, TrendingUp, Gauge, Building2, UserCircle, type LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import userService, { type User } from "@/services/user.service"
+import accountService, { type Account } from "@/services/account.service"
 import projectService, { type Project } from "@/services/project.service"
 import employeeService, { type Employee } from "@/services/employee.service"
 import departmentService, { type Department } from "@/services/department.service"
@@ -11,11 +11,11 @@ import departmentService, { type Department } from "@/services/department.servic
 export default function UserDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [members, setMembers] = useState<User[]>([])
+  const [members, setMembers] = useState<Account[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [, setEmp] = useState<Employee | null>(null)
   const [dept, setDept] = useState<Department | null>(null)
-  const [deptMembers, setDeptMembers] = useState<User[]>([])
+  const [deptMembers, setDeptMembers] = useState<Account[]>([])
   const [deptManager, setDeptManager] = useState<Employee | null>(null)
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function UserDashboard() {
         if (user?.position === "member") {
           const [projRes, userRes, empRes, deptRes] = await Promise.all([
             projectService.getMyProjects(),
-            userService.getAll(),
+            accountService.getAll(),
             employeeService.getAll(),
             departmentService.getAll(),
           ])
@@ -54,7 +54,7 @@ export default function UserDashboard() {
         } else {
           const [projRes, userRes, empRes, deptRes] = await Promise.all([
             projectService.getMyProjects(),
-            userService.getAll(),
+            accountService.getAll(),
             employeeService.getAll(),
             departmentService.getAll(),
           ])

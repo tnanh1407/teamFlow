@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
-import userService, { type User, type UserPosition } from "@/services/user.service"
+import accountService, { type Account, type AccountPosition } from "@/services/account.service"
 import employeeService, { type Employee } from "@/services/employee.service"
 import departmentService from "@/services/department.service"
 import positionService from "@/services/position.service"
 import { useAuth } from "@/contexts/AuthContext"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
-const positionOptions: { value: UserPosition; label: string }[] = [
+const positionOptions: { value: AccountPosition; label: string }[] = [
   { value: "member", label: "Member" },
   { value: "manager", label: "Manager" },
   { value: "admin", label: "Admin" },
 ]
 
-function getPositionOptions(currentPosition: UserPosition): { value: UserPosition; label: string }[] {
+function getPositionOptions(currentPosition: AccountPosition): { value: AccountPosition; label: string }[] {
   if (currentPosition === "admin") return positionOptions
   return [positionOptions[0]]
 }
 
-function getRoleBadge(role: UserPosition): { label: string; classes: string } {
+function getRoleBadge(role: AccountPosition): { label: string; classes: string } {
   switch (role) {
     case "admin":
       return { label: "Admin", classes: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" }
@@ -36,7 +36,7 @@ export default function UserDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<Account | null>(null)
   const [employee, setEmployee] = useState<Employee | null>(null)
   const [deptName, setDeptName] = useState("—")
   const [posName, setPosName] = useState("—")
@@ -46,7 +46,7 @@ export default function UserDetail() {
   const fetchUser = async () => {
     if (!id) return
     try {
-      const { data } = await userService.getById(id)
+      const { data } = await accountService.getById(id)
       const u = data.data
       setUser(u)
 
@@ -102,7 +102,7 @@ export default function UserDetail() {
 
   const openFormDialog = async () => {
     if (!user) return
-    const dataRef: { current: { employeeId: string; username: string; password: string; position: UserPosition; status: boolean } | null } = { current: null }
+    const dataRef: { current: { employeeId: string; username: string; password: string; position: AccountPosition; status: boolean } | null } = { current: null }
 
     function FormComponent() {
       const [f, setF] = useState({ employeeId: user.employeeId, username: user.username, password: "", position: user.position, status: user.status })
@@ -166,14 +166,14 @@ export default function UserDetail() {
 
     if (result.isConfirmed && result.value) {
       try {
-        const payload: Partial<User> & { password?: string } = {
+        const payload: Partial<Account> & { password?: string } = {
           employeeId: result.value.employeeId,
           username: result.value.username,
           position: result.value.position,
           status: result.value.status,
         }
         if (result.value.password) payload.password = result.value.password
-        await userService.update(user.id, payload)
+        await accountService.update(user.id, payload)
         fetchUser()
       } catch {
         console.error("Failed to update user")
@@ -189,7 +189,7 @@ export default function UserDetail() {
     })
     if (confirmed) {
       try {
-        await userService.delete(user.id)
+        await accountService.delete(user.id)
         navigate("/members")
       } catch {
         console.error("Failed to delete user")

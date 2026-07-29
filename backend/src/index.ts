@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import { fileURLToPath } from "url";
 import pool from "./config/database.js";
 import env from "./config/env.js";
-import userRouter from "./user/user.router.js";
+import accountRouter from "./account/account.router.js";
 import departmentRouter from "./department/department.router.js";
 import employeeRouter from "./employee/employee.router.js";
 import positionRouter from "./position/position.router.js";
@@ -35,15 +35,15 @@ app.get("/", (_req, res) => {
   res.json({ message: "TeamFlow API is running" });
 });
 
-app.use("/api/users", userRouter);
+app.use("/api/accounts", accountRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/employees", employeeRouter);
 app.use("/api/positions", positionRouter);
-app.use("/api/projects", projectRouter);
-app.use("/api/project-employees", projectEmployeeRouter);
-app.use("/api/project-comments", projectCommentRouter);
-app.use("/api/project-departments", projectDepartmentRouter);
-app.use("/api/project-logs", projectLogRouter);
+app.use("/api/tasks", projectRouter);
+app.use("/api/task-employees", projectEmployeeRouter);
+app.use("/api/task-comments", projectCommentRouter);
+app.use("/api/task-departments", projectDepartmentRouter);
+app.use("/api/task-logs", projectLogRouter);
 app.use("/api/upload", uploadRouter);
 app.use(errorHandler);
 

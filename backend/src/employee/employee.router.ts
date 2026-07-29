@@ -8,7 +8,7 @@ import {
   createEmployeeSchema,
   updateEmployeeSchema,
 } from "./employee.validation.js";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EAccountRole } from "../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -19,7 +19,7 @@ router.get("/:id", authenticate, asyncHandler(employeeController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   uploadAvatar.single("avatar"),
   validate(createEmployeeSchema),
   asyncHandler(employeeController.create)
@@ -27,7 +27,7 @@ router.post(
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   uploadAvatar.single("avatar"),
   validate(updateEmployeeSchema),
   asyncHandler(employeeController.update)
@@ -35,20 +35,7 @@ router.patch(
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   asyncHandler(employeeController.delete)
 );
-router.delete(
-  "/:id/hard",
-  authenticate,
-  authorize(EUserRole.ADMIN),
-  asyncHandler(employeeController.deleteHard)
-);
-router.post(
-  "/:id/restore",
-  authenticate,
-  authorize(EUserRole.ADMIN),
-  asyncHandler(employeeController.restore)
-);
-
 export default router;

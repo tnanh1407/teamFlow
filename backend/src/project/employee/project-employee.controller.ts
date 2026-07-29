@@ -15,9 +15,9 @@ class ProjectEmployeeController {
     res.json({ data: assignment });
   }
 
-  async getByProject(req: Request, res: Response) {
-    const projectId = req.params.projectId as string;
-    const assignments = await projectEmployeeService.findByProject(projectId);
+  async getByTask(req: Request, res: Response) {
+    const taskId = req.params.taskId as string;
+    const assignments = await projectEmployeeService.findByTask(taskId);
     res.json({ data: assignments });
   }
 

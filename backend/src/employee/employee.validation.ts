@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { EGender } from "../enums/gender.enum.js";
-import { EEmployeeStatus } from "../enums/employee-status.enum.js";
 
 export const createEmployeeSchema = z.object({
   departmentId: z.string().min(1, "Department ID is required"),
@@ -12,7 +11,7 @@ export const createEmployeeSchema = z.object({
   birthDate: z.string().optional(),
   hireDate: z.string().optional(),
   gender: z.enum(Object.values(EGender) as [string, ...string[]]).default(EGender.OTHER),
-  status: z.enum(Object.values(EEmployeeStatus) as [string, ...string[]]).default(EEmployeeStatus.ACTIVE),
+  status: z.boolean().default(true),
   avatarURL: z.string().optional(),
 });
 

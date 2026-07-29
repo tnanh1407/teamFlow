@@ -1,7 +1,7 @@
 [
   {
     "id": "cmt1",
-    "projectId": "proj1",
+    "taskId": "proj1",
     "employeeId": "emp1",
     "content": "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản. Cần review trước khi sang giai đoạn 2.",
     "attachments": null,
@@ -10,7 +10,7 @@
   },
   {
     "id": "cmt2",
-    "projectId": "proj1",
+    "taskId": "proj1",
     "employeeId": "emp2",
     "content": "Đã review giao diện. Có một số điểm cần chỉnh sửa về UX. Sẽ gửi feedback chi tiết sau.",
     "attachments": null,
@@ -19,7 +19,7 @@
   },
   {
     "id": "cmt3",
-    "projectId": "proj3",
+    "taskId": "proj3",
     "employeeId": "emp2",
     "content": "Đã nâng cấp firewall và cập nhật chứng chỉ SSL. Cần kiểm tra lại toàn bộ hệ thống.",
     "attachments": null,
@@ -28,7 +28,7 @@
   },
   {
     "id": "cmt4",
-    "projectId": "proj4",
+    "taskId": "proj4",
     "employeeId": "emp8",
     "content": "Đã hoàn thành kế hoạch chi tiết cho chiến dịch. Đang chờ duyệt ngân sách.",
     "attachments": "ke-hoach-mkt-q4.pdf",
@@ -37,7 +37,7 @@
   },
   {
     "id": "cmt5",
-    "projectId": "proj5",
+    "taskId": "proj5",
     "employeeId": "emp10",
     "content": "Dự án đã hoàn thành đúng tiến độ. Quy trình vận hành mới đã được áp dụng thành công.",
     "attachments": null,

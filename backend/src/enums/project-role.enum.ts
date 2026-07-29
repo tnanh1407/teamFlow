@@ -1,5 +1,5 @@
-export enum EProjectRole {
-  MANAGER = "manager",
+export enum ETaskRole {
+  LEADER = "leader",
   MEMBER = "member",
   REVIEWER = "reviewer",
 }

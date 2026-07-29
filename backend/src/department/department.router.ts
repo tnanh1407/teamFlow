@@ -7,7 +7,7 @@ import {
   createDepartmentSchema,
   updateDepartmentSchema,
 } from "./department.validation.js";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EAccountRole } from "../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -16,21 +16,21 @@ router.get("/:id", authenticate, asyncHandler(departmentController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   validate(createDepartmentSchema),
   asyncHandler(departmentController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   validate(updateDepartmentSchema),
   asyncHandler(departmentController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   asyncHandler(departmentController.delete)
 );
 

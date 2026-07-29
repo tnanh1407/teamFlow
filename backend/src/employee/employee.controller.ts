@@ -54,23 +54,9 @@ class EmployeeController {
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const employee = await employeeService.deleteSoft(id);
+    const employee = await employeeService.delete(id);
     if (!employee) throw new AppError("Employee not found", 404);
     res.json({ message: "Employee deleted successfully" });
-  }
-
-  async deleteHard(req: Request, res: Response) {
-    const id = req.params.id as string;
-    const employee = await employeeService.deleteHard(id);
-    if (!employee) throw new AppError("Employee not found", 404);
-    res.json({ message: "Employee permanently deleted" });
-  }
-
-  async restore(req: Request, res: Response) {
-    const id = req.params.id as string;
-    const employee = await employeeService.restore(id);
-    if (!employee) throw new AppError("Employee not found or not deleted", 404);
-    res.json({ data: employee });
   }
 }
 

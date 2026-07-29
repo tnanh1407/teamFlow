@@ -1,31 +1,31 @@
 import { Request, Response } from "express";
-import userController from "../../src/user/user.controller.js";
-import userService from "../../src/user/user.service.js";
+import accountController from "../../src/account/account.controller.js";
+import accountService from "../../src/account/account.service.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
-import { EUserRole } from "../../src/enums/user-role.enum.js";
+import { EAccountRole } from "../../src/enums/account-role.enum.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-jest.mock("../../src/user/user.service.js");
+jest.mock("../../src/account/account.service.js");
 jest.mock("bcryptjs");
 jest.mock("jsonwebtoken");
 
-const mockUserService = jest.mocked(userService);
+const mockAccountService = jest.mocked(accountService);
 const mockBcrypt = jest.mocked(bcrypt);
 const mockJwt = jest.mocked(jwt);
 
-const fakeUser = {
-  id: "user-1",
+const fakeAccount = {
+  id: "account-1",
   employeeId: "emp-1",
   username: "testuser",
   password: "hashedpwd",
-  role: EUserRole.USER,
+  role: EAccountRole.USER,
   status: true,
   createdAt: new Date("2025-01-01"),
   updatedAt: new Date("2025-01-01"),
 };
 
-describe("UserController", () => {
+describe("AccountController", () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
   let statusSpy: jest.Mock;
@@ -49,45 +49,45 @@ describe("UserController", () => {
   });
 
   describe("getAll", () => {
-    it("returns 200 with users", async () => {
-      mockUserService.findAll.mockResolvedValue([fakeUser]);
+    it("returns 200 with accounts", async () => {
+      mockAccountService.findAll.mockResolvedValue([fakeAccount]);
 
-      await userController.getAll(mockReq as Request, mockRes as Response);
+      await accountController.getAll(mockReq as Request, mockRes as Response);
 
-      expect(jsonSpy).toHaveBeenCalledWith({ data: [fakeUser] });
+      expect(jsonSpy).toHaveBeenCalledWith({ data: [fakeAccount] });
     });
   });
 
   describe("getById", () => {
-    it("returns 200 with user when found", async () => {
-      mockReq.params = { id: "user-1" };
-      mockUserService.findById.mockResolvedValue(fakeUser);
+    it("returns 200 with account when found", async () => {
+      mockReq.params = { id: "account-1" };
+      mockAccountService.findById.mockResolvedValue(fakeAccount);
 
-      await userController.getById(mockReq as Request, mockRes as Response);
+      await accountController.getById(mockReq as Request, mockRes as Response);
 
-      expect(jsonSpy).toHaveBeenCalledWith({ data: fakeUser });
+      expect(jsonSpy).toHaveBeenCalledWith({ data: fakeAccount });
     });
 
-    it("throws 404 when user not found", async () => {
+    it("throws 404 when account not found", async () => {
       mockReq.params = { id: "nonexistent" };
-      mockUserService.findById.mockResolvedValue(null);
+      mockAccountService.findById.mockResolvedValue(null);
 
       await expect(
-        userController.getById(mockReq as Request, mockRes as Response)
-      ).rejects.toThrow(new AppError("User not found", 404));
+        accountController.getById(mockReq as Request, mockRes as Response)
+      ).rejects.toThrow(new AppError("Account not found", 404));
     });
   });
 
   describe("create", () => {
-    it("returns 201 with created user", async () => {
+    it("returns 201 with created account", async () => {
       mockReq.body = {
         employeeId: "emp-2",
         username: "newuser",
         password: "password123",
       };
-      mockUserService.create.mockResolvedValue({ ...fakeUser, id: "user-2", username: "newuser" });
+      mockAccountService.create.mockResolvedValue({ ...fakeAccount, id: "account-2", username: "newuser" });
 
-      await userController.create(mockReq as Request, mockRes as Response);
+      await accountController.create(mockReq as Request, mockRes as Response);
 
       expect(statusSpy).toHaveBeenCalledWith(201);
       expect(jsonSpy).toHaveBeenCalledWith(
@@ -97,43 +97,43 @@ describe("UserController", () => {
   });
 
   describe("update", () => {
-    it("returns 200 with updated user", async () => {
-      mockReq.params = { id: "user-1" };
+    it("returns 200 with updated account", async () => {
+      mockReq.params = { id: "account-1" };
       mockReq.body = { username: "updateduser" };
-      mockUserService.update.mockResolvedValue({ ...fakeUser, username: "updateduser" });
+      mockAccountService.update.mockResolvedValue({ ...fakeAccount, username: "updateduser" });
 
-      await userController.update(mockReq as Request, mockRes as Response);
+      await accountController.update(mockReq as Request, mockRes as Response);
 
       expect(jsonSpy).toHaveBeenCalled();
     });
 
-    it("throws 404 when user not found", async () => {
+    it("throws 404 when account not found", async () => {
       mockReq.params = { id: "nonexistent" };
-      mockUserService.update.mockResolvedValue(null);
+      mockAccountService.update.mockResolvedValue(null);
 
       await expect(
-        userController.update(mockReq as Request, mockRes as Response)
-      ).rejects.toThrow(new AppError("User not found", 404));
+        accountController.update(mockReq as Request, mockRes as Response)
+      ).rejects.toThrow(new AppError("Account not found", 404));
     });
   });
 
   describe("delete", () => {
     it("returns 200 with success message", async () => {
-      mockReq.params = { id: "user-1" };
-      mockUserService.delete.mockResolvedValue(fakeUser);
+      mockReq.params = { id: "account-1" };
+      mockAccountService.delete.mockResolvedValue(fakeAccount);
 
-      await userController.delete(mockReq as Request, mockRes as Response);
+      await accountController.delete(mockReq as Request, mockRes as Response);
 
-      expect(jsonSpy).toHaveBeenCalledWith({ message: "User deleted successfully" });
+      expect(jsonSpy).toHaveBeenCalledWith({ message: "Account deleted successfully" });
     });
 
-    it("throws 404 when user not found", async () => {
+    it("throws 404 when account not found", async () => {
       mockReq.params = { id: "nonexistent" };
-      mockUserService.delete.mockResolvedValue(null);
+      mockAccountService.delete.mockResolvedValue(null);
 
       await expect(
-        userController.delete(mockReq as Request, mockRes as Response)
-      ).rejects.toThrow(new AppError("User not found", 404));
+        accountController.delete(mockReq as Request, mockRes as Response)
+      ).rejects.toThrow(new AppError("Account not found", 404));
     });
   });
 
@@ -142,11 +142,11 @@ describe("UserController", () => {
 
     it("returns 200 with token and sets cookie on success", async () => {
       mockReq.body = loginBody;
-      mockUserService.findByUsername.mockResolvedValue(fakeUser);
+      mockAccountService.findByUsername.mockResolvedValue(fakeAccount);
       mockBcrypt.compare.mockResolvedValue(true as never);
       mockJwt.sign.mockReturnValue("fake-token" as never);
 
-      await userController.login(mockReq as Request, mockRes as Response);
+      await accountController.login(mockReq as Request, mockRes as Response);
 
       expect(cookieSpy).toHaveBeenCalledWith(
         "token",
@@ -157,7 +157,7 @@ describe("UserController", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             token: "fake-token",
-            user: expect.not.objectContaining({ password: expect.anything() }),
+            account: expect.not.objectContaining({ password: expect.anything() }),
           }),
         })
       );
@@ -165,36 +165,36 @@ describe("UserController", () => {
 
     it("throws 401 when credentials are invalid", async () => {
       mockReq.body = loginBody;
-      mockUserService.findByUsername.mockResolvedValue(null);
+      mockAccountService.findByUsername.mockResolvedValue(null);
 
       await expect(
-        userController.login(mockReq as Request, mockRes as Response)
+        accountController.login(mockReq as Request, mockRes as Response)
       ).rejects.toThrow(new AppError("Invalid credentials", 401));
     });
 
     it("throws 403 when account is disabled", async () => {
       mockReq.body = loginBody;
-      mockUserService.findByUsername.mockResolvedValue({ ...fakeUser, status: false });
+      mockAccountService.findByUsername.mockResolvedValue({ ...fakeAccount, status: false });
 
       await expect(
-        userController.login(mockReq as Request, mockRes as Response)
+        accountController.login(mockReq as Request, mockRes as Response)
       ).rejects.toThrow(new AppError("Account is disabled", 403));
     });
 
     it("throws 401 when password does not match", async () => {
       mockReq.body = loginBody;
-      mockUserService.findByUsername.mockResolvedValue(fakeUser);
+      mockAccountService.findByUsername.mockResolvedValue(fakeAccount);
       mockBcrypt.compare.mockResolvedValue(false as never);
 
       await expect(
-        userController.login(mockReq as Request, mockRes as Response)
+        accountController.login(mockReq as Request, mockRes as Response)
       ).rejects.toThrow(new AppError("Invalid credentials", 401));
     });
   });
 
   describe("logout", () => {
     it("clears cookie and returns success message", async () => {
-      await userController.logout(mockReq as Request, mockRes as Response);
+      await accountController.logout(mockReq as Request, mockRes as Response);
 
       expect(clearCookieSpy).toHaveBeenCalledWith("token");
       expect(jsonSpy).toHaveBeenCalledWith({ message: "Logged out successfully" });

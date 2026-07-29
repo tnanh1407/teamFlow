@@ -7,32 +7,32 @@ import {
   createProjectCommentSchema,
   updateProjectCommentSchema,
 } from "./project-comment.validation.js";
-import { EUserRole } from "../../enums/user-role.enum.js";
+import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
 router.get("/", authenticate, asyncHandler(projectCommentController.getAll));
-router.get("/project/:projectId", authenticate, asyncHandler(projectCommentController.getByProject));
+router.get("/task/:taskId", authenticate, asyncHandler(projectCommentController.getByTask));
 router.get("/employee/:employeeId", authenticate, asyncHandler(projectCommentController.getByEmployee));
 router.get("/:id", authenticate, asyncHandler(projectCommentController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(createProjectCommentSchema),
   asyncHandler(projectCommentController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(updateProjectCommentSchema),
   asyncHandler(projectCommentController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   asyncHandler(projectCommentController.delete)
 );
 

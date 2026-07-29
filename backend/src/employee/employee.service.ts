@@ -13,11 +13,10 @@ interface EmployeeRow {
   birthDate: string;
   hireDate: string;
   gender: string;
-  status: string;
+  status: boolean;
   avatarURL: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
 }
 
 const employeeColumns = EmployeeSchema.columns;
@@ -25,14 +24,14 @@ const employeeColumns = EmployeeSchema.columns;
 class EmployeeService {
   async findAll() {
     const { rows } = await pool.query<EmployeeRow>(
-      `SELECT ${employeeColumns} FROM employees WHERE deleted_at IS NULL ORDER BY created_at DESC`
+      `SELECT ${employeeColumns} FROM employees ORDER BY created_at DESC`
     );
     return rows;
   }
 
   async findById(id: string) {
     const { rows } = await pool.query<EmployeeRow>(
-      `SELECT ${employeeColumns} FROM employees WHERE id = $1 AND deleted_at IS NULL`,
+      `SELECT ${employeeColumns} FROM employees WHERE id = $1`,
       [id]
     );
     return rows[0] || null;
@@ -64,7 +63,7 @@ class EmployeeService {
 
   async findByDepartment(departmentId: string) {
     const { rows } = await pool.query<EmployeeRow>(
-      `SELECT ${employeeColumns} FROM employees WHERE department_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`,
+      `SELECT ${employeeColumns} FROM employees WHERE department_id = $1 ORDER BY created_at DESC`,
       [departmentId]
     );
     return rows;
@@ -72,7 +71,7 @@ class EmployeeService {
 
   async findByPosition(positionId: string) {
     const { rows } = await pool.query<EmployeeRow>(
-      `SELECT ${employeeColumns} FROM employees WHERE position_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`,
+      `SELECT ${employeeColumns} FROM employees WHERE position_id = $1 ORDER BY created_at DESC`,
       [positionId]
     );
     return rows;
@@ -107,7 +106,7 @@ class EmployeeService {
       [
         data.departmentId, data.positionId, data.employeeCode, data.name,
         data.email, data.phone || null, data.birthDate || null,
-        data.hireDate || null, data.gender || "other", data.status || "active",
+        data.hireDate || null, data.gender || "other", data.status ?? true,
         data.avatarURL || null,
       ]
     );
@@ -168,35 +167,12 @@ class EmployeeService {
     return rows[0] || null;
   }
 
-  async deleteSoft(id: string) {
-    const { rows } = await pool.query<EmployeeRow>(
-      `UPDATE employees SET deleted_at = now() WHERE id = $1 AND deleted_at IS NULL RETURNING ${employeeColumns}`,
-      [id]
-    );
-    return rows[0] || null;
-  }
-
-  async deleteHard(id: string) {
+  async delete(id: string) {
     const { rows } = await pool.query<EmployeeRow>(
       `DELETE FROM employees WHERE id = $1 RETURNING ${employeeColumns}`,
       [id]
     );
     return rows[0] || null;
-  }
-
-  async restore(id: string) {
-    const { rows } = await pool.query<EmployeeRow>(
-      `UPDATE employees SET deleted_at = NULL WHERE id = $1 AND deleted_at IS NOT NULL RETURNING ${employeeColumns}`,
-      [id]
-    );
-    return rows[0] || null;
-  }
-
-  async findAllDeleted() {
-    const { rows } = await pool.query<EmployeeRow>(
-      `SELECT ${employeeColumns} FROM employees WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC`
-    );
-    return rows;
   }
 }
 

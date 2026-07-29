@@ -1,0 +1,22 @@
+[
+  {"id":"pe1","taskId":"proj1","employeeId":"emp1","role":"leader","assignedAt":"2025-06-01T00:00:00.000Z"},
+  {"id":"pe2","taskId":"proj1","employeeId":"emp2","role":"reviewer","assignedAt":"2025-06-01T00:00:00.000Z"},
+  {"id":"pe3","taskId":"proj1","employeeId":"emp3","role":"member","assignedAt":"2025-06-05T00:00:00.000Z"},
+  {"id":"pe4","taskId":"proj1","employeeId":"emp4","role":"member","assignedAt":"2025-06-05T00:00:00.000Z"},
+  {"id":"pe5","taskId":"proj2","employeeId":"emp1","role":"leader","assignedAt":"2025-08-01T00:00:00.000Z"},
+  {"id":"pe6","taskId":"proj2","employeeId":"emp3","role":"member","assignedAt":"2025-08-01T00:00:00.000Z"},
+  {"id":"pe7","taskId":"proj2","employeeId":"emp16","role":"member","assignedAt":"2025-08-01T00:00:00.000Z"},
+  {"id":"pe8","taskId":"proj3","employeeId":"emp2","role":"leader","assignedAt":"2025-05-01T00:00:00.000Z"},
+  {"id":"pe9","taskId":"proj3","employeeId":"emp1","role":"reviewer","assignedAt":"2025-05-01T00:00:00.000Z"},
+  {"id":"pe10","taskId":"proj3","employeeId":"emp3","role":"member","assignedAt":"2025-05-10T00:00:00.000Z"},
+  {"id":"pe11","taskId":"proj4","employeeId":"emp8","role":"leader","assignedAt":"2025-09-01T00:00:00.000Z"},
+  {"id":"pe12","taskId":"proj4","employeeId":"emp9","role":"member","assignedAt":"2025-09-01T00:00:00.000Z"},
+  {"id":"pe13","taskId":"proj4","employeeId":"emp16","role":"member","assignedAt":"2025-09-01T00:00:00.000Z"},
+  {"id":"pe14","taskId":"proj4","employeeId":"emp12","role":"member","assignedAt":"2025-09-05T00:00:00.000Z"},
+  {"id":"pe15","taskId":"proj5","employeeId":"emp10","role":"leader","assignedAt":"2025-03-01T00:00:00.000Z"},
+  {"id":"pe16","taskId":"proj5","employeeId":"emp6","role":"reviewer","assignedAt":"2025-03-05T00:00:00.000Z"},
+  {"id":"pe17","taskId":"proj5","employeeId":"emp11","role":"reviewer","assignedAt":"2025-03-05T00:00:00.000Z"},
+  {"id":"pe18","taskId":"proj5","employeeId":"emp14","role":"member","assignedAt":"2025-03-10T00:00:00.000Z"},
+  {"id":"pe19","taskId":"proj1","employeeId":"emp11","role":"reviewer","assignedAt":"2025-06-10T00:00:00.000Z"},
+  {"id":"pe20","taskId":"proj2","employeeId":"emp13","role":"member","assignedAt":"2025-08-05T00:00:00.000Z"}
+]

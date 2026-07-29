@@ -7,7 +7,7 @@ import {
   createPositionSchema,
   updatePositionSchema,
 } from "./position.validation.js";
-import { EUserRole } from "../enums/user-role.enum.js";
+import { EAccountRole } from "../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -16,21 +16,21 @@ router.get("/:id", authenticate, asyncHandler(positionController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   validate(createPositionSchema),
   asyncHandler(positionController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   validate(updatePositionSchema),
   asyncHandler(positionController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   asyncHandler(positionController.delete)
 );
 

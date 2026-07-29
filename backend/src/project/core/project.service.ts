@@ -1,8 +1,8 @@
 import pool from "../../config/database.js";
 import { AppError } from "../../utils/errors/app-error.js";
-import { ProjectSchema } from "../../schemas/index.js";
+import { TaskSchema } from "../../schemas/index.js";
 
-interface ProjectRow {
+interface TaskRow {
   id: string;
   title: string;
   description: string;
@@ -13,68 +13,66 @@ interface ProjectRow {
   dueDate: string;
   assignedBy: string;
   createdBy: string;
-  updatedBy: string;
   completedBy: string;
   estimatedHours: number;
   actualHours: number;
-  attachments: string;
   completedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const projectColumns = ProjectSchema.columns;
+const taskColumns = TaskSchema.columns;
 
 class ProjectService {
   async findAll() {
-    const { rows } = await pool.query<ProjectRow>(
-      `SELECT ${projectColumns} FROM projects ORDER BY created_at DESC`
+    const { rows } = await pool.query<TaskRow>(
+      `SELECT ${taskColumns} FROM tasks ORDER BY created_at DESC`
     );
     return rows;
   }
 
   async findById(id: string) {
-    const { rows } = await pool.query<ProjectRow>(
-      `SELECT ${projectColumns} FROM projects WHERE id = $1`,
+    const { rows } = await pool.query<TaskRow>(
+      `SELECT ${taskColumns} FROM tasks WHERE id = $1`,
       [id]
     );
     return rows[0] || null;
   }
 
   async findByStatus(status: string) {
-    const { rows } = await pool.query<ProjectRow>(
-      `SELECT ${projectColumns} FROM projects WHERE status = $1 ORDER BY created_at DESC`,
+    const { rows } = await pool.query<TaskRow>(
+      `SELECT ${taskColumns} FROM tasks WHERE status = $1 ORDER BY created_at DESC`,
       [status]
     );
     return rows;
   }
 
   async findByPriority(priority: string) {
-    const { rows } = await pool.query<ProjectRow>(
-      `SELECT ${projectColumns} FROM projects WHERE priority = $1 ORDER BY created_at DESC`,
+    const { rows } = await pool.query<TaskRow>(
+      `SELECT ${taskColumns} FROM tasks WHERE priority = $1 ORDER BY created_at DESC`,
       [priority]
     );
     return rows;
   }
 
   async findByCreatedBy(employeeId: string) {
-    const { rows } = await pool.query<ProjectRow>(
-      `SELECT ${projectColumns} FROM projects WHERE created_by = $1 ORDER BY created_at DESC`,
+    const { rows } = await pool.query<TaskRow>(
+      `SELECT ${taskColumns} FROM tasks WHERE created_by = $1 ORDER BY created_at DESC`,
       [employeeId]
     );
     return rows;
   }
 
   async findByEmployeeId(employeeId: string) {
-    const cols = projectColumns.split(",").map((c) => `p.${c.trim()}`).join(", ");
-    const { rows } = await pool.query<ProjectRow>(
+    const cols = taskColumns.split(",").map((c) => `t.${c.trim()}`).join(", ");
+    const { rows } = await pool.query<TaskRow>(
       `SELECT DISTINCT ${cols}
-       FROM projects p
-       LEFT JOIN project_employees pe ON pe.project_id = p.id
+       FROM tasks t
+       LEFT JOIN task_employees te ON te.task_id = t.id
        LEFT JOIN employees e ON e.id = $1
-       LEFT JOIN project_departments pd ON pd.project_id = p.id
-       WHERE pe.employee_id = $1 OR p.created_by = $1 OR pd.department_id = e.department_id
-       ORDER BY p.created_at DESC`,
+       LEFT JOIN task_departments td ON td.task_id = t.id
+       WHERE te.employee_id = $1 OR t.created_by = $1 OR td.department_id = e.department_id
+       ORDER BY t.created_at DESC`,
       [employeeId]
     );
     return rows;
@@ -92,16 +90,14 @@ class ProjectService {
     createdBy: string;
     estimatedHours?: number;
     actualHours?: number;
-    attachments?: string;
   }) {
-    const { rows } = await pool.query<ProjectRow>(
-      `INSERT INTO projects (title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, attachments) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING ${projectColumns}`,
+    const { rows } = await pool.query<TaskRow>(
+      `INSERT INTO tasks (title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ${taskColumns}`,
       [
         data.title, data.description || null, data.priority || "medium",
         data.status || "todo", data.progress ?? 0, data.startDate || null,
         data.dueDate || null, data.assignedBy || null, data.createdBy,
         data.estimatedHours || null, data.actualHours || null,
-        data.attachments || '[]',
       ]
     );
     return rows[0];
@@ -116,12 +112,9 @@ class ProjectService {
     startDate: string;
     dueDate: string;
     assignedBy: string;
-    createdBy: string;
-    updatedBy: string;
     completedBy: string;
     estimatedHours: number;
     actualHours: number;
-    attachments: string;
     completedAt: Date;
   }>) {
     const setClauses: string[] = [];
@@ -136,26 +129,24 @@ class ProjectService {
     if (data.startDate !== undefined) { setClauses.push(`start_date = $${idx++}`); values.push(data.startDate); }
     if (data.dueDate !== undefined) { setClauses.push(`due_date = $${idx++}`); values.push(data.dueDate); }
     if (data.assignedBy !== undefined) { setClauses.push(`assigned_by = $${idx++}`); values.push(data.assignedBy); }
-    if (data.updatedBy !== undefined) { setClauses.push(`updated_by = $${idx++}`); values.push(data.updatedBy); }
     if (data.completedBy !== undefined) { setClauses.push(`completed_by = $${idx++}`); values.push(data.completedBy); }
     if (data.estimatedHours !== undefined) { setClauses.push(`estimated_hours = $${idx++}`); values.push(data.estimatedHours); }
     if (data.actualHours !== undefined) { setClauses.push(`actual_hours = $${idx++}`); values.push(data.actualHours); }
-    if (data.attachments !== undefined) { setClauses.push(`attachments = $${idx++}`); values.push(data.attachments); }
     if (data.completedAt !== undefined) { setClauses.push(`completed_at = $${idx++}`); values.push(data.completedAt); }
 
     if (setClauses.length === 0) return this.findById(id);
 
     values.push(id);
-    const { rows } = await pool.query<ProjectRow>(
-      `UPDATE projects SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${projectColumns}`,
+    const { rows } = await pool.query<TaskRow>(
+      `UPDATE tasks SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${taskColumns}`,
       values
     );
     return rows[0] || null;
   }
 
   async delete(id: string) {
-    const { rows } = await pool.query<ProjectRow>(
-      `DELETE FROM projects WHERE id = $1 RETURNING ${projectColumns}`,
+    const { rows } = await pool.query<TaskRow>(
+      `DELETE FROM tasks WHERE id = $1 RETURNING ${taskColumns}`,
       [id]
     );
     return rows[0] || null;

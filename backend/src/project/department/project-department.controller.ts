@@ -8,9 +8,9 @@ class ProjectDepartmentController {
     res.json({ data: assignments });
   }
 
-  async getByProject(req: Request, res: Response) {
-    const projectId = req.params.projectId as string;
-    const assignments = await projectDepartmentService.findByProject(projectId);
+  async getByTask(req: Request, res: Response) {
+    const taskId = req.params.taskId as string;
+    const assignments = await projectDepartmentService.findByTask(taskId);
     res.json({ data: assignments });
   }
 
@@ -26,9 +26,9 @@ class ProjectDepartmentController {
   }
 
   async delete(req: Request, res: Response) {
-    const { projectId, departmentId } = req.params as { projectId: string; departmentId: string };
+    const { taskId, departmentId } = req.params as { taskId: string; departmentId: string };
 
-    const assignment = await projectDepartmentService.delete(projectId, departmentId);
+    const assignment = await projectDepartmentService.delete(taskId, departmentId);
     if (!assignment) throw new AppError("Assignment not found", 404);
     res.json({ message: "Assignment deleted successfully" });
   }

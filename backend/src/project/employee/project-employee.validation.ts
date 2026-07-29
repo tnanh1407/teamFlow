@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { EProjectRole } from "../../enums/project-role.enum.js";
+import { ETaskRole } from "../../enums/project-role.enum.js";
 
 export const createProjectEmployeeSchema = z.object({
-  projectId: z.string().min(1, "Project ID is required"),
+  taskId: z.string().min(1, "Task ID is required"),
   employeeId: z.string().min(1, "Employee ID is required"),
-  role: z.enum(Object.values(EProjectRole) as [string, ...string[]]).default(EProjectRole.MEMBER),
+  role: z.enum(Object.values(ETaskRole) as [string, ...string[]]).default(ETaskRole.MEMBER),
 });
 
 export const updateProjectEmployeeSchema = createProjectEmployeeSchema.partial();

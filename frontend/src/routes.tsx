@@ -15,8 +15,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { ReactNode } from "react";
 import DepartmentList from "./features/department/DepartmentList/DepartmentList";
 import DepartmentDetail from "./features/department/DepartmentDetail/DepartmentDetail";
-import UserDashboard from "./features/dashboard/AdminDashboard/UserDashboard/UserDashboard";
 import AdminDashboard from "./features/dashboard/AdminDashboard/AdminDashboard";
+import UserDashboard from "./features/dashboard/UserDashboard/UserDashboard";
 
 const positionHome: Record<string, string> = {
   admin: "/dashboard",

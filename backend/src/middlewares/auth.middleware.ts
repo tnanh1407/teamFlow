@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { EUserRole, EUserPosition } from "../enums/user-role.enum.js";
+import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import env from "../config/env.js"
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    role: EUserRole;
-    position: EUserPosition;
+    role: EAccountRole;
+    position: EAccountPosition;
   };
 }
 
@@ -27,7 +27,7 @@ export const authenticate = (
     const decoded = jwt.verify(
       token,
       env.JWT_SECRET
-    ) as { id: string; role: EUserRole; position: EUserPosition };
+    ) as { id: string; role: EAccountRole; position: EAccountPosition };
 
     req.user = decoded;
     next();
@@ -37,7 +37,7 @@ export const authenticate = (
 };
 
 //  xác thực
-export const authorize = (...roles: EUserRole[]) => {
+export const authorize = (...roles: EAccountRole[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: "Access denied" });

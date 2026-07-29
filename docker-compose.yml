@@ -17,6 +17,7 @@ services:
       POSTGRES_DB: teamflow
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     # quan trọng giúp lưu giữ liệu ngoài container
 
 volumes:

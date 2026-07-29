@@ -4,30 +4,30 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 
 jest.mock("jsonwebtoken");
-jest.mock("../../src/user/user.controller.js");
+jest.mock("../../src/account/account.controller.js");
 
-import userRouter from "../../src/user/user.router.js";
-import userController from "../../src/user/user.controller.js";
+import accountRouter from "../../src/account/account.router.js";
+import accountController from "../../src/account/account.controller.js";
 import { errorHandler } from "../../src/middlewares/error.middleware.js";
-import { EUserRole } from "../../src/enums/user-role.enum.js";
+import { EAccountRole } from "../../src/enums/account-role.enum.js";
 
 const mockJwtVerify = jwt.verify as jest.Mock;
-const mockUserController = jest.mocked(userController);
+const mockAccountController = jest.mocked(accountController);
 
 function createApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  app.use("/api/users", userRouter);
+  app.use("/api/accounts", accountRouter);
   app.use(errorHandler);
   return app;
 }
 
 function validTokenCookie() {
-  mockJwtVerify.mockReturnValue({ id: "admin-id", role: EUserRole.ADMIN });
+  mockJwtVerify.mockReturnValue({ id: "admin-id", role: EAccountRole.ADMIN });
 }
 
-describe("User Routes (integration)", () => {
+describe("Account Routes (integration)", () => {
   let app: express.Express;
 
   beforeEach(() => {
@@ -35,38 +35,38 @@ describe("User Routes (integration)", () => {
     jest.clearAllMocks();
   });
 
-  describe("POST /api/users/login", () => {
+  describe("POST /api/accounts/login", () => {
     it("returns 200 with token on valid credentials", async () => {
-      const fakeUser = {
-        id: "user-1",
+      const fakeAccount = {
+        id: "account-1",
         employeeId: "emp-1",
         username: "testuser",
         password: "hashed",
-        role: EUserRole.USER,
+        role: EAccountRole.USER,
         status: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockUserController.login.mockImplementation(async (req, res) => {
+      mockAccountController.login.mockImplementation(async (req, res) => {
         const token = "fake-jwt-token";
         res.cookie("token", token, { httpOnly: true });
-        const { password: _, ...userWithoutPassword } = fakeUser;
-        res.json({ data: { user: userWithoutPassword, token } });
+        const { password: _, ...accountWithoutPassword } = fakeAccount;
+        res.json({ data: { account: accountWithoutPassword, token } });
       });
 
       const res = await request(app)
-        .post("/api/users/login")
+        .post("/api/accounts/login")
         .send({ username: "testuser", password: "password123" });
 
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
       expect(res.body.data.token).toBe("fake-jwt-token");
-      expect(res.body.data.user).not.toHaveProperty("password");
+      expect(res.body.data.account).not.toHaveProperty("password");
     });
 
     it("returns 400 when body is invalid", async () => {
       const res = await request(app)
-        .post("/api/users/login")
+        .post("/api/accounts/login")
         .send({});
 
       expect(res.status).toBe(400);
@@ -75,23 +75,23 @@ describe("User Routes (integration)", () => {
 
     it("returns 400 when username is missing", async () => {
       const res = await request(app)
-        .post("/api/users/login")
+        .post("/api/accounts/login")
         .send({ password: "test123" });
 
       expect(res.status).toBe(400);
     });
   });
 
-  describe("POST /api/users/logout", () => {
+  describe("POST /api/accounts/logout", () => {
     it("returns 200 even without token (just clears cookie)", async () => {
-      mockUserController.logout.mockImplementation(async (_req, res) => {
+      mockAccountController.logout.mockImplementation(async (_req, res) => {
         res.clearCookie("token");
         res.json({ message: "Logged out successfully" });
       });
       validTokenCookie();
 
       const res = await request(app)
-        .post("/api/users/logout")
+        .post("/api/accounts/logout")
         .set("Cookie", ["token=valid-token"]);
 
       expect(res.status).toBe(200);
@@ -99,63 +99,63 @@ describe("User Routes (integration)", () => {
     });
 
     it("returns 401 without authentication", async () => {
-      const res = await request(app).post("/api/users/logout");
+      const res = await request(app).post("/api/accounts/logout");
 
       expect(res.status).toBe(401);
     });
   });
 
-  describe("GET /api/users", () => {
+  describe("GET /api/accounts", () => {
     it("returns 401 without token", async () => {
-      const res = await request(app).get("/api/users");
+      const res = await request(app).get("/api/accounts");
 
       expect(res.status).toBe(401);
       expect(res.body.message).toBe("Access denied. No token provided.");
     });
 
-    it("returns 200 with users list when authenticated", async () => {
-      const fakeUsers = [{ id: "1", username: "user1" }];
-      mockUserController.getAll.mockImplementation(async (_req, res) => {
-        res.json({ data: fakeUsers });
+    it("returns 200 with accounts list when authenticated", async () => {
+      const fakeAccounts = [{ id: "1", username: "user1" }];
+      mockAccountController.getAll.mockImplementation(async (_req, res) => {
+        res.json({ data: fakeAccounts });
       });
       validTokenCookie();
 
       const res = await request(app)
-        .get("/api/users")
+        .get("/api/accounts")
         .set("Cookie", ["token=valid-token"]);
 
       expect(res.status).toBe(200);
-      expect(res.body.data).toEqual(fakeUsers);
+      expect(res.body.data).toEqual(fakeAccounts);
     });
   });
 
-  describe("GET /api/users/:id", () => {
-    it("returns 200 when user found", async () => {
-      const fakeUser = { id: "user-1", username: "testuser" };
-      mockUserController.getById.mockImplementation(async (req, res) => {
-        res.json({ data: fakeUser });
+  describe("GET /api/accounts/:id", () => {
+    it("returns 200 when account found", async () => {
+      const fakeAccount = { id: "account-1", username: "testuser" };
+      mockAccountController.getById.mockImplementation(async (req, res) => {
+        res.json({ data: fakeAccount });
       });
       validTokenCookie();
 
       const res = await request(app)
-        .get("/api/users/user-1")
+        .get("/api/accounts/account-1")
         .set("Cookie", ["token=valid-token"]);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.id).toBe("user-1");
+      expect(res.body.data.id).toBe("account-1");
     });
   });
 
-  describe("POST /api/users", () => {
-    it("returns 201 when admin creates user", async () => {
-      const newUser = { id: "new-1", username: "newuser", role: EUserRole.USER };
-      mockUserController.create.mockImplementation(async (req, res) => {
-        res.status(201).json({ data: newUser });
+  describe("POST /api/accounts", () => {
+    it("returns 201 when admin creates account", async () => {
+      const newAccount = { id: "new-1", username: "newuser", role: EAccountRole.USER };
+      mockAccountController.create.mockImplementation(async (req, res) => {
+        res.status(201).json({ data: newAccount });
       });
       validTokenCookie();
 
       const res = await request(app)
-        .post("/api/users")
+        .post("/api/accounts")
         .set("Cookie", ["token=valid-token"])
         .send({
           employeeId: "emp-2",
@@ -171,7 +171,7 @@ describe("User Routes (integration)", () => {
       validTokenCookie();
 
       const res = await request(app)
-        .post("/api/users")
+        .post("/api/accounts")
         .set("Cookie", ["token=valid-token"])
         .send({ username: "only-username" });
 
@@ -180,15 +180,15 @@ describe("User Routes (integration)", () => {
     });
   });
 
-  describe("PATCH /api/users/:id", () => {
-    it("returns 200 when admin updates user", async () => {
-      mockUserController.update.mockImplementation(async (req, res) => {
+  describe("PATCH /api/accounts/:id", () => {
+    it("returns 200 when admin updates account", async () => {
+      mockAccountController.update.mockImplementation(async (req, res) => {
         res.json({ data: { id: req.params.id, username: "updated" } });
       });
       validTokenCookie();
 
       const res = await request(app)
-        .patch("/api/users/user-1")
+        .patch("/api/accounts/account-1")
         .set("Cookie", ["token=valid-token"])
         .send({ username: "updated" });
 
@@ -200,7 +200,7 @@ describe("User Routes (integration)", () => {
       validTokenCookie();
 
       const res = await request(app)
-        .patch("/api/users/user-1")
+        .patch("/api/accounts/account-1")
         .set("Cookie", ["token=valid-token"])
         .send({ username: "" });
 
@@ -208,26 +208,26 @@ describe("User Routes (integration)", () => {
     });
   });
 
-  describe("DELETE /api/users/:id", () => {
-    it("returns 200 when admin deletes user", async () => {
-      mockUserController.delete.mockImplementation(async (req, res) => {
-        res.json({ message: "User deleted successfully" });
+  describe("DELETE /api/accounts/:id", () => {
+    it("returns 200 when admin deletes account", async () => {
+      mockAccountController.delete.mockImplementation(async (req, res) => {
+        res.json({ message: "Account deleted successfully" });
       });
       validTokenCookie();
 
       const res = await request(app)
-        .delete("/api/users/user-1")
+        .delete("/api/accounts/account-1")
         .set("Cookie", ["token=valid-token"]);
 
       expect(res.status).toBe(200);
-      expect(res.body.message).toBe("User deleted successfully");
+      expect(res.body.message).toBe("Account deleted successfully");
     });
   });
 
   describe("401 Unauthorized scenarios", () => {
     it("blocks POST without auth", async () => {
       const res = await request(app)
-        .post("/api/users")
+        .post("/api/accounts")
         .send({ username: "test", employeeId: "e1", password: "pass123" });
 
       expect(res.status).toBe(401);
@@ -235,14 +235,14 @@ describe("User Routes (integration)", () => {
 
     it("blocks PATCH without auth", async () => {
       const res = await request(app)
-        .patch("/api/users/user-1")
+        .patch("/api/accounts/account-1")
         .send({ username: "hacker" });
 
       expect(res.status).toBe(401);
     });
 
     it("blocks DELETE without auth", async () => {
-      const res = await request(app).delete("/api/users/user-1");
+      const res = await request(app).delete("/api/accounts/account-1");
 
       expect(res.status).toBe(401);
     });
@@ -250,10 +250,10 @@ describe("User Routes (integration)", () => {
 
   describe("403 Forbidden scenarios", () => {
     it("blocks POST when user is not admin", async () => {
-      mockJwtVerify.mockReturnValue({ id: "user-1", role: EUserRole.USER });
+      mockJwtVerify.mockReturnValue({ id: "user-1", role: EAccountRole.USER });
 
       const res = await request(app)
-        .post("/api/users")
+        .post("/api/accounts")
         .set("Cookie", ["token=user-token"])
         .send({ username: "test", employeeId: "e1", password: "pass123" });
 
@@ -263,13 +263,13 @@ describe("User Routes (integration)", () => {
 
   describe("Token from Authorization header", () => {
     it("authenticates via Bearer token", async () => {
-      mockUserController.getAll.mockImplementation(async (_req, res) => {
+      mockAccountController.getAll.mockImplementation(async (_req, res) => {
         res.json({ data: [] });
       });
-      mockJwtVerify.mockReturnValue({ id: "user-1", role: EUserRole.ADMIN });
+      mockJwtVerify.mockReturnValue({ id: "user-1", role: EAccountRole.ADMIN });
 
       const res = await request(app)
-        .get("/api/users")
+        .get("/api/accounts")
         .set("Authorization", "Bearer my-token");
 
       expect(res.status).toBe(200);

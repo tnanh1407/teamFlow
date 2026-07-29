@@ -15,9 +15,9 @@ class ProjectLogController {
     res.json({ data: log });
   }
 
-  async getByProject(req: Request, res: Response) {
-    const projectId = req.params.projectId as string;
-    const logs = await projectLogService.findByProject(projectId);
+  async getByTask(req: Request, res: Response) {
+    const taskId = req.params.taskId as string;
+    const logs = await projectLogService.findByTask(taskId);
     res.json({ data: logs });
   }
 

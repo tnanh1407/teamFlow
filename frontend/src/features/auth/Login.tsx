@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react"
 import Swal from "sweetalert2"
 import { toast } from "sonner"
 import heroImg from "@/assets/hero.png"
-import userService from "@/services/user.service"
+import accountService from "@/services/account.service"
 import { useAuth } from "@/contexts/AuthContext"
 
 export default function Login() {
@@ -24,8 +24,8 @@ export default function Login() {
     }
     setLoading(true)
     try {
-      const { data } = await userService.login({ username, password })
-      const user = data.data.user
+      const { data } = await accountService.login({ username, password })
+      const user = data.data.account
       setUser(user)
       toast.success(`Xin chào ${user.username}!`)
       const home: Record<string, string> = {

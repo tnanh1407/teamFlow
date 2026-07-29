@@ -7,32 +7,32 @@ import {
   createProjectEmployeeSchema,
   updateProjectEmployeeSchema,
 } from "./project-employee.validation.js";
-import { EUserRole } from "../../enums/user-role.enum.js";
+import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
 router.get("/", authenticate, asyncHandler(projectEmployeeController.getAll));
-router.get("/project/:projectId", authenticate, asyncHandler(projectEmployeeController.getByProject));
+router.get("/task/:taskId", authenticate, asyncHandler(projectEmployeeController.getByTask));
 router.get("/employee/:employeeId", authenticate, asyncHandler(projectEmployeeController.getByEmployee));
 router.get("/:id", authenticate, asyncHandler(projectEmployeeController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(createProjectEmployeeSchema),
   asyncHandler(projectEmployeeController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   updateProjectEmployeeSchema ? validate(updateProjectEmployeeSchema) : (req, res, next) => next(),
   asyncHandler(projectEmployeeController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   asyncHandler(projectEmployeeController.delete)
 );
 

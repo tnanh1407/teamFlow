@@ -8,8 +8,11 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "seed": "tsx src/seed.ts",
+    "db:init": "tsx src/init.ts",
+    "db:reset": "tsx src/init.ts && npm run seed",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:watch:ci": "jest --watch:ci"
   },
   "keywords": [],
   "author": "",

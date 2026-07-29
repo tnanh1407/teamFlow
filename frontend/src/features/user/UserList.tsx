@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Eye, Copy, Fingerprint } from "lucide-react"
-import userService, { type User, type UserRole, type UserPosition } from "@/services/user.service"
+import accountService, { type Account, type AccountRole, type AccountPosition } from "@/services/account.service"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
@@ -11,7 +11,7 @@ interface FormData {
   employeeId: string
   username: string
   password: string
-  position: UserPosition
+  position: AccountPosition
   status: boolean
 }
 
@@ -23,28 +23,28 @@ const emptyForm: FormData = {
   status: true,
 }
 
-const positionOptions: { value: UserPosition; label: string }[] = [
+const positionOptions: { value: AccountPosition; label: string }[] = [
   { value: "admin", label: "Admin" },
   { value: "manager", label: "Manager" },
   { value: "member", label: "Member" },
 ]
 
-const positionLabels: Record<UserPosition, string> = {
+const positionLabels: Record<AccountPosition, string> = {
   admin: "Admin",
   manager: "Manager",
   member: "Member",
 }
 
-function positionToRole(position: UserPosition): UserRole {
+function positionToRole(position: AccountPosition): AccountRole {
   return position === "admin" ? "admin" : "user"
 }
 
-function getPositionOptions(currentPosition: UserPosition): { value: UserPosition; label: string }[] {
+function getPositionOptions(currentPosition: AccountPosition): { value: AccountPosition; label: string }[] {
   if (currentPosition === "admin") return positionOptions
   return [positionOptions[2]]
 }
 
-function getRoleBadge(position: UserPosition): { label: string; classes: string } {
+function getRoleBadge(position: AccountPosition): { label: string; classes: string } {
   switch (position) {
     case "admin":
       return { label: "Admin", classes: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" }
@@ -61,7 +61,7 @@ import departmentService from "@/services/department.service"
 export default function Members() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [userDeptId, setUserDeptId] = useState<string | null>(null)
@@ -73,7 +73,7 @@ export default function Members() {
   const fetchUsers = async () => {
     try {
       const [userRes, empRes, deptRes] = await Promise.all([
-        userService.getAll(),
+        accountService.getAll(),
         employeeService.getAll(),
         departmentService.getAll(),
       ])
@@ -134,7 +134,7 @@ export default function Members() {
     setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
   }
 
-  const canEdit = (target: User): boolean => {
+  const canEdit = (target: Account): boolean => {
     if (!currentUser) return false
     if (currentUser.position === "admin") {
       if (target.id === currentUser.id) return false
@@ -148,7 +148,7 @@ export default function Members() {
     return false
   }
 
-  const canDelete = (target: User): boolean => {
+  const canDelete = (target: Account): boolean => {
     return canEdit(target)
   }
 
@@ -157,7 +157,7 @@ export default function Members() {
 
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
-  const openFormDialog = async (editingUser?: User) => {
+  const openFormDialog = async (editingUser?: Account) => {
     const isEdit = !!editingUser
     const dataRef: { current: FormData | null } = { current: null }
 
@@ -248,9 +248,9 @@ export default function Members() {
             status: result.value.status,
           }
           if (result.value.password) payload.password = result.value.password
-          await userService.update(editingUser!.id, payload)
+          await accountService.update(editingUser!.id, payload)
         } else {
-          await userService.create({
+          await accountService.create({
             ...result.value,
             role: positionToRole(result.value.position),
           })
@@ -263,7 +263,7 @@ export default function Members() {
     }
   }
 
-  const confirmDelete = async (e: React.MouseEvent, user: User) => {
+  const confirmDelete = async (e: React.MouseEvent, user: Account) => {
     e.stopPropagation()
     const confirmed = await showDeleteConfirm({
       name: user.username,
@@ -271,7 +271,7 @@ export default function Members() {
     })
     if (confirmed) {
       try {
-        await userService.delete(user.id)
+        await accountService.delete(user.id)
         toast.success("Xoá thành công")
         fetchUsers()
       } catch {

@@ -7,7 +7,7 @@ import {
   createProjectSchema,
   updateProjectSchema,
 } from "./project.validation.js";
-import { EUserRole } from "../../enums/user-role.enum.js";
+import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -20,21 +20,21 @@ router.get("/:id", authenticate, asyncHandler(projectController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   validate(createProjectSchema),
   asyncHandler(projectController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN, EUserRole.USER),
+  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(updateProjectSchema),
   asyncHandler(projectController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EUserRole.ADMIN),
+  authorize(EAccountRole.ADMIN),
   asyncHandler(projectController.delete)
 );
 

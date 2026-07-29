@@ -1,0 +1,211 @@
+[
+    {
+        "id":  "user_root",
+        "employeeId":  "emp1",
+        "username":  "root",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "admin",
+        "position":  "admin",
+        "status": true,
+        "createdAt":  "2025-01-01T00:00:00.000Z",
+        "updatedAt":  "2025-01-01T00:00:00.000Z"
+    },
+    {
+        "id":  "user_ad",
+        "employeeId":  "emp2",
+        "username":  "admin",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "admin",
+        "position":  "admin",
+        "status": true,
+        "createdAt":  "2025-01-01T00:00:00.000Z",
+        "updatedAt":  "2025-01-01T00:00:00.000Z"
+    },
+    {
+        "id":  "user_mgr",
+        "employeeId":  "emp3",
+        "username":  "manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-02T00:00:00.000Z",
+        "updatedAt":  "2025-01-02T00:00:00.000Z"
+    },
+    {
+        "id":  "user_hr",
+        "employeeId":  "emp4",
+        "username":  "hr_manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-02T00:00:00.000Z",
+        "updatedAt":  "2025-01-02T00:00:00.000Z"
+    },
+    {
+        "id":  "user_acc",
+        "employeeId":  "emp6",
+        "username":  "acc_manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-03T00:00:00.000Z",
+        "updatedAt":  "2025-01-03T00:00:00.000Z"
+    },
+    {
+        "id":  "user_mkt",
+        "employeeId":  "emp8",
+        "username":  "mkt_manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-04T00:00:00.000Z",
+        "updatedAt":  "2025-01-04T00:00:00.000Z"
+    },
+    {
+        "id":  "user_ops",
+        "employeeId":  "emp11",
+        "username":  "ops_manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-05T00:00:00.000Z",
+        "updatedAt":  "2025-01-05T00:00:00.000Z"
+    },
+    {
+        "id":  "user_eng",
+        "employeeId":  "emp16",
+        "username":  "eng_manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-06T00:00:00.000Z",
+        "updatedAt":  "2025-01-06T00:00:00.000Z"
+    },
+    {
+        "id":  "user_dsg",
+        "employeeId":  "emp17",
+        "username":  "dsg_manager",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "manager",
+        "status": true,
+        "createdAt":  "2025-01-07T00:00:00.000Z",
+        "updatedAt":  "2025-01-07T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp5",
+        "employeeId":  "emp5",
+        "username":  "hoang.em",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-08T00:00:00.000Z",
+        "updatedAt":  "2025-01-08T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp7",
+        "employeeId":  "emp7",
+        "username":  "dang.giang",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-09T00:00:00.000Z",
+        "updatedAt":  "2025-01-09T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp9",
+        "employeeId":  "emp9",
+        "username":  "ngo.inh",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-10T00:00:00.000Z",
+        "updatedAt":  "2025-01-10T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp10",
+        "employeeId":  "emp10",
+        "username":  "duong.kim",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-11T00:00:00.000Z",
+        "updatedAt":  "2025-01-11T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp12",
+        "employeeId":  "emp12",
+        "username":  "trinh.ngoc",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-12T00:00:00.000Z",
+        "updatedAt":  "2025-01-12T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp13",
+        "employeeId":  "emp13",
+        "username":  "do.hoang",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-13T00:00:00.000Z",
+        "updatedAt":  "2025-01-13T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp14",
+        "employeeId":  "emp14",
+        "username":  "mai.lan",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-14T00:00:00.000Z",
+        "updatedAt":  "2025-01-14T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp18",
+        "employeeId":  "emp18",
+        "username":  "tran.huy",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-15T00:00:00.000Z",
+        "updatedAt":  "2025-01-15T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp19",
+        "employeeId":  "emp19",
+        "username":  "le.tam",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-16T00:00:00.000Z",
+        "updatedAt":  "2025-01-16T00:00:00.000Z"
+    },
+    {
+        "id":  "user_emp20",
+        "employeeId":  "emp20",
+        "username":  "vo.khoi",
+        "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+        "role":  "user",
+        "position":  "member",
+        "status": true,
+        "createdAt":  "2025-01-17T00:00:00.000Z",
+        "updatedAt":  "2025-01-17T00:00:00.000Z"
+    }
+]
