@@ -3,14 +3,13 @@ import bcrypt from "bcryptjs";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { AccountSchema } from "../schemas/index.js";
-
 interface AccountRow {
   id: string
   employeeId: string
   username: string
   password: string
-  role: string
-  position: string
+  role: EAccountRole
+  position: EAccountPosition | null
   status: boolean
   avatarURL?: string
   lastLogin: Date | null
@@ -18,22 +17,47 @@ interface AccountRow {
   updatedAt: Date
 }
 
+// Dùng cho INSERT/UPDATE/DELETE (single table)
 const accountColumns = AccountSchema.columns;
 
-const accountColumnsWithAvatar = `a.id, a.employee_id, a.username, a.password, a.role, a.position, a.status, e.avatar_url, a.created_at, a.updated_at`;
-const accountJoin = `FROM accounts a LEFT JOIN employees e ON e.id = a.employee_id`;
+// Dùng cho SELECT có JOIN (tránh ambiguous)
+const accountSelectColumns = `a.id,
+  a.employee_id,
+  a.username,
+  a.password,
+  a.role,
+  a.position,
+  a.status,
+  a.avatar_url,
+  e.avatar_url,
+  a.last_login,
+  a.created_at,
+  a.updated_at`;
 
+
+interface CreateUserDataInput {
+  username: string;
+  password: string;
+  role: EAccountRole;
+  position?: EAccountPosition | null;
+}
 class AccountService {
-  async findAll() {
+  async findAll(page = 1, limit = 10) {
+
+    const offset = (page - 1) * limit;
+    const countResult = await pool.query<{count : string}>(`SELECT COUNT(*) as count FROM accounts a LEFT JOIN employees e ON e.id = a.employess_id`)
+
+    const total = parseInt(countResult.rows[0].count , 10);
     const { rows } = await pool.query<AccountRow>(
-      `SELECT ${accountColumnsWithAvatar} ${accountJoin} ORDER BY a.created_at DESC`
+      `SELECT ${accountColumns} From accounts a JOIN employees e ON e.id = a.employee_id ORDER BY a.created_at DESC LIMIT $1 OFFSET $2`,[limit, offset]
     );
-    return rows;
+
+    return  {data : rows , total , page , limit , totalPages : Math.ceil(total/limit)};
   }
 
   async findById(id: string) {
     const { rows } = await pool.query<AccountRow>(
-      `SELECT ${accountColumnsWithAvatar} ${accountJoin} WHERE a.id = $1`,
+      `SELECT ${accountColumns} From accounts a JOIN employees e ON e.id = a.employee_id WHERE a.id = $1`,
       [id]
     );
     return rows[0] || null;
@@ -41,7 +65,7 @@ class AccountService {
 
   async findByUsername(username: string) {
     const { rows } = await pool.query<AccountRow>(
-      `SELECT ${accountColumnsWithAvatar} ${accountJoin} WHERE a.username = $1`,
+      `SELECT ${accountColumns} From accounts a JOIN employees e ON e.id = a.employee_id WHERE a.username = $1`,
       [username]
     );
     return rows[0] || null;
@@ -49,33 +73,25 @@ class AccountService {
 
   async findByEmployeeId(employeeId: string) {
     const { rows } = await pool.query<AccountRow>(
-      `SELECT ${accountColumnsWithAvatar} ${accountJoin} WHERE a.employee_id = $1`,
+      `SELECT ${accountColumns} From accounts a JOIN employees e ON e.id = a.employee_id WHERE a.employee_id = $1`,
       [employeeId]
     );
     return rows[0] || null;
   }
 
-  async create(data: {
-    employeeId: string;
-    username: string;
-    password: string;
-    role?: EAccountRole;
-    position?: EAccountPosition;
-    status?: boolean;
-  }) {
+
+
+  async create(data: CreateUserDataInput) {
     const existingUser = await this.findByUsername(data.username);
+    // kiểm tra người dùng tồn tại không
     if (existingUser) {
       throw new AppError("Username already exists", 409);
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const role = data.role || EAccountRole.USER;
-    const position = data.position || EAccountPosition.MEMBER;
-    const status = data.status ?? true;
-
     const { rows } = await pool.query<AccountRow>(
-      `INSERT INTO accounts (employee_id, username, password, role, position, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING ${accountColumns}`,
-      [data.employeeId, data.username, hashedPassword, role, position, status]
+      `INSERT INTO accounts (username, password, role, position) VALUES ($1, $2, $3, $4) RETURNING ${accountColumns}`,
+      [data.username, hashedPassword, data.role, data.position]
     );
     return this.findById(rows[0].id);
   }

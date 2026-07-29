@@ -1,19 +1,17 @@
 import { z } from "zod";
-import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
+import { EAccountPosition } from "../enums/account-role.enum.js";
 
 export const createAccountSchema = z.object({
-  employeeId: z.string().min(1, "Employee ID is required"),
   username: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  position: z.enum([EAccountPosition.ADMIN, EAccountPosition.MANAGER, EAccountPosition.MEMBER]).default(EAccountPosition.MEMBER),
-  status: z.boolean().default(true),
+  position: z.enum([EAccountPosition.MANAGER, EAccountPosition.MEMBER]).default(EAccountPosition.MEMBER),
 });
 
 export const updateAccountSchema = z.object({
   employeeId: z.string().optional(),
   username: z.string().optional(),
   password: z.string().min(6).optional(),
-  position: z.enum([EAccountPosition.ADMIN, EAccountPosition.MANAGER, EAccountPosition.MEMBER]).optional(),
+  position: z.enum([EAccountPosition.MANAGER, EAccountPosition.MEMBER]).optional(),
   status: z.boolean().optional(),
 });
 

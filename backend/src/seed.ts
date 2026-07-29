@@ -195,10 +195,10 @@ const seed = async () => {
     const users = rawEmployeesData.map((item) => {
       let pwd = "123456";
       let role = "user";
-      let position = "member";
+      let position: string | null = "member";
       switch (item.idx) {
-        case 1: pwd = "root123"; role = "admin"; position = "admin"; break;
-        case 2: pwd = "admin123"; role = "admin"; position = "admin"; break;
+        case 1: pwd = "root123"; role = "admin"; position = null; break;
+        case 2: pwd = "admin123"; role = "admin"; position = null; break;
         case 3: pwd = "manager123"; role = "user"; position = "manager"; break;
         case 7: pwd = "manager123"; role = "user"; position = "manager"; break;
         case 13: pwd = "manager123"; role = "user"; position = "manager"; break;

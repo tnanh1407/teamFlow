@@ -10,9 +10,11 @@ import bcrypt from "bcryptjs";
 import { handleFileUpload, deleteFile } from "../utils/upload.js";
 
 class AccountController {
-  async getAll(_req: AuthRequest, res: Response) {
-    const users = await accountService.findAll();
-    res.json({ data: users });
+  async getAll(req: AuthRequest, res: Response) {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const result = await accountService.findAll(page , limit);
+    res.json(result);
   }
 
   async getById(req: AuthRequest, res: Response) {
@@ -23,25 +25,20 @@ class AccountController {
   }
 
   async create(req: AuthRequest, res: Response) {
+    // lấy dữu liệu cần thiết
     const body = { ...req.body };
+
+    // lấy ra role user đó
     const currentPos = req.user!.position;
 
-    const posMap: Record<string, { role: EAccountRole; position: EAccountPosition }> = {
-      admin: { role: EAccountRole.ADMIN, position: EAccountPosition.ADMIN },
-      manager: { role: EAccountRole.USER, position: EAccountPosition.MANAGER },
-      member: { role: EAccountRole.USER, position: EAccountPosition.MEMBER },
-    };
-
-    const target = posMap[body.position];
-    if (!target) throw new AppError("Invalid position", 400);
 
     if (currentPos === EAccountPosition.MANAGER) {
-      if (target.position !== EAccountPosition.MEMBER) {
+      if (req.body.position !== EAccountPosition.MEMBER) {
         throw new AppError("Managers can only create members", 403);
       }
     }
 
-    const user = await accountService.create({ ...body, role: target.role, position: target.position });
+    const user = await accountService.create({ ...body });
     res.status(201).json({ data: user });
   }
 

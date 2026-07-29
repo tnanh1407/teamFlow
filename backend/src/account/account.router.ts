@@ -17,12 +17,12 @@ const router = Router();
 router.post("/login", validate(loginSchema), asyncHandler(accountController.login));
 router.post("/logout", authenticate, asyncHandler(accountController.logout));
 
-router.get("/", authenticate, asyncHandler(accountController.getAll));
+router.get("/", authorize(EAccountRole.ADMIN), authenticate, asyncHandler(accountController.getAll));
 router.get("/:id", authenticate, asyncHandler(accountController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
+  authorize(EAccountRole.ADMIN),
   validate(createAccountSchema),
   asyncHandler(accountController.create)
 );

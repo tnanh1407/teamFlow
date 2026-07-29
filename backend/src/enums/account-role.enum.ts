@@ -4,7 +4,6 @@ export enum EAccountRole {
 }
 
 export enum EAccountPosition {
-  ADMIN = "admin",
   MANAGER = "manager",
   MEMBER = "member",
 }

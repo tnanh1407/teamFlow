@@ -46,6 +46,7 @@ export const AccountSchema = {
   username,
   password,
   role,
+  avatar_url,
   position,
   status,
   last_login,

@@ -5,7 +5,7 @@
         "username":  "root",
         "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
         "role":  "admin",
-        "position":  "admin",
+        "position": null,
         "status": true,
         "createdAt":  "2025-01-01T00:00:00.000Z",
         "updatedAt":  "2025-01-01T00:00:00.000Z"
@@ -16,7 +16,7 @@
         "username":  "admin",
         "password":  "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
         "role":  "admin",
-        "position":  "admin",
+        "position": null,
         "status": true,
         "createdAt":  "2025-01-01T00:00:00.000Z",
         "updatedAt":  "2025-01-01T00:00:00.000Z"
