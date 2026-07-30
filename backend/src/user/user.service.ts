@@ -3,7 +3,9 @@ import bcrypt from "bcryptjs";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { UserSchema } from "../schemas/index.js";
+import { EGender } from "@/enums/gender.enum.js";
 
+// dữ liệu database
 interface UserRow {
   id: string;
   departmentId: string;
@@ -14,7 +16,7 @@ interface UserRow {
   phone: string;
   birthDate: string;
   hireDate: string;
-  gender: string;
+  gender: EGender;
   username: string;
   password: string;
   role: EAccountRole;
@@ -24,6 +26,31 @@ interface UserRow {
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// dữ liệu đầu vào
+export interface UserData {
+  departmentId: string;
+  positionId: string;
+  employeeCode: string;
+  name: string;
+  email: string;
+  phone?: string;
+  birthDate?: string;
+  hireDate?: string;
+  gender?: EGender;
+  username: string;
+  password: string;
+  role: EAccountRole;
+  position: EAccountPosition;
+  status: boolean;
+  avatarURL?: string;
+}
+export type CreateUserDataInput = UserData;
+export type UpdateUserDataInput = Partial<Omit<UserData, "password">>
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
 }
 
 const userColumns = UserSchema.columns;
@@ -102,70 +129,77 @@ class UserService {
     return rows;
   }
 
-  async create(data: {
-    departmentId: string;
-    positionId: string;
-    employeeCode: string;
-    name: string;
-    email: string;
-    phone?: string;
-    birthDate?: string;
-    hireDate?: string;
-    gender?: string;
-    username: string;
-    password: string;
-    role: EAccountRole;
-    position: EAccountPosition | null;
-    status?: boolean;
-    avatarURL?: string;
-  }) {
-    const existingUser = await this.findByUsername(data.username);
+
+
+  async create(data: CreateUserDataInput) {
+    const payload = {
+      ...data,
+      username: data.username.trim().toLowerCase(),
+      email: data.email.trim().toLowerCase(),
+      employeeCode: data.employeeCode.trim().toUpperCase(),
+      name: data.name.trim(),
+      phone: data.phone?.trim() || null,
+      gender: data.gender ?? "other",
+      status: data.status ?? true,
+      role: EAccountRole.USER
+    }
+
+    // xử lí phần trùng
+
+    const existingUser = await this.findByUsername(payload.username);
     if (existingUser) throw new AppError("Username already exists", 409);
 
-    const existingCode = await this.findByEmployeeCode(data.employeeCode);
+    const existingCode = await this.findByEmployeeCode(payload.employeeCode);
     if (existingCode) throw new AppError("Employee code already exists", 409);
 
-    const existingEmail = await this.findByEmail(data.email);
+    const existingEmail = await this.findByEmail(payload.email);
     if (existingEmail) throw new AppError("Email already exists", 409);
 
-    if (data.phone) {
-      const existingPhone = await this.findByPhone(data.phone);
+    if (payload.phone) {
+      const existingPhone = await this.findByPhone(payload.phone);
       if (existingPhone) throw new AppError("Phone already exists", 409);
     }
+
+    // chuẩn hóa lại dữ liệu
+
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const { rows } = await pool.query<UserRow>(
       `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, username, password, role, position, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING ${userColumns}`,
       [
-        data.departmentId, data.positionId, data.employeeCode, data.name,
-        data.email, data.phone || null, data.birthDate || null,
-        data.hireDate || null, data.gender || "other",
-        data.username, hashedPassword, data.role, data.position,
-        data.status ?? true, data.avatarURL || null,
+        payload.departmentId, payload.positionId, payload.employeeCode, payload.name,
+        payload.email, payload.phone, payload.birthDate || null,
+        payload.hireDate || null, payload.gender,
+        payload.username, hashedPassword, payload.role, payload.position,
+        payload.status, payload.avatarURL || null,
       ]
     );
     return this.findById(rows[0].id);
   }
 
+  async changePassword(id: string, data: ChangePasswordInput): Promise<void> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+    const isMatch = await bcrypt.compare(data.currentPassword, user.password);
+
+    if (!isMatch) {
+      throw new AppError("Current password is incorrect", 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    await pool.query(
+      `UPDATE users
+     SET password = $1,
+         updated_at = NOW()
+     WHERE id = $2`,
+      [hashedPassword, id]
+    );
+  }
   async update(
     id: string,
-    data: Partial<{
-      departmentId: string;
-      positionId: string;
-      employeeCode: string;
-      name: string;
-      email: string;
-      phone: string;
-      birthDate: string;
-      hireDate: string;
-      gender: string;
-      username: string;
-      password: string;
-      role: EAccountRole;
-      position: EAccountPosition;
-      status: boolean;
-      avatarURL: string;
-    }>
+    data: UpdateUserDataInput
   ) {
     if (data.username) {
       const existing = await this.findByUsername(data.username);
@@ -184,10 +218,6 @@ class UserService {
       if (existing && existing.id !== id) throw new AppError("Phone already exists", 409);
     }
 
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10);
-    }
-
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
@@ -202,7 +232,6 @@ class UserService {
     if (data.hireDate !== undefined) { setClauses.push(`hire_date = $${idx++}`); values.push(data.hireDate); }
     if (data.gender !== undefined) { setClauses.push(`gender = $${idx++}`); values.push(data.gender); }
     if (data.username !== undefined) { setClauses.push(`username = $${idx++}`); values.push(data.username); }
-    if (data.password !== undefined) { setClauses.push(`password = $${idx++}`); values.push(data.password); }
     if (data.role !== undefined) { setClauses.push(`role = $${idx++}`); values.push(data.role); }
     if (data.position !== undefined) { setClauses.push(`position = $${idx++}`); values.push(data.position); }
     if (data.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(data.status); }
@@ -220,12 +249,11 @@ class UserService {
     return rows[0] ? this.findById(rows[0].id) : null;
   }
 
-  async updateAvatar(id: string, avatarURL: string) {
-    const { rows } = await pool.query<UserRow>(
+  async updateAvatar(id: string, avatarURL: string): Promise<void> {
+    await pool.query<UserRow>(
       `UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING ${userColumns}`,
       [avatarURL, id]
     );
-    return rows[0] ? this.findById(rows[0].id) : null;
   }
 
   async updateLastLogin(id: string) {
@@ -235,12 +263,11 @@ class UserService {
     );
   }
 
-  async delete(id: string) {
-    const { rows } = await pool.query<UserRow>(
+  async delete(id: string) : Promise<void> {
+    await pool.query<UserRow>(
       `UPDATE users SET status = false WHERE id = $1 RETURNING ${userColumns}`,
       [id]
     );
-    return rows[0] ? this.findById(rows[0].id) : null;
   }
 }
 

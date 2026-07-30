@@ -34,11 +34,11 @@ class UserController {
     const currentUser = req.user!;
     let departmentId = req.params.departmentId as string;
 
-    if(currentUser.position === EAccountPosition.MANAGER && currentUser.role !== EAccountRole.ADMIN){
+    if (currentUser.position === EAccountPosition.MANAGER && currentUser.role !== EAccountRole.ADMIN) {
       const user = await userService.findById(currentUser.id)
-     if( departmentId !== user!.departmentId){
-      throw new AppError("You can only view your own department", 403);
-     }
+      if (departmentId !== user!.departmentId) {
+        throw new AppError("You can only view your own department", 403);
+      }
     }
     const employees = await userService.findByDepartment(departmentId);
     res.json({ data: employees });
@@ -121,18 +121,13 @@ class UserController {
     res.json({ message: "User deleted successfully" });
   }
 
-  async updateMe(req: AuthRequest, res: Response) {
+  // cập nhật password
+  async changePassword(req: AuthRequest, res: Response) {
     const id = req.user!.id;
-    const { currentPassword, newPassword } = req.body;
-    const user = await userService.findById(id);
-    if (!user) throw new AppError("User not found", 404);
-
-    const isMatch = await comparePassword(currentPassword, user.password);
-    if (!isMatch) throw new AppError("Current password is incorrect", 400);
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const updated = await userService.update(id, { password: hashedPassword });
-    res.json({ data: updated });
+    await userService.changePassword(id, req.body);
+    res.status(200).json({
+      message: "Password updated successfully",
+    });
   }
 
   async login(req: AuthRequest, res: Response) {
@@ -182,9 +177,12 @@ class UserController {
     }
 
     const avatarURL = handleFileUpload(req.file, "avatars");
-    const updated = await userService.updateAvatar(id, avatarURL!);
-    const { password: _, ...userWithoutPassword } = updated!;
-    res.json({ data: userWithoutPassword });
+    await userService.updateAvatar(id, avatarURL!);
+    // const { password: _, ...userWithoutPassword } = updated!;
+    // res.json({ data: userWithoutPassword });
+    res.json({
+      message: "Avatar updated successfully",
+    })
   }
 
   async logout(_req: AuthRequest, res: Response) {

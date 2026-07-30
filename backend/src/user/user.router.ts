@@ -7,8 +7,8 @@ import { uploadAvatar } from "../middlewares/upload.middleware.js";
 import {
   createUserSchema,
   updateUserSchema,
-  updateMeSchema,
   loginSchema,
+  updatePassword,
 } from "./user.validation.js";
 import { EAccountPosition, EAccountRole } from "../enums/account-role.enum.js";
 
@@ -30,30 +30,37 @@ router.post(
   validate(createUserSchema),
   asyncHandler(userController.create)
 );
+
+// cập nhật mật khẩu cho user và admin
 router.patch(
-  "/me",
+  "/updatePs",
   authenticate,
-  validate(updateMeSchema),
-  asyncHandler(userController.updateMe)
+  validate(updatePassword),
+  asyncHandler(userController.changePassword)
 );
+
+// tự cập nhật avatar
 router.post(
   "/me/avatar",
   authenticate,
   uploadAvatar.single("avatar"),
   asyncHandler(userController.updateAvatar)
 );
+
+// cập nhật toàn bộ thông tin trừ passowrd
 router.patch(
   "/:id",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   uploadAvatar.single("avatar"),
   validate(updateUserSchema),
   asyncHandler(userController.update)
 );
+
+// xóa người dùng
 router.delete(
   "/:id",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
+  authorize(EAccountRole.ADMIN),
   asyncHandler(userController.delete)
 );
 

@@ -15,7 +15,6 @@ export const createUserSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   position: z.enum([EAccountPosition.MANAGER, EAccountPosition.MEMBER]).default(EAccountPosition.MEMBER),
-  status: z.boolean().default(true),
   avatarURL: z.string().optional(),
 });
 
@@ -36,7 +35,7 @@ export const updateUserSchema = z.object({
   avatarURL: z.string().optional(),
 });
 
-export const updateMeSchema = z.object({
+export const updatePassword = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
   newPassword: z.string().min(6, "New password must be at least 6 characters"),
 });
