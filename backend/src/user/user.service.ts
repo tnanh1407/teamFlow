@@ -1,9 +1,11 @@
 import pool from "../config/database.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { UserSchema } from "../schemas/index.js";
 import { EGender } from "@/enums/gender.enum.js";
+import env from "../config/env.js";
 
 // dữ liệu database
 interface UserRow {
@@ -56,6 +58,27 @@ export interface ChangePasswordInput {
 const userColumns = UserSchema.columns;
 
 class UserService {
+  async login(username: string, password: string) {
+    const user = await this.findByUsername(username);
+    if (!user) throw new AppError("Invalid credentials", 401);
+    if (!user.status) throw new AppError("Account is disabled", 403);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new AppError("Invalid credentials", 401);
+
+    await this.updateLastLogin(user.id);
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role, position: user.position },
+      env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword, token };
+  }
+
   async findAll(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
     const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM users`)

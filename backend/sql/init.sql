@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS positions (
   name VARCHAR UNIQUE NOT NULL,
   description TEXT,
   level ELevel DEFAULT 'Intern',
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

@@ -1,8 +1,6 @@
 import { Response } from "express";
-import jwt from "jsonwebtoken";
 import userService from "./user.service.js";
 import env from "../config/env.js";
-import { comparePassword } from "../utils/auth/auth.comparePassword.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
@@ -131,37 +129,16 @@ class UserController {
 
   async login(req: AuthRequest, res: Response) {
     const { username, password } = req.body;
-    const user = await userService.findByUsername(username);
+    const result = await userService.login(username, password);
 
-    if (!user) throw new AppError("Invalid credentials", 401);
-    if (!user.status) throw new AppError("Account is disabled", 403);
-
-    const isMatch = await comparePassword(password, user.password);
-    if (!isMatch) throw new AppError("Invalid credentials", 401);
-
-    await userService.updateLastLogin(user.id);
-
-    const token = jwt.sign(
-      { id: user.id, role: user.role, position: user.position },
-      env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("token", token, {
+    res.cookie("token", result.token, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const { password: _, ...userWithoutPassword } = user;
-
-    res.json({
-      data: {
-        user: userWithoutPassword,
-        token,
-      },
-    });
+    res.json({ data: result });
   }
 
   async updateAvatar(req: AuthRequest, res: Response) {
@@ -177,8 +154,6 @@ class UserController {
 
     const avatarURL = handleFileUpload(req.file, "avatars");
     await userService.updateAvatar(id, avatarURL!);
-    // const { password: _, ...userWithoutPassword } = updated!;
-    // res.json({ data: userWithoutPassword });
     res.json({
       message: "Avatar updated successfully",
     })

@@ -7,6 +7,7 @@ interface PositionRow {
   name: string;
   description: string;
   level: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +17,7 @@ interface PositionData {
   name : string;
   description?: string;
   level: string;
+  isActive?: boolean;
 }
 
 export type CreatePositionDataInput = PositionData
@@ -56,8 +58,8 @@ class PositionService {
     if (existing) throw new AppError("Position name already exists", 409);
 
     const { rows } = await pool.query<PositionRow>(
-      `INSERT INTO positions (name, description, level) VALUES ($1, $2, $3) RETURNING ${positionColumns}`,
-      [payload.name, payload.description || null, payload.level || null]
+      `INSERT INTO positions (name, description, level, is_active) VALUES ($1, $2, $3, $4) RETURNING ${positionColumns}`,
+      [payload.name, payload.description || null, payload.level || null, payload.isActive ?? true]
     );
     return rows[0];
   }
@@ -75,6 +77,7 @@ class PositionService {
     if (data.name !== undefined) { setClauses.push(`name = $${idx++}`); values.push(data.name); }
     if (data.description !== undefined) { setClauses.push(`description = $${idx++}`); values.push(data.description); }
     if (data.level !== undefined) { setClauses.push(`level = $${idx++}`); values.push(data.level); }
+    if (data.isActive !== undefined) { setClauses.push(`is_active = $${idx++}`); values.push(data.isActive); }
 
     if (setClauses.length === 0) return this.findById(id);
 

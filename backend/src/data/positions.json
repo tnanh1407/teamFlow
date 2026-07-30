@@ -4,6 +4,7 @@
     "name": "Giám đốc",
     "description": "Giám đốc điều hành - quản lý chiến lược và định hướng phát triển",
     "level": "Manager",
+    "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
@@ -12,6 +13,7 @@
     "name": "Phó Giám đốc",
     "description": "Phó Giám đốc - hỗ trợ điều hành và quản lý các phòng ban",
     "level": "Senior",
+    "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
@@ -20,6 +22,7 @@
     "name": "Trưởng phòng",
     "description": "Trưởng phòng - quản lý và điều phối hoạt động phòng ban",
     "level": "Leader",
+    "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
@@ -28,6 +31,7 @@
     "name": "Phó phòng",
     "description": "Phó phòng - hỗ trợ trưởng phòng trong quản lý phòng ban",
     "level": "Middle",
+    "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
@@ -36,6 +40,7 @@
     "name": "Nhân viên",
     "description": "Nhân viên chính thức - thực hiện các nhiệm vụ được giao",
     "level": "Junior",
+    "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
@@ -44,6 +49,7 @@
     "name": "Thực tập sinh",
     "description": "Thực tập sinh - học việc và hỗ trợ các công việc cơ bản",
     "level": "Intern",
+    "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   }

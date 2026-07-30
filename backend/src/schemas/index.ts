@@ -18,6 +18,7 @@ export const PositionSchema = {
   name,
   description,
   level,
+  is_active,
   created_at, updated_at`,
 } as const;
 
