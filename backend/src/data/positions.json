@@ -1,6 +1,6 @@
 [
   {
-    "id": "pos_gd",
+    "id": "20000000-0000-4000-a000-000000000001",
     "name": "Giám đốc",
     "description": "Giám đốc điều hành - quản lý chiến lược và định hướng phát triển",
     "level": "Manager",
@@ -8,7 +8,7 @@
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": "pos_pgd",
+    "id": "20000000-0000-4000-a000-000000000002",
     "name": "Phó Giám đốc",
     "description": "Phó Giám đốc - hỗ trợ điều hành và quản lý các phòng ban",
     "level": "Senior",
@@ -16,7 +16,7 @@
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": "pos_tp",
+    "id": "20000000-0000-4000-a000-000000000003",
     "name": "Trưởng phòng",
     "description": "Trưởng phòng - quản lý và điều phối hoạt động phòng ban",
     "level": "Leader",
@@ -24,7 +24,7 @@
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": "pos_pp",
+    "id": "20000000-0000-4000-a000-000000000004",
     "name": "Phó phòng",
     "description": "Phó phòng - hỗ trợ trưởng phòng trong quản lý phòng ban",
     "level": "Middle",
@@ -32,7 +32,7 @@
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": "pos_nv",
+    "id": "20000000-0000-4000-a000-000000000005",
     "name": "Nhân viên",
     "description": "Nhân viên chính thức - thực hiện các nhiệm vụ được giao",
     "level": "Junior",
@@ -40,7 +40,7 @@
     "updatedAt": "2025-01-01T00:00:00.000Z"
   },
   {
-    "id": "pos_tts",
+    "id": "20000000-0000-4000-a000-000000000006",
     "name": "Thực tập sinh",
     "description": "Thực tập sinh - học việc và hỗ trợ các công việc cơ bản",
     "level": "Intern",

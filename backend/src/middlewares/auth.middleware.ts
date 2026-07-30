@@ -36,7 +36,7 @@ export const authenticate = (
   }
 };
 
-//  xác thực
+//  xác thực admin
 export const authorize = (...roles: EAccountRole[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -47,6 +47,24 @@ export const authorize = (...roles: EAccountRole[]) => {
       return res.status(403).json({ message: "Insufficient permissions" });
     }
 
+    next();
+  };
+};
+
+
+// xác thực manager
+
+export const authorizePosition = (...positions: EAccountPosition[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Access denied" });
+    }
+    if (req.user.role === EAccountRole.ADMIN) {
+      return next();
+    }
+    if (!req.user.position || !positions.includes(req.user.position)) {
+      return res.status(403).json({ message: "Insufficient position permissions" });
+    }
     next();
   };
 };

@@ -7,7 +7,7 @@ import { AppError } from "../utils/errors/app-error.js";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import bcrypt from "bcryptjs";
-import { handleFileUpload, deleteFile } from "../utils/upload.js";
+import { handleFileUpload, deleteFile } from "../utils/upload/upload.js";
 
 class UserController {
   async getAll(req: AuthRequest, res: Response) {
@@ -29,36 +29,31 @@ class UserController {
     res.json({ data: user });
   }
 
+  // lấy tất cả nhân viên phòng it
   async getByDepartment(req: AuthRequest, res: Response) {
-    const departmentId = req.params.departmentId as string;
+    const currentUser = req.user!;
+    let departmentId = req.params.departmentId as string;
+
+    if(currentUser.position === EAccountPosition.MANAGER && currentUser.role !== EAccountRole.ADMIN){
+      const user = await userService.findById(currentUser.id)
+     if( departmentId !== user!.departmentId){
+      throw new AppError("You can only view your own department", 403);
+     }
+    }
     const employees = await userService.findByDepartment(departmentId);
     res.json({ data: employees });
   }
 
+  // lấy cùng chức vụ
   async getByPosition(req: AuthRequest, res: Response) {
     const positionId = req.params.positionId as string;
     const employees = await userService.findByPosition(positionId);
     res.json({ data: employees });
   }
 
+  // tạo thành viên mới chỉ có admin đươic tạo
   async create(req: AuthRequest, res: Response) {
     const body = { ...req.body };
-    const currentPos = req.user!.position;
-
-    const posMap: Record<string, EAccountRole> = {
-      [EAccountPosition.MANAGER]: EAccountRole.USER,
-      [EAccountPosition.MEMBER]: EAccountRole.USER,
-    };
-
-    if (currentPos === EAccountPosition.MANAGER) {
-      if (req.body.position !== EAccountPosition.MEMBER) {
-        throw new AppError("Managers can only create members", 403);
-      }
-    }
-
-    if (currentPos === EAccountPosition.MANAGER) {
-      body.role = posMap[body.position] || EAccountRole.USER;
-    }
 
     if (req.file) {
       body.avatarURL = handleFileUpload(req.file, "avatars");

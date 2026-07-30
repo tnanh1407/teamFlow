@@ -13,7 +13,6 @@ import projectEmployeeRouter from "./project/employee/project-employee.router.js
 import projectCommentRouter from "./project/comment/project-comment.router.js";
 import projectDepartmentRouter from "./project/department/project-department.router.js";
 import projectLogRouter from "./project/log/project-log.router.js";
-import uploadRouter from "./upload/upload.router.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -44,7 +43,6 @@ app.use("/api/task-employees", projectEmployeeRouter);
 app.use("/api/task-comments", projectCommentRouter);
 app.use("/api/task-departments", projectDepartmentRouter);
 app.use("/api/task-logs", projectLogRouter);
-app.use("/api/upload", uploadRouter);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   explorer: true,

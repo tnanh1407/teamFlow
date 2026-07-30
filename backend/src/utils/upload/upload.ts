@@ -4,15 +4,16 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const uploadsRoot = path.join(__dirname, "../../uploads");
+const uploadsRoot = path.join(__dirname, "../../../uploads");
+
 
 export const handleFileUpload = (
-  file: Express.Multer.File | undefined,
-  target: string
-): string | undefined => {
-  if (!file) return undefined;
-  return `/uploads/${target}/${file.filename}`;
-};
+  file : Express.Multer.File | undefined,
+  subFolder : string
+) : string | undefined => {
+  if(!file) return undefined ;
+  return `uploads/${subFolder}/${file.filename}`;
+}
 
 export const deleteFile = async (fileUrl: string | null | undefined): Promise<void> => {
   if (!fileUrl) return;
@@ -23,3 +24,5 @@ export const deleteFile = async (fileUrl: string | null | undefined): Promise<vo
     // file not found or error
   }
 };
+
+

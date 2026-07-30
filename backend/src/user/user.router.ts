@@ -1,6 +1,6 @@
 import { Router } from "express";
 import userController from "./user.controller.js";
-import { authenticate, authorize } from "../middlewares/auth.middleware.js";
+import { authenticate, authorize, authorizePosition } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validation.middleware.js";
 import { asyncHandler } from "../middlewares/async.middleware.js";
 import { uploadAvatar } from "../middlewares/upload.middleware.js";
@@ -10,7 +10,7 @@ import {
   updateMeSchema,
   loginSchema,
 } from "./user.validation.js";
-import { EAccountRole } from "../enums/account-role.enum.js";
+import { EAccountPosition, EAccountRole } from "../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -19,8 +19,8 @@ router.post("/logout", authenticate, asyncHandler(userController.logout));
 
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.getAll));
 router.get("/all", authenticate, asyncHandler(userController.getAllEmployees));
-router.get("/department/:departmentId", authenticate, asyncHandler(userController.getByDepartment));
-router.get("/position/:positionId", authenticate, asyncHandler(userController.getByPosition));
+router.get("/department/:departmentId", authenticate,  authorizePosition(EAccountPosition.MANAGER) , asyncHandler(userController.getByDepartment));
+router.get("/position/:positionId", authenticate , authorize(EAccountRole.ADMIN),asyncHandler(userController.getByPosition));
 router.get("/:id", authenticate, asyncHandler(userController.getById));
 router.post(
   "/",

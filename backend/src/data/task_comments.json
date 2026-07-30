@@ -1,47 +1,119 @@
 [
   {
-    "id": "cmt1",
-    "taskId": "proj1",
-    "employeeId": "emp1",
+    "id": "70000000-0000-4000-a000-000000000001",
+    "taskId": "50000000-0000-4000-a000-000000000001",
+    "employeeId": "30000000-0000-4000-a000-000000000001",
     "content": "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản. Cần review trước khi sang giai đoạn 2.",
     "attachments": null,
     "createdAt": "2025-06-15T00:00:00.000Z",
     "updatedAt": "2025-06-15T00:00:00.000Z"
   },
   {
-    "id": "cmt2",
-    "taskId": "proj1",
-    "employeeId": "emp2",
+    "id": "70000000-0000-4000-a000-000000000002",
+    "taskId": "50000000-0000-4000-a000-000000000001",
+    "employeeId": "30000000-0000-4000-a000-000000000002",
     "content": "Đã review giao diện. Có một số điểm cần chỉnh sửa về UX. Sẽ gửi feedback chi tiết sau.",
     "attachments": null,
     "createdAt": "2025-06-20T00:00:00.000Z",
     "updatedAt": "2025-06-20T00:00:00.000Z"
   },
   {
-    "id": "cmt3",
-    "taskId": "proj3",
-    "employeeId": "emp2",
+    "id": "70000000-0000-4000-a000-000000000003",
+    "taskId": "50000000-0000-4000-a000-000000000003",
+    "employeeId": "30000000-0000-4000-a000-000000000002",
     "content": "Đã nâng cấp firewall và cập nhật chứng chỉ SSL. Cần kiểm tra lại toàn bộ hệ thống.",
     "attachments": null,
     "createdAt": "2025-07-10T00:00:00.000Z",
     "updatedAt": "2025-07-10T00:00:00.000Z"
   },
   {
-    "id": "cmt4",
-    "taskId": "proj4",
-    "employeeId": "emp8",
+    "id": "70000000-0000-4000-a000-000000000004",
+    "taskId": "50000000-0000-4000-a000-000000000004",
+    "employeeId": "30000000-0000-4000-a000-000000000008",
     "content": "Đã hoàn thành kế hoạch chi tiết cho chiến dịch. Đang chờ duyệt ngân sách.",
     "attachments": "ke-hoach-mkt-q4.pdf",
     "createdAt": "2025-09-05T00:00:00.000Z",
     "updatedAt": "2025-09-05T00:00:00.000Z"
   },
   {
-    "id": "cmt5",
-    "taskId": "proj5",
-    "employeeId": "emp10",
+    "id": "70000000-0000-4000-a000-000000000005",
+    "taskId": "50000000-0000-4000-a000-000000000005",
+    "employeeId": "30000000-0000-4000-a000-000000000010",
     "content": "Dự án đã hoàn thành đúng tiến độ. Quy trình vận hành mới đã được áp dụng thành công.",
     "attachments": null,
     "createdAt": "2025-06-28T00:00:00.000Z",
     "updatedAt": "2025-06-28T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000006",
+    "taskId": "50000000-0000-4000-a000-000000000006",
+    "employeeId": "30000000-0000-4000-a000-000000000001",
+    "content": "Đã hoàn thành thiết kế cơ sở dữ liệu và API cơ bản cho module chat. Đang phát triển giao diện.",
+    "attachments": null,
+    "createdAt": "2025-07-20T00:00:00.000Z",
+    "updatedAt": "2025-07-20T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000007",
+    "taskId": "50000000-0000-4000-a000-000000000006",
+    "employeeId": "30000000-0000-4000-a000-000000000036",
+    "content": "Đã gửi bản thiết kế UI/UX cho module chat. Bao gồm wireframe và prototype tương tác.",
+    "attachments": "chat-ui-prototype.fig",
+    "createdAt": "2025-07-25T00:00:00.000Z",
+    "updatedAt": "2025-07-25T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000008",
+    "taskId": "50000000-0000-4000-a000-000000000006",
+    "employeeId": "30000000-0000-4000-a000-000000000003",
+    "content": "Tích hợp WebSocket thành công. Tin nhắn real-time đã hoạt động ổn định trong môi trường test.",
+    "attachments": null,
+    "createdAt": "2025-08-05T00:00:00.000Z",
+    "updatedAt": "2025-08-05T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000009",
+    "taskId": "50000000-0000-4000-a000-000000000008",
+    "employeeId": "30000000-0000-4000-a000-000000000030",
+    "content": "Đã hoàn thành kiến trúc tổng thể cho dashboard. Sử dụng biểu đồ tương tác với dữ liệu thời gian thực.",
+    "attachments": "dashboard-architecture.pdf",
+    "createdAt": "2025-09-01T00:00:00.000Z",
+    "updatedAt": "2025-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000010",
+    "taskId": "50000000-0000-4000-a000-000000000008",
+    "employeeId": "30000000-0000-4000-a000-000000000032",
+    "content": "Kết nối dữ liệu từ các nguồn API và database hoàn tất. Đang xây dựng các biểu đồ cho module tài chính.",
+    "attachments": null,
+    "createdAt": "2025-09-10T00:00:00.000Z",
+    "updatedAt": "2025-09-10T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000011",
+    "taskId": "50000000-0000-4000-a000-000000000009",
+    "employeeId": "30000000-0000-4000-a000-000000000007",
+    "content": "Đã xây dựng tiêu chí đánh giá cho từng phòng ban. Đang tổng hợp kết quả tự đánh giá từ nhân viên.",
+    "attachments": "tieu-chi-danh-gia-q4.pdf",
+    "createdAt": "2025-11-15T00:00:00.000Z",
+    "updatedAt": "2025-11-15T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000012",
+    "taskId": "50000000-0000-4000-a000-000000000009",
+    "employeeId": "30000000-0000-4000-a000-000000000010",
+    "content": "Đã hoàn thành đánh giá cho phòng HR. Các phòng ban khác đang trong quá trình tổng hợp.",
+    "attachments": null,
+    "createdAt": "2025-11-22T00:00:00.000Z",
+    "updatedAt": "2025-11-22T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000013",
+    "taskId": "50000000-0000-4000-a000-000000000010",
+    "employeeId": "30000000-0000-4000-a000-000000000019",
+    "content": "Đã khảo sát và lựa chọn giải pháp CRM phù hợp. Đang lên kế hoạch triển khai chi tiết.",
+    "attachments": "crm-khao-sat-giai-phap.pdf",
+    "createdAt": "2025-09-15T00:00:00.000Z",
+    "updatedAt": "2025-09-15T00:00:00.000Z"
   }
 ]
