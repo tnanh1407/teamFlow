@@ -11,6 +11,16 @@ interface PositionRow {
   updatedAt: Date;
 }
 
+
+interface PositionData {
+  name : string;
+  description?: string;
+  level: string;
+}
+
+export type CreatePositionDataInput = PositionData
+export type UpdatePositionDataInput = Partial<PositionData>
+
 const positionColumns = PositionSchema.columns;
 
 class PositionService {
@@ -37,26 +47,22 @@ class PositionService {
     return rows[0] || null;
   }
 
-  async create(data: {
-    name: string;
-    description?: string;
-    level?: string;
-  }) {
-    const existing = await this.findByName(data.name);
+  async create(data: CreatePositionDataInput ) {
+    const payload = {
+      ...data,
+      name : data.name.trim().toLowerCase()
+    }
+    const existing = await this.findByName(payload.name);
     if (existing) throw new AppError("Position name already exists", 409);
 
     const { rows } = await pool.query<PositionRow>(
       `INSERT INTO positions (name, description, level) VALUES ($1, $2, $3) RETURNING ${positionColumns}`,
-      [data.name, data.description || null, data.level || null]
+      [payload.name, payload.description || null, payload.level || null]
     );
     return rows[0];
   }
 
-  async update(id: string, data: Partial<{
-    name: string;
-    description: string;
-    level: string;
-  }>) {
+  async update(id: string, data: UpdatePositionDataInput) {
     if (data.name) {
       const existing = await this.findByName(data.name);
       if (existing && existing.id !== id) throw new AppError("Position name already exists", 409);

@@ -24,11 +24,15 @@ interface TaskRow {
 const taskColumns = TaskSchema.columns;
 
 class ProjectService {
-  async findAll() {
+  async findAll(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM tasks`);
+    const total = parseInt(countResult.rows[0].count, 10);
     const { rows } = await pool.query<TaskRow>(
-      `SELECT ${taskColumns} FROM tasks ORDER BY created_at DESC`
+      `SELECT ${taskColumns} FROM tasks ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
-    return rows;
+    return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findById(id: string) {

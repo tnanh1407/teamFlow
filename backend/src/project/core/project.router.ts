@@ -11,7 +11,10 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
-router.get("/", authenticate, asyncHandler(projectController.getAll));
+// lấy all project 
+router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(projectController.getAll));
+
+// lấy project của tôi 
 router.get("/my", authenticate, asyncHandler(projectController.getMyProjects));
 router.get("/status/:status", authenticate, asyncHandler(projectController.getByStatus));
 router.get("/priority/:priority", authenticate, asyncHandler(projectController.getByPriority));
