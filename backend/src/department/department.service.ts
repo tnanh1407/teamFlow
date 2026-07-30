@@ -13,14 +13,30 @@ interface DepartmentRow {
   updatedAt: Date;
 }
 
+interface DepartmentData {
+  name : string;
+  code : string;
+  description?: string ;
+  managerId? :string ;
+  isActive?: boolean;
+}
+
+export type CreateDepartmentDataInput = DepartmentData;
+export type UpdateDepartmentDataInput = Partial<DepartmentData>
+
 const departmentColumns = DepartmentSchema.columns;
 
 class DepartmentService {
-  async findAll() {
+  async findAll(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM departments`);
+    const total = parseInt(countResult.rows[0].count, 10);
     const { rows } = await pool.query<DepartmentRow>(
-      `SELECT ${departmentColumns} FROM departments ORDER BY created_at DESC`
+      `SELECT ${departmentColumns} FROM departments ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
-    return rows;
+    console.log("DEBUG ROWS : " ,rows)
+    return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findById(id: string) {
@@ -47,33 +63,26 @@ class DepartmentService {
     return rows[0] || null;
   }
 
-  async create(data: {
-    name: string;
-    code: string;
-    description?: string;
-    managerId?: string;
-    isActive?: boolean;
-  }) {
-    const existingName = await this.findByName(data.name);
+  async create(data: CreateDepartmentDataInput) {
+    const payload = {
+      ...data,
+      name : data.name.trim().toLowerCase(),
+      code : data.code.trim().toLowerCase(),
+    }
+    const existingName = await this.findByName(payload.name);
     if (existingName) throw new AppError("Department name already exists", 409);
 
-    const existingCode = await this.findByCode(data.code);
+    const existingCode = await this.findByCode(payload.code);
     if (existingCode) throw new AppError("Department code already exists", 409);
 
     const { rows } = await pool.query<DepartmentRow>(
       `INSERT INTO departments (name, code, description, manager_id, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING ${departmentColumns}`,
-      [data.name, data.code, data.description || null, data.managerId || null, data.isActive ?? true]
+      [payload.name, payload.code, payload.description || null, payload.managerId || null, payload.isActive ?? true]
     );
     return rows[0];
   }
 
-  async update(id: string, data: Partial<{
-    name: string;
-    code: string;
-    description: string;
-    managerId: string;
-    isActive: boolean;
-  }>) {
+  async update(id: string, data: UpdateDepartmentDataInput) {
     if (data.name) {
       const existing = await this.findByName(data.name);
       if (existing && existing.id !== id) throw new AppError("Department name already exists", 409);

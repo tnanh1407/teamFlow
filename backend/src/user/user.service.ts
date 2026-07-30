@@ -43,7 +43,7 @@ export interface UserData {
   password: string;
   role: EAccountRole;
   position: EAccountPosition;
-  status: boolean;
+  status?: boolean;
   avatarURL?: string;
 }
 export type CreateUserDataInput = UserData;
@@ -63,6 +63,7 @@ class UserService {
     const { rows } = await pool.query<UserRow>(
       `SELECT ${userColumns} FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]
     );
+    console.log("DEBUG ROWS : " ,rows)
     return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 

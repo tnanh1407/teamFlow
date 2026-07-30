@@ -6,7 +6,6 @@ import { comparePassword } from "../utils/auth/auth.comparePassword.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
-import bcrypt from "bcryptjs";
 import { handleFileUpload, deleteFile } from "../utils/upload/upload.js";
 
 class UserController {
