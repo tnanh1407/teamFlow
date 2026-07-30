@@ -13,7 +13,7 @@ import projectEmployeeRouter from "./project/employee/project-employee.router.js
 import projectCommentRouter from "./project/comment/project-comment.router.js";
 import projectDepartmentRouter from "./project/department/project-department.router.js";
 import projectLogRouter from "./project/log/project-log.router.js";
-import swaggerUi from "swagger-ui-express";
+import { apiReference } from "@scalar/express-api-reference";
 import { swaggerSpec } from "./config/swagger.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
@@ -44,9 +44,9 @@ app.use("/api/task-comments", projectCommentRouter);
 app.use("/api/task-departments", projectDepartmentRouter);
 app.use("/api/task-logs", projectLogRouter);
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  explorer: true,
-  customSiteTitle: "TeamFlow API Docs",
+app.use("/api-docs", apiReference({
+  spec: { content: swaggerSpec },
+  theme: "purple",
 }));
 
 app.use(errorHandler);

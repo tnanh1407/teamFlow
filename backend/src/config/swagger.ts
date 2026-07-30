@@ -123,12 +123,38 @@ const options: swaggerJsdoc.Options = {
           responses: { 200: { description: "Đăng xuất thành công" } },
         },
       },
+      "/api/users/all": {
+        get: {
+          tags: ["Users"],
+          summary: "Lấy tất cả nhân viên",
+          security: [{ cookieAuth: [] }],
+          responses: { 200: { description: "Danh sách tất cả nhân viên", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+        },
+      },
+      "/api/users/department/{departmentId}": {
+        get: {
+          tags: ["Users"],
+          summary: "Lấy người dùng theo phòng ban",
+          security: [{ cookieAuth: [] }],
+          parameters: [{ name: "departmentId", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 200: { description: "Danh sách người dùng trong phòng ban", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+        },
+      },
+      "/api/users/position/{positionId}": {
+        get: {
+          tags: ["Users"],
+          summary: "Lấy người dùng theo chức vụ",
+          security: [{ cookieAuth: [] }],
+          parameters: [{ name: "positionId", in: "path", required: true, schema: { type: "string" } }],
+          responses: { 200: { description: "Danh sách người dùng theo chức vụ", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+        },
+      },
       "/api/users": {
         get: {
           tags: ["Users"],
-          summary: "Lấy danh sách người dùng",
+          summary: "Lấy danh sách người dùng (phân trang)",
           security: [{ cookieAuth: [] }],
-          responses: { 200: { description: "Danh sách người dùng", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+          responses: { 200: { description: "Danh sách người dùng phân trang", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
         },
         post: {
           tags: ["Users"],
@@ -154,7 +180,7 @@ const options: swaggerJsdoc.Options = {
         },
         patch: {
           tags: ["Users"],
-          summary: "Cập nhật người dùng",
+          summary: "Cập nhật người dùng (admin/manager)",
           security: [{ cookieAuth: [] }],
           parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
           requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
@@ -174,7 +200,7 @@ const options: swaggerJsdoc.Options = {
           },
         },
       },
-      "/api/users/me": {
+      "/api/users/updatePs": {
         patch: {
           tags: ["Users"],
           summary: "Đổi mật khẩu cá nhân",
