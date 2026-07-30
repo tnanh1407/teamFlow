@@ -22,18 +22,18 @@ describe("env config", () => {
 
   it("should use default PORT when not set", async () => {
     delete process.env.PORT;
-    const { default: env } = await import("../../src/config/env.js?update=1");
+    const { default: env } = await import("../../src/config/env.js");
     expect(env.PORT).toBe(5000);
   });
 
   it("should throw if JWT_SECRET is missing", async () => {
     delete process.env.JWT_SECRET;
-    await expect(import("../../src/config/env.js?update=2")).rejects.toThrow();
+    await expect(import("../../src/config/env.js")).rejects.toThrow();
   });
 
   it("should throw if JWT_ACCESS_SECRET is missing", async () => {
     process.env.JWT_SECRET = "test-secret";
     delete process.env.JWT_ACCESS_SECRET;
-    await expect(import("../../src/config/env.js?update=3")).rejects.toThrow();
+    await expect(import("../../src/config/env.js")).rejects.toThrow();
   });
 });

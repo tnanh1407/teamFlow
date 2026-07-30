@@ -14,7 +14,7 @@ import projectCommentRouter from "./project/comment/project-comment.router.js";
 import projectDepartmentRouter from "./project/department/project-department.router.js";
 import projectLogRouter from "./project/log/project-log.router.js";
 import { apiReference } from "@scalar/express-api-reference";
-import { swaggerSpec } from "./config/swagger.js";
+import { apiSpec } from "./docs-api/index.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -38,14 +38,14 @@ app.get("/", (_req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/positions", positionRouter);
-app.use("/api/tasks", projectRouter);
-app.use("/api/task-employees", projectEmployeeRouter);
-app.use("/api/task-comments", projectCommentRouter);
-app.use("/api/task-departments", projectDepartmentRouter);
-app.use("/api/task-logs", projectLogRouter);
+app.use("/api/project", projectRouter);
+app.use("/api/project-employees", projectEmployeeRouter);
+app.use("/api/project-comments", projectCommentRouter);
+app.use("/api/project-departments", projectDepartmentRouter);
+app.use("/api/project-logs", projectLogRouter);
 
 app.use("/api-docs", apiReference({
-  spec: { content: swaggerSpec },
+  spec: { content: apiSpec },
   theme: "purple",
 }));
 
