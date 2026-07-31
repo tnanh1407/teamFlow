@@ -7,6 +7,8 @@ interface ProjectDepartmentRow {
   assignedAt: Date;
 }
 
+export type CreateProjectDepartmentDataInput = Omit<ProjectDepartmentRow, "assignedAt">
+
 const projectDepartmentColumns = ProjectDepartmentSchema.columns;
 
 class ProjectDepartmentService {
@@ -25,18 +27,7 @@ class ProjectDepartmentService {
     return rows;
   }
 
-  async findByDepartment(departmentId: string) {
-    const { rows } = await pool.query<ProjectDepartmentRow>(
-      `SELECT ${projectDepartmentColumns} FROM project_departments WHERE department_id = $1 ORDER BY assigned_at DESC`,
-      [departmentId]
-    );
-    return rows;
-  }
-
-  async create(data: {
-    projectId: string;
-    departmentId: string;
-  }) {
+  async create(data: CreateProjectDepartmentDataInput) {
     const { rows } = await pool.query<ProjectDepartmentRow>(
       `INSERT INTO project_departments (project_id, department_id) VALUES ($1, $2) RETURNING ${projectDepartmentColumns}`,
       [data.projectId, data.departmentId]

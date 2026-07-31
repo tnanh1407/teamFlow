@@ -57,6 +57,12 @@ export interface ChangePasswordInput {
 
 const userColumns = UserSchema.columns;
 
+const normalizeRequiredText = (value: string) => value.trim();
+const normalizeOptionalText = (value: string | undefined) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+};
+
 class UserService {
   async login(username: string, password: string) {
     const user = await this.findByUsername(username);
@@ -173,16 +179,22 @@ class UserService {
 
   async create(data: CreateUserDataInput) {
     const payload = {
-      ...data,
-      username: data.username.trim().toLowerCase(),
-      email: data.email.trim().toLowerCase(),
-      employeeCode: data.employeeCode.trim().toUpperCase(),
-      name: data.name.trim(),
-      phone: data.phone?.trim() || null,
+      departmentId: data.departmentId,
+      positionId: data.positionId,
+      employeeCode: normalizeRequiredText(data.employeeCode).toUpperCase(),
+      name: normalizeRequiredText(data.name),
+      email: normalizeRequiredText(data.email).toLowerCase(),
+      phone: normalizeOptionalText(data.phone),
+      birthDate: normalizeOptionalText(data.birthDate),
+      hireDate: normalizeOptionalText(data.hireDate),
       gender: data.gender ?? "other",
+      username: normalizeRequiredText(data.username).toLowerCase(),
+      password: data.password,
+      position: data.position,
       status: data.status ?? true,
-      role: EAccountRole.USER
-    }
+      avatarURL: normalizeOptionalText(data.avatarURL),
+      role: EAccountRole.USER,
+    };
 
     // xử lí phần trùng
 
@@ -203,15 +215,15 @@ class UserService {
     // chuẩn hóa lại dữ liệu
 
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(payload.password, 10);
     const { rows } = await pool.query<UserRow>(
       `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, username, password, role, position, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING ${userColumns}`,
       [
         payload.departmentId, payload.positionId, payload.employeeCode, payload.name,
-        payload.email, payload.phone, payload.birthDate || null,
-        payload.hireDate || null, payload.gender,
+        payload.email, payload.phone, payload.birthDate,
+        payload.hireDate, payload.gender,
         payload.username, hashedPassword, payload.role, payload.position,
-        payload.status, payload.avatarURL || null,
+        payload.status, payload.avatarURL,
       ]
     );
     return this.findById(rows[0].id);
@@ -241,20 +253,37 @@ class UserService {
     id: string,
     data: UpdateUserDataInput
   ) {
-    if (data.username) {
-      const existing = await this.findByUsername(data.username);
+    const payload: UpdateUserDataInput = {};
+
+    if (data.departmentId !== undefined) payload.departmentId = data.departmentId;
+    if (data.positionId !== undefined) payload.positionId = data.positionId;
+    if (data.employeeCode !== undefined) payload.employeeCode = normalizeRequiredText(data.employeeCode).toUpperCase();
+    if (data.name !== undefined) payload.name = normalizeRequiredText(data.name);
+    if (data.email !== undefined) payload.email = normalizeRequiredText(data.email).toLowerCase();
+    if (data.phone !== undefined) payload.phone = normalizeOptionalText(data.phone) ?? undefined;
+    if (data.birthDate !== undefined) payload.birthDate = normalizeOptionalText(data.birthDate) ?? undefined;
+    if (data.hireDate !== undefined) payload.hireDate = normalizeOptionalText(data.hireDate) ?? undefined;
+    if (data.gender !== undefined) payload.gender = data.gender;
+    if (data.username !== undefined) payload.username = normalizeRequiredText(data.username).toLowerCase();
+    if (data.role !== undefined) payload.role = data.role;
+    if (data.position !== undefined) payload.position = data.position;
+    if (data.status !== undefined) payload.status = data.status;
+    if (data.avatarURL !== undefined) payload.avatarURL = normalizeOptionalText(data.avatarURL) ?? undefined;
+
+    if (payload.username) {
+      const existing = await this.findByUsername(payload.username);
       if (existing && existing.id !== id) throw new AppError("Username already exists", 409);
     }
-    if (data.employeeCode) {
-      const existing = await this.findByEmployeeCode(data.employeeCode);
+    if (payload.employeeCode) {
+      const existing = await this.findByEmployeeCode(payload.employeeCode);
       if (existing && existing.id !== id) throw new AppError("Employee code already exists", 409);
     }
-    if (data.email) {
-      const existing = await this.findByEmail(data.email);
+    if (payload.email) {
+      const existing = await this.findByEmail(payload.email);
       if (existing && existing.id !== id) throw new AppError("Email already exists", 409);
     }
-    if (data.phone) {
-      const existing = await this.findByPhone(data.phone);
+    if (payload.phone) {
+      const existing = await this.findByPhone(payload.phone);
       if (existing && existing.id !== id) throw new AppError("Phone already exists", 409);
     }
 
@@ -262,20 +291,20 @@ class UserService {
     const values: any[] = [];
     let idx = 1;
 
-    if (data.departmentId !== undefined) { setClauses.push(`department_id = $${idx++}`); values.push(data.departmentId); }
-    if (data.positionId !== undefined) { setClauses.push(`position_id = $${idx++}`); values.push(data.positionId); }
-    if (data.employeeCode !== undefined) { setClauses.push(`employee_code = $${idx++}`); values.push(data.employeeCode); }
-    if (data.name !== undefined) { setClauses.push(`name = $${idx++}`); values.push(data.name); }
-    if (data.email !== undefined) { setClauses.push(`email = $${idx++}`); values.push(data.email); }
-    if (data.phone !== undefined) { setClauses.push(`phone = $${idx++}`); values.push(data.phone); }
-    if (data.birthDate !== undefined) { setClauses.push(`birth_date = $${idx++}`); values.push(data.birthDate); }
-    if (data.hireDate !== undefined) { setClauses.push(`hire_date = $${idx++}`); values.push(data.hireDate); }
-    if (data.gender !== undefined) { setClauses.push(`gender = $${idx++}`); values.push(data.gender); }
-    if (data.username !== undefined) { setClauses.push(`username = $${idx++}`); values.push(data.username); }
-    if (data.role !== undefined) { setClauses.push(`role = $${idx++}`); values.push(data.role); }
-    if (data.position !== undefined) { setClauses.push(`position = $${idx++}`); values.push(data.position); }
-    if (data.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(data.status); }
-    if (data.avatarURL !== undefined) { setClauses.push(`avatar_url = $${idx++}`); values.push(data.avatarURL); }
+    if (payload.departmentId !== undefined) { setClauses.push(`department_id = $${idx++}`); values.push(payload.departmentId); }
+    if (payload.positionId !== undefined) { setClauses.push(`position_id = $${idx++}`); values.push(payload.positionId); }
+    if (payload.employeeCode !== undefined) { setClauses.push(`employee_code = $${idx++}`); values.push(payload.employeeCode); }
+    if (payload.name !== undefined) { setClauses.push(`name = $${idx++}`); values.push(payload.name); }
+    if (payload.email !== undefined) { setClauses.push(`email = $${idx++}`); values.push(payload.email); }
+    if (data.phone !== undefined) { setClauses.push(`phone = $${idx++}`); values.push(normalizeOptionalText(data.phone)); }
+    if (data.birthDate !== undefined) { setClauses.push(`birth_date = $${idx++}`); values.push(normalizeOptionalText(data.birthDate)); }
+    if (data.hireDate !== undefined) { setClauses.push(`hire_date = $${idx++}`); values.push(normalizeOptionalText(data.hireDate)); }
+    if (payload.gender !== undefined) { setClauses.push(`gender = $${idx++}`); values.push(payload.gender); }
+    if (payload.username !== undefined) { setClauses.push(`username = $${idx++}`); values.push(payload.username); }
+    if (payload.role !== undefined) { setClauses.push(`role = $${idx++}`); values.push(payload.role); }
+    if (payload.position !== undefined) { setClauses.push(`position = $${idx++}`); values.push(payload.position); }
+    if (payload.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(payload.status); }
+    if (data.avatarURL !== undefined) { setClauses.push(`avatar_url = $${idx++}`); values.push(normalizeOptionalText(data.avatarURL)); }
 
     if (setClauses.length === 0) {
       return this.findById(id);

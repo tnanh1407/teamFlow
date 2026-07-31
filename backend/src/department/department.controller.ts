@@ -17,6 +17,14 @@ class DepartmentController {
     res.json({ data: department });
   }
 
+  async getProjectsByDepartment(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const department = await departmentService.findById(id);
+    if (!department) throw new AppError("Department not found", 404);
+    const projects = await departmentService.findProjectsByDepartment(id);
+    res.json({ data: projects });
+  }
+
   async create(req: Request, res: Response) {
     const department = await departmentService.create(req.body);
     res.status(201).json({ data: department });

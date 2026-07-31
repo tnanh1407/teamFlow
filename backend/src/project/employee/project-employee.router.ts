@@ -18,7 +18,7 @@ router.get("/:id", authenticate, asyncHandler(projectEmployeeController.getById)
 router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
+  authorize(EAccountRole.ADMIN),
   validate(createProjectEmployeeSchema),
   asyncHandler(projectEmployeeController.create)
 );

@@ -10,20 +10,26 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
-router.get("/", authenticate, asyncHandler(projectDepartmentController.getAll));
+// lấy ra tất cả bộ phận phòng ban
+router.get("/", authenticate,authorize(EAccountRole.ADMIN),  asyncHandler(projectDepartmentController.getAll));
+
+// Lấy ra danh sách phòng ban được gắn cho project cụ thể
 router.get("/project/:projectId", authenticate, asyncHandler(projectDepartmentController.getByProject));
-router.get("/department/:departmentId", authenticate, asyncHandler(projectDepartmentController.getByDepartment));
+
 router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
+  authorize(EAccountRole.ADMIN),
   validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.create)
 );
+
+// xóa phòng ban khỏi dự án (đồng bộ với POST: nhận body + validate)
 router.delete(
-  "/:projectId/:departmentId",
+  "/",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
+  authorize(EAccountRole.ADMIN),
+  validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.delete)
 );
 

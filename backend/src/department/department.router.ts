@@ -12,6 +12,7 @@ import { EAccountRole } from "../enums/account-role.enum.js";
 const router = Router();
 
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(departmentController.getAll));
+router.get("/:id/projects", authenticate, asyncHandler(departmentController.getProjectsByDepartment));
 router.get("/:id", authenticate, asyncHandler(departmentController.getById));
 router.post(
   "/",

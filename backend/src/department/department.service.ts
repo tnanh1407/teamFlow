@@ -1,6 +1,6 @@
 import pool from "../config/database.js";
 import { AppError } from "../utils/errors/app-error.js";
-import { DepartmentSchema } from "../schemas/index.js";
+import { DepartmentSchema, ProjectSchema } from "../schemas/index.js";
 
 interface DepartmentRow {
   id: string;
@@ -9,6 +9,24 @@ interface DepartmentRow {
   description: string;
   managerId: string;
   isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ProjectRow {
+  id: string;
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  progress: number;
+  startDate: string;
+  dueDate: string;
+  assignedBy: string;
+  createdBy: string;
+  estimatedHours: number;
+  actualHours: number;
+  completedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +43,7 @@ export type CreateDepartmentDataInput = DepartmentData;
 export type UpdateDepartmentDataInput = Partial<DepartmentData>
 
 const departmentColumns = DepartmentSchema.columns;
+const projectColumns = ProjectSchema.columns;
 
 class DepartmentService {
   async findAll(page = 1, limit = 10) {
@@ -61,6 +80,18 @@ class DepartmentService {
       [code]
     );
     return rows[0] || null;
+  }
+
+  async findProjectsByDepartment(departmentId: string) {
+    const { rows } = await pool.query<ProjectRow>(
+      `SELECT DISTINCT ${projectColumns}
+       FROM projects p
+       JOIN project_departments pd ON pd.project_id = p.id
+       WHERE pd.department_id = $1
+       ORDER BY p.created_at DESC`,
+      [departmentId]
+    );
+    return rows;
   }
 
   async create(data: CreateDepartmentDataInput) {
