@@ -38,6 +38,7 @@ app.get("/", (_req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/positions", positionRouter);
+app.use("/api/projects", projectRouter);
 app.use("/api/project", projectRouter);
 app.use("/api/project-employees", projectEmployeeRouter);
 app.use("/api/project-comments", projectCommentRouter);

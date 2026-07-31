@@ -92,6 +92,22 @@ class ProjectService {
     return rows;
   }
 
+  async findByPriorityForUser(priority: string, userId: string) {
+    const cols = projectColumns.split(",").map((c) => `t.${c.trim()}`).join(", ");
+    const { rows } = await pool.query<ProjectRow>(
+      `SELECT DISTINCT ${cols}
+       FROM projects t
+       LEFT JOIN project_employees te ON te.project_id = t.id
+       LEFT JOIN users e ON e.id = $2
+       LEFT JOIN project_departments td ON td.project_id = t.id
+       WHERE t.priority = $1
+       AND (te.employee_id = $2 OR t.created_by = $2 OR td.department_id = e.department_id)
+       ORDER BY t.created_at DESC`,
+      [priority, userId]
+    );
+    return rows;
+  }
+
   async findByCreatedBy(employeeId: string) {
     const { rows } = await pool.query<ProjectRow>(
       `SELECT ${projectColumns} FROM projects WHERE created_by = $1 ORDER BY created_at DESC`,

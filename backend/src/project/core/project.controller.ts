@@ -15,27 +15,33 @@ class ProjectController {
 
   async getById(req: Request, res: Response) {
     const id = req.params.id as string;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+      throw new AppError("Invalid project id", 400);
+    }
     const project = await projectService.findById(id);
     if (!project) throw new AppError("Project not found", 404);
     res.json({ data: project });
   }
 
   async getByStatus(req: AuthRequest, res: Response) {
-    const userRole = req.user!.role; // check role
+    const user = req.user!;
     const status = req.params.status as string;
-    if (userRole === EAccountRole.ADMIN) {
+    if (user.role === EAccountRole.ADMIN) {
       const projects = await projectService.findByStatus(status);
-      console.log(`DEBUG ROLE : ${userRole} \n data : ${projects}`)
       return res.json({ data: projects })
     }
-    const projects = await projectService.findByStatusForUser(status, userRole);
-    console.log(`DEBUG ROLE : ${userRole} \n data : ${projects}`)
+    const projects = await projectService.findByStatusForUser(status, user.id);
     res.json({ data: projects });
   }
 
-  async getByPriority(req: Request, res: Response) {
+  async getByPriority(req: AuthRequest, res: Response) {
+    const user = req.user!;
     const priority = req.params.priority as string;
-    const projects = await projectService.findByPriority(priority);
+    if (user.role === EAccountRole.ADMIN) {
+      const projects = await projectService.findByPriority(priority);
+      return res.json({ data: projects });
+    }
+    const projects = await projectService.findByPriorityForUser(priority, user.id);
     res.json({ data: projects });
   }
 

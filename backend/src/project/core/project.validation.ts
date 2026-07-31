@@ -11,7 +11,6 @@ export const createProjectSchema = z.object({
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
   assignedBy: z.string().optional(),
-  createdBy: z.string().min(1, "Created by is required"),
   estimatedHours: z.number().optional(),
   actualHours: z.number().optional(),
 });
