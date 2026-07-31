@@ -19,6 +19,12 @@ class UserController {
     res.json({ data: employees });
   }
 
+  async search(req: AuthRequest, res: Response) {
+    const keyword = (req.query.q as string) || "";
+    const users = await userService.search(keyword);
+    res.json({ data: users });
+  }
+
   async getById(req: AuthRequest, res: Response) {
     const id = req.params.id as string;
     const user = await userService.findById(id);

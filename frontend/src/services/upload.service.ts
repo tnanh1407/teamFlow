@@ -11,7 +11,9 @@ const uploadService = {
   uploadFiles: (files: File[]) => {
     const formData = new FormData();
     files.forEach((f) => formData.append("files", f));
-    return api.post<{ data: UploadedFile[] }>("/project-comments/upload", formData);
+    return api.post<{ data: UploadedFile[] }>("/project-comments/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 };
 

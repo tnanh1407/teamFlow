@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { Request, Response, NextFunction } from "express";
+import multer from "multer";
 import { errorHandler } from "../../src/middlewares/error.middleware.js";
 import { AppError } from "../../src/utils/errors/app-error.js";
 
@@ -69,5 +70,43 @@ describe("errorHandler middleware", () => {
 
     expect(res.status).toHaveBeenCalledWith(409);
     expect(res.json).toHaveBeenCalledWith({ message: "Conflict" });
+  });
+
+  it("should respond with 400 for multer upload errors", () => {
+    const req = {} as Request;
+    const res = mockRes();
+    const next = vi.fn() as NextFunction;
+
+    const error = new multer.MulterError("LIMIT_UNEXPECTED_FILE");
+    errorHandler(error, req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "Unexpected field" });
+  });
+
+  it("should respond with 413 for multer file size errors", () => {
+    const req = {} as Request;
+    const res = mockRes();
+    const next = vi.fn() as NextFunction;
+
+    const error = new multer.MulterError("LIMIT_FILE_SIZE");
+    errorHandler(error, req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(413);
+    expect(res.json).toHaveBeenCalledWith({ message: "File too large" });
+  });
+
+  it("should respond with 400 for attachment file filter errors", () => {
+    const req = {} as Request;
+    const res = mockRes();
+    const next = vi.fn() as NextFunction;
+
+    const error = new Error("Only images, documents, PDFs, and archives are allowed");
+    errorHandler(error, req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Only images, documents, PDFs, and archives are allowed",
+    });
   });
 });

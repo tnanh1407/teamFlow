@@ -19,6 +19,7 @@ router.post("/logout", authenticate, asyncHandler(userController.logout));
 
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.getAll));
 router.get("/all", authenticate, asyncHandler(userController.getAllEmployees));
+router.get("/search", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.search));
 router.get("/department/:departmentId", authenticate,  authorizePosition(EAccountPosition.MANAGER) , asyncHandler(userController.getByDepartment));
 router.get("/position/:positionId", authenticate , authorize(EAccountRole.ADMIN),asyncHandler(userController.getByPosition));
 router.get("/:id", authenticate, asyncHandler(userController.getById));

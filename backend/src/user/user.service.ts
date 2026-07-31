@@ -152,7 +152,24 @@ class UserService {
     return rows;
   }
 
+  async search(keyword: string) {
+    const q = keyword.trim();
+    if (!q) return [];
 
+    const { rows } = await pool.query<UserRow>(
+      `SELECT ${userColumns}
+       FROM users
+       WHERE name ILIKE $1
+          OR id::text ILIKE $1
+          OR email ILIKE $1
+          OR username ILIKE $1
+          OR employee_code ILIKE $1
+          OR phone ILIKE $1
+       ORDER BY created_at DESC`,
+      [`%${q}%`]
+    );
+    return rows;
+  }
 
   async create(data: CreateUserDataInput) {
     const payload = {

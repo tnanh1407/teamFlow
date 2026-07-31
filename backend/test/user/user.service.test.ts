@@ -125,6 +125,25 @@ describe("UserService", () => {
     });
   });
 
+  describe("search", () => {
+    it("should search users by keyword", async () => {
+      mockQuery.mockResolvedValue({ rows: [mockUser], rowCount: 1 });
+      const { default: userService } = await import("../../src/user/user.service.js");
+      const users = await userService.search("john");
+
+      expect(users).toEqual([mockUser]);
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("id::text ILIKE"), ["%john%"]);
+    });
+
+    it("should return empty array for blank keyword", async () => {
+      const { default: userService } = await import("../../src/user/user.service.js");
+      const users = await userService.search("   ");
+
+      expect(users).toEqual([]);
+      expect(mockQuery).not.toHaveBeenCalled();
+    });
+  });
+
   describe("findByDepartment", () => {
     it("should return users in department", async () => {
       mockQuery.mockResolvedValue({ rows: [mockUser], rowCount: 1 });

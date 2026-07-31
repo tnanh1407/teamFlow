@@ -6,8 +6,8 @@ interface ProjectCommentRow {
   id: string;
   projectId: string;
   employeeId: string;
-  content: string;
-  attachments: string;
+  content: string | null;
+  attachments: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,10 +19,15 @@ interface ProjectCommentData {
   attachments?: string;
 }
 
-export type CreateProjectCommentDataInput = ProjectCommentData
-export type UpdateProjectCommentDataInput = Partial<ProjectCommentData>
+export type CreateProjectCommentDataInput = ProjectCommentData;
+export type UpdateProjectCommentDataInput = Partial<Omit<ProjectCommentData ,"projectId , employeeId">>;
 
 const projectCommentColumns = ProjectCommentSchema.columns;
+
+const normalizeOptionalText = (value: string | undefined) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+};
 
 class ProjectCommentService {
   async findAll() {
@@ -66,28 +71,41 @@ class ProjectCommentService {
   }
 
   async create(data: CreateProjectCommentDataInput) {
+    const content = normalizeOptionalText(data.content);
+    const attachments = normalizeOptionalText(data.attachments);
+
     const { rows } = await pool.query<ProjectCommentRow>(
       `INSERT INTO project_comments (project_id, employee_id, content, attachments) VALUES ($1, $2, $3, $4) RETURNING ${projectCommentColumns}`,
-      [data.projectId, data.employeeId, data.content || null, data.attachments || null]
+      [data.projectId, data.employeeId, content, attachments]
     );
 
     await pool.query(
       `INSERT INTO project_logs (project_id, employee_id, action, description) VALUES ($1, $2, $3, $4)`,
-      [data.projectId, data.employeeId, "commented", data.content ? `Bình luận: "${data.content.slice(0, 50)}${data.content.length > 50 ? "..." : ""}"` : "đã đăng một bình luận"]
+      [
+        data.projectId,
+        data.employeeId,
+        "commented",
+        content
+          ? `Bình luận: "${content.slice(0, 50)}${content.length > 50 ? "..." : ""}"`
+          : "đã đăng một bình luận",
+      ]
     );
 
     return rows[0];
   }
 
-  async update(id: string, data : UpdateProjectCommentDataInput) {
+  async update(id: string, data: UpdateProjectCommentDataInput) {
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
-
-    if (data.projectId !== undefined) { setClauses.push(`project_id = $${idx++}`); values.push(data.projectId); }
-    if (data.employeeId !== undefined) { setClauses.push(`employee_id = $${idx++}`); values.push(data.employeeId); }
-    if (data.content !== undefined) { setClauses.push(`content = $${idx++}`); values.push(data.content); }
-    if (data.attachments !== undefined) { setClauses.push(`attachments = $${idx++}`); values.push(data.attachments); }
+    if (data.content !== undefined) {
+      setClauses.push(`content = $${idx++}`);
+      values.push(normalizeOptionalText(data.content));
+    }
+    if (data.attachments !== undefined) {
+      setClauses.push(`attachments = $${idx++}`);
+      values.push(normalizeOptionalText(data.attachments));
+    }
 
     if (setClauses.length === 0) return this.findById(id);
 

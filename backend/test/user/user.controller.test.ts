@@ -5,6 +5,7 @@ import { EAccountRole, EAccountPosition } from "../../src/enums/account-role.enu
 const mockUserService = {
   findAll: vi.fn(),
   findAllRaw: vi.fn(),
+  search: vi.fn(),
   findById: vi.fn(),
   findByDepartment: vi.fn(),
   findByPosition: vi.fn(),
@@ -79,6 +80,30 @@ describe("UserController", () => {
 
       await controller.getAllEmployees(req, res);
       expect(mockUserService.findAllRaw).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({ data: [] });
+    });
+  });
+
+  describe("search", () => {
+    it("should search users by query keyword", async () => {
+      const req = { query: { q: "john" }, user: adminUser } as any;
+      const res = mockRes();
+      mockUserService.search.mockResolvedValue([{ id: "user-1", name: "John" }]);
+
+      await controller.search(req, res);
+
+      expect(mockUserService.search).toHaveBeenCalledWith("john");
+      expect(res.json).toHaveBeenCalledWith({ data: [{ id: "user-1", name: "John" }] });
+    });
+
+    it("should use empty keyword when q is missing", async () => {
+      const req = { query: {}, user: adminUser } as any;
+      const res = mockRes();
+      mockUserService.search.mockResolvedValue([]);
+
+      await controller.search(req, res);
+
+      expect(mockUserService.search).toHaveBeenCalledWith("");
       expect(res.json).toHaveBeenCalledWith({ data: [] });
     });
   });

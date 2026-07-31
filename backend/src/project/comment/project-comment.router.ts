@@ -8,7 +8,6 @@ import {
   createProjectCommentSchema,
   updateProjectCommentSchema,
 } from "./project-comment.validation.js";
-import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
