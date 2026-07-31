@@ -96,7 +96,7 @@ class UserController {
     }
 
     const user = await userService.update(id, data);
-    res.json({ data: user });
+    res.json({ message: "User updated successfully", data: user });
   }
 
   async delete(req: AuthRequest, res: Response) {

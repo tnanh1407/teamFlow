@@ -78,14 +78,12 @@ class ProjectController {
   async update(req: Request, res: Response) {
     const id = req.params.id as string;
     const project = await projectService.update(id, req.body);
-    if (!project) throw new AppError("Project not found", 404);
-    res.json({ data: project });
+    res.json({ message: "Project updated successfully", data: project });
   }
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const project = await projectService.delete(id);
-    if (!project) throw new AppError("Project not found", 404);
+    await projectService.delete(id);
     res.json({ message: "Project deleted successfully" });
   }
 }

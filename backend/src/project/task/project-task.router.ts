@@ -10,7 +10,11 @@ import {
 
 const router = Router();
 
-router.get("/", authenticate, asyncHandler(projectTaskController.getByProject));
+router.get("/", authenticate, asyncHandler(projectTaskController.getAll));
+router.get("/project/:projectId", authenticate, asyncHandler(projectTaskController.getByProject));
+
+// lấy các task được giao cho một nhân viên — phải đặt trước /:id
+router.get("/employee/:id", authenticate, asyncHandler(projectTaskController.getByEmployee));
 router.get("/:id", authenticate, asyncHandler(projectTaskController.getById));
 
 // chỉ manager mới được tạo/giao task, admin chỉ thống kê

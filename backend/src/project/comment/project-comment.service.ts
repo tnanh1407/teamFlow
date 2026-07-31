@@ -1,6 +1,7 @@
 import { handleFileUpload } from "@/utils/upload/upload.js";
 import pool from "../../config/database.js";
 import { ProjectCommentSchema } from "../../schemas/index.js";
+import { AppError } from "../../utils/errors/app-error.js";
 
 interface ProjectCommentRow {
   id: string;
@@ -95,17 +96,18 @@ class ProjectCommentService {
   }
 
   async update(id: string, data: UpdateProjectCommentDataInput) {
+    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    const payload: UpdateProjectCommentDataInput = {};
+
+    if (data.content !== undefined) payload.content = normalizeOptionalText(data.content) ?? undefined;
+    if (data.attachments !== undefined) payload.attachments = normalizeOptionalText(data.attachments) ?? undefined;
+
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
-    if (data.content !== undefined) {
-      setClauses.push(`content = $${idx++}`);
-      values.push(normalizeOptionalText(data.content));
-    }
-    if (data.attachments !== undefined) {
-      setClauses.push(`attachments = $${idx++}`);
-      values.push(normalizeOptionalText(data.attachments));
-    }
+
+    if (payload.content !== undefined) { setClauses.push(`content = $${idx++}`); values.push(payload.content); }
+    if (payload.attachments !== undefined) { setClauses.push(`attachments = $${idx++}`); values.push(payload.attachments); }
 
     if (setClauses.length === 0) return this.findById(id);
 
@@ -114,15 +116,16 @@ class ProjectCommentService {
       `UPDATE project_comments SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${projectCommentColumns}`,
       values
     );
-    return rows[0] || null;
+    if (!rows[0]) throw new AppError("Comment not found", 404);
+    return rows[0];
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     const { rows } = await pool.query<ProjectCommentRow>(
       `DELETE FROM project_comments WHERE id = $1 RETURNING ${projectCommentColumns}`,
       [id]
     );
-    return rows[0] || null;
+    if (!rows[0]) throw new AppError("Comment not found", 404);
   }
 }
 

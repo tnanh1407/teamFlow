@@ -29,14 +29,12 @@ class ProjectEmployeeController {
   async update(req: Request, res: Response) {
     const id = req.params.id as string;
     const assignment = await projectEmployeeService.update(id, req.body.role);
-    if (!assignment) throw new AppError("Assignment not found", 404);
-    res.json({ data: assignment });
+    res.json({ message: "Assignment updated successfully", data: assignment });
   }
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const assignment = await projectEmployeeService.delete(id);
-    if (!assignment) throw new AppError("Assignment not found", 404);
+    await projectEmployeeService.delete(id);
     res.json({ message: "Assignment deleted successfully" });
   }
 }

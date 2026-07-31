@@ -1,6 +1,7 @@
 import pool from "../../config/database.js";
 import { ProjectLogSchema } from "../../schemas/index.js";
 
+// dữ liệu database
 interface ProjectLogRow {
   id: string;
   projectId: string;
@@ -10,7 +11,20 @@ interface ProjectLogRow {
   createdAt: Date;
 }
 
+// dữ liệu đầu vào
+export interface CreateProjectLogDataInput {
+  projectId: string;
+  employeeId: string;
+  action?: string;
+  description?: string;
+}
+
 const projectLogColumns = ProjectLogSchema.columns;
+
+const normalizeOptionalText = (value: string | undefined) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+};
 
 class ProjectLogService {
   async findAll(page = 1, limit = 10) {
@@ -48,15 +62,18 @@ class ProjectLogService {
     return rows;
   }
 
-  async create(data: {
-    projectId: string;
-    employeeId: string;
-    action?: string;
-    description?: string;
-  }) {
+  async create(data: CreateProjectLogDataInput) {
+    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    const payload = {
+      projectId: data.projectId,
+      employeeId: data.employeeId,
+      action: normalizeOptionalText(data.action),
+      description: normalizeOptionalText(data.description),
+    };
+
     const { rows } = await pool.query<ProjectLogRow>(
       `INSERT INTO project_logs (project_id, employee_id, action, description) VALUES ($1, $2, $3, $4) RETURNING ${projectLogColumns}`,
-      [data.projectId, data.employeeId, data.action || null, data.description || null]
+      [payload.projectId, payload.employeeId, payload.action, payload.description]
     );
     return rows[0];
   }

@@ -1,13 +1,19 @@
 import pool from "../../config/database.js";
 import { ProjectDepartmentSchema } from "../../schemas/index.js";
+import { AppError } from "../../utils/errors/app-error.js";
 
+// dữ liệu database
 interface ProjectDepartmentRow {
   projectId: string;
   departmentId: string;
   assignedAt: Date;
 }
 
-export type CreateProjectDepartmentDataInput = Omit<ProjectDepartmentRow, "assignedAt">
+// dữ liệu đầu vào
+export interface CreateProjectDepartmentDataInput {
+  projectId: string;
+  departmentId: string;
+}
 
 const projectDepartmentColumns = ProjectDepartmentSchema.columns;
 
@@ -35,7 +41,7 @@ class ProjectDepartmentService {
     return rows[0];
   }
 
-  async delete(projectId: string, departmentId: string) {
+  async delete(projectId: string, departmentId: string): Promise<void> {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -46,7 +52,7 @@ class ProjectDepartmentService {
       );
       if (!rows[0]) {
         await client.query("ROLLBACK");
-        return null;
+        throw new AppError("Assignment not found", 404);
       }
 
       await client.query(
@@ -57,7 +63,6 @@ class ProjectDepartmentService {
       );
 
       await client.query("COMMIT");
-      return rows[0];
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;

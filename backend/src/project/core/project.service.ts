@@ -40,6 +40,17 @@ export type UpdateProjectDataInput = Partial<ProjectData>
 
 const projectColumns = ProjectSchema.columns;
 
+const normalizeRequiredText = (value: string) => value.trim();
+const normalizeOptionalText = (value: string | undefined) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+};
+const toNumberOrNull = (v: unknown): number | null => {
+  if (v === undefined || v === null || v === "") return null;
+  const n = Number(v);
+  return Number.isNaN(n) ? null : n;
+};
+
 class ProjectService {
   async findAll(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
@@ -147,21 +158,16 @@ class ProjectService {
   async create(data: CreateProjectDataInput) {
     if (!data.createdBy) throw new AppError("CreatedBy is required", 400);
 
-    const toNumberOrNull = (v: unknown): number | null => {
-      if (v === undefined || v === null || v === "") return null;
-      const n = Number(v);
-      return Number.isNaN(n) ? null : n;
-    };
-
+    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
     const payload = {
-      title: data.title.trim(),
-      description: data.description?.trim() || null,
+      title: normalizeRequiredText(data.title),
+      description: normalizeOptionalText(data.description),
       priority: (data.priority || "medium").toLowerCase(),
       status: (data.status || "todo").toLowerCase(),
       progress: data.progress ?? 0,
-      startDate: data.startDate?.trim() || null,
-      dueDate: data.dueDate?.trim() || null,
-      assignedBy: data.assignedBy?.trim() || null,
+      startDate: normalizeOptionalText(data.startDate),
+      dueDate: normalizeOptionalText(data.dueDate),
+      assignedBy: normalizeOptionalText(data.assignedBy),
       createdBy: data.createdBy,
       estimatedHours: toNumberOrNull(data.estimatedHours),
       actualHours: toNumberOrNull(data.actualHours),
@@ -179,21 +185,36 @@ class ProjectService {
   }
 
   async update(id: string, data: UpdateProjectDataInput) {
+    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    const payload: UpdateProjectDataInput = {};
+
+    if (data.title !== undefined) payload.title = normalizeRequiredText(data.title);
+    if (data.description !== undefined) payload.description = normalizeOptionalText(data.description) ?? undefined;
+    if (data.priority !== undefined) payload.priority = data.priority.toLowerCase();
+    if (data.status !== undefined) payload.status = data.status.toLowerCase();
+    if (data.progress !== undefined) payload.progress = data.progress;
+    if (data.startDate !== undefined) payload.startDate = normalizeOptionalText(data.startDate) ?? undefined;
+    if (data.dueDate !== undefined) payload.dueDate = normalizeOptionalText(data.dueDate) ?? undefined;
+    if (data.assignedBy !== undefined) payload.assignedBy = normalizeOptionalText(data.assignedBy) ?? undefined;
+    if (data.estimatedHours !== undefined) payload.estimatedHours = toNumberOrNull(data.estimatedHours) ?? undefined;
+    if (data.actualHours !== undefined) payload.actualHours = toNumberOrNull(data.actualHours) ?? undefined;
+    if (data.completedAt !== undefined) payload.completedAt = data.completedAt;
+
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
 
-    if (data.title !== undefined) { setClauses.push(`title = $${idx++}`); values.push(data.title); }
-    if (data.description !== undefined) { setClauses.push(`description = $${idx++}`); values.push(data.description); }
-    if (data.priority !== undefined) { setClauses.push(`priority = $${idx++}`); values.push(data.priority); }
-    if (data.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(data.status); }
-    if (data.progress !== undefined) { setClauses.push(`progress = $${idx++}`); values.push(data.progress); }
-    if (data.startDate !== undefined) { setClauses.push(`start_date = $${idx++}`); values.push(data.startDate); }
-    if (data.dueDate !== undefined) { setClauses.push(`due_date = $${idx++}`); values.push(data.dueDate); }
-    if (data.assignedBy !== undefined) { setClauses.push(`assigned_by = $${idx++}`); values.push(data.assignedBy); }
-    if (data.estimatedHours !== undefined) { setClauses.push(`estimated_hours = $${idx++}`); values.push(data.estimatedHours); }
-    if (data.actualHours !== undefined) { setClauses.push(`actual_hours = $${idx++}`); values.push(data.actualHours); }
-    if (data.completedAt !== undefined) { setClauses.push(`completed_at = $${idx++}`); values.push(data.completedAt); }
+    if (payload.title !== undefined) { setClauses.push(`title = $${idx++}`); values.push(payload.title); }
+    if (payload.description !== undefined) { setClauses.push(`description = $${idx++}`); values.push(payload.description); }
+    if (payload.priority !== undefined) { setClauses.push(`priority = $${idx++}`); values.push(payload.priority); }
+    if (payload.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(payload.status); }
+    if (payload.progress !== undefined) { setClauses.push(`progress = $${idx++}`); values.push(payload.progress); }
+    if (payload.startDate !== undefined) { setClauses.push(`start_date = $${idx++}`); values.push(payload.startDate); }
+    if (payload.dueDate !== undefined) { setClauses.push(`due_date = $${idx++}`); values.push(payload.dueDate); }
+    if (payload.assignedBy !== undefined) { setClauses.push(`assigned_by = $${idx++}`); values.push(payload.assignedBy); }
+    if (payload.estimatedHours !== undefined) { setClauses.push(`estimated_hours = $${idx++}`); values.push(payload.estimatedHours); }
+    if (payload.actualHours !== undefined) { setClauses.push(`actual_hours = $${idx++}`); values.push(payload.actualHours); }
+    if (payload.completedAt !== undefined) { setClauses.push(`completed_at = $${idx++}`); values.push(payload.completedAt); }
 
     if (setClauses.length === 0) return this.findById(id);
 
@@ -202,15 +223,16 @@ class ProjectService {
       `UPDATE projects SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${projectColumns}`,
       values
     );
-    return rows[0] || null;
+    if (!rows[0]) throw new AppError("Project not found", 404);
+    return rows[0];
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     const { rows } = await pool.query<ProjectRow>(
       `DELETE FROM projects WHERE id = $1 RETURNING ${projectColumns}`,
       [id]
     );
-    return rows[0] || null;
+    if (!rows[0]) throw new AppError("Project not found", 404);
   }
 }
 

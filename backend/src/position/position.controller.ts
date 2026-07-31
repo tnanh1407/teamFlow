@@ -23,14 +23,12 @@ class PositionController {
   async update(req: Request, res: Response) {
     const id = req.params.id as string;
     const position = await positionService.update(id, req.body);
-    if (!position) throw new AppError("Position not found", 404);
-    res.json({ data: position });
+    res.json({ message: "Position updated successfully", data: position });
   }
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const position = await positionService.delete(id);
-    if (!position) throw new AppError("Position not found", 404);
+    await positionService.delete(id);
     res.json({ message: "Position deleted successfully" });
   }
 }

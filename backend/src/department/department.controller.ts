@@ -33,14 +33,12 @@ class DepartmentController {
   async update(req: Request, res: Response) {
     const id = req.params.id as string;
     const department = await departmentService.update(id, req.body);
-    if (!department) throw new AppError("Department not found", 404);
-    res.json({ data: department });
+    res.json({ message: "Department updated successfully", data: department });
   }
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const department = await departmentService.delete(id);
-    if (!department) throw new AppError("Department not found", 404);
+    await departmentService.delete(id);
     res.json({ message: "Department deleted successfully" });
   }
 }

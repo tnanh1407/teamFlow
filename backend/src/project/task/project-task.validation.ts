@@ -3,6 +3,7 @@ import { EProjectTaskStatus } from "../../enums/project-task-status.enum.js";
 import { EPriority } from "../../enums/priority.enum.js";
 
 export const createProjectTaskSchema = z.object({
+  projectId: z.string().min(1, "Project ID is required"),
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   status: z.enum(Object.values(EProjectTaskStatus) as [string, ...string[]]).optional(),

@@ -45,8 +45,7 @@ app.use("/api/project-employees", projectEmployeeRouter);
 app.use("/api/project-comments", projectCommentRouter);
 app.use("/api/project-departments", projectDepartmentRouter);
 app.use("/api/project-logs", projectLogRouter);
-app.use("/api/projects/:projectId/tasks", projectTaskRouter);
-app.use("/api/project/:projectId/tasks", projectTaskRouter);
+app.use("/api/projects-task", projectTaskRouter);
 
 app.use("/api-docs", apiReference({
   spec: { content: apiSpec },

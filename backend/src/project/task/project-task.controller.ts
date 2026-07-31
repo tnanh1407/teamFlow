@@ -5,6 +5,11 @@ import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { EAccountPosition, EAccountRole } from "../../enums/account-role.enum.js";
 
 class ProjectTaskController {
+  async getAll(_req: Request, res: Response) {
+    const tasks = await projectTaskService.findAll();
+    res.json({ data: tasks });
+  }
+
   async getByProject(req: Request, res: Response) {
     const projectId = req.params.projectId as string;
     const tasks = await projectTaskService.findAllByProject(projectId, {
@@ -21,11 +26,15 @@ class ProjectTaskController {
     res.json({ data: task });
   }
 
+  async getByEmployee(req: Request, res: Response) {
+    const employeeId = req.params.id as string;
+    const tasks = await projectTaskService.findByEmployee(employeeId);
+    res.json({ data: tasks });
+  }
+
   async create(req: AuthRequest, res: Response) {
-    const projectId = req.params.projectId as string;
     const task = await projectTaskService.create({
       ...req.body,
-      projectId,
       assignedBy: req.user!.id,
       createdBy: req.user!.id,
     });
@@ -44,13 +53,12 @@ class ProjectTaskController {
     }
 
     const task = await projectTaskService.update(id, req.body);
-    res.json({ data: task });
+    res.json({ message: "Task updated successfully", data: task });
   }
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const task = await projectTaskService.delete(id);
-    if (!task) throw new AppError("Task not found", 404);
+    await projectTaskService.delete(id);
     res.json({ message: "Task deleted successfully" });
   }
 }

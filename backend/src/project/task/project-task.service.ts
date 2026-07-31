@@ -3,6 +3,7 @@ import { ProjectTaskSchema } from "../../schemas/index.js";
 import { AppError } from "../../utils/errors/app-error.js";
 import { EProjectTaskStatus } from "../../enums/project-task-status.enum.js";
 
+// dữ liệu database
 interface ProjectTaskRow {
   id: string;
   projectId: string;
@@ -20,9 +21,38 @@ interface ProjectTaskRow {
   updatedAt: Date;
 }
 
+// dữ liệu đầu vào
+export interface CreateProjectTaskDataInput {
+  projectId: string;
+  title: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  assignedTo?: string;
+  dueDate?: string;
+  assignedBy: string;
+  createdBy: string;
+}
+export type UpdateProjectTaskDataInput = Partial<
+  Omit<CreateProjectTaskDataInput, "projectId" | "assignedBy" | "createdBy">
+>;
+
 const projectTaskColumns = ProjectTaskSchema.columns;
 
+const normalizeRequiredText = (value: string) => value.trim();
+const normalizeOptionalText = (value: string | undefined) => {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+};
+
 class ProjectTaskService {
+  async findAll() {
+    const { rows } = await pool.query<ProjectTaskRow>(
+      `SELECT ${projectTaskColumns} FROM project_tasks ORDER BY created_at DESC`
+    );
+    return rows;
+  }
+
   async findAllByProject(projectId: string, filters: { status?: string; assignedTo?: string }) {
     const conditions: string[] = ["project_id = $1"];
     const values: any[] = [projectId];
@@ -54,6 +84,14 @@ class ProjectTaskService {
     return rows[0] || null;
   }
 
+  async findByEmployee(employeeId: string) {
+    const { rows } = await pool.query<ProjectTaskRow>(
+      `SELECT ${projectTaskColumns} FROM project_tasks WHERE assigned_to = $1 ORDER BY created_at DESC`,
+      [employeeId]
+    );
+    return rows;
+  }
+
   private async checkAssignable(projectId: string, assignedTo: string) {
     const user = await pool.query(
       `SELECT department_id FROM users WHERE id = $1`,
@@ -70,24 +108,28 @@ class ProjectTaskService {
     }
   }
 
-  async create(data: {
-    projectId: string;
-    title: string;
-    description?: string;
-    status?: string;
-    priority?: string;
-    assignedTo?: string;
-    dueDate?: string;
-    assignedBy: string;
-    createdBy: string;
-  }) {
+  async create(data: CreateProjectTaskDataInput) {
     const project = await pool.query(`SELECT id FROM projects WHERE id = $1`, [data.projectId]);
     if (!project.rows[0]) throw new AppError("Project not found", 404);
 
-    const assignedTo = data.assignedTo || null;
+    const assignedTo = normalizeOptionalText(data.assignedTo);
     if (assignedTo) {
       await this.checkAssignable(data.projectId, assignedTo);
     }
+
+    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    const payload = {
+      projectId: data.projectId,
+      title: normalizeRequiredText(data.title),
+      description: normalizeOptionalText(data.description),
+      status: data.status || EProjectTaskStatus.TODO,
+      priority: data.priority || "medium",
+      assignedTo,
+      assignedBy: data.assignedBy,
+      assignedAt: assignedTo ? new Date() : null,
+      dueDate: normalizeOptionalText(data.dueDate),
+      createdBy: data.createdBy,
+    };
 
     const { rows } = await pool.query<ProjectTaskRow>(
       `INSERT INTO project_tasks
@@ -95,66 +137,59 @@ class ProjectTaskService {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING ${projectTaskColumns}`,
       [
-        data.projectId,
-        data.title.trim(),
-        data.description?.trim() || null,
-        data.status || EProjectTaskStatus.TODO,
-        data.priority || "medium",
-        assignedTo,
-        data.assignedBy,
-        assignedTo ? new Date() : null,
-        data.dueDate || null,
-        data.createdBy,
+        payload.projectId,
+        payload.title,
+        payload.description,
+        payload.status,
+        payload.priority,
+        payload.assignedTo,
+        payload.assignedBy,
+        payload.assignedAt,
+        payload.dueDate,
+        payload.createdBy,
       ]
     );
     return rows[0];
   }
 
-  async update(id: string, data: Partial<{
-    title: string;
-    description: string;
-    status: string;
-    priority: string;
-    assignedTo: string;
-    dueDate: string;
-  }>) {
+  async update(id: string, data: UpdateProjectTaskDataInput) {
     const task = await this.findById(id);
-    if (!task) return null;
+    if (!task) throw new AppError("Task not found", 404);
+
+    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    const payload: UpdateProjectTaskDataInput = {};
+
+    if (data.title !== undefined) payload.title = normalizeRequiredText(data.title);
+    if (data.description !== undefined) payload.description = normalizeOptionalText(data.description) ?? undefined;
+    if (data.status !== undefined) payload.status = data.status;
+    if (data.priority !== undefined) payload.priority = data.priority;
+    if (data.assignedTo !== undefined) payload.assignedTo = normalizeOptionalText(data.assignedTo) ?? undefined;
+    if (data.dueDate !== undefined) payload.dueDate = normalizeOptionalText(data.dueDate) ?? undefined;
 
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
 
-    if (data.title !== undefined) {
-      setClauses.push(`title = $${idx++}`);
-      values.push(data.title.trim());
-    }
-    if (data.description !== undefined) {
-      setClauses.push(`description = $${idx++}`);
-      values.push(data.description.trim() || null);
-    }
-    if (data.priority !== undefined) {
-      setClauses.push(`priority = $${idx++}`);
-      values.push(data.priority);
-    }
-    if (data.dueDate !== undefined) {
-      setClauses.push(`due_date = $${idx++}`);
-      values.push(data.dueDate || null);
-    }
-    if (data.assignedTo !== undefined) {
-      if (data.assignedTo) {
-        await this.checkAssignable(task.projectId, data.assignedTo);
+    if (payload.title !== undefined) { setClauses.push(`title = $${idx++}`); values.push(payload.title); }
+    if (payload.description !== undefined) { setClauses.push(`description = $${idx++}`); values.push(payload.description); }
+    if (payload.priority !== undefined) { setClauses.push(`priority = $${idx++}`); values.push(payload.priority); }
+    if (payload.dueDate !== undefined) { setClauses.push(`due_date = $${idx++}`); values.push(payload.dueDate); }
+
+    if (payload.assignedTo !== undefined) {
+      if (payload.assignedTo) {
+        await this.checkAssignable(task.projectId, payload.assignedTo);
         setClauses.push(`assigned_to = $${idx++}, assigned_by = $${idx++}, assigned_at = $${idx++}`);
-        values.push(data.assignedTo, task.assignedBy ?? null, new Date());
+        values.push(payload.assignedTo, task.assignedBy ?? null, new Date());
       } else {
         setClauses.push(`assigned_to = $${idx++}, assigned_at = $${idx++}`);
         values.push(null, null);
       }
     }
-    if (data.status !== undefined) {
+
+    if (payload.status !== undefined) {
       setClauses.push(`status = $${idx++}`);
-      values.push(data.status);
-      if (data.status === EProjectTaskStatus.COMPLETED || data.status === EProjectTaskStatus.CANCELLED) {
+      values.push(payload.status);
+      if (payload.status === EProjectTaskStatus.COMPLETED || payload.status === EProjectTaskStatus.CANCELLED) {
         setClauses.push(`completed_at = $${idx++}`);
         values.push(new Date());
       } else {
@@ -173,12 +208,12 @@ class ProjectTaskService {
     return rows[0];
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     const { rows } = await pool.query<ProjectTaskRow>(
       `DELETE FROM project_tasks WHERE id = $1 RETURNING ${projectTaskColumns}`,
       [id]
     );
-    return rows[0] || null;
+    if (!rows[0]) throw new AppError("Task not found", 404);
   }
 }
 

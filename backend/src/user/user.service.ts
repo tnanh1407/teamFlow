@@ -315,7 +315,8 @@ class UserService {
       `UPDATE users SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${userColumns}`,
       values
     );
-    return rows[0] ? this.findById(rows[0].id) : null;
+    if (!rows[0]) throw new AppError("User not found", 404);
+    return rows[0];
   }
 
   async updateAvatar(id: string, avatarURL: string): Promise<void> {
@@ -333,10 +334,11 @@ class UserService {
   }
 
   async delete(id: string) : Promise<void> {
-    await pool.query<UserRow>(
+    const { rows } = await pool.query<UserRow>(
       `UPDATE users SET status = false WHERE id = $1 RETURNING ${userColumns}`,
       [id]
     );
+    if (!rows[0]) throw new AppError("User not found", 404);
   }
 }
 

@@ -42,14 +42,12 @@ class ProjectCommentController {
   async update(req: Request, res: Response) {
     const id = req.params.id as string;
     const comment = await projectCommentService.update(id, req.body);
-    if (!comment) throw new AppError("Comment not found", 404);
-    res.json({ data: comment });
+    res.json({ message: "Comment updated successfully", data: comment });
   }
 
   async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const comment = await projectCommentService.delete(id);
-    if (!comment) throw new AppError("Comment not found", 404);
+    await projectCommentService.delete(id);
     res.json({ message: "Comment deleted successfully" });
   }
 }

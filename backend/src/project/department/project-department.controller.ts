@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import projectDepartmentService from "./project-department.service.js";
-import { AppError } from "../../utils/errors/app-error.js";
 
 class ProjectDepartmentController {
   async getAll(_req: Request, res: Response) {
@@ -22,8 +21,7 @@ class ProjectDepartmentController {
   async delete(req: Request, res: Response) {
     const { projectId, departmentId } = req.body as { projectId: string; departmentId: string };
 
-    const assignment = await projectDepartmentService.delete(projectId, departmentId);
-    if (!assignment) throw new AppError("Assignment not found", 404);
+    await projectDepartmentService.delete(projectId, departmentId);
     res.json({ message: "Assignment deleted successfully" });
   }
 }
