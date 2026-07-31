@@ -7,6 +7,7 @@ import { UserSchema } from "../schemas/index.js";
 import { EGender } from "@/enums/gender.enum.js";
 import env from "../config/env.js";
 import sessionService, { generateJti, TOKEN_EXPIRES_IN } from "../session/session.service.js";
+import { generateResetCode } from "../utils/mail/mailer.js";
 
 // dữ liệu database
 interface UserRow {
@@ -55,6 +56,15 @@ export interface ChangePasswordInput {
   currentPassword: string;
   newPassword: string;
 }
+export interface ForgotPasswordInput {
+  email: string;
+  employeeCode: string;
+}
+export interface ResetPasswordInput {
+  email: string;
+  code: string;
+  newPassword: string;
+}
 
 const userColumns = UserSchema.columns;
 
@@ -63,6 +73,8 @@ const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim();
   return normalized ? normalized : null;
 };
+
+const RESET_CODE_TTL_MS = 10 * 60 * 1000;
 
 class UserService {
   async login(username: string, password: string, userAgent?: string, ip?: string) {
@@ -335,6 +347,56 @@ class UserService {
     }
 
     return rows[0];
+  }
+
+  async requestPasswordReset(email: string, employeeCode: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await this.findByEmail(normalizedEmail);
+    if (!user || user.employeeCode.toUpperCase() !== employeeCode.trim().toUpperCase()) {
+      throw new AppError("Email or employee code does not match any account", 400);
+    }
+
+    await pool.query(
+      `DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL`,
+      [user.id]
+    );
+
+    const code = generateResetCode();
+    await pool.query(
+      `INSERT INTO password_resets (user_id, email, code, expires_at)
+       VALUES ($1, $2, $3, now() + ($4 * interval '1 millisecond'))`,
+      [user.id, normalizedEmail, code, RESET_CODE_TTL_MS]
+    );
+
+    return { email: normalizedEmail, code };
+  }
+
+  async resetPassword(email: string, code: string, newPassword: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const { rows } = await pool.query<{ id: string; userId: string }>(
+      `SELECT id, user_id FROM password_resets
+       WHERE email = $1 AND code = $2 AND used_at IS NULL AND expires_at > now()
+       ORDER BY created_at DESC LIMIT 1`,
+      [normalizedEmail, code]
+    );
+    if (!rows[0]) throw new AppError("Invalid or expired code", 400);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      `UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2`,
+      [hashedPassword, rows[0].userId]
+    );
+
+    await pool.query(
+      `UPDATE password_resets SET used_at = now() WHERE id = $1`,
+      [rows[0].id]
+    );
+    await pool.query(
+      `DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL`,
+      [rows[0].userId]
+    );
+
+    await sessionService.revokeAllByUserId(rows[0].userId);
   }
 
   async updateAvatar(id: string, avatarURL: string): Promise<void> {

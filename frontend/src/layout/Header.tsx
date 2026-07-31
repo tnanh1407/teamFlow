@@ -71,7 +71,7 @@ export default function Header({ collapsed, onToggle }: HeaderProps) {
   }, [menuOpen])
 
   const route = routes.find((r) => location.pathname.startsWith(r.path))
-  let crumbs = route?.breadcrumbs ?? [{ label: "TeamFlow" }]
+  let crumbs = route?.breadcrumbs ?? [{ label: "Quản Lý Phòng Ban & Dự Án" }]
 
   if (route && location.pathname !== route.path) {
     crumbs = [...crumbs, { label: "Chi tiết" }]

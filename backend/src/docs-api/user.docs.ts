@@ -69,6 +69,23 @@ export const userSchemas = {
       newPassword: { type: "string", minLength: 6 },
     },
   },
+  ForgotPasswordInput: {
+    type: "object",
+    required: ["email", "employeeCode"],
+    properties: {
+      email: { type: "string", format: "email" },
+      employeeCode: { type: "string", description: "Mã nhân viên" },
+    },
+  },
+  ResetPasswordInput: {
+    type: "object",
+    required: ["email", "code", "newPassword"],
+    properties: {
+      email: { type: "string", format: "email" },
+      code: { type: "string", description: "Mã 6 số gửi qua email" },
+      newPassword: { type: "string", minLength: 6 },
+    },
+  },
   Error: {
     type: "object",
     properties: {
@@ -191,6 +208,29 @@ export const userPaths = {
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UpdateMeInput" } } } },
       responses: { 200: { description: "Đổi mật khẩu thành công" } },
+    },
+  },
+  "/api/users/forgot-password": {
+    post: {
+      tags: ["Users"],
+      summary: "Quên mật khẩu — gửi mã 6 số qua email",
+      description: "Nhập email + mã nhân viên để nhận mã xác nhận 6 số gửi qua email.",
+      requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ForgotPasswordInput" } } } },
+      responses: {
+        200: { description: "Mã xác nhận đã được gửi (nếu email tồn tại)" },
+        400: { description: "Email hoặc mã nhân viên không khớp" },
+      },
+    },
+  },
+  "/api/users/reset-password": {
+    post: {
+      tags: ["Users"],
+      summary: "Đặt lại mật khẩu bằng mã xác nhận",
+      requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ResetPasswordInput" } } } },
+      responses: {
+        200: { description: "Đặt lại mật khẩu thành công" },
+        400: { description: "Mã không hợp lệ hoặc đã hết hạn" },
+      },
     },
   },
   "/api/users/me/avatar": {

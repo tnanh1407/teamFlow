@@ -44,3 +44,14 @@ export const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email"),
+  employeeCode: z.string().min(1, "Employee code is required"),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email("Invalid email"),
+  code: z.string().regex(/^\d{6}$/, "Code must be exactly 6 digits"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+});

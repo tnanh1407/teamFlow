@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/", (_req, res) => {
-  res.json({ message: "TeamFlow API is running" });
+  res.json({ message: "Hệ thống Quản Lý Phòng Ban & Dự Án API is running" });
 });
 
 app.use("/api/users", userRouter);

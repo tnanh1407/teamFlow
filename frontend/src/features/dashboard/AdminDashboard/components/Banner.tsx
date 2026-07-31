@@ -42,7 +42,7 @@ export default function Banner({ user }: BannerProps) {
           </h1>
         </div>
         <p className="mt-1 text-sm text-blue-100/80 max-w-xl">
-          Chào mừng bạn quay trở lại. Dưới đây là tổng quan về hệ thống TeamFlow của bạn.
+          Chào mừng bạn quay trở lại. Dưới đây là tổng quan về hệ thống Quản Lý Phòng Ban & Dự Án của bạn.
         </p>
       </div>
     </div>

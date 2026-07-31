@@ -115,3 +115,86 @@ Server running on port 5000
 4:14:21 PM [tsx] change in ./src\project\core\project.router.ts Restarting...
 Database connected
 Server running on port 5000
+4:18:37 PM [tsx] change in ./src\config\env.ts Restarting...
+Database connected
+Server running on port 5000
+4:19:14 PM [tsx] change in ./src\user\user.validation.ts Restarting...
+Database connected
+Server running on port 5000
+4:19:24 PM [tsx] change in ./src\user\user.service.ts Restarting...
+Database connected
+Server running on port 5000
+4:19:30 PM [tsx] change in ./src\user\user.service.ts Restarting...
+Database connected
+Server running on port 5000
+4:19:38 PM [tsx] change in ./src\user\user.service.ts Restarting...
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+Error: Transform failed with 1 error:
+C:\Users\tnanh\Desktop\TeamFlow\backend\src\user\user.service.ts:348:8: ERROR: Expected ";" but found "requestPasswordReset"
+    at failureErrorWithLog (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\esbuild\lib\main.js:1748:15)
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\esbuild\lib\main.js:1017:50
+    at responseCallbacks.<computed> (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\esbuild\lib\main.js:884:9)
+    at handleIncomingPacket (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\esbuild\lib\main.js:939:12)
+    at Socket.readFromStdout (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\esbuild\lib\main.js:862:7)
+    at Socket.emit (node:events:508:20)
+    at addChunk (node:internal/streams/readable:564:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:515:3)
+    at Readable.push (node:internal/streams/readable:395:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23) {
+  name: 'TransformError'
+}
+
+Node.js v25.6.0
+4:20:11 PM [tsx] change in ./src\user\user.service.ts Rerunning...
+Database connected
+Server running on port 5000
+4:20:17 PM [tsx] change in ./src\user\user.service.ts Restarting...
+Database connected
+Server running on port 5000
+4:20:23 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+4:20:34 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+4:20:41 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+4:20:47 PM [tsx] change in ./src\user\user.router.ts Restarting...
+Database connected
+Server running on port 5000
+4:20:53 PM [tsx] change in ./src\user\user.router.ts Restarting...
+Database connected
+Server running on port 5000
+[mail-fallback] Reset code for nguyenvananh@teamflow.com: 111009
+[mail-fallback] Reset code for nguyenvananh@teamflow.com: 214589
+4:21:42 PM [tsx] change in ./src\docs-api\user.docs.ts Restarting...
+Database connected
+Server running on port 5000
+4:21:48 PM [tsx] change in ./src\docs-api\user.docs.ts Restarting...
+Database connected
+Server running on port 5000
+4:21:55 PM [tsx] change in ./src\docs-api\index.ts Restarting...
+Database connected
+Server running on port 5000
+4:24:41 PM [tsx] change in ./src\index.ts Restarting...
+Database connected
+Server running on port 5000
+4:24:47 PM [tsx] change in ./src\docs-api\index.ts Restarting...
+Database connected
+Server running on port 5000
+4:24:53 PM [tsx] change in ./src\docs-api\index.ts Restarting...
+Database connected
+Server running on port 5000
+4:24:59 PM [tsx] change in ./src\docs-api\index.ts Restarting...
+Database connected
+Server running on port 5000
+4:25:06 PM [tsx] change in ./src\utils\mail\mailer.ts Restarting...
+Database connected
+Server running on port 5000
+4:25:14 PM [tsx] change in ./src\utils\mail\mailer.ts Restarting...
+Database connected
+Server running on port 5000

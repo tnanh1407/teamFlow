@@ -41,7 +41,7 @@ export default function ForgotPassword() {
       <div className="hidden lg:flex flex-1 bg-white overflow-hidden">
         <motion.img
           src={heroImg}
-          alt="TeamFlow"
+          alt="Hệ Thống Quản Lý Phòng Ban & Dự Án"
           initial={{ scale: 1.3 }}
           animate={{ scale: 1 }}
           transition={{ duration: 1.5, ease: "easeOut" }}

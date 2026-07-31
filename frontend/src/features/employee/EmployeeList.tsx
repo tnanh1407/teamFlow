@@ -195,7 +195,7 @@ export default function Employees() {
           </div>
           <div>
             <label className={labelClass}>Email</label>
-            <input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="example@teamflow.com" className={inputClass} />
+            <input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="example@qlpbda.com" className={inputClass} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

@@ -9,6 +9,8 @@ import {
   updateUserSchema,
   loginSchema,
   updatePassword,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from "./user.validation.js";
 import { EAccountPosition, EAccountRole } from "../enums/account-role.enum.js";
 
@@ -16,6 +18,12 @@ const router = Router();
 
 router.post("/login", validate(loginSchema), asyncHandler(userController.login));
 router.post("/logout", authenticate, asyncHandler(userController.logout));
+
+// quên mật khẩu: nhập email + mã nhân viên, hệ thống gửi mã 6 số qua mail
+router.post("/forgot-password", validate(forgotPasswordSchema), asyncHandler(userController.forgotPassword));
+
+// nhập mã 6 số nhận được để đặt mật khẩu mới
+router.post("/reset-password", validate(resetPasswordSchema), asyncHandler(userController.resetPassword));
 
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.getAll));
 router.get("/all", authenticate, asyncHandler(userController.getAllEmployees));

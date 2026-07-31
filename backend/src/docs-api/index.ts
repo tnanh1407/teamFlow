@@ -5,8 +5,8 @@ import { sessionSchemas, sessionPaths } from "./session.docs.js";
 
 export const apiSpec = {
   info: {
-    title: "TeamFlow API",
-    description: `### Hệ Thống RESTful API Quản Lý Nhân Sự & Vận Hành Nội Bộ TeamFlow
+    title: "Hệ Thống Quản Lý Phòng Ban & Dự Án",
+    description: `### Hệ Thống RESTful API Quản Lý Nhân Sự & Vận Hành Nội Bộ (Quản Lý Phòng Ban & Dự Án)
 
 API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục vụ toàn bộ các thao tác nghiệp vụ quản trị doanh nghiệp: phân quyền nhân sự, cơ cấu tổ chức (phòng ban – chức vụ), quản lý dự án, giao việc, cộng tác và giám sát tiến độ.
 
@@ -15,7 +15,7 @@ API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục v
 ### 🚀 Các Phân Hệ & Endpoint Chính:
 
 #### 1. Quản Lý Tài Khoản & Phân Quyền (Users & Authentication)
-- **Xác thực:** Đăng nhập (\`POST /api/users/login\`), Đăng xuất (\`POST /api/users/logout\`), Đổi mật khẩu (\`PATCH /api/users/updatePs\`).
+- **Xác thực:** Đăng nhập (\`POST /api/users/login\`), Đăng xuất (\`POST /api/users/logout\`), Đổi mật khẩu (\`PATCH /api/users/updatePs\`), Quên mật khẩu – gửi mã 6 số qua email (\`POST /api/users/forgot-password\`, \`POST /api/users/reset-password\`).
 - **Hồ sơ cá nhân:** Cập nhật ảnh đại diện (\`POST /api/users/me/avatar\`).
 - **Quản trị Nhân viên:** Danh sách phân trang (\`GET /api/users\`), Toàn bộ nhân viên (\`GET /api/users/all\`), Tìm kiếm (\`GET /api/users/search\`), Xem chi tiết (\`GET /api/users/{id}\`), Tạo mới (\`POST /api/users\`), Cập nhật (\`PATCH /api/users/{id}\`), Vô hiệu hoá tài khoản (\`DELETE /api/users/{id}\`).
 - **Lọc theo tiêu chí:** Nhân viên theo phòng ban (\`GET /api/users/department/{departmentId}\`), theo chức vụ (\`GET /api/users/position/{positionId}\`).
@@ -75,8 +75,8 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
 - \`409 Conflict\`: Trùng lặp dữ liệu độc nhất (Ví dụ: Username/Email đã tồn tại).
 - \`500 Internal Server Error\`: Lỗi không xác định từ phía máy chủ.`,
     contact: {
-      name: "TeamFlow Development Team",
-      email: "support@teamflow.local",
+      name: "Đội Ngũ Phát Triển Hệ Thống Quản Lý Phòng Ban & Dự Án",
+      email: "support@qlpbda.local",
     },
     license: {
       name: "Internal Proprietary",

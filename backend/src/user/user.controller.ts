@@ -6,6 +6,7 @@ import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { handleFileUpload, deleteFile } from "../utils/upload/upload.js";
 import sessionService, { SESSION_TTL_MS } from "../session/session.service.js";
+import { sendResetCodeEmail } from "../utils/mail/mailer.js";
 
 class UserController {
   async getAll(req: AuthRequest, res: Response) {
@@ -151,6 +152,24 @@ class UserController {
     });
 
     res.json({ data: result });
+  }
+
+  async forgotPassword(req: AuthRequest, res: Response) {
+    const { email, employeeCode } = req.body;
+    const result = await userService.requestPasswordReset(email, employeeCode);
+
+    await sendResetCodeEmail(result.email, result.code);
+
+    res.json({
+      message: "If the email exists, a 6-digit reset code has been sent to your email",
+      data: env.NODE_ENV === "production" ? undefined : { devCode: result.code },
+    });
+  }
+
+  async resetPassword(req: AuthRequest, res: Response) {
+    const { email, code, newPassword } = req.body;
+    await userService.resetPassword(email, code, newPassword);
+    res.json({ message: "Password reset successfully" });
   }
 
   async updateAvatar(req: AuthRequest, res: Response) {
