@@ -13,6 +13,7 @@ CREATE TYPE EGender AS ENUM ('male', 'female', 'other');
 CREATE TYPE EProjectRole AS ENUM ('leader', 'member', 'reviewer');
 CREATE TYPE ELevel AS ENUM ('Intern', 'Junior', 'Middle', 'Senior', 'Leader', 'Manager');
 CREATE TYPE EProjectAction AS ENUM ('created', 'updated', 'assigned', 'commented', 'completed', 'cancelled');
+CREATE TYPE EProjectTaskStatus AS ENUM ('todo', 'in_progress', 'review', 'completed', 'cancelled');
 
 -- ══════════════════════════════════════════════════════════
 -- TABLES
@@ -117,6 +118,23 @@ CREATE TABLE IF NOT EXISTS project_logs (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS project_tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL,
+  title VARCHAR NOT NULL,
+  description TEXT,
+  status EProjectTaskStatus DEFAULT 'todo',
+  priority EPriority DEFAULT 'medium',
+  assigned_to UUID,
+  assigned_by UUID,
+  assigned_at TIMESTAMPTZ,
+  due_date DATE,
+  created_by UUID NOT NULL,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- ══════════════════════════════════════════════════════════
 -- INDEXES
 -- ══════════════════════════════════════════════════════════
@@ -132,6 +150,9 @@ CREATE INDEX IF NOT EXISTS idx_project_employees_project ON project_employees(pr
 CREATE INDEX IF NOT EXISTS idx_project_employees_employee ON project_employees(employee_id);
 CREATE INDEX IF NOT EXISTS idx_project_comments_project ON project_comments(project_id);
 CREATE INDEX IF NOT EXISTS idx_project_logs_project ON project_logs(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_tasks_project ON project_tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_tasks_assigned_to ON project_tasks(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
 
 -- ══════════════════════════════════════════════════════════
 -- FOREIGN KEYS
@@ -150,6 +171,10 @@ ALTER TABLE project_departments ADD CONSTRAINT fk_project_departments_project FO
 ALTER TABLE project_departments ADD CONSTRAINT fk_project_departments_department FOREIGN KEY (department_id) REFERENCES departments(id);
 ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_project FOREIGN KEY (project_id) REFERENCES projects(id);
 ALTER TABLE project_logs ADD CONSTRAINT fk_project_logs_employee FOREIGN KEY (employee_id) REFERENCES users(id);
+ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_assigned_to FOREIGN KEY (assigned_to) REFERENCES users(id);
+ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_assigned_by FOREIGN KEY (assigned_by) REFERENCES users(id);
+ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id);
 
 -- ══════════════════════════════════════════════════════════
 -- TRIGGERS (auto-update updated_at)
@@ -173,3 +198,5 @@ CREATE OR REPLACE TRIGGER trg_projects_updated_at
   BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE OR REPLACE TRIGGER trg_project_comments_updated_at
   BEFORE UPDATE ON project_comments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE OR REPLACE TRIGGER trg_project_tasks_updated_at
+  BEFORE UPDATE ON project_tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at();

@@ -25,6 +25,7 @@ const seed = async () => {
     await client.query("BEGIN");
 
     await client.query("DELETE FROM project_logs");
+    await client.query("DELETE FROM project_tasks");
     await client.query("DELETE FROM project_comments");
     await client.query("DELETE FROM project_departments");
     await client.query("DELETE FROM project_employees");
@@ -149,6 +150,18 @@ const seed = async () => {
       }
       counts.project_logs = data.length;
       console.log(`Inserted ${data.length} project_logs`);
+    }
+
+    if (has("project_tasks")) {
+      const data = loadJSON<any>("project_tasks");
+      for (const t of data) {
+        await client.query(
+          `INSERT INTO project_tasks (id, project_id, title, description, status, priority, assigned_to, assigned_by, assigned_at, due_date, created_by, completed_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+          [t.id, t.projectId, t.title, t.description, t.status, t.priority, t.assignedTo, t.assignedBy, t.assignedAt, t.dueDate, t.createdBy, t.completedAt || null, t.createdAt, t.updatedAt]
+        );
+      }
+      counts.project_tasks = data.length;
+      console.log(`Inserted ${data.length} project_tasks`);
     }
 
     await client.query("COMMIT");

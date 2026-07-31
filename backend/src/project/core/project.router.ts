@@ -1,13 +1,13 @@
 import { Router } from "express";
 import projectController from "./project.controller.js";
-import { authenticate, authorize, authorizePosition } from "../../middlewares/auth.middleware.js";
+import { authenticate, authorize, authorizeManager } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { asyncHandler } from "../../middlewares/async.middleware.js";
 import {
   createProjectSchema,
   updateProjectSchema,
 } from "./project.validation.js";
-import { EAccountPosition, EAccountRole } from "../../enums/account-role.enum.js";
+import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -41,12 +41,11 @@ router.post(
   asyncHandler(projectController.create)
 );
 
-//  sửa dự án
+//  sửa dự án (gồm cả progress — manager tự đánh giá)
 router.patch(
   "/:id",
   authenticate,
-  authorize(EAccountRole.ADMIN),
-  authorizePosition(EAccountPosition.MANAGER),
+  authorizeManager,
   validate(updateProjectSchema),
   asyncHandler(projectController.update)
 );

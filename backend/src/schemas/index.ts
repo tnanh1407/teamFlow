@@ -69,3 +69,8 @@ export const ProjectLogSchema = {
   table: "project_logs",
   columns: `id, project_id, employee_id, action, description, created_at`,
 } as const;
+
+export const ProjectTaskSchema = {
+  table: "project_tasks",
+  columns: `id, project_id, title, description, status, priority, assigned_to, assigned_by, assigned_at, due_date, created_by, completed_at, created_at, updated_at`,
+} as const;

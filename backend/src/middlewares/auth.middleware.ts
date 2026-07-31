@@ -68,3 +68,18 @@ export const authorizePosition = (...positions: EAccountPosition[]) => {
     next();
   };
 };
+
+// chỉ manager mới qua, admin bị chặn
+export const authorizeManager = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Access denied" });
+  }
+  if (req.user.role === EAccountRole.ADMIN || req.user.position !== EAccountPosition.MANAGER) {
+    return res.status(403).json({ message: "Insufficient permissions" });
+  }
+  next();
+};
