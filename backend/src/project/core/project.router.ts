@@ -15,7 +15,9 @@ const router = Router();
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(projectController.getAll));
 
 // lấy project của tôi 
-router.get("/my", authenticate, asyncHandler(projectController.getMyProjects));
+router.get("/me", authenticate, asyncHandler(projectController.getMyProjects));
+
+// get
 router.get("/status/:status", authenticate, asyncHandler(projectController.getByStatus));
 router.get("/priority/:priority", authenticate, asyncHandler(projectController.getByPriority));
 router.get("/created-by/:employeeId", authenticate, asyncHandler(projectController.getByCreatedBy));

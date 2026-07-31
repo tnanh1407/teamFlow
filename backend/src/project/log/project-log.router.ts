@@ -11,7 +11,7 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 const router = Router();
 
 router.get("/", authenticate, asyncHandler(projectLogController.getAll));
-router.get("/task/:taskId", authenticate, asyncHandler(projectLogController.getByTask));
+router.get("/project/:projectId", authenticate, asyncHandler(projectLogController.getByProject));
 router.get("/employee/:employeeId", authenticate, asyncHandler(projectLogController.getByEmployee));
 router.get("/:id", authenticate, asyncHandler(projectLogController.getById));
 router.post(

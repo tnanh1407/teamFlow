@@ -8,23 +8,23 @@ const __dirname = path.dirname(__filename);
 
 const dropAll = async () => {
   await pool.query(`
-    DROP TABLE IF EXISTS task_logs CASCADE;
-    DROP TABLE IF EXISTS task_comments CASCADE;
-    DROP TABLE IF EXISTS task_departments CASCADE;
-    DROP TABLE IF EXISTS task_employees CASCADE;
-    DROP TABLE IF EXISTS tasks CASCADE;
+    DROP TABLE IF EXISTS project_logs CASCADE;
+    DROP TABLE IF EXISTS project_comments CASCADE;
+    DROP TABLE IF EXISTS project_departments CASCADE;
+    DROP TABLE IF EXISTS project_employees CASCADE;
+    DROP TABLE IF EXISTS projects CASCADE;
     DROP TABLE IF EXISTS users CASCADE;
     DROP TABLE IF EXISTS departments CASCADE;
     DROP TABLE IF EXISTS positions CASCADE;
     DROP TYPE IF EXISTS EUserRole;
     DROP TYPE IF EXISTS Eposition;
-    DROP TYPE IF EXISTS ETaskStatus;
+    DROP TYPE IF EXISTS EProjectStatus;
     DROP TYPE IF EXISTS ENotificationType;
     DROP TYPE IF EXISTS EPriority;
     DROP TYPE IF EXISTS EGender;
-    DROP TYPE IF EXISTS ETaskRole;
+    DROP TYPE IF EXISTS EProjectRole;
     DROP TYPE IF EXISTS ELevel;
-    DROP TYPE IF EXISTS ETaskAction;
+    DROP TYPE IF EXISTS EProjectAction;
   `);
 };
 

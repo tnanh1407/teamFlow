@@ -1,53 +1,53 @@
 import pool from "../../config/database.js";
-import { TaskDepartmentSchema } from "../../schemas/index.js";
+import { ProjectDepartmentSchema } from "../../schemas/index.js";
 
-interface TaskDepartmentRow {
-  taskId: string;
+interface ProjectDepartmentRow {
+  projectId: string;
   departmentId: string;
   assignedAt: Date;
 }
 
-const taskDepartmentColumns = TaskDepartmentSchema.columns;
+const projectDepartmentColumns = ProjectDepartmentSchema.columns;
 
 class ProjectDepartmentService {
   async findAll() {
-    const { rows } = await pool.query<TaskDepartmentRow>(
-      `SELECT ${taskDepartmentColumns} FROM task_departments ORDER BY assigned_at DESC`
+    const { rows } = await pool.query<ProjectDepartmentRow>(
+      `SELECT ${projectDepartmentColumns} FROM project_departments ORDER BY assigned_at DESC`
     );
     return rows;
   }
 
-  async findByTask(taskId: string) {
-    const { rows } = await pool.query<TaskDepartmentRow>(
-      `SELECT ${taskDepartmentColumns} FROM task_departments WHERE task_id = $1 ORDER BY assigned_at DESC`,
-      [taskId]
+  async findByProject(projectId: string) {
+    const { rows } = await pool.query<ProjectDepartmentRow>(
+      `SELECT ${projectDepartmentColumns} FROM project_departments WHERE project_id = $1 ORDER BY assigned_at DESC`,
+      [projectId]
     );
     return rows;
   }
 
   async findByDepartment(departmentId: string) {
-    const { rows } = await pool.query<TaskDepartmentRow>(
-      `SELECT ${taskDepartmentColumns} FROM task_departments WHERE department_id = $1 ORDER BY assigned_at DESC`,
+    const { rows } = await pool.query<ProjectDepartmentRow>(
+      `SELECT ${projectDepartmentColumns} FROM project_departments WHERE department_id = $1 ORDER BY assigned_at DESC`,
       [departmentId]
     );
     return rows;
   }
 
   async create(data: {
-    taskId: string;
+    projectId: string;
     departmentId: string;
   }) {
-    const { rows } = await pool.query<TaskDepartmentRow>(
-      `INSERT INTO task_departments (task_id, department_id) VALUES ($1, $2) RETURNING ${taskDepartmentColumns}`,
-      [data.taskId, data.departmentId]
+    const { rows } = await pool.query<ProjectDepartmentRow>(
+      `INSERT INTO project_departments (project_id, department_id) VALUES ($1, $2) RETURNING ${projectDepartmentColumns}`,
+      [data.projectId, data.departmentId]
     );
     return rows[0];
   }
 
-  async delete(taskId: string, departmentId: string) {
-    const { rows } = await pool.query<TaskDepartmentRow>(
-      `DELETE FROM task_departments WHERE task_id = $1 AND department_id = $2 RETURNING ${taskDepartmentColumns}`,
-      [taskId, departmentId]
+  async delete(projectId: string, departmentId: string) {
+    const { rows } = await pool.query<ProjectDepartmentRow>(
+      `DELETE FROM project_departments WHERE project_id = $1 AND department_id = $2 RETURNING ${projectDepartmentColumns}`,
+      [projectId, departmentId]
     );
     return rows[0] || null;
   }

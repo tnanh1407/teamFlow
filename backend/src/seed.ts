@@ -24,11 +24,11 @@ const seed = async () => {
   try {
     await client.query("BEGIN");
 
-    await client.query("DELETE FROM task_logs");
-    await client.query("DELETE FROM task_comments");
-    await client.query("DELETE FROM task_departments");
-    await client.query("DELETE FROM task_employees");
-    await client.query("DELETE FROM tasks");
+    await client.query("DELETE FROM project_logs");
+    await client.query("DELETE FROM project_comments");
+    await client.query("DELETE FROM project_departments");
+    await client.query("DELETE FROM project_employees");
+    await client.query("DELETE FROM projects");
     await client.query("UPDATE departments SET manager_id = NULL");
     await client.query("DELETE FROM users");
     await client.query("DELETE FROM departments");
@@ -91,64 +91,64 @@ const seed = async () => {
       console.log("Updated department managers");
     }
 
-    if (has("tasks")) {
-      const data = loadJSON<any>("tasks");
+    if (has("projects")) {
+      const data = loadJSON<any>("projects");
       for (const t of data) {
         await client.query(
-          `INSERT INTO tasks (id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, completed_by, estimated_hours, actual_hours, completed_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
-          [t.id, t.title, t.description, t.priority, t.status, t.progress, t.startDate, t.dueDate, t.assignedBy, t.createdBy, t.completedBy || null, t.estimatedHours, t.actualHours, t.completedAt || null, t.createdAt, t.updatedAt]
+          `INSERT INTO projects (id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, completed_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+          [t.id, t.title, t.description, t.priority, t.status, t.progress, t.startDate, t.dueDate, t.assignedBy, t.createdBy, t.estimatedHours, t.actualHours, t.completedAt || null, t.createdAt, t.updatedAt]
         );
       }
-      counts.tasks = data.length;
-      console.log(`Inserted ${data.length} tasks`);
+      counts.projects = data.length;
+      console.log(`Inserted ${data.length} projects`);
     }
 
-    if (has("task_employees")) {
-      const data = loadJSON<any>("task_employees");
+    if (has("project_employees")) {
+      const data = loadJSON<any>("project_employees");
       for (const te of data) {
         await client.query(
-          `INSERT INTO task_employees (id, task_id, employee_id, role, assigned_at) VALUES ($1,$2,$3,$4,$5)`,
-          [te.id, te.taskId, te.employeeId, te.role, te.assignedAt]
+          `INSERT INTO project_employees (id, project_id, employee_id, role, assigned_at) VALUES ($1,$2,$3,$4,$5)`,
+          [te.id, te.projectId, te.employeeId, te.role, te.assignedAt]
         );
       }
-      counts.task_employees = data.length;
-      console.log(`Inserted ${data.length} task_employees`);
+      counts.project_employees = data.length;
+      console.log(`Inserted ${data.length} project_employees`);
     }
 
-    if (has("task_departments")) {
-      const data = loadJSON<any>("task_departments");
+    if (has("project_departments")) {
+      const data = loadJSON<any>("project_departments");
       for (const td of data) {
         await client.query(
-          `INSERT INTO task_departments (task_id, department_id, assigned_at) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
-          [td.taskId, td.departmentId, td.assignedAt]
+          `INSERT INTO project_departments (project_id, department_id, assigned_at) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
+          [td.projectId, td.departmentId, td.assignedAt]
         );
       }
-      counts.task_departments = data.length;
-      console.log(`Inserted ${data.length} task_departments`);
+      counts.project_departments = data.length;
+      console.log(`Inserted ${data.length} project_departments`);
     }
 
-    if (has("task_comments")) {
-      const data = loadJSON<any>("task_comments");
+    if (has("project_comments")) {
+      const data = loadJSON<any>("project_comments");
       for (const c of data) {
         await client.query(
-          `INSERT INTO task_comments (id, task_id, employee_id, content, attachments, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-          [c.id, c.taskId, c.employeeId, c.content, c.attachments, c.createdAt, c.updatedAt]
+          `INSERT INTO project_comments (id, project_id, employee_id, content, attachments, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+          [c.id, c.projectId, c.employeeId, c.content, c.attachments, c.createdAt, c.updatedAt]
         );
       }
-      counts.task_comments = data.length;
-      console.log(`Inserted ${data.length} task_comments`);
+      counts.project_comments = data.length;
+      console.log(`Inserted ${data.length} project_comments`);
     }
 
-    if (has("task_logs")) {
-      const data = loadJSON<any>("task_logs");
+    if (has("project_logs")) {
+      const data = loadJSON<any>("project_logs");
       for (const l of data) {
         await client.query(
-          `INSERT INTO task_logs (id, task_id, employee_id, action, description, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-          [l.id, l.taskId, l.employeeId, l.action, l.description, l.createdAt]
+          `INSERT INTO project_logs (id, project_id, employee_id, action, description, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
+          [l.id, l.projectId, l.employeeId, l.action, l.description, l.createdAt]
         );
       }
-      counts.task_logs = data.length;
-      console.log(`Inserted ${data.length} task_logs`);
+      counts.project_logs = data.length;
+      console.log(`Inserted ${data.length} project_logs`);
     }
 
     await client.query("COMMIT");

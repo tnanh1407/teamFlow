@@ -3,6 +3,7 @@ import projectService from "./project.service.js";
 import userService from "../../user/user.service.js";
 import { AppError } from "../../utils/errors/app-error.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
+import { EAccountRole } from "@/enums/account-role.enum.js";
 
 class ProjectController {
   async getAll(req: Request, res: Response) {
@@ -19,9 +20,16 @@ class ProjectController {
     res.json({ data: project });
   }
 
-  async getByStatus(req: Request, res: Response) {
+  async getByStatus(req: AuthRequest, res: Response) {
+    const userRole = req.user!.role; // check role
     const status = req.params.status as string;
-    const projects = await projectService.findByStatus(status);
+    if (userRole === EAccountRole.ADMIN) {
+      const projects = await projectService.findByStatus(status);
+      console.log(`DEBUG ROLE : ${userRole} \n data : ${projects}`)
+      return res.json({ data: projects })
+    }
+    const projects = await projectService.findByStatusForUser(status, userRole);
+    console.log(`DEBUG ROLE : ${userRole} \n data : ${projects}`)
     res.json({ data: projects });
   }
 

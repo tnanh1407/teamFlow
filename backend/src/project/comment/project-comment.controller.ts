@@ -15,9 +15,9 @@ class ProjectCommentController {
     res.json({ data: comment });
   }
 
-  async getByTask(req: Request, res: Response) {
-    const taskId = req.params.taskId as string;
-    const comments = await projectCommentService.findByTask(taskId);
+  async getByProject(req: Request, res: Response) {
+    const projectId = req.params.projectId as string;
+    const comments = await projectCommentService.findByProject(projectId);
     res.json({ data: comments });
   }
 

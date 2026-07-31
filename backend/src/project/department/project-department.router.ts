@@ -11,7 +11,7 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 const router = Router();
 
 router.get("/", authenticate, asyncHandler(projectDepartmentController.getAll));
-router.get("/task/:taskId", authenticate, asyncHandler(projectDepartmentController.getByTask));
+router.get("/project/:projectId", authenticate, asyncHandler(projectDepartmentController.getByProject));
 router.get("/department/:departmentId", authenticate, asyncHandler(projectDepartmentController.getByDepartment));
 router.post(
   "/",
@@ -21,7 +21,7 @@ router.post(
   asyncHandler(projectDepartmentController.create)
 );
 router.delete(
-  "/:taskId/:departmentId",
+  "/:projectId/:departmentId",
   authenticate,
   authorize(EAccountRole.ADMIN, EAccountRole.USER),
   asyncHandler(projectDepartmentController.delete)

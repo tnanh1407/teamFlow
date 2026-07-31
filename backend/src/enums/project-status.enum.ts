@@ -1,4 +1,4 @@
-export enum ETaskStatus {
+export enum EProjectStatus {
   TODO = "todo",
   IN_PROGRESS = "in_progress",
   REVIEW = "review",

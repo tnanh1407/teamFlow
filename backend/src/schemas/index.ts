@@ -45,27 +45,27 @@ export const UserSchema = {
   updated_at`,
 } as const;
 
-export const TaskSchema = {
-  table: "tasks",
-  columns: `id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, completed_by, estimated_hours, actual_hours, completed_at, created_at, updated_at`,
+export const ProjectSchema = {
+  table: "projects",
+  columns: `id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, completed_at, created_at, updated_at`,
 } as const;
 
-export const TaskCommentSchema = {
-  table: "task_comments",
-  columns: `id, task_id, employee_id, content, attachments, created_at, updated_at`,
+export const ProjectCommentSchema = {
+  table: "project_comments",
+  columns: `id, project_id, employee_id, content, attachments, created_at, updated_at`,
 } as const;
 
-export const TaskDepartmentSchema = {
-  table: "task_departments",
-  columns: `task_id, department_id, assigned_at`,
+export const ProjectDepartmentSchema = {
+  table: "project_departments",
+  columns: `project_id, department_id, assigned_at`,
 } as const;
 
-export const TaskEmployeeSchema = {
-  table: "task_employees",
-  columns: `id, task_id, employee_id, role, assigned_at`,
+export const ProjectEmployeeSchema = {
+  table: "project_employees",
+  columns: `id, project_id, employee_id, role, assigned_at`,
 } as const;
 
-export const TaskLogSchema = {
-  table: "task_logs",
-  columns: `id, task_id, employee_id, action, description, created_at`,
+export const ProjectLogSchema = {
+  table: "project_logs",
+  columns: `id, project_id, employee_id, action, description, created_at`,
 } as const;

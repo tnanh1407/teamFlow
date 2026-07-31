@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { ETaskAction } from "../../enums/project-action.enum.js";
+import { EProjectAction } from "../../enums/project-action.enum.js";
 
 export const createProjectLogSchema = z.object({
-  taskId: z.string().min(1, "Task ID is required"),
+  projectId: z.string().min(1, "Project ID is required"),
   employeeId: z.string().min(1, "Employee ID is required"),
-  action: z.enum(Object.values(ETaskAction) as [string, ...string[]]).optional(),
+  action: z.enum(Object.values(EProjectAction) as [string, ...string[]]).optional(),
   description: z.string().optional(),
 });

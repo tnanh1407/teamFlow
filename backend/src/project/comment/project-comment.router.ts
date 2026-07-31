@@ -12,7 +12,7 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 const router = Router();
 
 router.get("/", authenticate, asyncHandler(projectCommentController.getAll));
-router.get("/task/:taskId", authenticate, asyncHandler(projectCommentController.getByTask));
+router.get("/project/:projectId", authenticate, asyncHandler(projectCommentController.getByProject));
 router.get("/employee/:employeeId", authenticate, asyncHandler(projectCommentController.getByEmployee));
 router.get("/:id", authenticate, asyncHandler(projectCommentController.getById));
 router.post(

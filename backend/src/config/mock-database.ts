@@ -20,8 +20,8 @@ class MockPool {
   private loadAll() {
     const files = [
       "users", "departments", "positions",
-      "tasks", "task_logs", "task_employees",
-      "task_departments", "task_comments",
+      "projects", "project_logs", "project_employees",
+      "project_departments", "project_comments",
     ];
     for (const name of files) {
       const filePath = path.join(DATA_DIR, `${name}.json`);
@@ -146,10 +146,10 @@ class MockPool {
     if (camelCols.includes("updatedAt") === false && this.tables.get(table)?.[0]?.updatedAt !== undefined) {
       newRow.updatedAt = now;
     }
-    if (table === "task_departments") {
+    if (table === "project_departments") {
       newRow.assignedAt = now;
     }
-    if (table === "task_employees") {
+    if (table === "project_employees") {
       newRow.assignedAt = now;
     }
 

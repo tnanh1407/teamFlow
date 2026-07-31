@@ -1,4 +1,4 @@
-export enum ETaskAction {
+export enum EProjectAction {
   CREATED = "created",
   UPDATED = "updated",
   ASSIGNED = "assigned",
