@@ -6,6 +6,7 @@ interface ProjectRow {
   id: string;
   title: string;
   description: string;
+  avatarURL: string;
   priority: string;
   status: string;
   progress: number;
@@ -22,6 +23,7 @@ interface ProjectRow {
 interface ProjectData {
   title: string;
   description?: string;
+  avatar?: string;
   priority?: string;
   status?: string;
   progress?: number;
@@ -162,6 +164,7 @@ class ProjectService {
     const payload = {
       title: normalizeRequiredText(data.title),
       description: normalizeOptionalText(data.description),
+      avatar: normalizeOptionalText(data.avatar),
       priority: (data.priority || "medium").toLowerCase(),
       status: (data.status || "todo").toLowerCase(),
       progress: data.progress ?? 0,
@@ -174,9 +177,9 @@ class ProjectService {
     };
 
     const { rows } = await pool.query<ProjectRow>(
-      `INSERT INTO projects (title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ${projectColumns}`,
+      `INSERT INTO projects (title, description, avatar_url, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING ${projectColumns}`,
       [
-        payload.title, payload.description, payload.priority, payload.status,
+        payload.title, payload.description, payload.avatar, payload.priority, payload.status,
         payload.progress, payload.startDate, payload.dueDate, payload.assignedBy,
         payload.createdBy, payload.estimatedHours, payload.actualHours,
       ]
@@ -190,6 +193,7 @@ class ProjectService {
 
     if (data.title !== undefined) payload.title = normalizeRequiredText(data.title);
     if (data.description !== undefined) payload.description = normalizeOptionalText(data.description) ?? undefined;
+    if (data.avatar !== undefined) payload.avatar = normalizeOptionalText(data.avatar) ?? undefined;
     if (data.priority !== undefined) payload.priority = data.priority.toLowerCase();
     if (data.status !== undefined) payload.status = data.status.toLowerCase();
     if (data.progress !== undefined) payload.progress = data.progress;
@@ -206,6 +210,7 @@ class ProjectService {
 
     if (payload.title !== undefined) { setClauses.push(`title = $${idx++}`); values.push(payload.title); }
     if (payload.description !== undefined) { setClauses.push(`description = $${idx++}`); values.push(payload.description); }
+    if (payload.avatar !== undefined) { setClauses.push(`avatar_url = $${idx++}`); values.push(payload.avatar); }
     if (payload.priority !== undefined) { setClauses.push(`priority = $${idx++}`); values.push(payload.priority); }
     if (payload.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(payload.status); }
     if (payload.progress !== undefined) { setClauses.push(`progress = $${idx++}`); values.push(payload.progress); }
@@ -225,6 +230,22 @@ class ProjectService {
     );
     if (!rows[0]) throw new AppError("Project not found", 404);
     return rows[0];
+  }
+
+  async updateAvatar(id: string, avatarURL: string): Promise<void> {
+    const { rows } = await pool.query<ProjectRow>(
+      `UPDATE projects SET avatar_url = $1 WHERE id = $2 RETURNING ${projectColumns}`,
+      [avatarURL, id]
+    );
+    if (!rows[0]) throw new AppError("Project not found", 404);
+  }
+
+  async removeAvatar(id: string): Promise<void> {
+    const { rows } = await pool.query<ProjectRow>(
+      `UPDATE projects SET avatar_url = NULL WHERE id = $1 RETURNING ${projectColumns}`,
+      [id]
+    );
+    if (!rows[0]) throw new AppError("Project not found", 404);
   }
 
   async delete(id: string): Promise<void> {

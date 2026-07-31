@@ -4,6 +4,7 @@ import userService from "../../user/user.service.js";
 import { AppError } from "../../utils/errors/app-error.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { EAccountRole } from "@/enums/account-role.enum.js";
+import { handleFileUpload, deleteFile } from "../../utils/upload/upload.js";
 
 class ProjectController {
   async getAll(req: Request, res: Response) {
@@ -79,6 +80,35 @@ class ProjectController {
     const id = req.params.id as string;
     const project = await projectService.update(id, req.body);
     res.json({ message: "Project updated successfully", data: project });
+  }
+
+  async updateAvatar(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const project = await projectService.findById(id);
+    if (!project) throw new AppError("Project not found", 404);
+
+    if (!req.file) throw new AppError("No file uploaded", 400);
+
+    if (project.avatarURL) {
+      await deleteFile(project.avatarURL);
+    }
+
+    const avatarURL = handleFileUpload(req.file, "project-avatars");
+    await projectService.updateAvatar(id, avatarURL!);
+    res.json({ message: "Project avatar updated successfully" });
+  }
+
+  async removeAvatar(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const project = await projectService.findById(id);
+    if (!project) throw new AppError("Project not found", 404);
+
+    if (project.avatarURL) {
+      await deleteFile(project.avatarURL);
+    }
+
+    await projectService.removeAvatar(id);
+    res.json({ message: "Project avatar removed successfully" });
   }
 
   async delete(req: Request, res: Response) {

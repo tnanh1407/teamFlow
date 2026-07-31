@@ -48,6 +48,13 @@ router.post(
   asyncHandler(userController.updateAvatar)
 );
 
+// xóa avatar về mặc định (null)
+router.delete(
+  "/me/avatar",
+  authenticate,
+  asyncHandler(userController.removeAvatar)
+);
+
 // cập nhật toàn bộ thông tin trừ passowrd
 router.patch(
   "/:id",

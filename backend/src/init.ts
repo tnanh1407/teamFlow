@@ -8,6 +8,8 @@ const __dirname = path.dirname(__filename);
 
 const dropAll = async () => {
   await pool.query(`
+    DROP TABLE IF EXISTS sessions CASCADE;
+    DROP TABLE IF EXISTS project_tasks CASCADE;
     DROP TABLE IF EXISTS project_logs CASCADE;
     DROP TABLE IF EXISTS project_comments CASCADE;
     DROP TABLE IF EXISTS project_departments CASCADE;
@@ -25,6 +27,7 @@ const dropAll = async () => {
     DROP TYPE IF EXISTS EProjectRole;
     DROP TYPE IF EXISTS ELevel;
     DROP TYPE IF EXISTS EProjectAction;
+    DROP TYPE IF EXISTS EProjectTaskStatus;
   `);
 };
 

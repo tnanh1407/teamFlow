@@ -2,16 +2,18 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import env from "../config/env.js"
+import sessionService from "../session/session.service.js";
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     role: EAccountRole;
     position: EAccountPosition;
+    jti: string;
   };
 }
 
-export const authenticate = (
+export const authenticate = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -27,7 +29,12 @@ export const authenticate = (
     const decoded = jwt.verify(
       token,
       env.JWT_SECRET
-    ) as { id: string; role: EAccountRole; position: EAccountPosition };
+    ) as { id: string; role: EAccountRole; position: EAccountPosition; jti: string };
+
+    const session = await sessionService.validateAndTouch(decoded.jti);
+    if (!session) {
+      return res.status(401).json({ message: "Session expired or revoked" });
+    }
 
     req.user = decoded;
     next();

@@ -5,6 +5,7 @@ import { AppError } from "../utils/errors/app-error.js";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { handleFileUpload, deleteFile } from "../utils/upload/upload.js";
+import sessionService, { SESSION_TTL_MS } from "../session/session.service.js";
 
 class UserController {
   async getAll(req: AuthRequest, res: Response) {
@@ -135,13 +136,18 @@ class UserController {
 
   async login(req: AuthRequest, res: Response) {
     const { username, password } = req.body;
-    const result = await userService.login(username, password);
+    const result = await userService.login(
+      username,
+      password,
+      req.headers["user-agent"],
+      req.ip
+    );
 
     res.cookie("token", result.token, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: SESSION_TTL_MS,
     });
 
     res.json({ data: result });
@@ -165,7 +171,25 @@ class UserController {
     })
   }
 
-  async logout(_req: AuthRequest, res: Response) {
+  async removeAvatar(req: AuthRequest, res: Response) {
+    const id = req.user!.id;
+    const user = await userService.findById(id);
+    if (!user) throw new AppError("User not found", 404);
+
+    if (user.avatarURL) {
+      await deleteFile(user.avatarURL);
+    }
+
+    await userService.removeAvatar(id);
+    res.json({
+      message: "Avatar removed successfully",
+    })
+  }
+
+  async logout(req: AuthRequest, res: Response) {
+    if (req.user?.jti) {
+      await sessionService.revokeSession(req.user.jti);
+    }
     res.clearCookie("token");
     res.json({ message: "Logged out successfully" });
   }

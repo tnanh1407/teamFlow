@@ -6,6 +6,7 @@ import { AppError } from "../utils/errors/app-error.js";
 import { UserSchema } from "../schemas/index.js";
 import { EGender } from "@/enums/gender.enum.js";
 import env from "../config/env.js";
+import sessionService, { generateJti, TOKEN_EXPIRES_IN } from "../session/session.service.js";
 
 // dữ liệu database
 interface UserRow {
@@ -64,7 +65,7 @@ const normalizeOptionalText = (value: string | undefined) => {
 };
 
 class UserService {
-  async login(username: string, password: string) {
+  async login(username: string, password: string, userAgent?: string, ip?: string) {
     const user = await this.findByUsername(username);
     if (!user) throw new AppError("Invalid credentials", 401);
     if (!user.status) throw new AppError("Account is disabled", 403);
@@ -74,10 +75,13 @@ class UserService {
 
     await this.updateLastLogin(user.id);
 
+    const jti = generateJti();
+    await sessionService.createSession(user.id, jti, userAgent, ip);
+
     const token = jwt.sign(
-      { id: user.id, role: user.role, position: user.position },
+      { id: user.id, role: user.role, position: user.position, jti },
       env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: TOKEN_EXPIRES_IN }
     );
 
     const { password: _, ...userWithoutPassword } = user;
@@ -248,11 +252,16 @@ class UserService {
      WHERE id = $2`,
       [hashedPassword, id]
     );
+
+    await sessionService.revokeAllByUserId(id);
   }
   async update(
     id: string,
     data: UpdateUserDataInput
   ) {
+    const previous = await this.findById(id);
+    if (!previous) throw new AppError("User not found", 404);
+
     const payload: UpdateUserDataInput = {};
 
     if (data.departmentId !== undefined) payload.departmentId = data.departmentId;
@@ -316,6 +325,15 @@ class UserService {
       values
     );
     if (!rows[0]) throw new AppError("User not found", 404);
+
+    const roleChanged = payload.role !== undefined && payload.role !== previous.role;
+    const positionChanged = payload.position !== undefined && payload.position !== previous.position;
+    const disabled = payload.status === false;
+
+    if (disabled || roleChanged || positionChanged) {
+      await sessionService.revokeAllByUserId(id);
+    }
+
     return rows[0];
   }
 
@@ -323,6 +341,13 @@ class UserService {
     await pool.query<UserRow>(
       `UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING ${userColumns}`,
       [avatarURL, id]
+    );
+  }
+
+  async removeAvatar(id: string): Promise<void> {
+    await pool.query<UserRow>(
+      `UPDATE users SET avatar_url = NULL WHERE id = $1 RETURNING ${userColumns}`,
+      [id]
     );
   }
 
@@ -339,6 +364,7 @@ class UserService {
       [id]
     );
     if (!rows[0]) throw new AppError("User not found", 404);
+    await sessionService.revokeAllByUserId(id);
   }
 }
 

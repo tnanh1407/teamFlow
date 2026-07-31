@@ -38,6 +38,19 @@ const attachmentStorage = multer.diskStorage({
   },
 });
 
+const projectAvatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const uploadPath = path.join(__dirname, "../../uploads/project-avatars");
+    ensureDir(uploadPath);
+    cb(null, uploadPath);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `project-${uniqueSuffix}${ext}`);
+  },
+});
+
 const imageFilter = (
   _req: any,
   file: Express.Multer.File,
@@ -89,4 +102,10 @@ export const uploadAttachment = multer({
   storage: attachmentStorage,
   fileFilter: attachmentFilter,
   limits: { fileSize: 50 * 1024 * 1024 },
+});
+
+export const uploadProjectAvatar = multer({
+  storage: projectAvatarStorage,
+  fileFilter: imageFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
 });

@@ -14,6 +14,7 @@ import projectCommentRouter from "./project/comment/project-comment.router.js";
 import projectDepartmentRouter from "./project/department/project-department.router.js";
 import projectLogRouter from "./project/log/project-log.router.js";
 import projectTaskRouter from "./project/task/project-task.router.js";
+import sessionRouter from "./session/session.router.js";
 import { apiReference } from "@scalar/express-api-reference";
 import { apiSpec } from "./docs-api/index.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -46,6 +47,7 @@ app.use("/api/project-comments", projectCommentRouter);
 app.use("/api/project-departments", projectDepartmentRouter);
 app.use("/api/project-logs", projectLogRouter);
 app.use("/api/projects-task", projectTaskRouter);
+app.use("/api/sessions", sessionRouter);
 
 app.use("/api-docs", apiReference({
   spec: { content: apiSpec },

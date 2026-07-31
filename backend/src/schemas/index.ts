@@ -47,7 +47,7 @@ export const UserSchema = {
 
 export const ProjectSchema = {
   table: "projects",
-  columns: `id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, completed_at, created_at, updated_at`,
+  columns: `id, title, description, avatar_url, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, completed_at, created_at, updated_at`,
 } as const;
 
 export const ProjectCommentSchema = {

@@ -3,6 +3,7 @@ import projectController from "./project.controller.js";
 import { authenticate, authorize, authorizeManager } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { asyncHandler } from "../../middlewares/async.middleware.js";
+import { uploadProjectAvatar } from "../../middlewares/upload.middleware.js";
 import {
   createProjectSchema,
   updateProjectSchema,
@@ -48,6 +49,23 @@ router.patch(
   authorizeManager,
   validate(updateProjectSchema),
   asyncHandler(projectController.update)
+);
+
+// cập nhật ảnh đại diện dự án
+router.post(
+  "/:id/avatar",
+  authenticate,
+  authorizeManager,
+  uploadProjectAvatar.single("avatar"),
+  asyncHandler(projectController.updateAvatar)
+);
+
+// xóa ảnh đại diện dự án về mặc định (null)
+router.delete(
+  "/:id/avatar",
+  authenticate,
+  authorizeManager,
+  asyncHandler(projectController.removeAvatar)
 );
 
 
