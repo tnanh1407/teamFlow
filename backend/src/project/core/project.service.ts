@@ -132,13 +132,34 @@ class ProjectService {
   }
 
   async create(data: CreateProjectDataInput) {
+    if (!data.createdBy) throw new AppError("CreatedBy is required", 400);
+
+    const toNumberOrNull = (v: unknown): number | null => {
+      if (v === undefined || v === null || v === "") return null;
+      const n = Number(v);
+      return Number.isNaN(n) ? null : n;
+    };
+
+    const payload = {
+      title: data.title.trim(),
+      description: data.description?.trim() || null,
+      priority: (data.priority || "medium").toLowerCase(),
+      status: (data.status || "todo").toLowerCase(),
+      progress: data.progress ?? 0,
+      startDate: data.startDate?.trim() || null,
+      dueDate: data.dueDate?.trim() || null,
+      assignedBy: data.assignedBy?.trim() || null,
+      createdBy: data.createdBy,
+      estimatedHours: toNumberOrNull(data.estimatedHours),
+      actualHours: toNumberOrNull(data.actualHours),
+    };
+
     const { rows } = await pool.query<ProjectRow>(
       `INSERT INTO projects (title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ${projectColumns}`,
       [
-        data.title, data.description || null, data.priority || "medium",
-        data.status || "todo", data.progress ?? 0, data.startDate || null,
-        data.dueDate || null, data.assignedBy || null, data.createdBy,
-        data.estimatedHours || null, data.actualHours || null,
+        payload.title, payload.description, payload.priority, payload.status,
+        payload.progress, payload.startDate, payload.dueDate, payload.assignedBy,
+        payload.createdBy, payload.estimatedHours, payload.actualHours,
       ]
     );
     return rows[0];

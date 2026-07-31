@@ -69,11 +69,14 @@ const attachmentFilter = (
     "application/zip",
     "application/x-rar-compressed",
   ];
-  if (allowed.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only images, documents, PDFs, and archives are allowed"));
-  }
+  const isAllowed =
+    allowed.includes(file.mimetype) ||
+    file.mimetype.startsWith("text/") ||                    // txt, csv, json, md...
+    file.mimetype.startsWith("application/vnd.ms-") ||       // .doc, .xls, .ppt (msword, ms-excel, ms-powerpoint)
+    file.mimetype.includes("officedocument") ||              // .docx, .xlsx, .pptx
+    file.mimetype === "application/octet-stream";
+  if (isAllowed) cb(null, true);
+  else cb(new Error("Only images, documents, PDFs, and archives are allowed"));
 };
 
 export const uploadAvatar = multer({

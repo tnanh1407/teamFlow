@@ -58,8 +58,9 @@ class ProjectController {
     res.json({ data: projects });
   }
 
-  async create(req: Request, res: Response) {
-    const project = await projectService.create(req.body);
+  async create(req: AuthRequest, res: Response) {
+    const payload = { ...req.body, createdBy: req.user!.id };
+    const project = await projectService.create(payload);
     res.status(201).json({ data: project });
   }
 

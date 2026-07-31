@@ -3,6 +3,7 @@ import projectCommentController from "./project-comment.controller.js";
 import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { asyncHandler } from "../../middlewares/async.middleware.js";
+import { uploadAttachment } from "../../middlewares/upload.middleware.js";
 import {
   createProjectCommentSchema,
   updateProjectCommentSchema,
@@ -16,23 +17,26 @@ router.get("/project/:projectId", authenticate, asyncHandler(projectCommentContr
 router.get("/employee/:employeeId", authenticate, asyncHandler(projectCommentController.getByEmployee));
 router.get("/:id", authenticate, asyncHandler(projectCommentController.getById));
 router.post(
+  "/upload",
+  authenticate,
+  uploadAttachment.array("files", 10),
+  asyncHandler(projectCommentController.uploadFiles)
+);
+router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(createProjectCommentSchema),
   asyncHandler(projectCommentController.create)
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   validate(updateProjectCommentSchema),
   asyncHandler(projectCommentController.update)
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(EAccountRole.ADMIN, EAccountRole.USER),
   asyncHandler(projectCommentController.delete)
 );
 

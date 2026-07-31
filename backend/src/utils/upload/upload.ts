@@ -17,7 +17,8 @@ export const handleFileUpload = (
 
 export const deleteFile = async (fileUrl: string | null | undefined): Promise<void> => {
   if (!fileUrl) return;
-  const absolutePath = path.join(uploadsRoot, fileUrl.replace("/ uploads/", ""));
+  const cleanPath = fileUrl.replace(/^\/?uploads\//, "");
+  const absolutePath = path.join(uploadsRoot, cleanPath);
   try {
     await fs.unlink(absolutePath);
   } catch {

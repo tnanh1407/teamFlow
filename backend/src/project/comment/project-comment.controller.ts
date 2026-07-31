@@ -27,6 +27,13 @@ class ProjectCommentController {
     res.json({ data: comments });
   }
 
+  async uploadFiles(req: Request, res: Response) {
+    const files = (req.files as Express.Multer.File[]) || [];
+    if (files.length === 0) throw new AppError("No files uploaded", 400);
+    const data = await projectCommentService.uploadFiles(files);
+    res.status(201).json({ data });
+  }
+
   async create(req: Request, res: Response) {
     const comment = await projectCommentService.create(req.body);
     res.status(201).json({ data: comment });

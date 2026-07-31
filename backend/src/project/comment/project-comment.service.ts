@@ -1,3 +1,4 @@
+import { handleFileUpload } from "@/utils/upload/upload.js";
 import pool from "../../config/database.js";
 import { ProjectCommentSchema } from "../../schemas/index.js";
 
@@ -10,6 +11,16 @@ interface ProjectCommentRow {
   createdAt: Date;
   updatedAt: Date;
 }
+
+interface ProjectCommentData {
+  projectId: string;
+  employeeId: string;
+  content?: string;
+  attachments?: string;
+}
+
+export type CreateProjectCommentDataInput = ProjectCommentData
+export type UpdateProjectCommentDataInput = Partial<ProjectCommentData>
 
 const projectCommentColumns = ProjectCommentSchema.columns;
 
@@ -45,12 +56,16 @@ class ProjectCommentService {
     return rows;
   }
 
-  async create(data: {
-    projectId: string;
-    employeeId: string;
-    content?: string;
-    attachments?: string;
-  }) {
+  async uploadFiles(files: Express.Multer.File[]) {
+    return files.map((f) => ({
+      originalName: f.originalname,
+      url: handleFileUpload(f, "attachments")!,
+      size: f.size,
+      mimetype: f.mimetype,
+    }));
+  }
+
+  async create(data: CreateProjectCommentDataInput) {
     const { rows } = await pool.query<ProjectCommentRow>(
       `INSERT INTO project_comments (project_id, employee_id, content, attachments) VALUES ($1, $2, $3, $4) RETURNING ${projectCommentColumns}`,
       [data.projectId, data.employeeId, data.content || null, data.attachments || null]
@@ -64,12 +79,7 @@ class ProjectCommentService {
     return rows[0];
   }
 
-  async update(id: string, data: Partial<{
-    projectId: string;
-    employeeId: string;
-    content: string;
-    attachments: string;
-  }>) {
+  async update(id: string, data : UpdateProjectCommentDataInput) {
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
