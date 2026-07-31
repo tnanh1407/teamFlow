@@ -7,4 +7,6 @@ export const createProjectEmployeeSchema = z.object({
   role: z.enum(Object.values(EProjectRole) as [string, ...string[]]).default(EProjectRole.MEMBER),
 });
 
-export const updateProjectEmployeeSchema = createProjectEmployeeSchema.partial();
+export const updateProjectEmployeeSchema = z.object({
+  role: z.enum(Object.values(EProjectRole) as [string, ...string[]]),
+});

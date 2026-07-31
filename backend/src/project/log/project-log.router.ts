@@ -10,14 +10,14 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
-router.get("/", authenticate, asyncHandler(projectLogController.getAll));
-router.get("/project/:projectId", authenticate, asyncHandler(projectLogController.getByProject));
-router.get("/employee/:employeeId", authenticate, asyncHandler(projectLogController.getByEmployee));
-router.get("/:id", authenticate, asyncHandler(projectLogController.getById));
+
+router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(projectLogController.getAll));
+router.get("/project/:projectId/", authenticate,authorize(EAccountRole.ADMIN), asyncHandler(projectLogController.getByProject));
+router.get("/employee/:employeeId", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(projectLogController.getByEmployee));
+router.get("/:id", authenticate,authorize(EAccountRole.ADMIN), asyncHandler(projectLogController.getById));
 router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN),
   validate(createProjectLogSchema),
   asyncHandler(projectLogController.create)
 );

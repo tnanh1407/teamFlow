@@ -3,9 +3,11 @@ import projectLogService from "./project-log.service.js";
 import { AppError } from "../../utils/errors/app-error.js";
 
 class ProjectLogController {
-  async getAll(_req: Request, res: Response) {
-    const logs = await projectLogService.findAll();
-    res.json({ data: logs });
+  async getAll(req: Request, res: Response) {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const result = await projectLogService.findAll(page, limit);
+    res.json(result);
   }
 
   async getById(req: Request, res: Response) {

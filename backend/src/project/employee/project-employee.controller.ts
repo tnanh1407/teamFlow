@@ -15,12 +15,6 @@ class ProjectEmployeeController {
     res.json({ data: assignment });
   }
 
-  async getByProject(req: Request, res: Response) {
-    const projectId = req.params.projectId as string;
-    const assignments = await projectEmployeeService.findByProject(projectId);
-    res.json({ data: assignments });
-  }
-
   async getByEmployee(req: Request, res: Response) {
     const employeeId = req.params.employeeId as string;
     const assignments = await projectEmployeeService.findByEmployee(employeeId);
@@ -34,7 +28,7 @@ class ProjectEmployeeController {
 
   async update(req: Request, res: Response) {
     const id = req.params.id as string;
-    const assignment = await projectEmployeeService.update(id, req.body);
+    const assignment = await projectEmployeeService.update(id, req.body.role);
     if (!assignment) throw new AppError("Assignment not found", 404);
     res.json({ data: assignment });
   }

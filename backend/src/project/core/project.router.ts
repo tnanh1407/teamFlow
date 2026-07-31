@@ -29,6 +29,9 @@ router.get("/created-by/:employeeId", authenticate, asyncHandler(projectControll
 // lấy chi tiết 1 project
 router.get("/:id", authenticate, asyncHandler(projectController.getById));
 
+// lấy danh sách nhân viên được gán cho project
+router.get("/:id/employees", authenticate, asyncHandler(projectController.getEmployeesByProject));
+
 // Tạo dự án 
 router.post(
   "/",

@@ -36,11 +36,34 @@ class ProjectDepartmentService {
   }
 
   async delete(projectId: string, departmentId: string) {
-    const { rows } = await pool.query<ProjectDepartmentRow>(
-      `DELETE FROM project_departments WHERE project_id = $1 AND department_id = $2 RETURNING ${projectDepartmentColumns}`,
-      [projectId, departmentId]
-    );
-    return rows[0] || null;
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const { rows } = await client.query<ProjectDepartmentRow>(
+        `DELETE FROM project_departments WHERE project_id = $1 AND department_id = $2 RETURNING ${projectDepartmentColumns}`,
+        [projectId, departmentId]
+      );
+      if (!rows[0]) {
+        await client.query("ROLLBACK");
+        return null;
+      }
+
+      await client.query(
+        `DELETE FROM project_employees
+         WHERE project_id = $1
+           AND employee_id IN (SELECT id FROM users WHERE department_id = $2)`,
+        [projectId, departmentId]
+      );
+
+      await client.query("COMMIT");
+      return rows[0];
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 }
 

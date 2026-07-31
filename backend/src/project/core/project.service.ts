@@ -131,6 +131,19 @@ class ProjectService {
     return rows;
   }
 
+  async findEmployeesByProject(projectId: string) {
+    const { rows } = await pool.query(
+      `SELECT u.id, u.employee_code, u.name, u.email, u.avatar_url,
+              u.position_id, u.department_id, pe.role AS "projectRole", pe.assigned_at
+       FROM project_employees pe
+       JOIN users u ON u.id = pe.employee_id
+       WHERE pe.project_id = $1
+       ORDER BY pe.assigned_at DESC`,
+      [projectId]
+    );
+    return rows;
+  }
+
   async create(data: CreateProjectDataInput) {
     if (!data.createdBy) throw new AppError("CreatedBy is required", 400);
 

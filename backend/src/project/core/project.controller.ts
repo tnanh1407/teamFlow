@@ -23,6 +23,17 @@ class ProjectController {
     res.json({ data: project });
   }
 
+  async getEmployeesByProject(req: Request, res: Response) {
+    const id = req.params.id as string;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+      throw new AppError("Invalid project id", 400);
+    }
+    const project = await projectService.findById(id);
+    if (!project) throw new AppError("Project not found", 404);
+    const employees = await projectService.findEmployeesByProject(id);
+    res.json({ data: employees });
+  }
+
   async getByStatus(req: AuthRequest, res: Response) {
     const user = req.user!;
     const status = req.params.status as string;

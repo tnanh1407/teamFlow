@@ -13,11 +13,15 @@ interface ProjectLogRow {
 const projectLogColumns = ProjectLogSchema.columns;
 
 class ProjectLogService {
-  async findAll() {
+  async findAll(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM project_logs`);
+    const total = parseInt(countResult.rows[0].count, 10);
     const { rows } = await pool.query<ProjectLogRow>(
-      `SELECT ${projectLogColumns} FROM project_logs ORDER BY created_at DESC`
+      `SELECT ${projectLogColumns} FROM project_logs ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
-    return rows;
+    return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findById(id: string) {
