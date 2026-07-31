@@ -1,4 +1,4 @@
-import { handleFileUpload } from "@/utils/upload/upload.js";
+import { uploadToCloudinary } from "@/utils/upload/cloudinary.js";
 import pool from "../../config/database.js";
 import { ProjectCommentSchema } from "../../schemas/index.js";
 import { AppError } from "../../utils/errors/app-error.js";
@@ -63,12 +63,16 @@ class ProjectCommentService {
   }
 
   async uploadFiles(files: Express.Multer.File[]) {
-    return files.map((f) => ({
-      originalName: f.originalname,
-      url: handleFileUpload(f, "attachments")!,
-      size: f.size,
-      mimetype: f.mimetype,
-    }));
+    const results = [];
+    for (const f of files) {
+      results.push({
+        originalName: f.originalname,
+        url: await uploadToCloudinary(f, "attachments"),
+        size: f.size,
+        mimetype: f.mimetype,
+      });
+    }
+    return results;
   }
 
   async create(data: CreateProjectCommentDataInput) {

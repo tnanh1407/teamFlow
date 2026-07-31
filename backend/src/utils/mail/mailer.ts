@@ -29,7 +29,10 @@ export const sendResetCodeEmail = async (
   }
 
   await transporter.sendMail({
-    from: env.MAIL_FROM || env.MAIL_USER,
+    from: {
+      name: "Hệ Thống Quản Lý Phòng Ban & Dự Án",
+      address: env.MAIL_FROM || env.MAIL_USER!,
+    },
     to,
     subject: "Mã khôi phục mật khẩu Hệ Thống Quản Lý Phòng Ban & Dự Án",
     html: `

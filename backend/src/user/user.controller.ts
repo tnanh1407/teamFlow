@@ -4,7 +4,7 @@ import env from "../config/env.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
-import { handleFileUpload, deleteFile } from "../utils/upload/upload.js";
+import { uploadToCloudinary, deleteCloudinaryFile } from "../utils/upload/cloudinary.js";
 import sessionService, { SESSION_TTL_MS } from "../session/session.service.js";
 import { sendResetCodeEmail } from "../utils/mail/mailer.js";
 
@@ -61,7 +61,7 @@ class UserController {
     const body = { ...req.body };
 
     if (req.file) {
-      body.avatarURL = handleFileUpload(req.file, "avatars");
+      body.avatarURL = await uploadToCloudinary(req.file, "avatars");
     }
 
     const user = await userService.create({ ...body });
@@ -92,9 +92,9 @@ class UserController {
     const data = { ...req.body };
     if (req.file) {
       if (target.avatarURL) {
-        await deleteFile(target.avatarURL);
+        await deleteCloudinaryFile(target.avatarURL);
       }
-      data.avatarURL = handleFileUpload(req.file, "avatars");
+      data.avatarURL = await uploadToCloudinary(req.file, "avatars");
     }
 
     const user = await userService.update(id, data);
@@ -180,10 +180,10 @@ class UserController {
     if (!req.file) throw new AppError("No file uploaded", 400);
 
     if (user.avatarURL) {
-      await deleteFile(user.avatarURL);
+      await deleteCloudinaryFile(user.avatarURL);
     }
 
-    const avatarURL = handleFileUpload(req.file, "avatars");
+    const avatarURL = await uploadToCloudinary(req.file, "avatars");
     await userService.updateAvatar(id, avatarURL!);
     res.json({
       message: "Avatar updated successfully",
@@ -196,7 +196,7 @@ class UserController {
     if (!user) throw new AppError("User not found", 404);
 
     if (user.avatarURL) {
-      await deleteFile(user.avatarURL);
+      await deleteCloudinaryFile(user.avatarURL);
     }
 
     await userService.removeAvatar(id);

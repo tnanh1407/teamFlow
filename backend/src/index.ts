@@ -1,8 +1,6 @@
 import express from "express";
 import cors from "cors";
-import path from "path";
 import cookieParser from "cookie-parser";
-import { fileURLToPath } from "url";
 import pool from "./config/database.js";
 import env from "./config/env.js";
 import userRouter from "./user/user.router.js";
@@ -19,9 +17,6 @@ import { apiReference } from "@scalar/express-api-reference";
 import { apiSpec } from "./docs-api/index.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 const PORT = env.PORT;
 
@@ -31,7 +26,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/", (_req, res) => {
   res.json({ message: "Hệ thống Quản Lý Phòng Ban & Dự Án API is running" });

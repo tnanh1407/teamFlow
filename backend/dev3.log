@@ -1,0 +1,76 @@
+
+> backend@1.0.0 dev
+> tsx watch src/index.ts
+
+Database connected
+Server running on port 5000
+Unhandled error: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\types\json.js:91:21)
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\read.js:162:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:226:14)
+    at invokeCallback (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:238:16)
+    at done (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:508:20)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  expose: true,
+  statusCode: 400,
+  status: 400,
+  body: '{email:nguyenvananh@qlpbda.com,employeeCode:EMP001}',
+  type: 'entity.parse.failed'
+}
+Unhandled error: error: insert or update on table "users" violates foreign key constraint "fk_users_department"
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async UserService.create (C:\Users\tnanh\Desktop\TeamFlow\backend\src\user\user.service.ts:235:22)
+    at async create (C:\Users\tnanh\Desktop\TeamFlow\backend\src\user\user.controller.ts:67:18) {
+  length: 291,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (department_id)=(20000000-0000-4000-a000-000000000001) is not present in table "departments".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'users',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'fk_users_department',
+  file: 'ri_triggers.c',
+  line: '2608',
+  routine: 'ri_ReportViolation'
+}
+5:08:59 PM [tsx] change in ./src\utils\mail\mailer.ts Restarting...
+Database connected
+Server running on port 5000
+5:13:38 PM [tsx] change in ./src\utils\upload\cloudinary.ts Rerunning...
+Database connected
+Server running on port 5000
+5:13:48 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:13:55 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:14:02 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:14:08 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:14:15 PM [tsx] change in ./src\project\core\project.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:14:26 PM [tsx] change in ./src\project\comment\project-comment.service.ts Restarting...
+Database connected
+Server running on port 5000
+5:14:34 PM [tsx] change in ./src\middlewares\upload.middleware.ts Restarting...
+Database connected
+Server running on port 5000
+5:17:20 PM [tsx] change in ./src\utils\upload\cloudinary.ts Restarting...
+Database connected
+Server running on port 5000

@@ -4,7 +4,7 @@ import userService from "../../user/user.service.js";
 import { AppError } from "../../utils/errors/app-error.js";
 import { AuthRequest } from "../../middlewares/auth.middleware.js";
 import { EAccountRole } from "@/enums/account-role.enum.js";
-import { handleFileUpload, deleteFile } from "../../utils/upload/upload.js";
+import { uploadToCloudinary, deleteCloudinaryFile } from "../../utils/upload/cloudinary.js";
 
 class ProjectController {
   async getAll(req: Request, res: Response) {
@@ -90,10 +90,10 @@ class ProjectController {
     if (!req.file) throw new AppError("No file uploaded", 400);
 
     if (project.avatarURL) {
-      await deleteFile(project.avatarURL);
+      await deleteCloudinaryFile(project.avatarURL);
     }
 
-    const avatarURL = handleFileUpload(req.file, "project-avatars");
+    const avatarURL = await uploadToCloudinary(req.file, "project-avatars");
     await projectService.updateAvatar(id, avatarURL!);
     res.json({ message: "Project avatar updated successfully" });
   }
@@ -104,7 +104,7 @@ class ProjectController {
     if (!project) throw new AppError("Project not found", 404);
 
     if (project.avatarURL) {
-      await deleteFile(project.avatarURL);
+      await deleteCloudinaryFile(project.avatarURL);
     }
 
     await projectService.removeAvatar(id);
