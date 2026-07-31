@@ -21,6 +21,12 @@ class ProjectEmployeeController {
     res.json({ data: assignments });
   }
 
+  async getByProject(req: Request, res: Response) {
+    const projectId = req.params.projectId as string;
+    const assignments = await projectEmployeeService.findByProject(projectId);
+    res.json({ data: assignments });
+  }
+
   async create(req: Request, res: Response) {
     const assignment = await projectEmployeeService.create(req.body);
     res.status(201).json({ data: assignment });

@@ -2,6 +2,13 @@ import { userSchemas, userPaths } from "./user.docs.js";
 import { departmentSchemas, departmentPaths } from "./department.docs.js";
 import { positionSchemas, positionPaths } from "./position.docs.js";
 import { sessionSchemas, sessionPaths } from "./session.docs.js";
+import { projectSchemas, projectPaths } from "./project.docs.js";
+import { projectTaskSchemas, projectTaskPaths } from "./project-task.docs.js";
+import { projectEmployeeSchemas, projectEmployeePaths } from "./project-employee.docs.js";
+import { projectDepartmentSchemas, projectDepartmentPaths } from "./project-department.docs.js";
+import { projectCommentSchemas, projectCommentPaths } from "./project-comment.docs.js";
+import { projectLogSchemas, projectLogPaths } from "./project-log.docs.js";
+import { searchSchemas, searchPaths } from "./search.docs.js";
 
 export const apiSpec = {
   info: {
@@ -52,6 +59,9 @@ API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục v
 - Danh sách log (\`GET /api/project-logs\`), theo dự án (\`GET /api/project-logs/project/{projectId}\`), theo nhân viên (\`GET /api/project-logs/employee/{employeeId}\`), chi tiết (\`GET /api/project-logs/{id}\`).
 - Ghi log tự động khi có thay đổi dự án/task; chỉ Admin mới xem được danh sách log.
 
+#### 10. Tìm Kiếm Nhanh Toàn Hệ Thống (Search - Ctrl+K)
+- Tìm kiếm gộp nhân viên, dự án, task, phòng ban, chức vụ trong một lần gọi (\`GET /api/search?q=...\`) — mỗi nhóm tối đa 5 kết quả; nhân viên thường chỉ nhận kết quả trong phạm vi của mình.
+
 ---
 
 ### 🔒 Quy Trình Xác Thực & Bảo Mật (Authentication Security):
@@ -93,6 +103,13 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
       ...departmentSchemas,
       ...positionSchemas,
       ...sessionSchemas,
+      ...projectSchemas,
+      ...projectTaskSchemas,
+      ...projectEmployeeSchemas,
+      ...projectDepartmentSchemas,
+      ...projectCommentSchemas,
+      ...projectLogSchemas,
+      ...searchSchemas,
     },
   },
   paths: {
@@ -100,5 +117,12 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
     ...departmentPaths,
     ...positionPaths,
     ...sessionPaths,
+    ...projectPaths,
+    ...projectTaskPaths,
+    ...projectEmployeePaths,
+    ...projectDepartmentPaths,
+    ...projectCommentPaths,
+    ...projectLogPaths,
+    ...searchPaths,
   },
 };

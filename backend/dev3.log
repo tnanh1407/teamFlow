@@ -18,59 +18,18 @@ Unhandled error: SyntaxError: Expected property name or '}' in JSON at position 
   expose: true,
   statusCode: 400,
   status: 400,
-  body: '{email:nguyenvananh@qlpbda.com,employeeCode:EMP001}',
+  body: '{username:root,password:root123}',
   type: 'entity.parse.failed'
 }
-Unhandled error: error: insert or update on table "users" violates foreign key constraint "fk_users_department"
-    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
-    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at async UserService.create (C:\Users\tnanh\Desktop\TeamFlow\backend\src\user\user.service.ts:235:22)
-    at async create (C:\Users\tnanh\Desktop\TeamFlow\backend\src\user\user.controller.ts:67:18) {
-  length: 291,
-  severity: 'ERROR',
-  code: '23503',
-  detail: 'Key (department_id)=(20000000-0000-4000-a000-000000000001) is not present in table "departments".',
-  hint: undefined,
-  position: undefined,
-  internalPosition: undefined,
-  internalQuery: undefined,
-  where: undefined,
-  schema: 'public',
-  table: 'users',
-  column: undefined,
-  dataType: undefined,
-  constraint: 'fk_users_department',
-  file: 'ri_triggers.c',
-  line: '2608',
-  routine: 'ri_ReportViolation'
-}
-5:08:59 PM [tsx] change in ./src\utils\mail\mailer.ts Restarting...
+5:48:50 PM [tsx] change in ./src\project\employee\project-employee.service.ts Restarting...
 Database connected
 Server running on port 5000
-5:13:38 PM [tsx] change in ./src\utils\upload\cloudinary.ts Rerunning...
+5:48:56 PM [tsx] change in ./src\project\employee\project-employee.controller.ts Restarting...
 Database connected
 Server running on port 5000
-5:13:48 PM [tsx] change in ./src\user\user.controller.ts Restarting...
+5:49:02 PM [tsx] change in ./src\project\employee\project-employee.router.ts Restarting...
 Database connected
 Server running on port 5000
-5:13:55 PM [tsx] change in ./src\user\user.controller.ts Restarting...
-Database connected
-Server running on port 5000
-5:14:02 PM [tsx] change in ./src\user\user.controller.ts Restarting...
-Database connected
-Server running on port 5000
-5:14:08 PM [tsx] change in ./src\user\user.controller.ts Restarting...
-Database connected
-Server running on port 5000
-5:14:15 PM [tsx] change in ./src\project\core\project.controller.ts Restarting...
-Database connected
-Server running on port 5000
-5:14:26 PM [tsx] change in ./src\project\comment\project-comment.service.ts Restarting...
-Database connected
-Server running on port 5000
-5:14:34 PM [tsx] change in ./src\middlewares\upload.middleware.ts Restarting...
-Database connected
-Server running on port 5000
-5:17:20 PM [tsx] change in ./src\utils\upload\cloudinary.ts Restarting...
+5:51:38 PM [tsx] change in ./src\index.ts Restarting...
 Database connected
 Server running on port 5000

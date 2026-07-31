@@ -14,7 +14,8 @@ const router = Router();
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), authorizePosition(EAccountPosition.MANAGER), asyncHandler(projectEmployeeController.getAll));
 
 // Chưa dùng làm gì cả
-router.get("/employee/:employeeId", authenticate, asyncHandler(projectEmployeeController.getByEmployee));
+  router.get("/employee/:employeeId", authenticate, asyncHandler(projectEmployeeController.getByEmployee));
+  router.get("/project/:projectId", authenticate, asyncHandler(projectEmployeeController.getByProject));
 
 // lấy ra chi tiết 1 cái
 router.get("/:id", authenticate, asyncHandler(projectEmployeeController.getById));

@@ -462,3 +462,322 @@ Server running on port 5000
 5:17:20 PM [tsx] change in ./src\utils\upload\cloudinary.ts Rerunning...
 Database connected
 Server running on port 5000
+5:23:35 PM [tsx] change in ./src\docs-api\index.ts Restarting...
+Database connected
+Server running on port 5000
+5:23:43 PM [tsx] change in ./src\docs-api\index.ts Restarting...
+Database connected
+Server running on port 5000
+5:23:53 PM [tsx] change in ./src\docs-api\user.docs.ts Restarting...
+Database connected
+Server running on port 5000
+5:27:57 PM [tsx] change in ./src\project\core\project.service.ts Restarting...
+Database connected
+Server running on port 5000
+5:28:05 PM [tsx] change in ./src\project\core\project.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:28:13 PM [tsx] change in ./src\project\core\project.router.ts Restarting...
+Database connected
+Server running on port 5000
+5:28:22 PM [tsx] change in ./src\project\task\project-task.service.ts Restarting...
+Database connected
+Server running on port 5000
+5:28:29 PM [tsx] change in ./src\project\task\project-task.controller.ts Restarting...
+Database connected
+Server running on port 5000
+5:28:40 PM [tsx] change in ./src\docs-api\project.docs.ts Restarting...
+Database connected
+Server running on port 5000
+5:28:49 PM [tsx] change in ./src\docs-api\project-task.docs.ts Restarting...
+Database connected
+Server running on port 5000
+5:29:04 PM [tsx] change in ./src\project\core\project.service.ts Rerunning...
+Database connected
+Server running on port 5000
+Unhandled error: error: there is no parameter $1
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProjectService.findAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.service.ts:102:25)
+    at async getAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.controller.ts:15:20) {
+  length: 95,
+  severity: 'ERROR',
+  code: '42P02',
+  detail: undefined,
+  hint: undefined,
+  position: '251',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_expr.c',
+  line: '864',
+  routine: 'transformParamRef'
+}
+Unhandled error: error: there is no parameter $1
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProjectService.findAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.service.ts:102:25)
+    at async getAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.controller.ts:15:20) {
+  length: 95,
+  severity: 'ERROR',
+  code: '42P02',
+  detail: undefined,
+  hint: undefined,
+  position: '247',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_expr.c',
+  line: '864',
+  routine: 'transformParamRef'
+}
+Unhandled error: error: there is no parameter $1
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProjectService.findAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.service.ts:102:25)
+    at async getAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.controller.ts:15:20) {
+  length: 95,
+  severity: 'ERROR',
+  code: '42P02',
+  detail: undefined,
+  hint: undefined,
+  position: '249',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_expr.c',
+  line: '864',
+  routine: 'transformParamRef'
+}
+Unhandled error: error: there is no parameter $1
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProjectService.findAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.service.ts:102:25)
+    at async getAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.controller.ts:15:20) {
+  length: 95,
+  severity: 'ERROR',
+  code: '42P02',
+  detail: undefined,
+  hint: undefined,
+  position: '365',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_expr.c',
+  line: '864',
+  routine: 'transformParamRef'
+}
+Unhandled error: error: there is no parameter $1
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async ProjectService.findAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.service.ts:102:25)
+    at async getAll (C:\Users\tnanh\Desktop\TeamFlow\backend\src\project\core\project.controller.ts:15:20) {
+  length: 95,
+  severity: 'ERROR',
+  code: '42P02',
+  detail: undefined,
+  hint: undefined,
+  position: '251',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_expr.c',
+  line: '864',
+  routine: 'transformParamRef'
+}
+5:30:36 PM [tsx] change in ./src\project\core\project.service.ts Restarting...
+Database connected
+Server running on port 5000
+5:31:06 PM [tsx] change in ./src\index.ts Rerunning...
+Database connected
+Server running on port 5000
+5:31:14 PM [tsx] change in ./src\project\core\project.service.ts Restarting...
+Database connected
+Server running on port 5000
+5:35:16 PM [tsx] change in ./src\index.ts Rerunning...
+Database connected
+Server running on port 5000
+5:35:23 PM [tsx] change in ./src\index.ts Restarting...
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\tnanh\Desktop\TeamFlow\backend\src\utils\async-handler.js' imported from C:\Users\tnanh\Desktop\TeamFlow\backend\src\search\search.router.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:713:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:730:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveBaseSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:9102)
+    at resolveDirectorySync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:10315)
+    at resolveTsPathsSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:11547)
+    at resolve (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:13365) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/tnanh/Desktop/TeamFlow/backend/src/utils/async-handler.js'
+}
+
+Node.js v25.6.0
+5:35:39 PM [tsx] change in ./src\docs-api\index.ts Rerunning...
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\tnanh\Desktop\TeamFlow\backend\src\utils\async-handler.js' imported from C:\Users\tnanh\Desktop\TeamFlow\backend\src\search\search.router.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:713:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:730:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveBaseSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:9102)
+    at resolveDirectorySync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:10315)
+    at resolveTsPathsSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:11547)
+    at resolve (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:13365) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/tnanh/Desktop/TeamFlow/backend/src/utils/async-handler.js'
+}
+
+Node.js v25.6.0
+5:35:44 PM [tsx] change in ./src\docs-api\index.ts Rerunning...
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\tnanh\Desktop\TeamFlow\backend\src\utils\async-handler.js' imported from C:\Users\tnanh\Desktop\TeamFlow\backend\src\search\search.router.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:713:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:730:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveBaseSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:9102)
+    at resolveDirectorySync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:10315)
+    at resolveTsPathsSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:11547)
+    at resolve (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:13365) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/tnanh/Desktop/TeamFlow/backend/src/utils/async-handler.js'
+}
+
+Node.js v25.6.0
+5:35:49 PM [tsx] change in ./src\docs-api\index.ts Rerunning...
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\tnanh\Desktop\TeamFlow\backend\src\utils\async-handler.js' imported from C:\Users\tnanh\Desktop\TeamFlow\backend\src\search\search.router.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:713:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:730:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveBaseSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:9102)
+    at resolveDirectorySync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:10315)
+    at resolveTsPathsSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:11547)
+    at resolve (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:13365) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/tnanh/Desktop/TeamFlow/backend/src/utils/async-handler.js'
+}
+
+Node.js v25.6.0
+5:35:57 PM [tsx] change in ./src\docs-api\index.ts Rerunning...
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\tnanh\Desktop\TeamFlow\backend\src\utils\async-handler.js' imported from C:\Users\tnanh\Desktop\TeamFlow\backend\src\search\search.router.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:713:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:730:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveBaseSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:9102)
+    at resolveDirectorySync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:10315)
+    at resolveTsPathsSync (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:11547)
+    at resolve (file:///C:/Users/tnanh/Desktop/TeamFlow/backend/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:13365) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/tnanh/Desktop/TeamFlow/backend/src/utils/async-handler.js'
+}
+
+Node.js v25.6.0
+5:43:21 PM [tsx] change in ./src\index.ts Rerunning...
+Database connected
+Server running on port 5000
+Unhandled error: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\types\json.js:91:21)
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\read.js:162:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:226:14)
+    at invokeCallback (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:238:16)
+    at done (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:508:20)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  expose: true,
+  statusCode: 400,
+  status: 400,
+  body: '{username:root,password:root123}',
+  type: 'entity.parse.failed'
+}
+Unhandled error: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\types\json.js:91:21)
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\read.js:162:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:226:14)
+    at invokeCallback (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:238:16)
+    at done (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:508:20)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  expose: true,
+  statusCode: 400,
+  status: 400,
+  body: '{username:root,password:root123}',
+  type: 'entity.parse.failed'
+}
+Unhandled error: SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\types\json.js:91:21)
+    at C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\body-parser\lib\read.js:162:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:226:14)
+    at invokeCallback (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:238:16)
+    at done (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\Users\tnanh\Desktop\TeamFlow\backend\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:508:20)
+    at endReadableNT (node:internal/streams/readable:1729:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  expose: true,
+  statusCode: 400,
+  status: 400,
+  body: '{username:root,password:root123}',
+  type: 'entity.parse.failed'
+}

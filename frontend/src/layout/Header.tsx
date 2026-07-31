@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { ChevronRight, PanelLeft, PanelLeftClose, Search } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
-import useQuickSearch from "@/hooks/useQuickSearch"
 
 const routes = [
   {
@@ -53,9 +52,10 @@ const routes = [
 interface HeaderProps {
   collapsed: boolean
   onToggle: () => void
+  onQuickSearchClick: () => void
 }
 
-export default function Header({ collapsed, onToggle }: HeaderProps) {
+export default function Header({ collapsed, onToggle, onQuickSearchClick }: HeaderProps) {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -77,7 +77,6 @@ export default function Header({ collapsed, onToggle }: HeaderProps) {
     crumbs = [...crumbs, { label: "Chi tiết" }]
   }
 
-  const {handleQuickSearch} = useQuickSearch(console.log)
   return (
     <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur px-6 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -132,7 +131,7 @@ export default function Header({ collapsed, onToggle }: HeaderProps) {
       </div>
 
       <button className="flex items-center gap-2 h-10 w-72 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 text-sm text-zinc-500 hover:bg-white dark:hover:bg-zinc-700 transition"
-      onClick={handleQuickSearch}>
+      onClick={onQuickSearchClick}>
         <Search size={16} className="text-zinc-400" />
         <span className="flex-1 text-left">Tìm kiếm...</span>
         <span className="rounded-md border border-zinc-300 dark:border-zinc-600 px-1.5 py-0.5 text-sm text-zinc-400">Ctrl K</span>

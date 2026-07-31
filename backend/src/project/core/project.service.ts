@@ -54,13 +54,60 @@ const toNumberOrNull = (v: unknown): number | null => {
 };
 
 class ProjectService {
-  async findAll(page = 1, limit = 10) {
+  async findAll(
+    page = 1,
+    limit = 10,
+    filters: { q?: string; status?: string; priority?: string; mine?: boolean; userId?: string } = {}
+  ) {
     const offset = (page - 1) * limit;
-    const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM projects`);
+    const { q, status, priority, mine, userId } = filters;
+
+    const values: any[] = [];
+    const conditions: string[] = [];
+    let idx = 1;
+    let distinct = "";
+    let selectCols: string = projectColumns;
+    let fromClause = "FROM projects";
+    let orderBy = "created_at DESC";
+
+    if (mine && userId) {
+      distinct = "DISTINCT";
+      selectCols = projectColumns.split(",").map((c) => `t.${c.trim()}`).join(", ");
+      fromClause = `FROM projects t
+        LEFT JOIN project_employees te ON te.project_id = t.id
+        LEFT JOIN users e ON e.id = $${idx}
+        LEFT JOIN project_departments td ON td.project_id = t.id`;
+      orderBy = "t.created_at DESC";
+      conditions.push(`(te.employee_id = $${idx} OR t.created_by = $${idx} OR td.department_id = e.department_id)`);
+      values.push(userId);
+      idx++;
+    }
+
+    if (q) {
+      const titleCol = mine && userId ? "t.title" : "title";
+      const descCol = mine && userId ? "t.description" : "description";
+      conditions.push(`(${titleCol} ILIKE $${idx++} OR ${descCol} ILIKE $${idx++})`);
+      values.push(`%${q}%`, `%${q}%`);
+    }
+    if (status) {
+      conditions.push(`${mine && userId ? "t.status" : "status"} = $${idx++}`);
+      values.push(status);
+    }
+    if (priority) {
+      conditions.push(`${mine && userId ? "t.priority" : "priority"} = $${idx++}`);
+      values.push(priority);
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const countResult = await pool.query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM (SELECT ${distinct} ${selectCols} ${fromClause} ${where}) sub`,
+      values
+    );
     const total = parseInt(countResult.rows[0].count, 10);
+
     const { rows } = await pool.query<ProjectRow>(
-      `SELECT ${projectColumns} FROM projects ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      `SELECT ${distinct} ${selectCols} ${fromClause} ${where} ORDER BY ${orderBy} LIMIT $${idx++} OFFSET $${idx++}`,
+      [...values, limit, offset]
     );
     return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
   }

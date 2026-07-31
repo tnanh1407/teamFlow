@@ -12,8 +12,8 @@ import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
-// lấy all project 
-router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(projectController.getAll));
+// lấy all project (admin: tất cả + filter; user thường: chỉ project của mình)
+router.get("/", authenticate, asyncHandler(projectController.getAll));
 
 // lấy project của tôi 
 router.get("/me", authenticate, asyncHandler(projectController.getMyProjects));

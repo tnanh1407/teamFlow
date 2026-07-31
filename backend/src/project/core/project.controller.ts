@@ -7,10 +7,18 @@ import { EAccountRole } from "@/enums/account-role.enum.js";
 import { uploadToCloudinary, deleteCloudinaryFile } from "../../utils/upload/cloudinary.js";
 
 class ProjectController {
-  async getAll(req: Request, res: Response) {
+  async getAll(req: AuthRequest, res: Response) {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
-    const result = await projectService.findAll(page, limit);
+    const user = req.user!;
+    const isAdmin = user.role === EAccountRole.ADMIN;
+    const result = await projectService.findAll(page, limit, {
+      q: req.query.q as string | undefined,
+      status: req.query.status as string | undefined,
+      priority: req.query.priority as string | undefined,
+      mine: req.query.mine === "true" || !isAdmin,
+      userId: user.id,
+    });
     res.json(result);
   }
 

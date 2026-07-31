@@ -15,6 +15,7 @@ class ProjectTaskController {
     const tasks = await projectTaskService.findAllByProject(projectId, {
       status: req.query.status as string | undefined,
       assignedTo: req.query.assignedTo as string | undefined,
+      q: req.query.q as string | undefined,
     });
     res.json({ data: tasks });
   }

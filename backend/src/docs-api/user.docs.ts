@@ -237,9 +237,37 @@ export const userPaths = {
     post: {
       tags: ["Users"],
       summary: "Cập nhật avatar",
+      description: "Ảnh (jpg/png/gif/webp) tối đa 5MB, lưu trên Cloudinary. File cũ sẽ bị xoá khỏi Cloudinary.",
       security: [{ cookieAuth: [] }],
-      requestBody: { content: { "multipart/form-data": { schema: { type: "object", properties: { avatar: { type: "string", format: "binary" } } } } } },
-      responses: { 200: { description: "Cập nhật avatar thành công" } },
+      requestBody: { content: { "multipart/form-data": { schema: { type: "object", required: ["avatar"], properties: { avatar: { type: "string", format: "binary" } } } } } },
+      responses: {
+        200: { description: "Cập nhật avatar thành công" },
+        400: { description: "Thiếu file hoặc định dạng không hợp lệ" },
+      },
+    },
+    delete: {
+      tags: ["Users"],
+      summary: "Xoá avatar về mặc định (null)",
+      description: "Xoá file trên Cloudinary và đặt avatar về null.",
+      security: [{ cookieAuth: [] }],
+      responses: { 200: { description: "Xoá avatar thành công" } },
+    },
+  },
+  "/api/users/search": {
+    get: {
+      tags: ["Users"],
+      summary: "Tìm kiếm nhân viên",
+      description: "Tìm kiếm theo tên, email hoặc username. Chỉ Admin.",
+      security: [{ cookieAuth: [] }],
+      parameters: [
+        { name: "q", in: "query", required: true, schema: { type: "string" } },
+        { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+        { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
+      ],
+      responses: {
+        200: { description: "Kết quả tìm kiếm", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } },
+        403: { description: "Không đủ quyền (chỉ Admin)" },
+      },
     },
   },
 };

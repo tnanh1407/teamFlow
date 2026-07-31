@@ -1,0 +1,147 @@
+export const projectCommentSchemas = {
+  ProjectComment: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      projectId: { type: "string", format: "uuid" },
+      employeeId: { type: "string", format: "uuid" },
+      content: { type: "string", nullable: true },
+      attachments: { type: "string", nullable: true, description: "Chuỗi JSON chứa danh sách file đính kèm (URL Cloudinary)" },
+      createdAt: { type: "string", format: "date-time" },
+      updatedAt: { type: "string", format: "date-time" },
+    },
+  },
+  ProjectCommentInput: {
+    type: "object",
+    required: ["projectId", "employeeId"],
+    properties: {
+      projectId: { type: "string", format: "uuid" },
+      employeeId: { type: "string", format: "uuid" },
+      content: { type: "string", description: "Nội dung bình luận — bắt buộc có content hoặc attachments" },
+      attachments: { type: "string", description: "Chuỗi JSON danh sách file đính kèm (kết quả trả về từ /upload)" },
+    },
+  },
+  UploadedFile: {
+    type: "object",
+    properties: {
+      originalName: { type: "string" },
+      url: { type: "string", description: "URL Cloudinary của file (image/raw)" },
+      size: { type: "integer" },
+      mimetype: { type: "string" },
+    },
+  },
+};
+
+const cmtAuth = { security: [{ cookieAuth: [] }] };
+
+const cmtIdParam = {
+  name: "id",
+  in: "path",
+  required: true,
+  schema: { type: "string", format: "uuid" },
+};
+
+export const projectCommentPaths = {
+  "/api/project-comments": {
+    get: {
+      tags: ["Project Comments"],
+      summary: "Lấy danh sách bình luận",
+      ...cmtAuth,
+      responses: {
+        200: { description: "Danh sách bình luận", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } } } } },
+      },
+    },
+    post: {
+      tags: ["Project Comments"],
+      summary: "Tạo bình luận",
+      description: "Bình luận phải có ít nhất content hoặc attachments.",
+      ...cmtAuth,
+      requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectCommentInput" } } } },
+      responses: {
+        201: { description: "Tạo bình luận thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectComment" } } } } } },
+        400: { description: "Thiếu content lẫn attachments" },
+      },
+    },
+  },
+  "/api/project-comments/project/{projectId}": {
+    get: {
+      tags: ["Project Comments"],
+      summary: "Lấy bình luận theo dự án",
+      ...cmtAuth,
+      parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: {
+        200: { description: "Danh sách bình luận của dự án", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } } } } },
+      },
+    },
+  },
+  "/api/project-comments/employee/{employeeId}": {
+    get: {
+      tags: ["Project Comments"],
+      summary: "Lấy bình luận theo nhân viên",
+      ...cmtAuth,
+      parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: {
+        200: { description: "Danh sách bình luận của nhân viên", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } } } } },
+      },
+    },
+  },
+  "/api/project-comments/upload": {
+    post: {
+      tags: ["Project Comments"],
+      summary: "Upload file đính kèm lên Cloudinary",
+      description:
+        "Gửi tối đa 10 file (field name: files). Hỗ trợ ảnh, PDF, tài liệu Office, txt, zip... tối đa 50MB/file. " +
+        "Trả về danh sách file với URL Cloudinary — dùng URL này đưa vào attachments khi tạo bình luận.",
+      ...cmtAuth,
+      requestBody: {
+        content: {
+          "multipart/form-data": {
+            schema: {
+              type: "object",
+              required: ["files"],
+              properties: {
+                files: { type: "array", items: { type: "string", format: "binary" }, description: "Tối đa 10 file" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        201: { description: "Upload thành công", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/UploadedFile" } } } } } } },
+        400: { description: "Định dạng file không được hỗ trợ hoặc vượt giới hạn 50MB" },
+      },
+    },
+  },
+  "/api/project-comments/{id}": {
+    get: {
+      tags: ["Project Comments"],
+      summary: "Xem chi tiết bình luận",
+      ...cmtAuth,
+      parameters: [cmtIdParam],
+      responses: {
+        200: { description: "Thông tin bình luận", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectComment" } } } } } },
+        404: { description: "Không tìm thấy bình luận" },
+      },
+    },
+    patch: {
+      tags: ["Project Comments"],
+      summary: "Cập nhật bình luận",
+      ...cmtAuth,
+      parameters: [cmtIdParam],
+      requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectCommentInput" } } } },
+      responses: {
+        200: { description: "Cập nhật thành công" },
+        404: { description: "Không tìm thấy bình luận" },
+      },
+    },
+    delete: {
+      tags: ["Project Comments"],
+      summary: "Xoá bình luận",
+      ...cmtAuth,
+      parameters: [cmtIdParam],
+      responses: {
+        200: { description: "Xoá bình luận thành công" },
+      },
+    },
+  },
+};

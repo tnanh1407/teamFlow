@@ -25,13 +25,10 @@ export default function Login() {
     setLoading(true)
     try {
       const { data } = await accountService.login({ username, password })
-      const user = data.data.account
+      const user = data.data.user
       setUser(user)
       toast.success(`Xin chào ${user.username}!`)
-      const home: Record<string, string> = {
-        admin: "/dashboard",
-      }
-      navigate(home[user.position] || "/")
+      navigate(user.role === "admin" ? "/dashboard" : "/")
     } catch {
       Swal.fire({ icon: "error", title: "Lỗi", text: "Sai tài khoản hoặc mật khẩu", confirmButtonColor: "#2563eb" })
     } finally {

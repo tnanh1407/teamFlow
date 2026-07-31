@@ -49,6 +49,14 @@ class ProjectEmployeeService {
     return rows;
   }
 
+  async findByProject(projectId: string) {
+    const { rows } = await pool.query<ProjectEmployeeRow>(
+      `SELECT ${projectEmployeeColumns} FROM project_employees WHERE project_id = $1 ORDER BY assigned_at DESC`,
+      [projectId]
+    );
+    return rows;
+  }
+
   private async checkAssignable(projectId: string, employeeId: string) {
     const user = await pool.query(
       `SELECT department_id FROM users WHERE id = $1`,

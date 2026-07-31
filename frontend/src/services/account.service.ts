@@ -22,7 +22,7 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  account: Account;
+  user: Account;
   token: string;
 }
 
@@ -33,29 +33,29 @@ export interface UpdateMePayload {
 
 const accountService = {
   login: (data: LoginPayload) =>
-    api.post<{ data: LoginResponse }>("/accounts/login", data),
+    api.post<{ data: LoginResponse }>("/users/login", data),
 
-  logout: () => api.post("/accounts/logout"),
+  logout: () => api.post("/users/logout"),
 
-  getAll: () => api.get<{ data: Account[] }>("/accounts"),
+  getAll: () => api.get<{ data: Account[] }>("/users"),
 
-  getById: (id: string) => api.get<{ data: Account }>(`/accounts/${id}`),
+  getById: (id: string) => api.get<{ data: Account }>(`/users/${id}`),
 
   create: (data: Omit<Account, "id" | "createdAt" | "updatedAt"> & { password: string }) =>
-    api.post<{ data: Account }>("/accounts", data),
+    api.post<{ data: Account }>("/users", data),
 
   update: (id: string, data: Partial<Account>) =>
-    api.patch<{ data: Account }>(`/accounts/${id}`, data),
+    api.patch<{ data: Account }>(`/users/${id}`, data),
 
-  delete: (id: string) => api.delete(`/accounts/${id}`),
+  delete: (id: string) => api.delete(`/users/${id}`),
 
   updateMe: (data: UpdateMePayload) =>
-    api.patch<{ data: Account }>("/accounts/me", data),
+    api.patch<{ data: Account }>("/users/updatePs", data),
 
   uploadAvatar: (file: File) => {
     const formData = new FormData();
     formData.append("avatar", file);
-    return api.post<{ data: Account }>("/accounts/me/avatar", formData, {
+    return api.post<{ data: Account }>("/users/me/avatar", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },

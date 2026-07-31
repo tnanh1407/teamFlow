@@ -53,7 +53,7 @@ class ProjectTaskService {
     return rows;
   }
 
-  async findAllByProject(projectId: string, filters: { status?: string; assignedTo?: string }) {
+  async findAllByProject(projectId: string, filters: { status?: string; assignedTo?: string; q?: string }) {
     const conditions: string[] = ["project_id = $1"];
     const values: any[] = [projectId];
     let idx = 2;
@@ -65,6 +65,10 @@ class ProjectTaskService {
     if (filters.assignedTo) {
       conditions.push(`assigned_to = $${idx++}`);
       values.push(filters.assignedTo);
+    }
+    if (filters.q) {
+      conditions.push(`(title ILIKE $${idx++} OR description ILIKE $${idx++})`);
+      values.push(`%${filters.q}%`, `%${filters.q}%`);
     }
 
     const { rows } = await pool.query<ProjectTaskRow>(

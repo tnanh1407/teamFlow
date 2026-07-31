@@ -13,6 +13,7 @@ import projectDepartmentRouter from "./project/department/project-department.rou
 import projectLogRouter from "./project/log/project-log.router.js";
 import projectTaskRouter from "./project/task/project-task.router.js";
 import sessionRouter from "./session/session.router.js";
+import searchRouter from "./search/search.router.js";
 import { apiReference } from "@scalar/express-api-reference";
 import { apiSpec } from "./docs-api/index.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -40,8 +41,9 @@ app.use("/api/project-employees", projectEmployeeRouter);
 app.use("/api/project-comments", projectCommentRouter);
 app.use("/api/project-departments", projectDepartmentRouter);
 app.use("/api/project-logs", projectLogRouter);
-app.use("/api/projects-task", projectTaskRouter);
+app.use("/api/project-tasks", projectTaskRouter);
 app.use("/api/sessions", sessionRouter);
+app.use("/api/search", searchRouter);
 
 app.use("/api-docs", apiReference({
   spec: { content: apiSpec },
