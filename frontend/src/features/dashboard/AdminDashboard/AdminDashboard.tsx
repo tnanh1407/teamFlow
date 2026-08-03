@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Briefcase, Building2, Medal, Users } from "lucide-react"
-import userService from "@/services/user.service"
+import userService, { type User } from "@/services/user.service"
 import departmentService from "@/services/department.service"
 import positionService from "@/services/position.service"
 import projectService from "@/services/project.service"
@@ -18,7 +18,7 @@ const colors = {
 }
 
 export default function AdminDashboard() {
-  const [employees, setEmployees] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [projects, setProjects] = useState<any[]>([])
   const [departments, setDepartments] = useState<any[]>([])
   const [deptCount, setDeptCount] = useState(0)
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
           userService.getAll(),
         ])
         const depts = deptRes.data.data
-        setEmployees(empRes.data.data)
+        setUsers(empRes.data.data)
         setProjects(projRes.data.data)
         setDepartments(depts)
         setDeptCount(depts.length)
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
   const deptData = departments
     .map((d: any, i: number) => ({
       name: d.name,
-      value: employees.filter((e: any) => e.departmentId === d.id).length,
+      value: users.filter((u) => u.departmentId === d.id).length,
       color: deptColors[i % deptColors.length],
     }))
     .filter((d) => d.value > 0)
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
 
   const growthData = (() => {
     const months: Record<string, number> = {}
-    employees.forEach((e: any) => {
+    users.forEach((e) => {
       if (!e.hireDate) return
       const key = e.hireDate.slice(0, 7)
       months[key] = (months[key] || 0) + 1
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
   })()
 
   const stats = [
-    { label: "Nhân viên", value: employees.length, icon: Briefcase, color: colors.blue },
+    { label: "Người dùng", value: users.length, icon: Briefcase, color: colors.blue },
     { label: "Phòng ban", value: deptCount, icon: Building2, color: colors.emerald },
     { label: "Chức vụ", value: posCount, icon: Medal, color: colors.purple },
     { label: "Tài khoản", value: userCount, icon: Users, color: colors.amber },
@@ -106,9 +106,9 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <StatsGrid stats={stats} />
-      <GrowthChart data={growthData} currentTotal={employees.length} />
+      <GrowthChart data={growthData} currentTotal={users.length} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DonutChartCard title="Phân bố phòng ban" data={deptData} total={employees.length || 1} index={0} />
+        <DonutChartCard title="Phân bố phòng ban" data={deptData} total={users.length || 1} index={0} />
         <DonutChartCard title="Trạng thái dự án" data={projStatusData} total={projects.length || 1} index={1} />
       </div>
     </div>

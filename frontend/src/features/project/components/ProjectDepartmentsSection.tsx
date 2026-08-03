@@ -3,7 +3,7 @@ import type { Department } from "@/services/department.service"
 
 interface ProjectDepartmentsSectionProps {
   departments: Department[]
-  deptEmployeeCount: Record<string, number>
+  deptUserCount: Record<string, number>
   canEdit: boolean
   onOpenAddModal: () => void
   onRemoveDepartment: (departmentId: string) => void
@@ -11,7 +11,7 @@ interface ProjectDepartmentsSectionProps {
 
 export default function ProjectDepartmentsSection({
   departments,
-  deptEmployeeCount,
+  deptUserCount,
   canEdit,
   onOpenAddModal,
   onRemoveDepartment,
@@ -41,7 +41,7 @@ export default function ProjectDepartmentsSection({
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{dept.name}</p>
                   <span className="inline-flex items-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2 py-0.5 text-[10px] font-medium">
-                    {deptEmployeeCount[dept.id] ?? 0} người
+                    {deptUserCount[dept.id] ?? 0} người
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 mt-0.5">{dept.code}</p>

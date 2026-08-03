@@ -49,8 +49,8 @@ const projectService = {
 
   getMyProjects: () => api.get<{ data: Project[] }>("/projects/me"),
 
-  getByCreatedBy: (employeeId: string) =>
-    api.get<{ data: Project[] }>(`/projects/created-by/${employeeId}`),
+  getByCreatedBy: (userId: string) =>
+    api.get<{ data: Project[] }>(`/projects/created-by/${userId}`),
 
   getById: (id: string) => api.get<{ data: Project }>(`/projects/${id}`),
 

@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { Users, Plus, Building2, X } from "lucide-react"
-import type { ProjectEmployee } from "@/services/project-employee.service"
+import type { ProjectMember } from "@/services/project-employee.service"
 import type { Department } from "@/services/department.service"
 import type { User } from "@/services/user.service"
 
 interface ProjectMembersSectionProps {
-  projectMembers: (ProjectEmployee & { employee?: User })[]
+  projectMembers: (ProjectMember & { user?: User })[]
   departments: Department[]
   canManageMembers: boolean
   isManager: boolean
@@ -47,7 +47,7 @@ export default function ProjectMembersSection({
         <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có thành viên</p>
       ) : (
         departments.map((dept) => {
-          const deptMems = projectMembers.filter((pm) => pm.employee?.departmentId === dept.id)
+          const deptMems = projectMembers.filter((pm) => pm.user?.departmentId === dept.id)
           if (deptMems.length === 0) return null
           const open = expandedDepts[dept.id] ?? true
           return (
@@ -66,21 +66,21 @@ export default function ProjectMembersSection({
               {open && (
                 <div className="divide-y divide-zinc-50 dark:divide-zinc-800/50">
                   {deptMems.map((pm) => {
-                    const canRemoveThisMember = canEdit || (isManager && pm.employee?.departmentId === userDeptId)
+                    const canRemoveThisMember = canEdit || (isManager && pm.user?.departmentId === userDeptId)
                     return (
                       <div key={pm.id} className="px-5 py-2 flex items-center gap-3 pl-10">
                         <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
-                          {pm.employee?.avatarURL ? (
-                            <img src={pm.employee.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                          {pm.user?.avatarURL ? (
+                            <img src={pm.user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
                           ) : (
-                            <span>{pm.employee?.name?.slice(0, 2).toUpperCase() || "??"}</span>
+                            <span>{pm.user?.name?.slice(0, 2).toUpperCase() || "??"}</span>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
-                            {pm.employee?.name || "—"}
+                            {pm.user?.name || "—"}
                           </p>
-                          <p className="text-xs text-zinc-400 truncate">{pm.employee?.employeeCode}</p>
+                          <p className="text-xs text-zinc-400 truncate">{pm.user?.employeeCode}</p>
                         </div>
                         {canRemoveThisMember && (
                           <button

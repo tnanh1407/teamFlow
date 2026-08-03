@@ -4,7 +4,7 @@ import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Che
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
-import projectEmployeeService, { type ProjectEmployee } from "@/services/project-employee.service"
+import projectMemberService, { type ProjectMember } from "@/services/project-employee.service"
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
 import departmentService, { type Department } from "@/services/department.service"
 import userService, { type User } from "@/services/user.service"
@@ -99,15 +99,15 @@ export default function ProjectDetail() {
   const [project, setProject] = useState<Project | null>(null)
   const [logs, setLogs] = useState<ProjectLog[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
-  const [deptEmployeeCount, setDeptEmployeeCount] = useState<Record<string, number>>({})
-  const [, setEmployees] = useState<User[]>([])
+  const [deptUserCount, setDeptUserCount] = useState<Record<string, number>>({})
+  const [, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   const [allDepartments, setAllDepartments] = useState<Department[]>([])
   const [projectDeptIds, setProjectDeptIds] = useState<string[]>([])
-  const [projectMembers, setProjectMembers] = useState<(ProjectEmployee & { User?: User })[]>([])
-  const [logEmployeeMap, setLogEmployeeMap] = useState<Record<string, User>>({})
-  const [comments, setComments] = useState<(ProjectComment & { User?: User })[]>([])
+  const [projectMembers, setProjectMembers] = useState<(ProjectMember & { user?: User })[]>([])
+  const [logUserMap, setLogUserMap] = useState<Record<string, User>>({})
+  const [comments, setComments] = useState<(ProjectComment & { user?: User })[]>([])
   const [commentText, setCommentText] = useState("")
   const [commentFiles, setCommentFiles] = useState<FileAttachment[]>([])
   const [commentUploading, setCommentUploading] = useState(false)
@@ -129,7 +129,7 @@ export default function ProjectDetail() {
       projectService.getById(id),
       projectLogService.getByProject(id),
       projectDepartmentService.getByProject(id),
-      projectEmployeeService.getByProject(id),
+      projectMemberService.getByProject(id),
       projectCommentService.getByProject(id),
     ])
       .then(([projRes, logsRes, deptRes, memberRes, commentRes]) => {
@@ -138,16 +138,16 @@ export default function ProjectDetail() {
         const rawLogs = logsRes.data.data as ProjectLog[]
         setLogs(rawLogs)
 
-        const uniqueEmpIds = [...new Set(rawLogs.map((l) => l.employeeId).filter(Boolean))]
-        if (uniqueEmpIds.length > 0) {
-          Promise.all(uniqueEmpIds.map((eid) => userService.getById(eid)))
+        const uniqueUserIds = [...new Set(rawLogs.map((l) => l.userId).filter(Boolean))]
+        if (uniqueUserIds.length > 0) {
+          Promise.all(uniqueUserIds.map((uid) => userService.getById(uid)))
             .then((results) => {
               const map: Record<string, User> = {}
               results.forEach((r: any) => {
-                const emp = r.data.data
-                if (emp) map[emp.id] = emp
+                const user = r.data.data
+                if (user) map[user.id] = user
               })
-              setLogEmployeeMap(map)
+              setLogUserMap(map)
             })
         }
 
@@ -169,21 +169,21 @@ export default function ProjectDetail() {
             deptIds.forEach((did, i) => {
               countMap[did] = empResults[i]?.length || 0
             })
-            setDeptEmployeeCount(countMap)
+            setDeptUserCount(countMap)
             setDepartments(depts)
-            setEmployees(empResults.flat())
+            setUsers(empResults.flat())
           })
         } else {
           setDepartments([])
-          setEmployees([])
-          setDeptEmployeeCount({})
+          setUsers([])
+          setDeptUserCount({})
         }
 
-        const pemps = memberRes.data.data as ProjectEmployee[]
+        const pemps = memberRes.data.data as ProjectMember[]
         if (pemps.length > 0) {
           Promise.all(
-            pemps.map((pe: ProjectEmployee) =>
-              userService.getById(pe.employeeId).then((r) => ({ ...pe, User: r.data.data }))
+            pemps.map((pm: ProjectMember) =>
+              userService.getById(pm.userId).then((r) => ({ ...pm, user: r.data.data }))
             )
           ).then((enriched) => setProjectMembers(enriched))
         } else {
@@ -194,7 +194,7 @@ export default function ProjectDetail() {
         if (rawComments.length > 0) {
           Promise.all(
             rawComments.map((c: ProjectComment) =>
-              userService.getById(c.employeeId).then((r) => ({ ...c, User: r.data.data }))
+              userService.getById(c.userId).then((r) => ({ ...c, user: r.data.data }))
             )
           ).then((enriched) => setComments(enriched))
         } else {
@@ -212,7 +212,7 @@ export default function ProjectDetail() {
       userService.getById(user.id).then((r) => {
         const emp = r.data.data
         if (emp) {
-          setLogEmployeeMap((prev) => ({ ...prev, [emp.id]: emp }))
+          setLogUserMap((prev) => ({ ...prev, [emp.id]: emp }))
           if (emp.departmentId) setUserDeptId(emp.departmentId)
         }
       })
@@ -224,7 +224,7 @@ export default function ProjectDetail() {
 
     const initialDeptId = isManager && userDeptId ? userDeptId : ""
     let currentDeptId = initialDeptId
-    let currentEmpIds: string[] = []
+    let currentUserIds: string[] = []
     let currentDeptEmps: User[] = []
 
     const AddMemberContent = () => {
@@ -236,7 +236,7 @@ export default function ProjectDetail() {
 
       useEffect(() => {
         currentDeptId = selectedDeptId
-        currentEmpIds = selectedEmpIds
+        currentUserIds = selectedEmpIds
         currentDeptEmps = deptEmps
       }, [selectedDeptId, selectedEmpIds, deptEmps])
 
@@ -255,8 +255,8 @@ export default function ProjectDetail() {
           userService.getByDepartment(selectedDeptId).then((r) => {
             const emps = r.data.data
             setDeptEmps(emps)
-            const existingEmpIds = projectMembers.map((m) => m.employeeId)
-            const preSelected = emps.filter((e) => existingEmpIds.includes(e.id)).map((e) => e.id)
+            const existingUserIds = projectMembers.map((m) => m.userId)
+            const preSelected = emps.filter((e) => existingUserIds.includes(e.id)).map((e) => e.id)
             setSelectedEmpIds(preSelected)
           })
         } else {
@@ -320,8 +320,8 @@ export default function ProjectDetail() {
           </div>
 
           {selectedDeptId && (() => {
-            const existingEmpIds = projectMembers.map((m) => m.employeeId)
-            const availableEmps = deptEmps.filter((e) => !existingEmpIds.includes(e.id))
+            const existingUserIds = projectMembers.map((m) => m.userId)
+            const availableEmps = deptEmps.filter((e) => !existingUserIds.includes(e.id))
             return (
               <div>
                 <label className={labelClass}>Chọn thành viên ({availableEmps.length} người)</label>
@@ -384,30 +384,30 @@ export default function ProjectDetail() {
           MySwal.showValidationMessage("Vui lòng chọn phòng ban")
           return false
         }
-        if (currentEmpIds.length === 0) {
+        if (currentUserIds.length === 0) {
           MySwal.showValidationMessage("Vui lòng chọn thành viên")
           return false
         }
-        return { departmentId: currentDeptId, employeeIds: currentEmpIds }
+        return { departmentId: currentDeptId, userIds: currentUserIds }
       },
     })
 
     if (!result.isConfirmed) return
 
-    const { departmentId, employeeIds } = result.value
+    const { departmentId, userIds } = result.value
     try {
       if (!projectDeptIds.includes(departmentId)) {
         await projectDepartmentService.create({ projectId: project.id, departmentId })
       }
 
-      const existingEmpIds = projectMembers.map((m) => m.employeeId)
-      const empIdsToAdd = employeeIds.filter((id: string) => !existingEmpIds.includes(id))
-      const newMembers = currentDeptEmps.filter((e) => empIdsToAdd.includes(e.id))
+      const existingUserIds = projectMembers.map((m) => m.userId)
+      const userIdsToAdd = userIds.filter((id: string) => !existingUserIds.includes(id))
+      const newMembers = currentDeptEmps.filter((e) => userIdsToAdd.includes(e.id))
 
-      if (empIdsToAdd.length > 0) {
+      if (userIdsToAdd.length > 0) {
         await Promise.all(
-          empIdsToAdd.map((empId: string) =>
-            projectEmployeeService.create({ projectId: project.id, employeeId: empId })
+          userIdsToAdd.map((userId: string) =>
+            projectMemberService.create({ projectId: project.id, userId })
           )
         )
         if (user?.id) {
@@ -416,7 +416,7 @@ export default function ProjectDetail() {
             newMembers.map((m) =>
               projectLogService.create({
                 projectId: project.id,
-                employeeId: user.id,
+                userId: user.id,
                 action: "assigned",
                 description: `${m.name} - ${deptName}`,
               })
@@ -750,7 +750,7 @@ export default function ProjectDetail() {
         const roleStr = roleLabel[user.position] || user.position
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.id,
+          userId: user.id,
           action: "updated",
           description: changed.length > 0
             ? `[${roleStr}] ${changed.join("; ")}`
@@ -765,7 +765,7 @@ export default function ProjectDetail() {
   }
 
   const handleLogDetail = (log: ProjectLog) => {
-    const emp = logEmployeeMap[log.employeeId]
+    const emp = logUserMap[log.userId]
     const initials = emp?.name?.slice(0, 2).toUpperCase() || "??"
 
     MySwal.fire({
@@ -840,7 +840,7 @@ export default function ProjectDetail() {
         const dept = departments.find((d) => d.id === departmentId)
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.id,
+          userId: user.id,
           action: "updated",
           description: `Phòng ban ${dept?.name || ""}`,
         })
@@ -855,13 +855,13 @@ export default function ProjectDetail() {
     if (!project) return
     try {
       const pm = projectMembers.find((m) => m.id === id)
-      await projectEmployeeService.delete(id)
-      if (user?.id && pm?.User?.name) {
+      await projectMemberService.delete(id)
+      if (user?.id && pm?.user?.name) {
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.id,
+          userId: user.id,
           action: "updated",
-          description: pm.User.name,
+          description: pm.user.name,
         })
       }
       fetchProject()
@@ -894,16 +894,16 @@ export default function ProjectDetail() {
     try {
       const { data } = await projectCommentService.create({
         projectId: project.id,
-        employeeId: user.id,
+        userId: user.id,
         content: commentText.trim() || undefined,
         attachments: commentFiles.length > 0 ? JSON.stringify(commentFiles) : undefined,
       })
       const emp = await userService.getById(user.id)
-      setComments((prev) => [{ ...data.data, User: emp.data.data }, ...prev])
+      setComments((prev) => [{ ...data.data, user: emp.data.data }, ...prev])
       if (user.id) {
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.id,
+          userId: user.id,
           action: "commented",
           description: commentText.trim() || "đã bình luận",
         })
@@ -923,7 +923,7 @@ export default function ProjectDetail() {
       if (project && user?.id) {
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.id,
+          userId: user.id,
           action: "updated",
           description: "đã xoá một bình luận",
         })
@@ -1071,7 +1071,7 @@ export default function ProjectDetail() {
           {isAdmin && (
             <ProjectLogsSection
               logs={logs}
-              logEmployeeMap={logEmployeeMap}
+              logUserMap={logUserMap}
               onSelectLog={handleLogDetail}
             />
           )}
@@ -1093,7 +1093,7 @@ export default function ProjectDetail() {
         <div className="space-y-6">
           <ProjectDepartmentsSection
             departments={departments}
-            deptEmployeeCount={deptEmployeeCount}
+            deptUserCount={deptUserCount}
             canEdit={canEdit}
             onOpenAddModal={handleOpenAddMember}
             onRemoveDepartment={removeDepartment}

@@ -1,24 +1,33 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import Login from "@/features/auth/Login";
-import ForgotPassword from "@/features/auth/ForgotPassword";
-import UserList from "@/features/user/UserList";
-import UserDetail from "@/features/user/UserDetail";
-import PositionList from "@/features/position/PositionList";
-import ProjectList from "@/features/project/ProjectList";
-import Settings from "@/features/user/Settings";
+const Login = lazy(() => import("@/features/auth/Login"));
+const ForgotPassword = lazy(() => import("@/features/auth/ForgotPassword"));
+const UserList = lazy(() => import("@/features/user/UserList"));
+const UserDetail = lazy(() => import("@/features/user/UserDetail"));
+const PositionList = lazy(() => import("@/features/position/PositionList"));
+const ProjectList = lazy(() => import("@/features/project/ProjectList"));
+const Settings = lazy(() => import("@/features/user/Settings"));
 import NotFound from "@/features/user/NotFound";
-import ProjectDetail from "@/features/project/ProjectDetail";
+const ProjectDetail = lazy(() => import("@/features/project/ProjectDetail"));
 import { useAuth } from "@/contexts/AuthContext";
 import type { ReactNode } from "react";
-import DepartmentList from "./features/department/DepartmentList/DepartmentList";
-import DepartmentDetail from "./features/department/DepartmentDetail/DepartmentDetail";
-import AdminDashboard from "./features/dashboard/AdminDashboard/AdminDashboard";
-import UserDashboard from "./features/dashboard/UserDashboard/UserDashboard";
+const DepartmentList = lazy(() => import("./features/department/DepartmentList/DepartmentList"));
+const DepartmentDetail = lazy(() => import("./features/department/DepartmentDetail/DepartmentDetail"));
+const AdminDashboard = lazy(() => import("./features/dashboard/AdminDashboard/AdminDashboard"));
+const UserDashboard = lazy(() => import("./features/dashboard/UserDashboard/UserDashboard"));
 
 const positionHome: Record<string, string> = {
   admin: "/dashboard",
 };
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <p className="text-sm text-zinc-500">Đang tải...</p>
+    </div>
+  )
+}
 
 function RoleRedirect({ children, roles }: { children: ReactNode; roles: string[] }) {
   const { user, ready } = useAuth();
@@ -40,25 +49,25 @@ function RoleRedirect({ children, roles }: { children: ReactNode; roles: string[
 const router = createBrowserRouter([
   {
     path: "login",
-    element: <Login />,
+    element: <Suspense fallback={<RouteFallback />}><Login /></Suspense>,
   },
   {
     path: "forgot-password",
-    element: <ForgotPassword />,
+    element: <Suspense fallback={<RouteFallback />}><ForgotPassword /></Suspense>,
   },
   {
     element: <DashboardLayout />,
     children: [
-      { index: true, element: <RoleRedirect roles={["admin", "user"]}><UserDashboard /></RoleRedirect> },
-      { path: "dashboard", element: <RoleRedirect roles={["admin"]}><AdminDashboard /></RoleRedirect> },
-      { path: "users", element: <RoleRedirect roles={["admin", "user"]}><UserList /></RoleRedirect> },
-      { path: "users/:id", element: <RoleRedirect roles={["admin", "user"]}><UserDetail /></RoleRedirect> },
-      { path: "departments", element: <RoleRedirect roles={["admin"]}><DepartmentList /></RoleRedirect> },
-      { path: "departments/:id", element: <RoleRedirect roles={["admin"]}><DepartmentDetail /></RoleRedirect> },
-      { path: "positions", element: <RoleRedirect roles={["admin"]}><PositionList /></RoleRedirect> },
-      { path: "projects", element: <RoleRedirect roles={["admin", "user"]}><ProjectList /></RoleRedirect> },
-      { path: "projects/:id", element: <RoleRedirect roles={["admin", "user"]}><ProjectDetail /></RoleRedirect> },
-      { path: "settings", element: <RoleRedirect roles={["admin", "user"]}><Settings /></RoleRedirect> },
+      { index: true, element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserDashboard /></Suspense></RoleRedirect> },
+      { path: "dashboard", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><AdminDashboard /></Suspense></RoleRedirect> },
+      { path: "users", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserList /></Suspense></RoleRedirect> },
+      { path: "users/:id", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserDetail /></Suspense></RoleRedirect> },
+      { path: "departments", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><DepartmentList /></Suspense></RoleRedirect> },
+      { path: "departments/:id", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><DepartmentDetail /></Suspense></RoleRedirect> },
+      { path: "positions", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><PositionList /></Suspense></RoleRedirect> },
+      { path: "projects", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><ProjectList /></Suspense></RoleRedirect> },
+      { path: "projects/:id", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><ProjectDetail /></Suspense></RoleRedirect> },
+      { path: "settings", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><Settings /></Suspense></RoleRedirect> },
     ],
   },
   {

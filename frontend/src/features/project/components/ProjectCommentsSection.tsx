@@ -4,7 +4,7 @@ import type { ProjectComment } from "@/services/project-comment.service"
 import type { FileAttachment } from "@/services/project.service"
 import type { User } from "@/services/user.service"
 
-export type CommentWithUser = ProjectComment & { employee?: User }
+export type CommentWithUser = ProjectComment & { user?: User }
 
 interface ProjectCommentsProps {
   comments: CommentWithUser[]
@@ -99,18 +99,18 @@ export default function ProjectCommentsSection({
           </div>
         ) : (
           [...comments].reverse().map((c) => {
-            const initialsC = c.employee?.name?.slice(0, 2).toUpperCase() || "??"
+            const initialsC = c.user?.name?.slice(0, 2).toUpperCase() || "??"
             let fileList: FileAttachment[] = []
             try {
               fileList = JSON.parse(c.attachments || "[]")
             } catch {}
-            const isOwner = user?.id === c.employeeId
+            const isOwner = user?.id === c.userId
             return (
               <div key={c.id} className={`flex ${isOwner ? "justify-end" : "justify-start"}`}>
                 <div className={`flex items-end gap-2 max-w-[85%] ${isOwner ? "flex-row-reverse" : "flex-row"}`}>
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-sm">
-                    {c.employee?.avatarURL ? (
-                      <img src={c.employee.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
+                    {c.user?.avatarURL ? (
+                      <img src={c.user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
                     ) : (
                       <span>{initialsC}</span>
                     )}
@@ -118,7 +118,7 @@ export default function ProjectCommentsSection({
                   <div className="min-w-0">
                     <div className={`flex items-center gap-2 mb-0.5 px-1 ${isOwner ? "justify-end" : "justify-start"}`}>
                       <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-                        {c.employee?.name || "—"}
+                        {c.user?.name || "—"}
                       </span>
                       <span className="text-[10px] text-zinc-400 dark:text-zinc-500">{timeAgo(c.createdAt)}</span>
                       {isOwner && (

@@ -1,30 +1,45 @@
 import api from "@/lib/axios";
 
-export interface ProjectEmployee {
+export interface ProjectMember {
   id: string;
   projectId: string;
-  employeeId: string;
+  userId: string;
   role: string;
   assignedAt: string;
 }
 
-const projectEmployeeService = {
-  getAll: () => api.get<{ data: ProjectEmployee[] }>("/project-employees"),
+const mapMember = (member: { id: string; projectId: string; employeeId: string; role: string; assignedAt: string }): ProjectMember => ({
+  id: member.id,
+  projectId: member.projectId,
+  userId: member.employeeId,
+  role: member.role,
+  assignedAt: member.assignedAt,
+});
 
-  getByEmployee: (employeeId: string) =>
-    api.get<{ data: ProjectEmployee[] }>(`/project-employees/employee/${employeeId}`),
+const projectMemberService = {
+  getAll: async () => {
+    const { data } = await api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; role: string; assignedAt: string }> }>("/project-employees");
+    return { data: { data: data.data.map(mapMember) } };
+  },
 
-  getByProject: (projectId: string) =>
-    api.get<{ data: ProjectEmployee[] }>(`/project-employees/project/${projectId}`),
+  getByUser: (userId: string) =>
+    api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; role: string; assignedAt: string }> }>(`/project-employees/employee/${userId}`),
 
-  getById: (id: string) =>
-    api.get<{ data: ProjectEmployee }>(`/project-employees/${id}`),
+  getByProject: async (projectId: string) => {
+    const { data } = await api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; role: string; assignedAt: string }> }>(`/project-employees/project/${projectId}`);
+    return { data: { data: data.data.map(mapMember) } };
+  },
 
-  create: (data: { projectId: string; employeeId: string; role?: string }) =>
-    api.post<{ data: ProjectEmployee }>("/project-employees", data),
+  getById: async (id: string) => {
+    const { data } = await api.get<{ data: { id: string; projectId: string; employeeId: string; role: string; assignedAt: string } }>(`/project-employees/${id}`);
+    return { data: { data: mapMember(data.data) } };
+  },
+
+  create: (data: { projectId: string; userId: string; role?: string }) =>
+    api.post("/project-employees", { ...data, employeeId: data.userId }),
 
   delete: (id: string) =>
     api.delete(`/project-employees/${id}`),
 };
 
-export default projectEmployeeService;
+export default projectMemberService;

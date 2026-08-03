@@ -12,11 +12,11 @@ const actionLabels: Record<string, string> = {
 
 interface ProjectLogsProps {
   logs: ProjectLog[]
-  logEmployeeMap: Record<string, User>
+  logUserMap: Record<string, User>
   onSelectLog: (log: ProjectLog) => void
 }
 
-export default function ProjectLogsSection({ logs, logEmployeeMap, onSelectLog }: ProjectLogsProps) {
+export default function ProjectLogsSection({ logs, logUserMap, onSelectLog }: ProjectLogsProps) {
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
       <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
@@ -27,7 +27,7 @@ export default function ProjectLogsSection({ logs, logEmployeeMap, onSelectLog }
           <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có hoạt động nào</p>
         ) : (
           logs.map((log) => {
-            const emp = logEmployeeMap[log.employeeId]
+            const emp = logUserMap[log.userId]
             const actorName = emp?.name ? `${emp.name} (${emp.employeeCode})` : "—"
             return (
               <button

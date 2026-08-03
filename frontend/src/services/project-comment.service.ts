@@ -3,24 +3,41 @@ import api from "@/lib/axios";
 export interface ProjectComment {
   id: string;
   projectId: string;
-  employeeId: string;
+  userId: string;
   content: string;
   attachments: string;
   createdAt: string;
   updatedAt: string;
 }
 
+const mapComment = (comment: { id: string; projectId: string; employeeId: string; content: string; attachments: string; createdAt: string; updatedAt: string }): ProjectComment => ({
+  id: comment.id,
+  projectId: comment.projectId,
+  userId: comment.employeeId,
+  content: comment.content,
+  attachments: comment.attachments,
+  createdAt: comment.createdAt,
+  updatedAt: comment.updatedAt,
+});
+
 const projectCommentService = {
-  getAll: () => api.get<{ data: ProjectComment[] }>("/project-comments"),
+  getAll: async () => {
+    const { data } = await api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; content: string; attachments: string; createdAt: string; updatedAt: string }> }>("/project-comments");
+    return { data: { data: data.data.map(mapComment) } };
+  },
 
-  getByProject: (projectId: string) =>
-    api.get<{ data: ProjectComment[] }>(`/project-comments/project/${projectId}`),
+  getByProject: async (projectId: string) => {
+    const { data } = await api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; content: string; attachments: string; createdAt: string; updatedAt: string }> }>(`/project-comments/project/${projectId}`);
+    return { data: { data: data.data.map(mapComment) } };
+  },
 
-  getByEmployee: (employeeId: string) =>
-    api.get<{ data: ProjectComment[] }>(`/project-comments/employee/${employeeId}`),
+  getByUser: (userId: string) =>
+    api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; content: string; attachments: string; createdAt: string; updatedAt: string }> }>(`/project-comments/employee/${userId}`),
 
-  getById: (id: string) =>
-    api.get<{ data: ProjectComment }>(`/project-comments/${id}`),
+  getById: async (id: string) => {
+    const { data } = await api.get<{ data: { id: string; projectId: string; employeeId: string; content: string; attachments: string; createdAt: string; updatedAt: string } }>(`/project-comments/${id}`);
+    return { data: { data: mapComment(data.data) } };
+  },
 
   uploadFiles: (files: File[]) => {
     const formData = new FormData();
@@ -30,8 +47,8 @@ const projectCommentService = {
     });
   },
 
-  create: (data: { projectId: string; employeeId: string; content?: string; attachments?: string }) =>
-    api.post<{ data: ProjectComment }>("/project-comments", data),
+  create: (data: { projectId: string; userId: string; content?: string; attachments?: string }) =>
+    api.post("/project-comments", { ...data, employeeId: data.userId }),
 
   update: (id: string, data: Partial<Pick<ProjectComment, "content" | "attachments">>) =>
     api.patch<{ data: ProjectComment }>(`/project-comments/${id}`, data),
