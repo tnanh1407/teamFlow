@@ -9,7 +9,7 @@ const routes = [
     breadcrumbs: [{ label: "Tổng quan" }],
   },
   {
-    path: "/employees",
+    path: "/users",
     breadcrumbs: [
       { label: "Quản trị" },
       { label: "Quản lí nhân viên" },
@@ -30,7 +30,7 @@ const routes = [
     ],
   },
   {
-    path: "/members",
+    path: "/users",
     breadcrumbs: [
       { label: "Quản trị" },
       { label: "Quản lí tài khoản" },

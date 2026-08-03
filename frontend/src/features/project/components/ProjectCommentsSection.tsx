@@ -2,14 +2,13 @@ import { useRef, useEffect } from "react"
 import { MessageCircle, X, Paperclip, Send, File, FileImage } from "lucide-react"
 import type { ProjectComment } from "@/services/project-comment.service"
 import type { FileAttachment } from "@/services/project.service"
-import type { Employee } from "@/services/employee.service"
-import type { Account } from "@/services/account.service"
+import type { User } from "@/services/user.service"
 
-export type CommentWithEmployee = ProjectComment & { employee?: Employee }
+export type CommentWithUser = ProjectComment & { employee?: User }
 
 interface ProjectCommentsProps {
-  comments: CommentWithEmployee[]
-  user: Account | null
+  comments: CommentWithUser[]
+  user: User | null
   commentText: string
   setCommentText: (v: string) => void
   commentFiles: FileAttachment[]
@@ -105,7 +104,7 @@ export default function ProjectCommentsSection({
             try {
               fileList = JSON.parse(c.attachments || "[]")
             } catch {}
-            const isOwner = user?.employeeId === c.employeeId
+            const isOwner = user?.id === c.employeeId
             return (
               <div key={c.id} className={`flex ${isOwner ? "justify-end" : "justify-start"}`}>
                 <div className={`flex items-end gap-2 max-w-[85%] ${isOwner ? "flex-row-reverse" : "flex-row"}`}>

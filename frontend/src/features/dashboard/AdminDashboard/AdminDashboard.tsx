@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react"
 import { Briefcase, Building2, Medal, Users } from "lucide-react"
-import employeeService from "@/services/employee.service"
+import userService from "@/services/user.service"
 import departmentService from "@/services/department.service"
 import positionService from "@/services/position.service"
 import projectService from "@/services/project.service"
-import accountService from "@/services/account.service"
-import { useAuth } from "@/contexts/AuthContext"
-import Banner from "./components/Banner"
 import StatsGrid from "./components/StatsGrid"
 import GrowthChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
@@ -21,7 +18,6 @@ const colors = {
 }
 
 export default function AdminDashboard() {
-  const { user } = useAuth()
   const [employees, setEmployees] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
   const [departments, setDepartments] = useState<any[]>([])
@@ -34,11 +30,11 @@ export default function AdminDashboard() {
     const fetch = async () => {
       try {
         const [empRes, deptRes, posRes, projRes, userRes] = await Promise.all([
-          employeeService.getAll(),
+          userService.getAll(),
           departmentService.getAll(),
           positionService.getAll(),
           projectService.getAll(),
-          accountService.getAll(),
+          userService.getAll(),
         ])
         const depts = deptRes.data.data
         setEmployees(empRes.data.data)
@@ -109,7 +105,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <Banner user={user} />
       <StatsGrid stats={stats} />
       <GrowthChart data={growthData} currentTotal={employees.length} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

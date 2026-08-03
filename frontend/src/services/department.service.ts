@@ -16,6 +16,9 @@ const departmentService = {
 
   getById: (id: string) => api.get<{ data: Department }>(`/departments/${id}`),
 
+  getProjectsByDepartment: (id: string) =>
+    api.get<{ data: unknown[] }>(`/departments/${id}/projects`),
+
   create: (data: { name: string; code: string; description?: string; isActive?: boolean }) =>
     api.post<{ data: Department }>("/departments", data),
 

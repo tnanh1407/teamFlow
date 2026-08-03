@@ -406,7 +406,7 @@ export default function Projects() {
           if (editingId) {
             await projectService.update(editingId, payload)
           } else {
-            payload.createdBy = user?.employeeId || ""
+            payload.createdBy = user?.id || ""
             await projectService.create(payload)
           }
           fetchProjects()

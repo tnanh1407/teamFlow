@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react"
-import { Search, Plus, Pencil, Trash2, ArrowUpDown, Medal, Fingerprint, Copy } from "lucide-react"
+import { Search, Plus, Pencil, Trash2, ArrowUpDown, Fingerprint, Copy } from "lucide-react"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
 import { toast } from "sonner"
@@ -40,7 +40,7 @@ function FormContent({
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
-  React.useEffect(() => {
+  useEffect(() => {
     dataRef.current = form
   }, [form, dataRef])
 

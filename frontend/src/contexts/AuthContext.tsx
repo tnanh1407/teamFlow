@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import accountService, { type Account } from "@/services/account.service";
+import { createContext, useContext, useState, useEffect, type ReactNode, type Dispatch, type SetStateAction } from "react";
+import userService, { type User } from "@/services/user.service";
 
 interface AuthContextType {
-  user: Account | null;
-  setUser: (user: Account | null) => void;
+  user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
   logout: () => Promise<void>;
   ready: boolean;
 }
@@ -11,7 +11,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<Account | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const bootstrapAuth = async () => {
       try {
-        const { data } = await accountService.me();
+        const { data } = await userService.me();
         if (!cancelled) {
           setUser(data.data);
         }
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await accountService.logout();
+      await userService.logout();
     } catch {
       // ignore
     } finally {

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
 import { Eye, EyeOff } from "lucide-react"
@@ -8,7 +8,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
-import accountService from "@/services/account.service"
+import userService from "@/services/user.service"
 import { useAuth } from "@/contexts/AuthContext"
 
 const loginSchema = z.object({
@@ -20,7 +20,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function Login() {
   const navigate = useNavigate()
-  const { setUser } = useAuth()
+  const { user, ready, setUser } = useAuth()
   const savedUsername = localStorage.getItem("rememberedUsername") ?? ""
   const [showPassword, setShowPassword] = useState(false)
   const [rememberInfo, setRememberInfo] = useState(Boolean(savedUsername))
@@ -36,6 +36,11 @@ export default function Login() {
     },
   })
 
+  useEffect(() => {
+    if (!ready || !user) return
+    navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
+  }, [navigate, ready, user])
+
   const onSubmit = async (values: LoginFormValues) => {
     try {
       if (rememberInfo) {
@@ -44,11 +49,11 @@ export default function Login() {
         localStorage.removeItem("rememberedUsername")
       }
 
-      const { data } = await accountService.login(values)
+      const { data } = await userService.login(values)
       const user = data.data.user
       setUser(user)
       toast.success(`Xin chào ${user.username}!`)
-      navigate(user.role === "admin" ? "/dashboard" : "/")
+      navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
     } catch (error) {
       const message =
         error && typeof error === "object" && "response" in error

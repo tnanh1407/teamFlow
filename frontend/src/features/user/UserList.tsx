@@ -1,14 +1,23 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
-import { Search, Plus, Pencil, Trash2, ChevronDown, ArrowUpDown, Eye, Copy, Fingerprint } from "lucide-react"
-import accountService, { type Account, type AccountRole, type AccountPosition } from "@/services/account.service"
-import { useAuth } from "@/contexts/AuthContext"
+import { ArrowUpDown, Copy, Eye, Fingerprint, Pencil, Plus, Search, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { useAuth } from "@/contexts/AuthContext"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import userService, { type AccountPosition, type User } from "@/services/user.service"
+import departmentService, { type Department } from "@/services/department.service"
+import positionService, { type Position } from "@/services/position.service"
 
 interface FormData {
-  employeeId: string
+  employeeCode: string
+  name: string
+  email: string
+  phone: string
+  birthDate: string
+  hireDate: string
+  gender: "male" | "female" | "other"
+  departmentId: string
+  positionId: string
   username: string
   password: string
   position: AccountPosition
@@ -16,7 +25,15 @@ interface FormData {
 }
 
 const emptyForm: FormData = {
-  employeeId: "",
+  employeeCode: "",
+  name: "",
+  email: "",
+  phone: "",
+  birthDate: "",
+  hireDate: "",
+  gender: "other",
+  departmentId: "",
+  positionId: "",
   username: "",
   password: "",
   position: "member",
@@ -24,77 +41,36 @@ const emptyForm: FormData = {
 }
 
 const positionOptions: { value: AccountPosition; label: string }[] = [
-  { value: "admin", label: "Admin" },
   { value: "manager", label: "Manager" },
   { value: "member", label: "Member" },
 ]
 
-const positionLabels: Record<AccountPosition, string> = {
-  admin: "Admin",
-  manager: "Manager",
-  member: "Member",
+function getPositionLabel(position: string) {
+  return positionOptions.find((p) => p.value === position)?.label ?? position
 }
 
-function positionToRole(position: AccountPosition): AccountRole {
-  return position === "admin" ? "admin" : "user"
-}
-
-function getPositionOptions(currentPosition: AccountPosition): { value: AccountPosition; label: string }[] {
-  if (currentPosition === "admin") return positionOptions
-  return [positionOptions[2]]
-}
-
-function getRoleBadge(position: AccountPosition): { label: string; classes: string } {
-  switch (position) {
-    case "admin":
-      return { label: "Admin", classes: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" }
-    case "manager":
-      return { label: "Manager", classes: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300" }
-    default:
-      return { label: "Member", classes: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" }
-  }
-}
-
-import employeeService from "@/services/employee.service"
-import departmentService from "@/services/department.service"
-
-export default function Members() {
+export default function UserList() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState<Account[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [positions, setPositions] = useState<Position[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-  const [userDeptId, setUserDeptId] = useState<string | null>(null)
-
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
-
-  const [employees, setEmployees] = useState<any[]>([])
 
   const fetchUsers = async () => {
     try {
-      const [userRes, empRes, deptRes] = await Promise.all([
-        accountService.getAll(),
-        employeeService.getAll(),
+      const [userRes, deptRes, posRes] = await Promise.all([
+        userService.getAll(),
         departmentService.getAll(),
+        positionService.getAll(),
       ])
-      const allUsers = userRes.data.data
-      const allEmps = empRes.data.data
-      const allDepts = deptRes.data.data
-
-      setUsers(allUsers)
-      setEmployees(allEmps)
-
-      if (currentUser?.employeeId) {
-        const myEmp = allEmps.find((e) => e.id === currentUser.employeeId)
-        if (myEmp?.departmentId) {
-          setUserDeptId(myEmp.departmentId)
-        } else {
-          const managedDept = allDepts.find((d) => d.managerId === currentUser.employeeId)
-          if (managedDept) setUserDeptId(managedDept.id)
-        }
-      }
+      setUsers(userRes.data.data)
+      setDepartments(deptRes.data.data)
+      setPositions(posRes.data.data)
     } catch {
-      console.error("Failed to fetch users")
+      toast.error("Không thể tải danh sách người dùng")
     } finally {
       setLoading(false)
     }
@@ -102,470 +78,354 @@ export default function Members() {
 
   useEffect(() => {
     fetchUsers()
-  }, [currentUser])
+  }, [])
 
-  const visible = currentUser?.position === "admin"
-    ? users
-    : currentUser?.position === "manager" && userDeptId
-    ? users.filter((u) => {
-        const targetEmp = employees.find((e) => e.id === u.employeeId)
-        return targetEmp && targetEmp.departmentId === userDeptId
-      })
-    : users
+  const deptNameMap = useMemo(
+    () => new Map(departments.map((d) => [d.id, d.name] as const)),
+    [departments]
+  )
+  const posNameMap = useMemo(
+    () => new Map(positions.map((p) => [p.id, p.name] as const)),
+    [positions]
+  )
 
-  const filtered = visible.filter((u) => {
-    const empObj = employees.find((e) => e.id === u.employeeId)
-    const empName = empObj?.name?.toLowerCase() || ""
-    const query = search.toLowerCase()
-    return (
-      u.username.toLowerCase().includes(query) ||
-      u.employeeId.toLowerCase().includes(query) ||
-      empName.includes(query)
+  const visibleUsers = useMemo(() => {
+    if (currentUser?.role === "admin") return users
+    if (currentUser?.position === "manager" && currentUser.departmentId) {
+      return users.filter((u) => u.departmentId === currentUser.departmentId)
+    }
+    return users
+  }, [currentUser, users])
+
+  const filteredUsers = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return visibleUsers
+    return visibleUsers.filter((u) =>
+      [u.employeeCode, u.username, u.name, u.email]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
     )
-  })
+  }, [search, visibleUsers])
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (!sortDir) return 0
-    const cmp = a.username.localeCompare(b.username)
-    return sortDir === "asc" ? cmp : -cmp
-  })
+  const sortedUsers = useMemo(() => {
+    const arr = [...filteredUsers]
+    if (!sortDir) return arr
+    arr.sort((a, b) => {
+      const cmp = a.username.localeCompare(b.username)
+      return sortDir === "asc" ? cmp : -cmp
+    })
+    return arr
+  }, [filteredUsers, sortDir])
 
   const toggleSort = () => {
     setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
   }
 
-  const canEdit = (target: Account): boolean => {
+  const canEdit = (target: User) => {
     if (!currentUser) return false
-    if (currentUser.position === "admin") {
-      if (target.id === currentUser.id) return false
-      return true
-    }
+    if (currentUser.role === "admin") return target.id !== currentUser.id
     if (currentUser.position === "manager") {
-      if (target.id === currentUser.id) return false
-      if (target.position !== "member") return false
-      return true
+      return target.id !== currentUser.id && target.position === "member"
     }
     return false
   }
 
-  const canDelete = (target: Account): boolean => {
-    return canEdit(target)
-  }
+  const canDelete = (target: User) => canEdit(target)
 
-  const inputClass =
-    "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-
-  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
-
-  const openFormDialog = async (editingUser?: Account) => {
+  const openFormDialog = async (editingUser?: User) => {
     const isEdit = !!editingUser
     const dataRef: { current: FormData | null } = { current: null }
 
     function FormComponent() {
       const [f, setF] = useState<FormData>(
         isEdit
-          ? { employeeId: editingUser!.employeeId, username: editingUser!.username, password: "", position: editingUser!.position, status: editingUser!.status }
+          ? {
+              employeeCode: editingUser!.employeeCode,
+              name: editingUser!.name,
+              email: editingUser!.email,
+              phone: editingUser!.phone || "",
+              birthDate: editingUser!.birthDate ? editingUser!.birthDate.slice(0, 10) : "",
+              hireDate: editingUser!.hireDate ? editingUser!.hireDate.slice(0, 10) : "",
+              gender: editingUser!.gender || "other",
+              departmentId: editingUser!.departmentId,
+              positionId: editingUser!.positionId,
+              username: editingUser!.username,
+              password: "",
+              position: editingUser!.position,
+              status: editingUser!.status,
+            }
           : emptyForm
       )
-      const [showPwd, setShowPwd] = useState(isEdit ? false : true)
-      const [posOpen, setPosOpen] = useState(false)
+
       dataRef.current = f
 
-      const posOptions = getPositionOptions(currentUser?.position ?? "member")
-
       return (
-        <div className="space-y-3" style={{ textAlign: "left" }}>
-          <div>
-            <label className={labelClass}>Mã nhân viên</label>
-            <input type="text" value={f.employeeId} onChange={(e) => setF((p) => ({ ...p, employeeId: e.target.value }))} placeholder="VD: NV001" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Tên đăng nhập</label>
-            <input type="text" value={f.username} onChange={(e) => setF((p) => ({ ...p, username: e.target.value }))} placeholder="Nhập tên đăng nhập" className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>
-              Mật khẩu {isEdit && <span className="text-zinc-400 font-normal">(để trống nếu không đổi)</span>}
-            </label>
-            <div className="relative">
-              <input type={showPwd ? "text" : "password"} value={f.password} onChange={(e) => setF((p) => ({ ...p, password: e.target.value }))} placeholder={isEdit ? "Để trống nếu không đổi" : "Nhập mật khẩu"} className={inputClass} />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer border-none bg-transparent text-xs">
-                {showPwd ? "Ẩn" : "Hiện"}
-              </button>
+        <div className="space-y-3 text-left">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Mã người dùng</label>
+              <input value={f.employeeCode} onChange={(e) => setF((p) => ({ ...p, employeeCode: e.target.value }))} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Tên đăng nhập</label>
+              <input value={f.username} onChange={(e) => setF((p) => ({ ...p, username: e.target.value }))} className={inputClass} />
             </div>
           </div>
-          <div>
-            <label className={labelClass}>Vai trò</label>
-            <div className="relative">
-              <button type="button" onClick={() => setPosOpen(!posOpen)} className={`${inputClass} flex items-center justify-between`}>
-                <span>{positionLabels[f.position]}</span>
-                <ChevronDown size={14} className="text-zinc-400" />
-              </button>
-              {posOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 bg-white shadow-lg z-10 overflow-hidden">
-                  {posOptions.map((r) => (
-                    <button key={r.value} type="button" onClick={() => { setF((p) => ({ ...p, position: r.value })); setPosOpen(false) }} className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 transition cursor-pointer border-none ${f.position === r.value ? "bg-blue-50 text-blue-700 font-medium" : "text-zinc-700"}`}>
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Họ và tên</label>
+              <input value={f.name} onChange={(e) => setF((p) => ({ ...p, name: e.target.value }))} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Email</label>
+              <input type="email" value={f.email} onChange={(e) => setF((p) => ({ ...p, email: e.target.value }))} className={inputClass} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Phòng ban</label>
+              <select value={f.departmentId} onChange={(e) => setF((p) => ({ ...p, departmentId: e.target.value }))} className={`${inputClass} appearance-none`}>
+                <option value="">-- Chọn --</option>
+                {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Chức vụ</label>
+              <select value={f.positionId} onChange={(e) => setF((p) => ({ ...p, positionId: e.target.value }))} className={`${inputClass} appearance-none`}>
+                <option value="">-- Chọn --</option>
+                {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Mật khẩu {isEdit && <span className="font-normal text-zinc-400">(để trống nếu không đổi)</span>}</label>
+              <input type="password" value={f.password} onChange={(e) => setF((p) => ({ ...p, password: e.target.value }))} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Vai trò</label>
+              <select value={f.position} onChange={(e) => setF((p) => ({ ...p, position: e.target.value as AccountPosition }))} className={`${inputClass} appearance-none`}>
+                {positionOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Số điện thoại</label>
+              <input value={f.phone} onChange={(e) => setF((p) => ({ ...p, phone: e.target.value }))} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Giới tính</label>
+              <select value={f.gender} onChange={(e) => setF((p) => ({ ...p, gender: e.target.value as FormData["gender"] }))} className={`${inputClass} appearance-none`}>
+                <option value="other">Other</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelClass}>Ngày sinh</label>
+              <input type="date" value={f.birthDate} onChange={(e) => setF((p) => ({ ...p, birthDate: e.target.value }))} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Ngày vào làm</label>
+              <input type="date" value={f.hireDate} onChange={(e) => setF((p) => ({ ...p, hireDate: e.target.value }))} className={inputClass} />
             </div>
           </div>
           <div className="flex items-center gap-2 pt-1">
-            <input type="checkbox" id="swal-status" checked={f.status} onChange={(e) => setF((p) => ({ ...p, status: e.target.checked }))} className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
-            <label htmlFor="swal-status" className="text-sm text-zinc-700 cursor-pointer">Kích hoạt</label>
+            <input type="checkbox" checked={f.status} onChange={(e) => setF((p) => ({ ...p, status: e.target.checked }))} />
+            <span className="text-sm text-zinc-700">Kích hoạt</span>
           </div>
         </div>
       )
     }
 
     const result = await MySwal.fire({
-      title: isEdit ? "Sửa thành viên" : "Thêm thành viên",
-      width: 420,
+      title: isEdit ? "Sửa người dùng" : "Thêm người dùng",
+      width: 640,
       html: <FormComponent />,
       showCancelButton: true,
       confirmButtonText: isEdit ? "Cập nhật" : "Tạo mới",
-      cancelButtonText: "Huỷ",
+      cancelButtonText: "Hủy",
       reverseButtons: true,
       preConfirm: () => {
         const d = dataRef.current
         if (!d) return false
-        if (!d.employeeId.trim()) { MySwal.showValidationMessage("Vui lòng nhập mã nhân viên"); return false }
+        if (!d.employeeCode.trim()) { MySwal.showValidationMessage("Vui lòng nhập mã người dùng"); return false }
+        if (!d.name.trim()) { MySwal.showValidationMessage("Vui lòng nhập họ và tên"); return false }
+        if (!d.email.trim()) { MySwal.showValidationMessage("Vui lòng nhập email"); return false }
+        if (!d.departmentId.trim()) { MySwal.showValidationMessage("Vui lòng chọn phòng ban"); return false }
+        if (!d.positionId.trim()) { MySwal.showValidationMessage("Vui lòng chọn chức vụ"); return false }
         if (!d.username.trim()) { MySwal.showValidationMessage("Vui lòng nhập tên đăng nhập"); return false }
         if (!isEdit && !d.password.trim()) { MySwal.showValidationMessage("Vui lòng nhập mật khẩu"); return false }
         return d
       },
     })
 
-    if (result.isConfirmed && result.value) {
-      try {
-        if (isEdit) {
-          const payload: any = {
-            employeeId: result.value.employeeId,
-            username: result.value.username,
-            position: result.value.position,
-            status: result.value.status,
-          }
-          if (result.value.password) payload.password = result.value.password
-          await accountService.update(editingUser!.id, payload)
-        } else {
-          await accountService.create({
-            ...result.value,
-            role: positionToRole(result.value.position),
-          })
-        }
-        toast.success(isEdit ? "Cập nhật thành công" : "Tạo mới thành công")
-        fetchUsers()
-      } catch {
-        toast.error("Lưu thất bại")
+    if (!result.isConfirmed || !result.value) return
+
+    try {
+      const payload: Record<string, unknown> = {
+        employeeCode: result.value.employeeCode,
+        name: result.value.name,
+        email: result.value.email,
+        phone: result.value.phone,
+        birthDate: result.value.birthDate || undefined,
+        hireDate: result.value.hireDate || undefined,
+        gender: result.value.gender,
+        departmentId: result.value.departmentId,
+        positionId: result.value.positionId,
+        username: result.value.username,
+        position: result.value.position,
+        status: result.value.status,
       }
+      if (result.value.password) payload.password = result.value.password
+
+      if (isEdit) {
+        await userService.update(editingUser!.id, payload)
+      } else {
+        await userService.create(payload)
+      }
+      toast.success(isEdit ? "Cập nhật thành công" : "Tạo mới thành công")
+      fetchUsers()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Lưu thất bại")
     }
   }
 
-  const confirmDelete = async (e: React.MouseEvent, user: Account) => {
+  const confirmDelete = async (e: React.MouseEvent, user: User) => {
     e.stopPropagation()
     const confirmed = await showDeleteConfirm({
       name: user.username,
-      html: `Bạn có chắc muốn xoá thành viên <strong>${user.username}</strong>? Hành động này không thể hoàn tác.`,
+      html: `Bạn có chắc muốn xoá người dùng <strong>${user.username}</strong>? Hành động này không thể hoàn tác.`,
     })
-    if (confirmed) {
-      try {
-        await accountService.delete(user.id)
-        toast.success("Xoá thành công")
-        fetchUsers()
-      } catch {
-        toast.error("Xoá thất bại")
-      }
+    if (!confirmed) return
+    try {
+      await userService.delete(user.id)
+      toast.success("Xoá thành công")
+      fetchUsers()
+    } catch {
+      toast.error("Xoá thất bại")
     }
   }
+
+  const inputClass =
+    "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+  const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Quản lí thành viên
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Quản lý tài khoản người dùng trong hệ thống
-          </p>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Quản lý người dùng</h1>
+          <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Quản lý tài khoản người dùng trong hệ thống</p>
         </div>
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-2 gap-4">
-        {(() => {
-          const activeUsers = users.filter(u => u.status).length
-          const inactiveUsers = users.filter(u => !u.status).length
-          const adminCount = users.filter(u => u.position === "admin").length
-          const managerCount = users.filter(u => u.position === "manager").length
-          const memberCount = users.filter(u => u.position === "member").length
-          const statusData = [
-            { name: "Hoạt động", value: activeUsers, color: "#10b981" },
-            { name: "Vô hiệu", value: inactiveUsers, color: "#ef4444" },
-          ].filter(d => d.value > 0)
-          const roleData = [
-            { name: "Admin", value: adminCount, color: "#8b5cf6" },
-            { name: "Manager", value: managerCount, color: "#06b6d4" },
-            { name: "Member", value: memberCount, color: "#3b82f6" },
-          ].filter(d => d.value > 0)
-          const total = users.length || 1
-          return (<>
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Trạng thái</p>
-              <div className="flex items-start gap-4">
-                <ResponsiveContainer width="55%" height={220}>
-                  <PieChart>
-                    <Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                      {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex-1 flex flex-col gap-2 pt-2">
-                  {statusData.map((entry) => (
-                    <div key={entry.name} className="group cursor-default">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
-                        </div>
-                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
-                      </div>
-                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Vai trò</p>
-              <div className="flex items-start gap-4">
-                <ResponsiveContainer width="55%" height={220}>
-                  <PieChart>
-                    <Pie data={roleData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                      {roleData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e4e4e7", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: "13px" }} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex-1 flex flex-col gap-2 pt-2">
-                  {roleData.map((entry) => (
-                    <div key={entry.name} className="group cursor-default">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-                          <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
-                        </div>
-                        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
-                      </div>
-                      <div className="w-full h-1 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(entry.value / total) * 100}%`, backgroundColor: entry.color }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </>)
-        })()}
-      </div>
-
-      <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
+      <div className="flex items-center justify-between rounded-2xl bg-zinc-50 px-6 py-2 shadow-sm dark:bg-zinc-800/50">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => openFormDialog()}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
-            title="Thêm thành viên"
-          >
+          <button onClick={() => openFormDialog()} className="flex h-9 w-9 items-center justify-center rounded-full border-none bg-white text-zinc-400 transition-all hover:text-blue-500 hover:shadow-sm dark:bg-zinc-800">
             <Plus size={18} />
           </button>
-          <button
-            onClick={toggleSort}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-none hover:bg-white dark:hover:bg-zinc-800"
-            title={
-              sortDir === null ? "Sắp xếp A-Z" : sortDir === "asc" ? "Sắp xếp Z-A" : "Bỏ sắp xếp"
-            }
-          >
-            <ArrowUpDown
-              size={16}
-              className={`transition-all duration-200 ${sortDir === "desc" ? "rotate-180" : ""
-                } ${sortDir ? "text-blue-500" : "text-zinc-400"}`}
-            />
-            {sortDir && (
-              <span className="text-zinc-600 dark:text-zinc-300">
-                {sortDir === "asc" ? "A-Z" : "Z-A"}
-              </span>
-            )}
+          <button onClick={toggleSort} className="flex items-center gap-2 rounded-lg border-none px-3 py-2 text-sm font-medium transition-colors hover:bg-white dark:hover:bg-zinc-800">
+            <ArrowUpDown size={16} className={sortDir ? "text-blue-500" : "text-zinc-400"} />
+            {sortDir && <span>{sortDir === "asc" ? "A-Z" : "Z-A"}</span>}
           </button>
         </div>
         <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-          />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
-            placeholder="Tìm kiếm theo tên đăng nhập hoặc mã nhân viên..."
+            placeholder="Tìm theo tên, mã người dùng, email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-zinc-400 transition focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
           />
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">UUID</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Avatar
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Mã NV
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Họ và tên
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Tên đăng nhập
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Vai trò
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Trạng thái
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Thao tác
-                </th>
+              <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">UUID</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Avatar</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Mã người dùng</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Họ và tên</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Tên đăng nhập</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Vai trò</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Trạng thái</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
-                <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Đang tải...
-                  </td>
-                </tr>
-              ) : sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Không tìm thấy thành viên nào
-                  </td>
-                </tr>
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td></tr>
+              ) : sortedUsers.length === 0 ? (
+                <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy người dùng nào</td></tr>
               ) : (
-                sorted.map((user) => {
-                  const badge = getRoleBadge(user.position)
-                  const empObj = employees.find((e) => e.id === user.employeeId)
+                sortedUsers.map((item) => {
+                  const deptName = deptNameMap.get(item.departmentId) || "—"
+                  const posName = posNameMap.get(item.positionId) || "—"
                   return (
-                    <tr
-                      key={user.id}
-                      className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                    >
+                    <tr key={item.id} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
-                          <Fingerprint size={12} className="shrink-0" />
-                          {user.id.slice(0, 8)}...
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              navigator.clipboard.writeText(user.id)
-                              toast.success("Đã sao chép UUID")
-                            }}
-                            className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
-                            title="Copy UUID"
-                          >
+                        <span className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-400">
+                          <Fingerprint size={12} />
+                          {item.id.slice(0, 8)}...
+                          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(item.id); toast.success("Đã sao chép UUID") }} className="border-none bg-transparent p-0.5 text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-500 dark:hover:bg-zinc-800">
                             <Copy size={12} />
                           </button>
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
-                          {user.avatarURL ? (
-                            <img src={user.avatarURL} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            user.username.slice(0, 2).toUpperCase()
-                          )}
+                        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-xs font-bold text-white">
+                          {item.avatarURL ? <img src={item.avatarURL} alt="" className="h-full w-full object-cover" /> : item.username.slice(0, 2).toUpperCase()}
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100 font-mono">
-                          {user.employeeId}
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(user.employeeId) }}
-                            className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
-                            title="Copy"
-                          >
+                        <div className="inline-flex items-center gap-1.5 font-mono text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                          {item.employeeCode}
+                          <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(item.employeeCode) }} className="border-none bg-transparent p-0.5 text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-500 dark:hover:bg-zinc-800">
                             <Copy size={12} />
                           </button>
-                        </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                          {empObj?.name || "—"}
-                        </span>
+                        <div className="font-medium text-zinc-900 dark:text-zinc-100">{item.name || "—"}</div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{deptName} · {posName}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => navigate(`/members/${user.id}`)}
-                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent"
-                        >
-                          {user.username}
+                        <button onClick={() => navigate(`/users/${item.id}`)} className="border-none bg-transparent text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                          {item.username}
                         </button>
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.classes}`}
-                        >
-                          {badge.label}
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${item.role === "admin" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300" : item.position === "manager" ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"}`}>
+                          {item.role === "admin" ? "Admin" : getPositionLabel(item.position)}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1.5 text-xs font-medium ${user.status
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-red-500 dark:text-red-400"
-                            }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${user.status
-                              ? "bg-emerald-500"
-                              : "bg-red-500"
-                              }`}
-                          />
-                          {user.status ? "Hoạt động" : "Vô hiệu"}
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${item.status ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400"}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${item.status ? "bg-emerald-500" : "bg-red-500"}`} />
+                          {item.status ? "Hoạt động" : "Vô hiệu"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => navigate(`/members/${user.id}`)}
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
-                            title="Xem chi tiết"
-                          >
+                          <button onClick={() => navigate(`/users/${item.id}`)} className="border-none rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400" title="Xem chi tiết">
                             <Eye size={15} />
                           </button>
-                          {canEdit(user) && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); openFormDialog(user) }}
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none"
-                              title="Sửa"
-                            >
+                          {canEdit(item) && (
+                            <button onClick={(e) => { e.stopPropagation(); openFormDialog(item) }} className="border-none rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400" title="Sửa">
                               <Pencil size={15} />
                             </button>
                           )}
-                          {canDelete(user) && (
-                            <button
-                              onClick={(e) => confirmDelete(e, user)}
-                              className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none"
-                              title="Xoá"
-                            >
+                          {canDelete(item) && (
+                            <button onClick={(e) => confirmDelete(e, item)} className="border-none rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400" title="Xoá">
                               <Trash2 size={15} />
                             </button>
                           )}

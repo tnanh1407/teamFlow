@@ -13,8 +13,14 @@ const projectDepartmentService = {
   create: (data: { projectId: string; departmentId: string }) =>
     api.post<{ data: ProjectDepartment }>("/project-departments", data),
 
-  delete: (projectId: string, departmentId: string) =>
-    api.delete(`/project-departments/${projectId}/${departmentId}`),
+  delete: (projectIdOrData: string | { projectId: string; departmentId: string }, departmentId?: string) => {
+    const data =
+      typeof projectIdOrData === "string"
+        ? { projectId: projectIdOrData, departmentId: departmentId ?? "" }
+        : projectIdOrData;
+
+    return api.delete("/project-departments", { data });
+  },
 };
 
 export default projectDepartmentService;

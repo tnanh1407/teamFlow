@@ -7,7 +7,7 @@ import projectDepartmentService, { type ProjectDepartment } from "@/services/pro
 import projectEmployeeService, { type ProjectEmployee } from "@/services/project-employee.service"
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
 import departmentService, { type Department } from "@/services/department.service"
-import employeeService, { type Employee } from "@/services/employee.service"
+import userService, { type User } from "@/services/user.service"
 import uploadService from "@/services/upload.service"
 import { useAuth } from "@/contexts/AuthContext"
 import ProjectLogsSection from "./components/ProjectLogsSection"
@@ -100,14 +100,14 @@ export default function ProjectDetail() {
   const [logs, setLogs] = useState<ProjectLog[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [deptEmployeeCount, setDeptEmployeeCount] = useState<Record<string, number>>({})
-  const [, setEmployees] = useState<Employee[]>([])
+  const [, setEmployees] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   const [allDepartments, setAllDepartments] = useState<Department[]>([])
   const [projectDeptIds, setProjectDeptIds] = useState<string[]>([])
-  const [projectMembers, setProjectMembers] = useState<(ProjectEmployee & { employee?: Employee })[]>([])
-  const [logEmployeeMap, setLogEmployeeMap] = useState<Record<string, Employee>>({})
-  const [comments, setComments] = useState<(ProjectComment & { employee?: Employee })[]>([])
+  const [projectMembers, setProjectMembers] = useState<(ProjectEmployee & { User?: User })[]>([])
+  const [logEmployeeMap, setLogEmployeeMap] = useState<Record<string, User>>({})
+  const [comments, setComments] = useState<(ProjectComment & { User?: User })[]>([])
   const [commentText, setCommentText] = useState("")
   const [commentFiles, setCommentFiles] = useState<FileAttachment[]>([])
   const [commentUploading, setCommentUploading] = useState(false)
@@ -140,9 +140,9 @@ export default function ProjectDetail() {
 
         const uniqueEmpIds = [...new Set(rawLogs.map((l) => l.employeeId).filter(Boolean))]
         if (uniqueEmpIds.length > 0) {
-          Promise.all(uniqueEmpIds.map((eid) => employeeService.getById(eid)))
+          Promise.all(uniqueEmpIds.map((eid) => userService.getById(eid)))
             .then((results) => {
-              const map: Record<string, Employee> = {}
+              const map: Record<string, User> = {}
               results.forEach((r: any) => {
                 const emp = r.data.data
                 if (emp) map[emp.id] = emp
@@ -159,11 +159,11 @@ export default function ProjectDetail() {
           const deptIds = pdepts.map((pd: ProjectDepartment) => pd.departmentId)
           Promise.all([
             ...deptIds.map((did: string) => departmentService.getById(did)),
-            ...deptIds.map((did: string) => employeeService.getByDepartment(did)),
+            ...deptIds.map((did: string) => userService.getByDepartment(did)),
           ]).then((results) => {
             const mid = deptIds.length
             const depts = results.slice(0, mid).map((r: any) => r.data.data)
-            const empResults = results.slice(mid).map((r: any) => r.data.data as Employee[])
+            const empResults = results.slice(mid).map((r: any) => r.data.data as User[])
 
             const countMap: Record<string, number> = {}
             deptIds.forEach((did, i) => {
@@ -183,7 +183,7 @@ export default function ProjectDetail() {
         if (pemps.length > 0) {
           Promise.all(
             pemps.map((pe: ProjectEmployee) =>
-              employeeService.getById(pe.employeeId).then((r) => ({ ...pe, employee: r.data.data }))
+              userService.getById(pe.employeeId).then((r) => ({ ...pe, User: r.data.data }))
             )
           ).then((enriched) => setProjectMembers(enriched))
         } else {
@@ -194,7 +194,7 @@ export default function ProjectDetail() {
         if (rawComments.length > 0) {
           Promise.all(
             rawComments.map((c: ProjectComment) =>
-              employeeService.getById(c.employeeId).then((r) => ({ ...c, employee: r.data.data }))
+              userService.getById(c.employeeId).then((r) => ({ ...c, User: r.data.data }))
             )
           ).then((enriched) => setComments(enriched))
         } else {
@@ -208,8 +208,8 @@ export default function ProjectDetail() {
   useEffect(() => {
     fetchProject()
     departmentService.getAll().then((r) => setAllDepartments(r.data.data))
-    if (user?.employeeId) {
-      employeeService.getById(user.employeeId).then((r) => {
+    if (user?.id) {
+      userService.getById(user.id).then((r) => {
         const emp = r.data.data
         if (emp) {
           setLogEmployeeMap((prev) => ({ ...prev, [emp.id]: emp }))
@@ -225,13 +225,13 @@ export default function ProjectDetail() {
     const initialDeptId = isManager && userDeptId ? userDeptId : ""
     let currentDeptId = initialDeptId
     let currentEmpIds: string[] = []
-    let currentDeptEmps: Employee[] = []
+    let currentDeptEmps: User[] = []
 
     const AddMemberContent = () => {
       const [selectedDeptId, setSelectedDeptId] = useState(initialDeptId)
       const [selectedEmpIds, setSelectedEmpIds] = useState<string[]>([])
       const [selectedDeptOpen, setSelectedDeptOpen] = useState(false)
-      const [deptEmps, setDeptEmps] = useState<Employee[]>([])
+      const [deptEmps, setDeptEmps] = useState<User[]>([])
       const selectDeptRef = useRef<HTMLDivElement>(null)
 
       useEffect(() => {
@@ -252,7 +252,7 @@ export default function ProjectDetail() {
 
       useEffect(() => {
         if (selectedDeptId) {
-          employeeService.getByDepartment(selectedDeptId).then((r) => {
+          userService.getByDepartment(selectedDeptId).then((r) => {
             const emps = r.data.data
             setDeptEmps(emps)
             const existingEmpIds = projectMembers.map((m) => m.employeeId)
@@ -410,13 +410,13 @@ export default function ProjectDetail() {
             projectEmployeeService.create({ projectId: project.id, employeeId: empId })
           )
         )
-        if (user?.employeeId) {
+        if (user?.id) {
           const deptName = allDepartments.find((d) => d.id === departmentId)?.name || ""
           await Promise.all(
             newMembers.map((m) =>
               projectLogService.create({
                 projectId: project.id,
-                employeeId: user.employeeId,
+                employeeId: user.id,
                 action: "assigned",
                 description: `${m.name} - ${deptName}`,
               })
@@ -746,11 +746,11 @@ export default function ProjectDetail() {
         }
       }
 
-      if (user?.employeeId) {
+      if (user?.id) {
         const roleStr = roleLabel[user.position] || user.position
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.employeeId,
+          employeeId: user.id,
           action: "updated",
           description: changed.length > 0
             ? `[${roleStr}] ${changed.join("; ")}`
@@ -836,11 +836,11 @@ export default function ProjectDetail() {
     if (!project) return
     try {
       await projectDepartmentService.delete(project.id, departmentId)
-      if (user?.employeeId) {
+      if (user?.id) {
         const dept = departments.find((d) => d.id === departmentId)
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.employeeId,
+          employeeId: user.id,
           action: "updated",
           description: `Phòng ban ${dept?.name || ""}`,
         })
@@ -856,12 +856,12 @@ export default function ProjectDetail() {
     try {
       const pm = projectMembers.find((m) => m.id === id)
       await projectEmployeeService.delete(id)
-      if (user?.employeeId && pm?.employee?.name) {
+      if (user?.id && pm?.User?.name) {
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.employeeId,
+          employeeId: user.id,
           action: "updated",
-          description: pm.employee.name,
+          description: pm.User.name,
         })
       }
       fetchProject()
@@ -890,20 +890,20 @@ export default function ProjectDetail() {
   }
 
   const handleAddComment = async () => {
-    if (!project || !user?.employeeId || (!commentText.trim() && commentFiles.length === 0)) return
+    if (!project || !user?.id || (!commentText.trim() && commentFiles.length === 0)) return
     try {
       const { data } = await projectCommentService.create({
         projectId: project.id,
-        employeeId: user.employeeId,
+        employeeId: user.id,
         content: commentText.trim() || undefined,
         attachments: commentFiles.length > 0 ? JSON.stringify(commentFiles) : undefined,
       })
-      const emp = await employeeService.getById(user.employeeId)
-      setComments((prev) => [{ ...data.data, employee: emp.data.data }, ...prev])
-      if (user.employeeId) {
+      const emp = await userService.getById(user.id)
+      setComments((prev) => [{ ...data.data, User: emp.data.data }, ...prev])
+      if (user.id) {
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.employeeId,
+          employeeId: user.id,
           action: "commented",
           description: commentText.trim() || "đã bình luận",
         })
@@ -920,10 +920,10 @@ export default function ProjectDetail() {
     try {
       await projectCommentService.delete(commentId)
       setComments((prev) => prev.filter((c) => c.id !== commentId))
-      if (project && user?.employeeId) {
+      if (project && user?.id) {
         await projectLogService.create({
           projectId: project.id,
-          employeeId: user.employeeId,
+          employeeId: user.id,
           action: "updated",
           description: "đã xoá một bình luận",
         })

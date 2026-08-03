@@ -9,8 +9,16 @@ export interface ProjectEmployee {
 }
 
 const projectEmployeeService = {
+  getAll: () => api.get<{ data: ProjectEmployee[] }>("/project-employees"),
+
+  getByEmployee: (employeeId: string) =>
+    api.get<{ data: ProjectEmployee[] }>(`/project-employees/employee/${employeeId}`),
+
   getByProject: (projectId: string) =>
     api.get<{ data: ProjectEmployee[] }>(`/project-employees/project/${projectId}`),
+
+  getById: (id: string) =>
+    api.get<{ data: ProjectEmployee }>(`/project-employees/${id}`),
 
   create: (data: { projectId: string; employeeId: string; role?: string }) =>
     api.post<{ data: ProjectEmployee }>("/project-employees", data),

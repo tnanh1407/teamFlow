@@ -2,10 +2,10 @@ import { useState } from "react"
 import { Users, Plus, Building2, X } from "lucide-react"
 import type { ProjectEmployee } from "@/services/project-employee.service"
 import type { Department } from "@/services/department.service"
-import type { Employee } from "@/services/employee.service"
+import type { User } from "@/services/user.service"
 
 interface ProjectMembersSectionProps {
-  projectMembers: (ProjectEmployee & { employee?: Employee })[]
+  projectMembers: (ProjectEmployee & { employee?: User })[]
   departments: Department[]
   canManageMembers: boolean
   isManager: boolean

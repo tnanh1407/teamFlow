@@ -4,8 +4,6 @@ import Login from "@/features/auth/Login";
 import ForgotPassword from "@/features/auth/ForgotPassword";
 import UserList from "@/features/user/UserList";
 import UserDetail from "@/features/user/UserDetail";
-import EmployeeList from "@/features/employee/EmployeeList";
-import EmployeeDetail from "@/features/employee/EmployeeDetail";
 import PositionList from "@/features/position/PositionList";
 import ProjectList from "@/features/project/ProjectList";
 import Settings from "@/features/user/Settings";
@@ -53,12 +51,10 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <RoleRedirect roles={["admin", "user"]}><UserDashboard /></RoleRedirect> },
       { path: "dashboard", element: <RoleRedirect roles={["admin"]}><AdminDashboard /></RoleRedirect> },
-      { path: "members", element: <RoleRedirect roles={["admin", "user"]}><UserList /></RoleRedirect> },
-      { path: "members/:id", element: <RoleRedirect roles={["admin", "user"]}><UserDetail /></RoleRedirect> },
+      { path: "users", element: <RoleRedirect roles={["admin", "user"]}><UserList /></RoleRedirect> },
+      { path: "users/:id", element: <RoleRedirect roles={["admin", "user"]}><UserDetail /></RoleRedirect> },
       { path: "departments", element: <RoleRedirect roles={["admin"]}><DepartmentList /></RoleRedirect> },
       { path: "departments/:id", element: <RoleRedirect roles={["admin"]}><DepartmentDetail /></RoleRedirect> },
-      { path: "employees", element: <RoleRedirect roles={["admin"]}><EmployeeList /></RoleRedirect> },
-      { path: "employees/:id", element: <RoleRedirect roles={["admin"]}><EmployeeDetail /></RoleRedirect> },
       { path: "positions", element: <RoleRedirect roles={["admin"]}><PositionList /></RoleRedirect> },
       { path: "projects", element: <RoleRedirect roles={["admin", "user"]}><ProjectList /></RoleRedirect> },
       { path: "projects/:id", element: <RoleRedirect roles={["admin", "user"]}><ProjectDetail /></RoleRedirect> },

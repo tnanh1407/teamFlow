@@ -15,6 +15,9 @@ const projectLogService = {
   getByProject: (projectId: string) =>
     api.get<{ data: ProjectLog[] }>(`/project-logs/project/${projectId}`),
 
+  getByEmployee: (employeeId: string) =>
+    api.get<{ data: ProjectLog[] }>(`/project-logs/employee/${employeeId}`),
+
   getById: (id: string) => api.get<{ data: ProjectLog }>(`/project-logs/${id}`),
 
   create: (data: { projectId: string; employeeId: string; action?: string; description?: string }) =>

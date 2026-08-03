@@ -16,16 +16,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import type { AccountPosition, AccountRole } from "@/services/account.service"
 import dashboardImg from "@/assets/dashboard.png"
-
-interface IUserSideBar {
-  id: string;
-  departmentId: string;
-  name: string;
-  userPosition: AccountPosition;
-  role: AccountRole;
-}
 
 interface ISidebarItem {
   label: string;
@@ -46,7 +37,7 @@ const sidebarItems: ISidebarItem[] = [
     children: [
       {
         label: "Nhân viên",
-        to: "/employees",
+        to: "/users",
         icon: Briefcase,
       },
       {

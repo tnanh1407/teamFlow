@@ -3,93 +3,87 @@ import { useNavigate } from "react-router-dom"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 import { Users, CheckSquare, Activity, TrendingUp, Gauge, Building2, UserCircle, type LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import accountService, { type Account } from "@/services/account.service"
+import userService, { type User } from "@/services/user.service"
 import projectService, { type Project } from "@/services/project.service"
-import employeeService, { type Employee } from "@/services/employee.service"
 import departmentService, { type Department } from "@/services/department.service"
 
 export default function UserDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [members, setMembers] = useState<Account[]>([])
+  const [members, setMembers] = useState<User[]>([])
   const [projects, setProjects] = useState<Project[]>([])
-  const [, setEmp] = useState<Employee | null>(null)
   const [dept, setDept] = useState<Department | null>(null)
-  const [deptMembers, setDeptMembers] = useState<Account[]>([])
-  const [deptManager, setDeptManager] = useState<Employee | null>(null)
+  const [deptMembers, setDeptMembers] = useState<User[]>([])
+  const [deptManager, setDeptManager] = useState<User | null>(null)
 
   useEffect(() => {
     const fetch = async () => {
       try {
         if (user?.position === "member") {
-          const [projRes, userRes, empRes, deptRes] = await Promise.all([
+          const [projRes, userRes, deptRes] = await Promise.all([
             projectService.getMyProjects(),
-            accountService.getAll(),
-            employeeService.getAll(),
+            userService.getAll(),
             departmentService.getAll(),
           ])
           setProjects(projRes.data.data)
           setMembers(userRes.data.data)
 
-          const myEmp = empRes.data.data.find((e) => e.id === user.employeeId)
-          setEmp(myEmp || null)
+          const myUser = userRes.data.data.find((e) => e.id === user.id)
 
-          if (myEmp?.departmentId) {
-            const myDept = deptRes.data.data.find((d) => d.id === myEmp.departmentId)
+          if (myUser?.departmentId) {
+            const myDept = deptRes.data.data.find((d) => d.id === myUser.departmentId)
             setDept(myDept || null)
 
             if (myDept?.managerId) {
-              const mgr = empRes.data.data.find((e) => e.id === myDept.managerId)
+              const mgr = userRes.data.data.find((e) => e.id === myDept.managerId)
               setDeptManager(mgr || null)
             }
 
-            const deptEmpIds = empRes.data.data
-              .filter((e) => e.departmentId === myEmp.departmentId)
+            const deptEmpIds = userRes.data.data
+              .filter((e) => e.departmentId === myUser.departmentId)
               .map((e) => e.id)
             const deptUsers = userRes.data.data.filter((u) =>
-              deptEmpIds.includes(u.employeeId) && u.id !== user.id
+              deptEmpIds.includes(u.id) && u.id !== user.id
             )
             setDeptMembers(deptUsers)
           }
         } else {
-          const [projRes, userRes, empRes, deptRes] = await Promise.all([
+          const [projRes, userRes, deptRes] = await Promise.all([
             projectService.getMyProjects(),
-            accountService.getAll(),
-            employeeService.getAll(),
+            userService.getAll(),
             departmentService.getAll(),
           ])
           setProjects(projRes.data.data)
           setMembers(userRes.data.data)
 
-          const myEmp = empRes.data.data.find((e) => e.id === user!.employeeId)
-          setEmp(myEmp || null)
+          const myUser = userRes.data.data.find((e) => e.id === user!.id)
 
-          const managedDept = deptRes.data.data.find((d) => d.managerId === user!.employeeId)
+          const managedDept = deptRes.data.data.find((d) => d.managerId === user!.id)
           if (managedDept) {
             setDept(managedDept)
-            setDeptManager(myEmp || null)
+            setDeptManager(myUser || null)
 
-            const deptEmpIds = empRes.data.data
+            const deptEmpIds = userRes.data.data
               .filter((e) => e.departmentId === managedDept.id)
               .map((e) => e.id)
             const deptUsers = userRes.data.data.filter((u) =>
-              deptEmpIds.includes(u.employeeId) && u.id !== user!.id
+              deptEmpIds.includes(u.id) && u.id !== user!.id
             )
             setDeptMembers(deptUsers)
-          } else if (myEmp?.departmentId) {
-            const myDept = deptRes.data.data.find((d) => d.id === myEmp.departmentId)
+          } else if (myUser?.departmentId) {
+            const myDept = deptRes.data.data.find((d) => d.id === myUser.departmentId)
             setDept(myDept || null)
 
             if (myDept?.managerId) {
-              const mgr = empRes.data.data.find((e) => e.id === myDept.managerId)
+              const mgr = userRes.data.data.find((e) => e.id === myDept.managerId)
               setDeptManager(mgr || null)
             }
 
-            const deptEmpIds = empRes.data.data
-              .filter((e) => e.departmentId === myEmp.departmentId)
+            const deptEmpIds = userRes.data.data
+              .filter((e) => e.departmentId === myUser.departmentId)
               .map((e) => e.id)
             const deptUsers = userRes.data.data.filter((u) =>
-              deptEmpIds.includes(u.employeeId) && u.id !== user!.id
+              deptEmpIds.includes(u.id) && u.id !== user!.id
             )
             setDeptMembers(deptUsers)
           }
@@ -141,7 +135,7 @@ export default function UserDashboard() {
       value: deptMemberCount,
       icon: Users,
       color: "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400",
-      onClick: () => navigate("/members"),
+      onClick: () => navigate("/users"),
     })
   }
 
@@ -367,7 +361,7 @@ export default function UserDashboard() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{(m.username ?? "")}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.employeeId ?? "").slice(0, 8)}...</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.id ?? "").slice(0, 8)}...</p>
                     </div>
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${m.status ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"}`}>
                       {m.status ? "Hoạt động" : "Vô hiệu"}
@@ -394,7 +388,7 @@ export default function UserDashboard() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{(m.username ?? "")}</p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.employeeId ?? "").slice(0, 8)}...</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.id ?? "").slice(0, 8)}...</p>
                       </div>
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${m.status ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"}`}>
                         {m.status ? "Hoạt động" : "Vô hiệu"}

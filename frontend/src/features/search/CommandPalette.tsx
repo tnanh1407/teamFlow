@@ -35,10 +35,10 @@ interface CommandPaletteProps {
 const roleScopedRoutes = (role: string) => [
   ...(role === "admin" ? [{ label: "Tổng quan", path: "/dashboard", icon: <LayoutDashboard size={18} /> }] : []),
   { label: "Dự án", path: "/projects", icon: <FolderKanban size={18} /> },
-  { label: "Nhân sự", path: "/members", icon: <Users size={18} /> },
+  { label: "Người dùng", path: "/users", icon: <Users size={18} /> },
   ...(role === "admin"
     ? [
-        { label: "Quản lý nhân viên", path: "/employees", icon: <UserRound size={18} /> },
+        { label: "Quản lý người dùng", path: "/users", icon: <UserRound size={18} /> },
         { label: "Phòng ban", path: "/departments", icon: <Building2 size={18} /> },
         { label: "Chức vụ", path: "/positions", icon: <ClipboardList size={18} /> },
       ]
@@ -71,6 +71,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       setLoading(false);
       return;
     }
+
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
@@ -82,6 +83,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
         setLoading(false);
       }
     }, 250);
+
     return () => clearTimeout(timer);
   }, [query, open]);
 
@@ -100,6 +102,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   const items: PaletteItem[] = useMemo(() => {
     const list: PaletteItem[] = [];
+
     if (!query.trim()) {
       for (const route of roleScopedRoutes(user?.role ?? "user")) {
         list.push({
@@ -123,6 +126,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
         onSelect: () => go(`/projects/${p.id}`),
       });
     }
+
     for (const t of results.tasks) {
       list.push({
         id: `task-${t.id}`,
@@ -133,16 +137,18 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
         onSelect: () => go(`/projects/${t.projectId}`),
       });
     }
+
     for (const u of results.users) {
       list.push({
         id: `user-${u.id}`,
-        group: "Nhân sự",
+        group: "Người dùng",
         label: u.name,
         sublabel: u.username,
         icon: <UserRound size={18} />,
-        onSelect: () => go(`/members/${u.id}`),
+        onSelect: () => go(`/users/${u.id}`),
       });
     }
+
     if (user?.role === "admin") {
       for (const d of results.departments) {
         list.push({
@@ -154,6 +160,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
           onSelect: () => go(`/departments/${d.id}`),
         });
       }
+
       for (const p of results.positions) {
         list.push({
           id: `position-${p.id}`,
@@ -165,6 +172,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
         });
       }
     }
+
     return list;
   }, [query, results, user, go]);
 
@@ -215,7 +223,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center pt-[12vh] px-4"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm"
           onMouseDown={close}
         >
           <motion.div
@@ -223,72 +231,64 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-            className="w-full max-w-xl rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden"
+            className="w-full max-w-xl overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 px-4 border-b border-zinc-200 dark:border-zinc-800">
-              <Search size={18} className="text-zinc-400 shrink-0" />
+            <div className="flex items-center gap-3 border-b border-zinc-200 px-4 dark:border-zinc-800">
+              <Search size={18} className="shrink-0 text-zinc-400" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder="Tìm nhân viên, dự án, công việc, phòng ban..."
-                className="flex-1 h-14 bg-transparent outline-none text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+                placeholder="Tìm người dùng, dự án, công việc, phòng ban..."
+                className="h-14 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-zinc-100"
               />
-              <kbd className="rounded-md border border-zinc-300 dark:border-zinc-600 px-1.5 py-0.5 text-[11px] text-zinc-400 shrink-0">
+              <kbd className="shrink-0 rounded-md border border-zinc-300 px-1.5 py-0.5 text-[11px] text-zinc-400 dark:border-zinc-600">
                 Esc
               </kbd>
             </div>
 
             <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-2">
               {loading && (
-                <div className="px-4 py-8 flex justify-center">
-                  <div className="size-6 animate-spin rounded-full border-2 border-zinc-300 dark:border-zinc-600 border-t-indigo-500" />
+                <div className="flex justify-center px-4 py-8">
+                  <div className="size-6 animate-spin rounded-full border-2 border-zinc-300 border-t-indigo-500 dark:border-zinc-600" />
                 </div>
               )}
 
               {!loading && items.length === 0 && (
                 <div className="px-4 py-8 text-center text-sm text-zinc-400">
-                  {query.trim()
-                    ? "Không tìm thấy kết quả phù hợp"
-                    : "Gõ để tìm kiếm hoặc chọn trang nhanh bên dưới"}
+                  {query.trim() ? "Không tìm thấy kết quả phù hợp" : "Gõ để tìm kiếm hoặc chọn trang nhanh bên dưới"}
                 </div>
               )}
 
               {!loading &&
                 grouped.map(({ group, items: groupItems }) => (
-                  <div key={group}>
-                    <div className="px-4 pt-2 pb-1 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                  <div key={group} className="px-2 py-1">
+                    <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
                       {group}
                     </div>
-                    {groupItems.map((item) => (
+                    {groupItems.map((item, idx) => (
                       <button
                         key={item.id}
-                        data-index={item.flatIndex}
-                        onMouseEnter={() => setActiveIndex(item.flatIndex)}
+                        data-index={idx}
                         onClick={item.onSelect}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                          activeIndex === item.flatIndex
-                            ? "bg-zinc-100 dark:bg-zinc-800"
-                            : ""
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${
+                          activeIndex === idx ? "bg-blue-50 dark:bg-blue-950" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
                         }`}
                       >
-                        <span className="text-zinc-400 shrink-0">{item.icon}</span>
-                        <span className="flex-1 min-w-0">
-                          <span className="block text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                          {item.icon}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
                             {item.label}
                           </span>
                           {item.sublabel && (
-                            <span className="block text-xs text-zinc-400 truncate">{item.sublabel}</span>
+                            <span className="block truncate text-xs text-zinc-400">{item.sublabel}</span>
                           )}
                         </span>
-                        <ArrowRight
-                          size={14}
-                          className={`shrink-0 text-zinc-300 transition-opacity ${
-                            activeIndex === item.flatIndex ? "opacity-100" : "opacity-0"
-                          }`}
-                        />
+                        <ArrowRight size={16} className="shrink-0 text-zinc-300" />
                       </button>
                     ))}
                   </div>

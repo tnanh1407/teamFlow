@@ -1,38 +1,74 @@
-import { useState } from "react"
+import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
+import Swal from "sweetalert2"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
+import { useAuth } from "@/contexts/AuthContext"
+import userService from "@/services/user.service"
+
+const forgotPasswordSchema = z.object({
+  email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
+  employeeCode: z.string().trim().min(1, "Vui lòng nhập mã nhân viên"),
+})
+
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-  const [loading, setLoading] = useState(false)
+  const { user, ready } = useAuth()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+      employeeCode: "",
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) {
-      setError("Vui lòng nhập email")
-      return
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Email không hợp lệ")
-      return
-    }
-    setLoading(true)
-    setError("")
-    setSuccess("")
+  useEffect(() => {
+    if (!ready || !user) return
+    navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
+  }, [navigate, ready, user])
+
+  const onSubmit = async (values: ForgotPasswordFormValues) => {
     try {
-      // TODO: call forgot password API
-      console.log("Forgot password email:", email)
-      setSuccess("Vui lòng kiểm tra email để đặt lại mật khẩu")
-      setTimeout(() => navigate("/login"), 2000)
+      const { data } = await userService.forgotPassword(values)
+      const devCode = data.data?.devCode
+
+      await Swal.fire({
+        icon: "success",
+        title: "Đã gửi yêu cầu",
+        text: devCode
+          ? `Mã đặt lại mật khẩu trong môi trường dev: ${devCode}`
+          : "Vui lòng kiểm tra email để đặt lại mật khẩu",
+        confirmButtonColor: "#2563eb",
+      })
+
+      navigate("/login", { replace: true })
     } catch {
-      setError("Có lỗi xảy ra, vui lòng thử lại sau")
-    } finally {
-      setLoading(false)
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể gửi yêu cầu đặt lại mật khẩu",
+        confirmButtonColor: "#2563eb",
+      })
     }
+  }
+
+  const onInvalid = (formErrors: typeof errors) => {
+    const firstError = Object.values(formErrors)[0]?.message
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi",
+      text: firstError || "Vui lòng kiểm tra lại thông tin",
+      confirmButtonColor: "#2563eb",
+    })
   }
 
   return (
@@ -66,46 +102,62 @@ export default function ForgotPassword() {
               Quên mật khẩu
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Nhập email để nhận link đặt lại mật khẩu
+              Nhập email và mã nhân viên để nhận link đặt lại mật khẩu
             </p>
           </div>
 
           {/* Card */}
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6">
-            {error && (
-              <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="mb-4 rounded-lg bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-700 dark:text-green-400">
-                {success}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-5" noValidate>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Email
                 </label>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Nhập email của bạn"
-                  className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  aria-invalid={Boolean(errors.email)}
+                  className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                    errors.email
+                      ? "border-red-400 focus:ring-red-500"
+                      : "border-zinc-300 dark:border-zinc-700 focus:ring-blue-500"
+                  }`}
+                  {...register("email")}
                 />
+                {errors.email?.message && (
+                  <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Mã nhân viên
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nhập mã nhân viên"
+                  aria-invalid={Boolean(errors.employeeCode)}
+                  className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                    errors.employeeCode
+                      ? "border-red-400 focus:ring-red-500"
+                      : "border-zinc-300 dark:border-zinc-700 focus:ring-blue-500"
+                  }`}
+                  {...register("employeeCode")}
+                />
+                {errors.employeeCode?.message && (
+                  <p className="mt-1.5 text-xs text-red-500">{errors.employeeCode.message}</p>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="w-full h-11 rounded-lg text-white font-medium text-base border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed transition"
                 style={{
                   background: "linear-gradient(135deg, #2563eb, #7c3aed)",
                 }}
               >
-                {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
+                {isSubmitting ? "Đang xử lý..." : "Gửi yêu cầu"}
               </button>
 
               <div className="flex justify-center">

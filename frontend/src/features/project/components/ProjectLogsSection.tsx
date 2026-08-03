@@ -1,5 +1,5 @@
 import type { ProjectLog } from "@/services/project-log.service"
-import type { Employee } from "@/services/employee.service"
+import type { User } from "@/services/user.service"
 
 const actionLabels: Record<string, string> = {
   created: "Tạo dự án",
@@ -12,7 +12,7 @@ const actionLabels: Record<string, string> = {
 
 interface ProjectLogsProps {
   logs: ProjectLog[]
-  logEmployeeMap: Record<string, Employee>
+  logEmployeeMap: Record<string, User>
   onSelectLog: (log: ProjectLog) => void
 }
 
