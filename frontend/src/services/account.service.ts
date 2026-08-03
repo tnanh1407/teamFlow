@@ -35,6 +35,8 @@ const accountService = {
   login: (data: LoginPayload) =>
     api.post<{ data: LoginResponse }>("/users/login", data),
 
+  me: () => api.get<{ data: Account }>("/users/me"),
+
   logout: () => api.post("/users/logout"),
 
   getAll: () => api.get<{ data: Account[] }>("/users"),

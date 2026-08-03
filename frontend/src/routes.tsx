@@ -23,7 +23,14 @@ const positionHome: Record<string, string> = {
 };
 
 function RoleRedirect({ children, roles }: { children: ReactNode; roles: string[] }) {
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-zinc-500">Đang tải...</p>
+      </div>
+    );
+  }
   if (!user) return <Navigate to="/login" replace />;
   if (!roles.includes(user.role)) {
     const redirect = positionHome[user.position] || "/";

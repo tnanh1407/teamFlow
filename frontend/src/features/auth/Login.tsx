@@ -4,35 +4,63 @@ import { motion } from "motion/react"
 import { Eye, EyeOff } from "lucide-react"
 import Swal from "sweetalert2"
 import { toast } from "sonner"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
 import accountService from "@/services/account.service"
 import { useAuth } from "@/contexts/AuthContext"
 
+const loginSchema = z.object({
+  username: z.string().trim().min(1, "Vui lòng nhập tài khoản"),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu"),
+})
+
+type LoginFormValues = z.infer<typeof loginSchema>
+
 export default function Login() {
   const navigate = useNavigate()
   const { setUser } = useAuth()
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const savedUsername = localStorage.getItem("rememberedUsername") ?? ""
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [rememberInfo, setRememberInfo] = useState(Boolean(savedUsername))
+  const {
+    register,
+    handleSubmit: handleFormSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: savedUsername,
+      password: "",
+    },
+  })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!username || !password) {
-      Swal.fire({ icon: "error", title: "Lỗi", text: "Vui lòng nhập đầy đủ tài khoản và mật khẩu", confirmButtonColor: "#2563eb" })
-      return
-    }
-    setLoading(true)
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      const { data } = await accountService.login({ username, password })
+      if (rememberInfo) {
+        localStorage.setItem("rememberedUsername", values.username.trim())
+      } else {
+        localStorage.removeItem("rememberedUsername")
+      }
+
+      const { data } = await accountService.login(values)
       const user = data.data.user
       setUser(user)
       toast.success(`Xin chào ${user.username}!`)
       navigate(user.role === "admin" ? "/dashboard" : "/")
-    } catch {
-      Swal.fire({ icon: "error", title: "Lỗi", text: "Sai tài khoản hoặc mật khẩu", confirmButtonColor: "#2563eb" })
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? "Sai tài khoản hoặc mật khẩu"
+          : "Không thể đăng nhập lúc này"
+
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: message,
+        confirmButtonColor: "#2563eb",
+      })
     }
   }
 
@@ -68,18 +96,25 @@ export default function Login() {
 
           {/* Card */}
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-5" noValidate>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                   Tài khoản
                 </label>
                 <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="Nhập tên tài khoản"
-                  className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  aria-invalid={Boolean(errors.username)}
+                  className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                    errors.username
+                      ? "border-red-400 focus:ring-red-500"
+                      : "border-zinc-300 dark:border-zinc-700 focus:ring-blue-500"
+                  }`}
+                  {...register("username")}
                 />
+                {errors.username?.message && (
+                  <p className="mt-1.5 text-xs text-red-500">{errors.username.message}</p>
+                )}
               </div>
 
               <div>
@@ -89,10 +124,14 @@ export default function Login() {
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Nhập mật khẩu"
-                    className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2.5 pr-10 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    aria-invalid={Boolean(errors.password)}
+                    className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 pr-10 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                      errors.password
+                        ? "border-red-400 focus:ring-red-500"
+                        : "border-zinc-300 dark:border-zinc-700 focus:ring-blue-500"
+                    }`}
+                    {...register("password")}
                   />
                   <button
                     type="button"
@@ -102,9 +141,22 @@ export default function Login() {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+                {errors.password?.message && (
+                  <p className="mt-1.5 text-xs text-red-500">{errors.password.message}</p>
+                )}
               </div>
 
-              <div className="flex justify-end -mt-1">
+              <div className="flex items-center justify-between gap-4 -mt-1">
+                <label className="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberInfo}
+                    onChange={(e) => setRememberInfo(e.target.checked)}
+                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Lưu thông tin</span>
+                </label>
+
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
@@ -116,13 +168,13 @@ export default function Login() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="w-full h-11 rounded-lg text-white font-medium text-base border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed transition"
                 style={{
                   background: "#2563eb",
                 }}
               >
-                {loading ? "Đang xử lý..." : "Đăng nhập"}
+                {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
               </button>
             </form>
           </div>

@@ -18,6 +18,7 @@ const router = Router();
 
 router.post("/login", validate(loginSchema), asyncHandler(userController.login));
 router.post("/logout", authenticate, asyncHandler(userController.logout));
+router.get("/me", authenticate, asyncHandler(userController.me));
 
 // quên mật khẩu: nhập email + mã nhân viên, hệ thống gửi mã 6 số qua mail
 router.post("/forgot-password", validate(forgotPasswordSchema), asyncHandler(userController.forgotPassword));

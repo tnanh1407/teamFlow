@@ -9,6 +9,14 @@ import sessionService, { SESSION_TTL_MS } from "../session/session.service.js";
 import { sendResetCodeEmail } from "../utils/mail/mailer.js";
 
 class UserController {
+  async me(req: AuthRequest, res: Response) {
+    const user = await userService.findById(req.user!.id);
+    if (!user) throw new AppError("User not found", 404);
+
+    const { password: _password, ...safeUser } = user as typeof user & { password?: string };
+    res.json({ data: safeUser });
+  }
+
   async getAll(req: AuthRequest, res: Response) {
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
