@@ -7,6 +7,9 @@ export interface ProjectDepartment {
 }
 
 const projectDepartmentService = {
+  getAll: () =>
+    api.get<{ data: ProjectDepartment[] }>("/project-departments"),
+
   getByProject: (projectId: string) =>
     api.get<{ data: ProjectDepartment[] }>(`/project-departments/project/${projectId}`),
 

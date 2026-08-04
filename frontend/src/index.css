@@ -73,12 +73,12 @@
   --success: #16a34a;
   --chart-1: var(--primary);
   --chart-2: var(--secondary);
-  --chart-3: var(--primary-300);
-  --chart-4: var(--secondary-300);
-  --chart-5: var(--primary-700);
-  --chart-6: var(--secondary-700);
-  --chart-7: var(--primary-100);
-  --chart-8: var(--secondary-100);
+  --chart-3: #00bcd4;
+  --chart-4: #8b5cf6;
+  --chart-5: #22c55e;
+  --chart-6: #ef4444;
+  --chart-7: #f59e0b;
+  --chart-8: #ec4899;
 }
 
 .dark {
@@ -109,14 +109,14 @@
   --secondary-700: #cc6936;
   --secondary-800: #b35a2f;
   --secondary-900: #8f4925;
-  --chart-1: var(--primary-400);
-  --chart-2: var(--secondary-400);
-  --chart-3: var(--primary-200);
-  --chart-4: var(--secondary-200);
-  --chart-5: var(--primary-700);
-  --chart-6: var(--secondary-700);
-  --chart-7: var(--primary-100);
-  --chart-8: var(--secondary-100);
+  --chart-1: #7fb0ff;
+  --chart-2: #ffa36b;
+  --chart-3: #22d3ee;
+  --chart-4: #c084fc;
+  --chart-5: #4ade80;
+  --chart-6: #f87171;
+  --chart-7: #fbbf24;
+  --chart-8: #f472b6;
 }
 
 html,

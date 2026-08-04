@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import { Briefcase, Building2, Medal, UserCheck, UserX, Users } from "lucide-react"
 import StatsGrid from "./components/StatsGrid"
 import GrowthChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
+import ProjectOverviewChart from "./components/ProjectOverviewChart"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService from "@/services/position.service"
@@ -23,10 +23,16 @@ interface DashboardChartPoint {
   color?: string
 }
 
+interface ProjectOverviewPoint {
+  month: string
+  total: number
+  completed: number
+  incomplete: number
+}
+
 interface DashboardStat {
   label: string
   value: number
-  icon: React.ElementType
   color: string
 }
 
@@ -74,6 +80,58 @@ function buildProjectStatusData(projects: Project[]): DashboardChartPoint[] {
     { name: "Hoàn thành", value: projects.filter((project) => project.status === "completed").length, color: projectPalette.completed },
     { name: "Đã huỷ", value: projects.filter((project) => project.status === "cancelled").length, color: projectPalette.cancelled },
   ].filter((project) => project.value > 0)
+}
+
+function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
+  const monthEvents: Record<string, { created: number; completed: number }> = {}
+  const monthKeys = new Set<string>()
+
+  projects.forEach((project) => {
+    if (project.createdAt) {
+      const createdKey = project.createdAt.slice(0, 7)
+      monthEvents[createdKey] = monthEvents[createdKey] || { created: 0, completed: 0 }
+      monthEvents[createdKey].created += 1
+      monthKeys.add(createdKey)
+    }
+
+    if (project.completedAt) {
+      const completedKey = project.completedAt.slice(0, 7)
+      monthEvents[completedKey] = monthEvents[completedKey] || { created: 0, completed: 0 }
+      monthEvents[completedKey].completed += 1
+      monthKeys.add(completedKey)
+    } else if (project.status === "completed" && project.updatedAt) {
+      const completedKey = project.updatedAt.slice(0, 7)
+      monthEvents[completedKey] = monthEvents[completedKey] || { created: 0, completed: 0 }
+      monthEvents[completedKey].completed += 1
+      monthKeys.add(completedKey)
+    }
+  })
+
+  const sortedMonths = Array.from(monthKeys).sort()
+  if (sortedMonths.length === 0) return []
+
+  const start = new Date(`${sortedMonths[0]}-01T00:00:00Z`)
+  const end = new Date(`${sortedMonths[sortedMonths.length - 1]}-01T00:00:00Z`)
+  const result: ProjectOverviewPoint[] = []
+  let total = 0
+  let completed = 0
+
+  for (const cursor = new Date(start); cursor <= end; cursor.setMonth(cursor.getMonth() + 1)) {
+    const key = cursor.toISOString().slice(0, 7)
+    const monthEvent = monthEvents[key] || { created: 0, completed: 0 }
+    total += monthEvent.created
+    completed += monthEvent.completed
+    const incomplete = Math.max(total - completed, 0)
+    const [year, month] = key.split("-")
+    result.push({
+      month: `Th${Number.parseInt(month, 10)}/${year}`,
+      total,
+      completed,
+      incomplete,
+    })
+  }
+
+  return result
 }
 
 function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
@@ -178,19 +236,24 @@ export default function AdminDashboard() {
   const todayKey = new Date().toISOString().slice(0, 10)
   const activeUsersCount = countActiveUsers(users, todayKey)
   const departedUsersCount = countDepartedUsers(users, todayKey)
+  const completedProjectsCount = projects.filter((project) => project.status === "completed").length
+  const incompleteProjectsCount = projects.length - completedProjectsCount
 
   const stats: DashboardStat[] = [
-    { label: "Người dùng", value: users.length, icon: Briefcase, color: colors.blue },
-    { label: "Đang làm", value: activeUsersCount, icon: UserCheck, color: colors.emerald },
-    { label: "Đã nghỉ", value: departedUsersCount, icon: UserX, color: colors.red },
-    { label: "Phòng ban", value: departments.length, icon: Building2, color: colors.emerald },
-    { label: "Chức vụ", value: positionsCount, icon: Medal, color: colors.purple },
-    { label: "Tài khoản", value: users.length, icon: Users, color: colors.amber },
+    { label: "Tổng tài khoản", value: users.length, color: colors.blue },
+    { label: "Đang làm", value: activeUsersCount, color: colors.emerald },
+    { label: "Đã nghỉ", value: departedUsersCount, color: colors.red },
+    { label: "Phòng ban", value: departments.length, color: colors.emerald },
+    { label: "Chức vụ", value: positionsCount, color: colors.purple },
+    { label: "Dự án hoàn thành", value: completedProjectsCount, color: colors.blue },
+    { label: "Tổng dự án", value: projects.length, color: colors.amber },
+    { label: "Dự án chưa hoàn thành", value: incompleteProjectsCount, color: colors.red },
   ]
 
   const growthData = buildGrowthData(users)
   const deptData = buildDepartmentData(users, departments)
   const projStatusData = buildProjectStatusData(projects)
+  const projectOverviewData = buildProjectOverviewData(projects)
 
   if (loading) {
     return (
@@ -217,6 +280,12 @@ export default function AdminDashboard() {
         />
         <DonutChartCard title="Trạng thái dự án" data={projStatusData} total={projects.length || 1} index={1} />
       </div>
+      <ProjectOverviewChart
+        data={projectOverviewData}
+        currentTotal={projects.length}
+        completedTotal={completedProjectsCount}
+        incompleteTotal={incompleteProjectsCount}
+      />
     </div>
   )
 }
