@@ -2,7 +2,16 @@ import { motion } from "motion/react"
 import { TrendingUp } from "lucide-react"
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts"
 
-const defaultColors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899", "#06b6d4", "#84cc16"]
+const chartPalette = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-6)",
+  "var(--chart-7)",
+  "var(--chart-8)",
+]
 
 interface DonutChartCardProps {
   title: string
@@ -13,7 +22,7 @@ interface DonutChartCardProps {
 }
 
 export default function DonutChartCard({ title, data, total, index, palette }: DonutChartCardProps) {
-  const colors = palette?.length ? palette : defaultColors
+  const colors = palette?.length ? palette : chartPalette
 
   return (
     <motion.div

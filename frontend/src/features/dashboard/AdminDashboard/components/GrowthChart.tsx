@@ -11,6 +11,17 @@ import {
   Legend,
 } from "recharts"
 
+const chartPalette = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-6)",
+  "var(--chart-7)",
+  "var(--chart-8)",
+]
+
 interface GrowthChartProps {
   data: { month: string; active: number; departed: number; totalHires: number; hires: number; leaves: number }[]
   currentTotal: number
@@ -41,7 +52,7 @@ function GrowthTooltip({ active, payload, label }: any) {
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[1] }} />
             <span>Đang làm</span>
           </div>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.active}</span>
@@ -49,7 +60,7 @@ function GrowthTooltip({ active, payload, label }: any) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
-            <span className="h-2 w-2 rounded-full bg-red-500" />
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[4] }} />
             <span>Đã nghỉ</span>
           </div>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.departed}</span>
@@ -108,29 +119,29 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
               type="monotone"
               dataKey="active"
               name="Đang làm"
-              stroke="#10b981"
+              stroke={chartPalette[1]}
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#10b981", stroke: "#fff", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#10b981", stroke: "#fff", strokeWidth: 2 }}
+              dot={{ r: 4, fill: chartPalette[1], stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: chartPalette[1], stroke: "#fff", strokeWidth: 2 }}
             />
             <Line
               type="monotone"
               dataKey="departed"
               name="Đã nghỉ"
-              stroke="#ef4444"
+              stroke={chartPalette[4]}
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#ef4444", stroke: "#fff", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#ef4444", stroke: "#fff", strokeWidth: 2 }}
+              dot={{ r: 4, fill: chartPalette[4], stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: chartPalette[4], stroke: "#fff", strokeWidth: 2 }}
             />
             <Line
               type="monotone"
               dataKey="totalHires"
               name="Tổng tuyển"
-              stroke="#3b82f6"
+              stroke={chartPalette[0]}
               strokeWidth={2.5}
               strokeDasharray="6 4"
-              dot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+              dot={{ r: 4, fill: chartPalette[0], stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: chartPalette[0], stroke: "#fff", strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>
