@@ -49,23 +49,65 @@ export const projectLogPaths = {
   "/api/project-logs": {
     get: {
       tags: ["Project Logs"],
-      summary: "Lấy danh sách nhật ký hoạt động",
+      summary: "Danh sách nhật ký",
       description: "Chỉ Admin mới xem được nhật ký hoạt động của hệ thống.",
       ...logAuth,
       responses: {
-        200: { description: "Danh sách nhật ký", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } } } } },
-        403: { description: "Không đủ quyền (chỉ Admin)" },
+        200: {
+          description: "Danh sách nhật ký",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } },
+              example: {
+                data: [
+                  {
+                    id: "80000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    employeeId: "30000000-0000-4000-a000-000000000001",
+                    action: "created",
+                    description: "Dự án được tạo bởi Nguyễn Văn Anh",
+                    createdAt: "2025-06-01T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        403: {
+          description: "Không đủ quyền (chỉ Admin)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+        },
       },
     },
     post: {
       tags: ["Project Logs"],
-      summary: "Ghi nhật ký hoạt động",
+      summary: "Ghi nhật ký",
       description: "Nhật ký thường được ghi tự động khi có thay đổi dự án/task.",
       ...logAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectLogInput" } } } },
       responses: {
-        201: { description: "Ghi nhật ký thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectLog" } } } } } },
-        400: { description: "Dữ liệu không hợp lệ" },
+        201: {
+          description: "Ghi nhật ký thành công",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectLog" } } },
+              example: {
+                data: {
+                  id: "80000000-0000-4000-a000-000000000011",
+                  projectId: "50000000-0000-4000-a000-000000000001",
+                  employeeId: "30000000-0000-4000-a000-000000000001",
+                  action: "updated",
+                  description: "Cập nhật tiến độ dự án lên 60%",
+                  createdAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Dữ liệu không hợp lệ",
+          content: { "application/json": { example: { message: "Dữ liệu không hợp lệ" } } },
+        },
       },
     },
   },
@@ -73,12 +115,34 @@ export const projectLogPaths = {
     get: {
       tags: ["Project Logs"],
       description: "Lấy toàn bộ nhật ký liên quan đến một dự án theo ID. Dùng để audit lịch sử thay đổi, xem ai đã tạo/cập nhật/hoàn thành/cancel dự án và phục vụ màn hình lịch sử hoạt động của dự án.",
-      summary: "Lấy nhật ký theo dự án",
+      summary: "Nhật ký dự án",
       ...logAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Danh sách nhật ký của dự án", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } } } } },
-        403: { description: "Không đủ quyền (chỉ Admin)" },
+        200: {
+          description: "Danh sách nhật ký của dự án",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } },
+              example: {
+                data: [
+                  {
+                    id: "80000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    employeeId: "30000000-0000-4000-a000-000000000001",
+                    action: "created",
+                    description: "Dự án được tạo bởi Nguyễn Văn Anh",
+                    createdAt: "2025-06-01T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        403: {
+          description: "Không đủ quyền (chỉ Admin)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+        },
       },
     },
   },
@@ -86,12 +150,34 @@ export const projectLogPaths = {
     get: {
       tags: ["Project Logs"],
       description: "Lấy nhật ký hoạt động gắn với một nhân viên cụ thể để xem người đó đã tạo, cập nhật, được giao hay tương tác với dự án/task nào trong hệ thống.",
-      summary: "Lấy nhật ký theo nhân viên",
+      summary: "Nhật ký nhân viên",
       ...logAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Danh sách nhật ký của nhân viên", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } } } } },
-        403: { description: "Không đủ quyền (chỉ Admin)" },
+        200: {
+          description: "Danh sách nhật ký của nhân viên",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } },
+              example: {
+                data: [
+                  {
+                    id: "80000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    employeeId: "30000000-0000-4000-a000-000000000001",
+                    action: "created",
+                    description: "Dự án được tạo bởi Nguyễn Văn Anh",
+                    createdAt: "2025-06-01T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        403: {
+          description: "Không đủ quyền (chỉ Admin)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+        },
       },
     },
   },
@@ -99,13 +185,36 @@ export const projectLogPaths = {
     get: {
       tags: ["Project Logs"],
       description: "Xem chi tiết một bản ghi nhật ký theo ID, bao gồm hành động, mô tả, dự án liên quan, nhân viên thực hiện và thời điểm phát sinh.",
-      summary: "Xem chi tiết nhật ký",
+      summary: "Chi tiết nhật ký",
       ...logAuth,
       parameters: [logIdParam],
       responses: {
-        200: { description: "Thông tin nhật ký", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectLog" } } } } } },
-        403: { description: "Không đủ quyền (chỉ Admin)" },
-        404: { description: "Không tìm thấy nhật ký" },
+        200: {
+          description: "Thông tin nhật ký",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectLog" } } },
+              example: {
+                data: {
+                  id: "80000000-0000-4000-a000-000000000001",
+                  projectId: "50000000-0000-4000-a000-000000000001",
+                  employeeId: "30000000-0000-4000-a000-000000000001",
+                  action: "created",
+                  description: "Dự án được tạo bởi Nguyễn Văn Anh",
+                  createdAt: "2025-06-01T00:00:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        403: {
+          description: "Không đủ quyền (chỉ Admin)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+        },
+        404: {
+          description: "Không tìm thấy nhật ký",
+          content: { "application/json": { example: { message: "Không tìm thấy nhật ký" } } },
+        },
       },
     },
   },

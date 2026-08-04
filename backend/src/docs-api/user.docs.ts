@@ -271,11 +271,21 @@ export const userPaths = {
         },
         401: {
           description: "Tài khoản hoặc mật khẩu không đúng, nên người dùng chưa được cấp phiên đăng nhập mới.",
-          content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/Error" },
+              example: { message: "Tài khoản hoặc mật khẩu không đúng." },
+            },
+          },
         },
         403: {
           description: "Tài khoản đã nghỉ việc hoặc bị khóa, vì vậy không thể tạo session và không được phép truy cập hệ thống.",
-          content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/Error" },
+              example: { message: "Tài khoản đã nghỉ việc hoặc bị khóa." },
+            },
+          },
         },
       },
     },
@@ -286,50 +296,197 @@ export const userPaths = {
       description: "Đăng xuất phiên hiện tại bằng cách thu hồi session đang dùng và xoá cookie xác thực trên trình duyệt. Sau khi gọi endpoint này, token cũ sẽ không còn dùng được nữa.",
       summary: "Đăng xuất",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Đăng xuất thành công" } },
+      responses: {
+        200: {
+          description: "Đăng xuất thành công",
+          content: {
+            "application/json": {
+              example: {
+                message: "Đăng xuất thành công",
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/users/all": {
     get: {
       tags: ["Users"],
       description: "Lấy toàn bộ danh sách nhân viên đã được nạp vào hệ thống, thường dùng cho màn hình quản trị, dropdown chọn người dùng và các chức năng tra cứu nội bộ.",
-      summary: "Lấy tất cả nhân viên",
+      summary: "Danh sách nhân viên",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Danh sách tất cả nhân viên", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+      responses: {
+        200: {
+          description: "Danh sách tất cả nhân viên",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PaginatedUsers" },
+              example: {
+                data: [
+                  {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000005",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234567",
+                    birthDate: "1998-03-21",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    lastLogin: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/users/department/{departmentId}": {
     get: {
       tags: ["Users"],
       description: "Lấy danh sách nhân viên thuộc một phòng ban cụ thể theo ID phòng ban. Endpoint này hỗ trợ các màn hình quản lý phòng ban, lọc nhân sự theo tổ chức và những form cần chọn thành viên trong cùng đơn vị.",
-      summary: "Lấy người dùng theo phòng ban",
+      summary: "Nhân viên theo phòng ban",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "departmentId", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
-      responses: { 200: { description: "Danh sách người dùng trong phòng ban", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+      responses: {
+        200: {
+          description: "Danh sách người dùng trong phòng ban",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PaginatedUsers" },
+              example: {
+                data: [
+                  {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000005",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234567",
+                    birthDate: "1998-03-21",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    lastLogin: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/users/position/{positionId}": {
     get: {
       tags: ["Users"],
       description: "Lấy danh sách nhân viên có cùng chức vụ theo ID chức vụ. Thường dùng để lọc nhân sự theo cấp bậc/chức danh hoặc phục vụ logic phân công và báo cáo theo vị trí công việc.",
-      summary: "Lấy người dùng theo chức vụ",
+      summary: "Nhân viên theo chức vụ",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "positionId", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
-      responses: { 200: { description: "Danh sách người dùng theo chức vụ", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+      responses: {
+        200: {
+          description: "Danh sách người dùng theo chức vụ",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PaginatedUsers" },
+              example: {
+                data: [
+                  {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000005",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234567",
+                    birthDate: "1998-03-21",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    lastLogin: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/users": {
     get: {
       tags: ["Users"],
       description: "Lấy danh sách người dùng có phân trang để phục vụ màn hình danh sách quản trị. Hỗ trợ hiển thị theo trang, giới hạn số bản ghi và dùng làm nguồn dữ liệu cho các thao tác bulk hoặc tìm kiếm nâng cao ở tầng giao diện.",
-      summary: "Lấy danh sách người dùng (phân trang)",
+      summary: "Danh sách người dùng",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Danh sách người dùng phân trang", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
+      responses: {
+        200: {
+          description: "Danh sách người dùng phân trang",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PaginatedUsers" },
+              example: {
+                data: [
+                  {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000005",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234567",
+                    birthDate: "1998-03-21",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    lastLogin: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
     post: {
       tags: ["Users"],
       description: "Tạo mới một tài khoản nhân viên trong hệ thống. Khi tạo mới có thể điền đầy đủ thông tin hồ sơ, thông tin đăng nhập, vai trò, chức vụ, ngày vào làm và trạng thái làm việc; đây là endpoint dành cho khởi tạo nhân sự mới.",
-      summary: "Tạo người dùng mới",
+      summary: "Tạo người dùng",
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
       responses: {
@@ -364,7 +521,10 @@ export const userPaths = {
             },
           },
         },
-        409: { description: "Username đã tồn tại trong hệ thống nên không thể tạo tài khoản mới." },
+        409: {
+          description: "Username đã tồn tại trong hệ thống nên không thể tạo tài khoản mới.",
+          content: { "application/json": { example: { message: "Username đã tồn tại trong hệ thống." } } },
+        },
       },
     },
   },
@@ -372,24 +532,89 @@ export const userPaths = {
     get: {
       tags: ["Users"],
       description: "Lấy chi tiết hồ sơ của một nhân viên theo ID để hiển thị trang xem chi tiết, chuẩn bị form chỉnh sửa hoặc kiểm tra trạng thái tài khoản và thời gian làm việc.",
-      summary: "Lấy người dùng theo ID",
+      summary: "Chi tiết người dùng",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "30000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Thông tin người dùng", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } } } } },
-        404: { description: "Không tìm thấy" },
+        200: {
+          description: "Thông tin người dùng",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } },
+              example: {
+                data: {
+                  id: "30000000-0000-4000-a000-000000000001",
+                  departmentId: "10000000-0000-4000-a000-000000000001",
+                  positionId: "20000000-0000-4000-a000-000000000005",
+                  employeeCode: "EMP001",
+                  name: "Nguyễn Văn Anh",
+                  email: "nguyenvananh@qlpbda.com",
+                  phone: "0901234567",
+                  birthDate: "1998-03-21",
+                  hireDate: "2023-06-01",
+                  leaveDate: null,
+                  gender: "male",
+                  username: "root",
+                  role: "admin",
+                  position: null,
+                  status: true,
+                  avatarURL: null,
+                  lastLogin: null,
+                  createdAt: "2026-01-01T08:00:00.000Z",
+                  updatedAt: "2026-01-01T08:00:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy",
+          content: { "application/json": { example: { message: "Không tìm thấy" } } },
+        },
       },
     },
     patch: {
       tags: ["Users"],
       description: "Cập nhật hồ sơ nhân viên theo ID, bao gồm thông tin cá nhân, thông tin công việc, ảnh đại diện, trạng thái tài khoản và ngày nghỉ việc. Endpoint này tự đồng bộ status/leaveDate theo rule của hệ thống để tránh dữ liệu mâu thuẫn.",
-      summary: "Cập nhật người dùng (admin/manager)",
+      summary: "Cập nhật người dùng",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
       responses: {
-        200: { description: "Cập nhật hồ sơ người dùng thành công và trả về dữ liệu mới nhất." },
-        404: { description: "Không tìm thấy người dùng cần cập nhật." },
+        200: {
+          description: "Cập nhật hồ sơ người dùng thành công và trả về dữ liệu mới nhất.",
+          content: {
+            "application/json": {
+              example: {
+                data: {
+                  id: "30000000-0000-4000-a000-000000000051",
+                  departmentId: "10000000-0000-4000-a000-000000000001",
+                  positionId: "20000000-0000-4000-a000-000000000005",
+                  employeeCode: "EMP051",
+                  name: "Trần Thị B",
+                  email: "tranthib@qlpbda.com",
+                  phone: "0912345678",
+                  birthDate: "1999-07-10",
+                  hireDate: "2026-01-01",
+                  leaveDate: null,
+                  gender: "female",
+                  username: "tranthib",
+                  role: "user",
+                  position: "member",
+                  status: true,
+                  avatarURL: null,
+                  lastLogin: null,
+                  createdAt: "2026-08-04T08:30:00.000Z",
+                  updatedAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy người dùng cần cập nhật.",
+          content: { "application/json": { example: { message: "Không tìm thấy người dùng cần cập nhật." } } },
+        },
       },
     },
     delete: {
@@ -399,8 +624,20 @@ export const userPaths = {
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       responses: {
-        200: { description: "Vô hiệu hoá thành công, trạng thái tài khoản đã được cập nhật theo rule leaveDate/status." },
-        404: { description: "Không tìm thấy người dùng cần vô hiệu hoá." },
+        200: {
+          description: "Vô hiệu hoá thành công, trạng thái tài khoản đã được cập nhật theo rule leaveDate/status.",
+          content: {
+            "application/json": {
+              example: {
+                message: "Vô hiệu hoá thành công",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy người dùng cần vô hiệu hoá.",
+          content: { "application/json": { example: { message: "Không tìm thấy người dùng cần vô hiệu hoá." } } },
+        },
       },
     },
   },
@@ -408,21 +645,44 @@ export const userPaths = {
     patch: {
       tags: ["Users"],
       description: "Cho phép người dùng đang đăng nhập tự đổi mật khẩu bằng cách nhập mật khẩu hiện tại và mật khẩu mới. Đây là thao tác đổi mật khẩu nội bộ, không liên quan tới luồng quên mật khẩu qua email.",
-      summary: "Đổi mật khẩu cá nhân",
+      summary: "Đổi mật khẩu",
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UpdateMeInput" } } } },
-      responses: { 200: { description: "Đổi mật khẩu cá nhân thành công." } },
+      responses: {
+        200: {
+          description: "Đổi mật khẩu cá nhân thành công.",
+          content: {
+            "application/json": {
+              example: {
+                message: "Đổi mật khẩu cá nhân thành công.",
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/users/forgot-password": {
     post: {
       tags: ["Users"],
       description: "Khởi tạo luồng quên mật khẩu bằng cách xác thực email và mã nhân viên, sau đó gửi mã xác nhận 6 số về email nếu thông tin hợp lệ.",
-      summary: "Quên mật khẩu — gửi mã 6 số qua email",
+      summary: "Quên mật khẩu",
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ForgotPasswordInput" } } } },
       responses: {
-        200: { description: "Nếu email hợp lệ, hệ thống đã gửi mã xác nhận 6 số tới hộp thư tương ứng." },
-        400: { description: "Email hoặc mã nhân viên không khớp nên không thể khởi tạo luồng quên mật khẩu." },
+        200: {
+          description: "Nếu email hợp lệ, hệ thống đã gửi mã xác nhận 6 số tới hộp thư tương ứng.",
+          content: {
+            "application/json": {
+              example: {
+                message: "Nếu email hợp lệ, hệ thống đã gửi mã xác nhận 6 số tới hộp thư tương ứng.",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Email hoặc mã nhân viên không khớp nên không thể khởi tạo luồng quên mật khẩu.",
+          content: { "application/json": { example: { message: "Email hoặc mã nhân viên không khớp." } } },
+        },
       },
     },
   },
@@ -430,11 +690,23 @@ export const userPaths = {
     post: {
       tags: ["Users"],
       description: "Đặt lại mật khẩu bằng mã xác nhận 6 số đã được gửi qua email. Endpoint này là bước tiếp theo của luồng quên mật khẩu và sẽ chỉ thành công khi mã còn hiệu lực.",
-      summary: "Đặt lại mật khẩu bằng mã xác nhận",
+      summary: "Đặt lại mật khẩu",
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ResetPasswordInput" } } } },
       responses: {
-        200: { description: "Đặt lại mật khẩu thành công và mã xác nhận đã được sử dụng." },
-        400: { description: "Mã không hợp lệ, không khớp hoặc đã hết hạn." },
+        200: {
+          description: "Đặt lại mật khẩu thành công và mã xác nhận đã được sử dụng.",
+          content: {
+            "application/json": {
+              example: {
+                message: "Đặt lại mật khẩu thành công và mã xác nhận đã được sử dụng.",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Mã không hợp lệ, không khớp hoặc đã hết hạn.",
+          content: { "application/json": { example: { message: "Mã không hợp lệ, không khớp hoặc đã hết hạn." } } },
+        },
       },
     },
   },
@@ -446,16 +718,42 @@ export const userPaths = {
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "multipart/form-data": { schema: { type: "object", required: ["avatar"], properties: { avatar: { type: "string", format: "binary" } } } } } },
       responses: {
-        200: { description: "Cập nhật ảnh đại diện thành công và lưu URL mới vào hồ sơ người dùng." },
-        400: { description: "Thiếu file hoặc định dạng file không hợp lệ." },
+        200: {
+          description: "Cập nhật ảnh đại diện thành công và lưu URL mới vào hồ sơ người dùng.",
+          content: {
+            "application/json": {
+              example: {
+                message: "Cập nhật ảnh đại diện thành công và lưu URL mới vào hồ sơ người dùng.",
+                data: {
+                  avatarURL: "https://res.cloudinary.com/demo/image/upload/avatar-user.jpg",
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Thiếu file hoặc định dạng file không hợp lệ.",
+          content: { "application/json": { example: { message: "Thiếu file hoặc định dạng file không hợp lệ." } } },
+        },
       },
     },
     delete: {
       tags: ["Users"],
       description: "Xoá ảnh đại diện của tài khoản hiện tại, đồng thời dọn file trên Cloudinary và đưa avatar về trạng thái null để ứng dụng dùng ảnh mặc định.",
-      summary: "Xoá avatar về mặc định (null)",
+      summary: "Xoá avatar",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Xoá ảnh đại diện thành công và đưa avatar về trạng thái mặc định." } },
+      responses: {
+        200: {
+          description: "Xoá ảnh đại diện thành công và đưa avatar về trạng thái mặc định.",
+          content: {
+            "application/json": {
+              example: {
+                message: "Xoá ảnh đại diện thành công và đưa avatar về trạng thái mặc định.",
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/users/search": {
@@ -470,8 +768,43 @@ export const userPaths = {
         { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
       ],
       responses: {
-        200: { description: "Trả về danh sách người dùng khớp từ khoá tìm kiếm, có phân trang." , content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } },
-        403: { description: "Không đủ quyền vì endpoint này chỉ dành cho Admin." },
+        200: {
+          description: "Trả về danh sách người dùng khớp từ khoá tìm kiếm, có phân trang.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PaginatedUsers" },
+              example: {
+                data: [
+                  {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000005",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234567",
+                    birthDate: "1998-03-21",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    lastLogin: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        403: {
+          description: "Không đủ quyền vì endpoint này chỉ dành cho Admin.",
+          content: { "application/json": { example: { message: "Không đủ quyền vì endpoint này chỉ dành cho Admin." } } },
+        },
       },
     },
   },

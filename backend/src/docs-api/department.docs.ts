@@ -70,18 +70,60 @@ export const departmentPaths = {
     get: {
       tags: ["Departments"],
       description: "Trả về danh sách phòng ban đang tồn tại trong hệ thống theo dạng phân trang. Endpoint này thường dùng cho màn hình quản trị danh mục phòng ban, bộ lọc khi tạo/cập nhật nhân viên và các màn hình cần chọn phòng ban theo danh sách.",
-      summary: "Lấy danh sách phòng ban (phân trang)",
+      summary: "Danh sách phòng ban",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Danh sách phòng ban", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedDepartments" } } } } },
+      responses: {
+        200: {
+          description: "Danh sách phòng ban",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/PaginatedDepartments" },
+              example: {
+                data: [
+                  {
+                    id: "10000000-0000-4000-a000-000000000001",
+                    name: "Công nghệ thông tin",
+                    code: "IT",
+                    description: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+                    managerId: "30000000-0000-4000-a000-000000000001",
+                    isActive: true,
+                    createdAt: "2025-01-01T00:00:00.000Z",
+                    updatedAt: "2025-01-01T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
     post: {
       tags: ["Departments"],
       description: "Tạo mới một phòng ban trong hệ thống. Yêu cầu có ít nhất tên và mã phòng ban; các thông tin như mô tả, trưởng phòng và trạng thái hoạt động là tùy chọn. Thường chỉ Admin có quyền sử dụng endpoint này để mở rộng cơ cấu tổ chức.",
-      summary: "Tạo phòng ban mới",
+      summary: "Tạo phòng ban",
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/DepartmentInput" } } } },
       responses: {
-        201: { description: "Tạo thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Department" } } } } } },
+        201: {
+          description: "Tạo thành công",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Department" } } },
+              example: {
+                data: {
+                  id: "10000000-0000-4000-a000-000000000012",
+                  name: "Nghiên cứu & Phát triển",
+                  code: "RND",
+                  description: "Phòng phụ trách nghiên cứu, thử nghiệm và xây dựng sản phẩm mới",
+                  managerId: "30000000-0000-4000-a000-000000000003",
+                  isActive: true,
+                  createdAt: "2026-08-04T08:30:00.000Z",
+                  updatedAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -89,12 +131,34 @@ export const departmentPaths = {
     get: {
       tags: ["Departments"],
       description: "Lấy đầy đủ thông tin của một phòng ban theo ID. Dùng khi cần xem chi tiết phòng ban, kiểm tra mô tả, trưởng phòng, trạng thái hoạt động hoặc hiển thị dữ liệu trước khi chỉnh sửa.",
-      summary: "Lấy phòng ban theo ID",
+      summary: "Chi tiết phòng ban",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Thông tin phòng ban", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Department" } } } } } },
-        404: { description: "Không tìm thấy" },
+        200: {
+          description: "Thông tin phòng ban",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Department" } } },
+              example: {
+                data: {
+                  id: "10000000-0000-4000-a000-000000000001",
+                  name: "Công nghệ thông tin",
+                  code: "IT",
+                  description: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+                  managerId: "30000000-0000-4000-a000-000000000001",
+                  isActive: true,
+                  createdAt: "2025-01-01T00:00:00.000Z",
+                  updatedAt: "2025-01-01T00:00:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy",
+          content: { "application/json": { example: { message: "Không tìm thấy" } } },
+        },
       },
     },
     patch: {
@@ -105,8 +169,29 @@ export const departmentPaths = {
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/DepartmentInput" } } } },
       responses: {
-        200: { description: "Cập nhật thành công" },
-        404: { description: "Không tìm thấy" },
+        200: {
+          description: "Cập nhật thành công",
+          content: {
+            "application/json": {
+              example: {
+                data: {
+                  id: "10000000-0000-4000-a000-000000000001",
+                  name: "Công nghệ thông tin",
+                  code: "IT",
+                  description: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+                  managerId: "30000000-0000-4000-a000-000000000003",
+                  isActive: true,
+                  createdAt: "2025-01-01T00:00:00.000Z",
+                  updatedAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy",
+          content: { "application/json": { example: { message: "Không tìm thấy" } } },
+        },
       },
     },
     delete: {
@@ -116,7 +201,16 @@ export const departmentPaths = {
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
         responses: {
-        200: { description: "Xoá thành công" },
+        200: {
+          description: "Xoá thành công",
+          content: {
+            "application/json": {
+              example: {
+                message: "Xoá thành công",
+              },
+            },
+          },
+        },
         404: { description: "Không tìm thấy" },
       },
     },

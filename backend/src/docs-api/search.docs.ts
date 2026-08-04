@@ -100,7 +100,7 @@ export const searchPaths = {
   "/api/search": {
     get: {
       tags: ["Search"],
-      summary: "Tìm kiếm nhanh toàn hệ thống (Ctrl+K)",
+      summary: "Tìm kiếm nhanh",
       description:
         "Tìm kiếm gộp trong một lần gọi: nhân viên, dự án, task, phòng ban, chức vụ — mỗi nhóm tối đa 5 kết quả. " +
         "Nhân viên thường chỉ nhận kết quả thuộc phạm vi của mình (dự án/task được phân công, người tạo hoặc cùng phòng ban); phòng ban/chức vụ chỉ trả về cho Admin. " +
@@ -113,7 +113,96 @@ export const searchPaths = {
       responses: {
         200: {
           description: "Kết quả tìm kiếm theo nhóm",
-          content: { "application/json": { schema: { $ref: "#/components/schemas/SearchResults" } } },
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SearchResults" },
+              example: {
+                users: [
+                  {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000005",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234001",
+                    birthDate: "1985-03-15",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                ],
+                projects: [
+                  {
+                    id: "50000000-0000-4000-a000-000000000001",
+                    title: "Xây dựng website Hệ Thống Quản Lý Phòng Ban & Dự Án",
+                    description: "Dự án xây dựng website quản lý công việc nội bộ cho công ty, bao gồm các module quản lý nhân sự, dự án, và báo cáo",
+                    avatarURL: null,
+                    priority: "high",
+                    status: "in_progress",
+                    progress: 60,
+                    startDate: "2025-06-01",
+                    dueDate: "2025-09-30",
+                    assignedBy: "30000000-0000-4000-a000-000000000001",
+                    createdBy: "30000000-0000-4000-a000-000000000001",
+                    estimatedHours: 500,
+                    actualHours: 280,
+                    completedAt: null,
+                    createdAt: "2025-06-01T00:00:00.000Z",
+                    updatedAt: "2025-07-20T00:00:00.000Z",
+                  },
+                ],
+                tasks: [
+                  {
+                    id: "90000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    title: "Thiết kế database",
+                    description: "Thiết kế schema cho module nhân sự",
+                    status: "completed",
+                    priority: "high",
+                    assignedTo: "30000000-0000-4000-a000-000000000001",
+                    assignedBy: "30000000-0000-4000-a000-000000000003",
+                    assignedAt: "2026-07-01T08:00:00.000Z",
+                    dueDate: "2026-07-10",
+                    createdBy: "30000000-0000-4000-a000-000000000003",
+                    completedAt: "2026-07-09T15:30:00.000Z",
+                    createdAt: "2026-07-01T08:00:00.000Z",
+                    updatedAt: "2026-07-09T15:30:00.000Z",
+                  },
+                ],
+                departments: [
+                  {
+                    id: "10000000-0000-4000-a000-000000000001",
+                    name: "Công nghệ thông tin",
+                    code: "IT",
+                    description: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+                    managerId: "30000000-0000-4000-a000-000000000001",
+                    isActive: true,
+                    createdAt: "2025-01-01T00:00:00.000Z",
+                    updatedAt: "2025-01-01T00:00:00.000Z",
+                  },
+                ],
+                positions: [
+                  {
+                    id: "20000000-0000-4000-a000-000000000005",
+                    name: "Nhân viên",
+                    description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+                    level: "Junior",
+                    isActive: true,
+                    createdAt: "2025-01-01T00:00:00.000Z",
+                    updatedAt: "2025-01-01T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
         },
       },
     },

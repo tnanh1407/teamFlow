@@ -29,7 +29,7 @@ export const sessionPaths = {
     get: {
       tags: ["Sessions"],
       description: "Lấy danh sách các phiên đăng nhập đang còn hiệu lực của tài khoản hiện tại, bao gồm thiết bị, IP, thời điểm hết hạn và đánh dấu phiên nào là phiên hiện tại.",
-      summary: "Danh sách phiên đăng nhập của tôi",
+      summary: "Phiên của tôi",
       security: [{ cookieAuth: [] }],
       responses: {
         200: {
@@ -42,6 +42,20 @@ export const sessionPaths = {
                   data: { type: "array", items: { $ref: "#/components/schemas/Session" } },
                 },
               },
+              example: {
+                data: [
+                  {
+                    id: "a0000000-0000-4000-a000-000000000001",
+                    userId: "30000000-0000-4000-a000-000000000001",
+                    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0",
+                    ip: "127.0.0.1",
+                    expiresAt: "2026-08-05T08:30:00.000Z",
+                    revokedAt: null,
+                    createdAt: "2026-08-04T08:30:00.000Z",
+                    isCurrent: true,
+                  },
+                ],
+              },
             },
           },
         },
@@ -49,22 +63,45 @@ export const sessionPaths = {
     },
     delete: {
       tags: ["Sessions"],
-      summary: "Đăng xuất tất cả thiết bị khác",
+      summary: "Đăng xuất phiên khác",
       description: "Thu hồi mọi phiên khác của tài khoản hiện tại, giữ lại phiên đang dùng.",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Đã thu hồi toàn bộ phiên khác" } },
+      responses: {
+        200: {
+          description: "Đã thu hồi toàn bộ phiên khác",
+          content: {
+            "application/json": {
+              example: {
+                message: "Đã thu hồi toàn bộ phiên khác",
+              },
+            },
+          },
+        },
+      },
     },
   },
   "/api/sessions/{id}": {
     delete: {
       tags: ["Sessions"],
-      summary: "Thu hồi một phiên đăng nhập từ xa",
+      summary: "Thu hồi phiên",
       description: "Dùng để vô hiệu hoá một phiên cụ thể theo ID phiên.",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "a0000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Thu hồi phiên thành công" },
-        404: { description: "Không tìm thấy phiên" },
+        200: {
+          description: "Thu hồi phiên thành công",
+          content: {
+            "application/json": {
+              example: {
+                message: "Thu hồi phiên thành công",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy phiên",
+          content: { "application/json": { example: { message: "Không tìm thấy phiên" } } },
+        },
       },
     },
   },

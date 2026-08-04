@@ -67,10 +67,30 @@ export const projectCommentPaths = {
     get: {
       tags: ["Project Comments"],
       description: "Lấy danh sách tất cả bình luận mà người dùng có quyền xem. Endpoint này phù hợp cho màn hình kiểm duyệt, thống kê tương tác hoặc các view tổng hợp hoạt động trao đổi trong hệ thống.",
-      summary: "Lấy danh sách bình luận",
+      summary: "Danh sách bình luận",
       ...cmtAuth,
       responses: {
-        200: { description: "Danh sách bình luận", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } } } } },
+        200: {
+          description: "Danh sách bình luận",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } },
+              example: {
+                data: [
+                  {
+                    id: "70000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    employeeId: "30000000-0000-4000-a000-000000000001",
+                    content: "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản.",
+                    attachments: null,
+                    createdAt: "2025-06-15T00:00:00.000Z",
+                    updatedAt: "2025-06-15T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
       },
     },
     post: {
@@ -80,8 +100,29 @@ export const projectCommentPaths = {
       ...cmtAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectCommentInput" } } } },
       responses: {
-        201: { description: "Tạo bình luận thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectComment" } } } } } },
-        400: { description: "Thiếu content lẫn attachments" },
+        201: {
+          description: "Tạo bình luận thành công",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectComment" } } },
+              example: {
+                data: {
+                  id: "70000000-0000-4000-a000-000000000011",
+                  projectId: "50000000-0000-4000-a000-000000000001",
+                  employeeId: "30000000-0000-4000-a000-000000000002",
+                  content: "Đã review xong giao diện, còn vài điểm cần tối ưu UX.",
+                  attachments: null,
+                  createdAt: "2026-08-04T08:30:00.000Z",
+                  updatedAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Thiếu content lẫn attachments",
+          content: { "application/json": { example: { message: "Thiếu content lẫn attachments" } } },
+        },
       },
     },
   },
@@ -89,11 +130,31 @@ export const projectCommentPaths = {
     get: {
       tags: ["Project Comments"],
       description: "Lấy các bình luận thuộc về một dự án cụ thể để hiển thị ở màn hình trao đổi của dự án hoặc luồng thảo luận theo công việc.",
-      summary: "Lấy bình luận theo dự án",
+      summary: "Bình luận theo dự án",
       ...cmtAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Danh sách bình luận của dự án", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } } } } },
+        200: {
+          description: "Danh sách bình luận của dự án",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } },
+              example: {
+                data: [
+                  {
+                    id: "70000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    employeeId: "30000000-0000-4000-a000-000000000001",
+                    content: "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản.",
+                    attachments: null,
+                    createdAt: "2025-06-15T00:00:00.000Z",
+                    updatedAt: "2025-06-15T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -101,18 +162,38 @@ export const projectCommentPaths = {
     get: {
       tags: ["Project Comments"],
       description: "Lấy toàn bộ bình luận do một nhân viên đăng để xem lịch sử trao đổi, dấu vết tham gia và mức độ đóng góp trong các dự án/task.",
-      summary: "Lấy bình luận theo nhân viên",
+      summary: "Bình luận theo nhân viên",
       ...cmtAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000002" } }],
       responses: {
-        200: { description: "Danh sách bình luận của nhân viên", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } } } } },
+        200: {
+          description: "Danh sách bình luận của nhân viên",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectComment" } } } },
+              example: {
+                data: [
+                  {
+                    id: "70000000-0000-4000-a000-000000000001",
+                    projectId: "50000000-0000-4000-a000-000000000001",
+                    employeeId: "30000000-0000-4000-a000-000000000002",
+                    content: "Đã review xong giao diện, còn vài điểm cần tối ưu UX.",
+                    attachments: null,
+                    createdAt: "2025-06-15T00:00:00.000Z",
+                    updatedAt: "2025-06-15T00:00:00.000Z",
+                  },
+                ],
+              },
+            },
+          },
+        },
       },
     },
   },
   "/api/project-comments/upload": {
     post: {
       tags: ["Project Comments"],
-      summary: "Upload file đính kèm lên Cloudinary",
+      summary: "Upload file",
       description:
         "Gửi tối đa 10 file (field name: files). Hỗ trợ ảnh, PDF, tài liệu Office, txt, zip... tối đa 50MB/file. " +
         "Trả về danh sách file với URL Cloudinary — dùng URL này đưa vào attachments khi tạo bình luận.",
@@ -131,8 +212,28 @@ export const projectCommentPaths = {
         },
       },
       responses: {
-        201: { description: "Upload thành công", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/UploadedFile" } } } } } } },
-        400: { description: "Định dạng file không được hỗ trợ hoặc vượt giới hạn 50MB" },
+        201: {
+          description: "Upload thành công",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/UploadedFile" } } } },
+              example: {
+                data: [
+                  {
+                    originalName: "ke-hoach-mkt-q4.pdf",
+                    url: "https://res.cloudinary.com/demo/raw/upload/ke-hoach-mkt-q4.pdf",
+                    size: 1250000,
+                    mimetype: "application/pdf",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        400: {
+          description: "Định dạng file không được hỗ trợ hoặc vượt giới hạn 50MB",
+          content: { "application/json": { example: { message: "Định dạng file không được hỗ trợ hoặc vượt giới hạn 50MB" } } },
+        },
       },
     },
   },
@@ -140,12 +241,33 @@ export const projectCommentPaths = {
     get: {
       tags: ["Project Comments"],
       description: "Lấy chi tiết một bình luận theo ID, bao gồm nội dung, file đính kèm, người tạo và thời điểm tạo/cập nhật.",
-      summary: "Xem chi tiết bình luận",
+      summary: "Chi tiết bình luận",
       ...cmtAuth,
       parameters: [{ ...cmtIdParam, schema: { ...cmtIdParam.schema, example: "70000000-0000-4000-a000-000000000001" } }],
       responses: {
-        200: { description: "Thông tin bình luận", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectComment" } } } } } },
-        404: { description: "Không tìm thấy bình luận" },
+        200: {
+          description: "Thông tin bình luận",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectComment" } } },
+              example: {
+                data: {
+                  id: "70000000-0000-4000-a000-000000000001",
+                  projectId: "50000000-0000-4000-a000-000000000001",
+                  employeeId: "30000000-0000-4000-a000-000000000001",
+                  content: "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản.",
+                  attachments: null,
+                  createdAt: "2025-06-15T00:00:00.000Z",
+                  updatedAt: "2025-06-15T00:00:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy bình luận",
+          content: { "application/json": { example: { message: "Không tìm thấy bình luận" } } },
+        },
       },
     },
     patch: {
@@ -156,8 +278,28 @@ export const projectCommentPaths = {
       parameters: [cmtIdParam],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectCommentInput" } } } },
       responses: {
-        200: { description: "Cập nhật thành công" },
-        404: { description: "Không tìm thấy bình luận" },
+        200: {
+          description: "Cập nhật thành công",
+          content: {
+            "application/json": {
+              example: {
+                data: {
+                  id: "70000000-0000-4000-a000-000000000001",
+                  projectId: "50000000-0000-4000-a000-000000000001",
+                  employeeId: "30000000-0000-4000-a000-000000000002",
+                  content: "Đã review xong giao diện, còn vài điểm cần tối ưu UX.",
+                  attachments: null,
+                  createdAt: "2025-06-15T00:00:00.000Z",
+                  updatedAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Không tìm thấy bình luận",
+          content: { "application/json": { example: { message: "Không tìm thấy bình luận" } } },
+        },
       },
     },
     delete: {
@@ -167,7 +309,16 @@ export const projectCommentPaths = {
       ...cmtAuth,
       parameters: [cmtIdParam],
       responses: {
-        200: { description: "Xoá bình luận thành công" },
+        200: {
+          description: "Xoá bình luận thành công",
+          content: {
+            "application/json": {
+              example: {
+                message: "Xoá bình luận thành công",
+              },
+            },
+          },
+        },
       },
     },
   },
