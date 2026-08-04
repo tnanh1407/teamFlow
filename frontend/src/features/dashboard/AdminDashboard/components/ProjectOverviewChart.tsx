@@ -37,13 +37,13 @@ interface ProjectOverviewChartProps {
   incompleteTotal: number
 }
 
-type TimeRangeKey = "12m" | "6m" | "3m" | "1m"
+type TimeRangeKey = "all" | "12m" | "6m" | "3m"
 
 const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number }> = [
+  { key: "all", label: "Tất cả", months: Number.POSITIVE_INFINITY },
   { key: "12m", label: "1 năm", months: 12 },
   { key: "6m", label: "6 tháng", months: 6 },
   { key: "3m", label: "3 tháng", months: 3 },
-  { key: "1m", label: "1 tháng", months: 1 },
 ]
 
 function ProjectOverviewTooltip({ active, payload }: any) {
@@ -89,7 +89,7 @@ export default function ProjectOverviewChart({
 
   const visibleData = useMemo(() => {
     const selectedMonths = timeRangeOptions.find((option) => option.key === range)?.months ?? 12
-    return data.slice(-selectedMonths)
+    return Number.isFinite(selectedMonths) ? data.slice(-selectedMonths) : data
   }, [data, range])
 
   if (visibleData.length === 0) return null

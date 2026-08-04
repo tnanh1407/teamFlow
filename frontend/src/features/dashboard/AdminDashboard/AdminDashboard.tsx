@@ -176,7 +176,8 @@ function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
   if (sortedMonths.length === 0) return []
 
   const start = new Date(`${sortedMonths[0]}-01T00:00:00Z`)
-  const end = new Date(`${sortedMonths[sortedMonths.length - 1]}-01T00:00:00Z`)
+  const today = new Date()
+  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1))
   const result: ProjectOverviewPoint[] = []
   let total = 0
   let completed = 0
@@ -224,7 +225,8 @@ function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
   if (sortedMonths.length === 0) return []
 
   const start = new Date(`${sortedMonths[0]}-01T00:00:00Z`)
-  const end = new Date(`${sortedMonths[sortedMonths.length - 1]}-01T00:00:00Z`)
+  const today = new Date()
+  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1))
   const result: DashboardGrowthPoint[] = []
   let active = 0
   let departed = 0
@@ -275,7 +277,7 @@ export default function AdminDashboard() {
           userService.getAll(),
           departmentService.getAll(),
           positionService.getAll(),
-          projectService.getAll(),
+          projectService.getAll({ limit: 100 }),
         ])
 
         if (!alive) return

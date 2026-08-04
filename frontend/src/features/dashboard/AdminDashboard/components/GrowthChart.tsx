@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react"
 import { motion } from "motion/react"
 import {
   ResponsiveContainer,
@@ -26,6 +27,15 @@ interface GrowthChartProps {
   data: { month: string; active: number; departed: number; totalHires: number; hires: number; leaves: number }[]
   currentTotal: number
 }
+
+type TimeRangeKey = "all" | "12m" | "6m" | "3m"
+
+const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number }> = [
+  { key: "all", label: "Tất cả", months: Number.POSITIVE_INFINITY },
+  { key: "12m", label: "1 năm", months: 12 },
+  { key: "6m", label: "6 tháng", months: 6 },
+  { key: "3m", label: "3 tháng", months: 3 },
+]
 
 function GrowthTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
@@ -78,7 +88,16 @@ function GrowthTooltip({ active, payload }: any) {
 }
 
 export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
-  if (data.length <= 1) return null
+  const [range, setRange] = useState<TimeRangeKey>("12m")
+
+  const visibleData = useMemo(() => {
+    const selectedMonths = timeRangeOptions.find((option) => option.key === range)?.months ?? 12
+    return Number.isFinite(selectedMonths) ? data.slice(-selectedMonths) : data
+  }, [data, range])
+
+  const visibleCurrentTotal = visibleData.at(-1)?.active ?? currentTotal
+
+  if (visibleData.length === 0) return null
 
   return (
     <motion.div
@@ -91,11 +110,31 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
         <div className="flex items-center gap-2.5">
           <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 uppercase">BIỀU ĐỒ NHÂN SỰ</h2>
         </div>
-        <span className="text-sm font-medium text-zinc-400">{currentTotal} nhân sự hiện tại đang làm việc</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
+            {timeRangeOptions.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setRange(option.key)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  range === option.key
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
+                    : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <span className="text-sm font-medium text-zinc-400">
+            {visibleCurrentTotal} nhân sự hiện tại đang làm việc
+          </span>
+        </div>
       </div>
       <div className="p-5">
         <ResponsiveContainer width="100%" height={360}>
-          <LineChart data={data} margin={{ top: 8, right: 16, left: 24, bottom: 24 }} >
+          <LineChart data={visibleData} margin={{ top: 8, right: 16, left: 24, bottom: 24 }} >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
             <XAxis
               dataKey="month"
