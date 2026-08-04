@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   department_id UUID,
   position_id UUID,
-  employee_code VARCHAR UNIQUE NOT NULL,
+  employee_code VARCHAR UNIQUE,
   name TEXT NOT NULL,
   email VARCHAR UNIQUE NOT NULL,
   phone VARCHAR UNIQUE,
@@ -71,8 +71,12 @@ ALTER TABLE users
   );
 
 ALTER TABLE users
-  ADD CONSTRAINT ck_users_employee_code_not_blank
-  CHECK (length(trim(employee_code)) > 0);
+  ADD CONSTRAINT ck_users_employee_code_role
+  CHECK (
+    (role = 'admin' AND employee_code IS NULL)
+    OR
+    (role <> 'admin' AND employee_code IS NOT NULL AND length(trim(employee_code)) > 0)
+  );
 
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

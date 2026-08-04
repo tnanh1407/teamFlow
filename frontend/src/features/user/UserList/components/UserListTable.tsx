@@ -92,11 +92,11 @@ export default function UserListTable({
 
                     <td className="px-4 py-3">
                       <div className="inline-flex items-center gap-1.5 font-mono text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                        {item.employeeCode}
+                        {item.employeeCode || "—"}
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            navigator.clipboard.writeText(item.employeeCode)
+                            navigator.clipboard.writeText(item.employeeCode || "")
                           }}
                           className="border-none bg-transparent p-0.5 text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-500 dark:hover:bg-zinc-800"
                         >

@@ -127,7 +127,7 @@ export default function Settings() {
     setSaving(true)
     try {
       const fd = new FormData()
-      fd.append("employeeCode", profileUser.employeeCode)
+      fd.append("employeeCode", profileUser.employeeCode || "")
       fd.append("name", combineName(values.firstName, values.lastName))
       fd.append("email", values.email)
       fd.append("phone", values.phone || "")

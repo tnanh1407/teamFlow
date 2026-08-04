@@ -28,7 +28,7 @@ export default function ProjectLogsSection({ logs, logUserMap, onSelectLog }: Pr
         ) : (
           logs.map((log) => {
             const emp = logUserMap[log.userId]
-            const actorName = emp?.name ? `${emp.name} (${emp.employeeCode})` : "—"
+            const actorName = emp?.name ? `${emp.name} (${emp.employeeCode || "—"})` : "—"
             return (
               <button
                 key={log.id}

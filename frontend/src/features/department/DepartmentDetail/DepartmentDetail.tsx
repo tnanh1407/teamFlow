@@ -154,7 +154,7 @@ export default function DepartmentDetail() {
                         {m.phone && <span className="flex items-center gap-1"><Phone size={11} />{m.phone}</span>}
                       </div>
                     </div>
-                    <span className="shrink-0 font-mono text-[11px] text-zinc-300 dark:text-zinc-600">{m.employeeCode}</span>
+                    <span className="shrink-0 font-mono text-[11px] text-zinc-300 dark:text-zinc-600">{m.employeeCode || "—"}</span>
                   </motion.div>
                 ))
               )}

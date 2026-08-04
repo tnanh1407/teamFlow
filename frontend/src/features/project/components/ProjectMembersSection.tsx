@@ -80,7 +80,7 @@ export default function ProjectMembersSection({
                           <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                             {pm.user?.name || "—"}
                           </p>
-                          <p className="text-xs text-zinc-400 truncate">{pm.user?.employeeCode}</p>
+                          <p className="text-xs text-zinc-400 truncate">{pm.user?.employeeCode || "—"}</p>
                         </div>
                         {canRemoveThisMember && (
                           <button

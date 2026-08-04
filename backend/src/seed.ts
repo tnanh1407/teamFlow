@@ -39,7 +39,16 @@ const seed = async () => {
     await client.query(`ALTER TABLE users DROP COLUMN IF EXISTS position`);
     await client.query(`ALTER TABLE users ALTER COLUMN department_id DROP NOT NULL`);
     await client.query(`ALTER TABLE users ALTER COLUMN position_id DROP NOT NULL`);
+    await client.query(`ALTER TABLE users ALTER COLUMN employee_code DROP NOT NULL`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS leave_date DATE`);
+    await client.query("DELETE FROM project_logs");
+    await client.query("DELETE FROM project_tasks");
+    await client.query("DELETE FROM project_comments");
+    await client.query("DELETE FROM project_departments");
+    await client.query("DELETE FROM project_employees");
+    await client.query("DELETE FROM projects");
+    await client.query("UPDATE departments SET manager_id = NULL");
+    await client.query("DELETE FROM users");
     await client.query(`
       ALTER TABLE users
       ADD CONSTRAINT ck_users_admin_assignment
@@ -51,18 +60,13 @@ const seed = async () => {
     `);
     await client.query(`
       ALTER TABLE users
-      ADD CONSTRAINT ck_users_employee_code_not_blank
-      CHECK (length(trim(employee_code)) > 0)
+      ADD CONSTRAINT ck_users_employee_code_role
+      CHECK (
+        (role = 'admin' AND employee_code IS NULL)
+        OR
+        (role <> 'admin' AND employee_code IS NOT NULL AND length(trim(employee_code)) > 0)
+      )
     `);
-
-    await client.query("DELETE FROM project_logs");
-    await client.query("DELETE FROM project_tasks");
-    await client.query("DELETE FROM project_comments");
-    await client.query("DELETE FROM project_departments");
-    await client.query("DELETE FROM project_employees");
-    await client.query("DELETE FROM projects");
-    await client.query("UPDATE departments SET manager_id = NULL");
-    await client.query("DELETE FROM users");
     await client.query("DELETE FROM departments");
     await client.query("DELETE FROM positions");
 
@@ -103,7 +107,7 @@ const seed = async () => {
         const hashed = bcrypt.hashSync(pwdFor(u.username), 10);
         await client.query(
           `INSERT INTO users (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url, last_login, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
-          [u.id, u.role === "admin" ? null : u.departmentId, u.role === "admin" ? null : u.positionId, u.employeeCode, u.name, u.email, u.phone, u.birthDate, u.hireDate, u.leaveDate ?? null, u.gender, u.username, hashed, u.role, u.status, u.avatarURL, u.lastLogin, u.createdAt, u.updatedAt]
+          [u.id, u.role === "admin" ? null : u.departmentId, u.role === "admin" ? null : u.positionId, u.role === "admin" ? null : u.employeeCode, u.name, u.email, u.phone, u.birthDate, u.hireDate, u.leaveDate ?? null, u.gender, u.username, hashed, u.role, u.status, u.avatarURL, u.lastLogin, u.createdAt, u.updatedAt]
         );
       }
       counts.users = data.length;

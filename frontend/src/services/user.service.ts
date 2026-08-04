@@ -8,7 +8,7 @@ export interface User {
   id: string;
   departmentId: string | null;
   positionId: string | null;
-  employeeCode: string;
+  employeeCode: string | null;
   name: string;
   email: string;
   phone: string;
@@ -47,9 +47,9 @@ export interface ForgotPasswordPayload {
 
 type BackendUser = {
   id: string;
-  departmentId: string;
-  positionId: string;
-  employeeCode: string;
+  departmentId: string | null;
+  positionId: string | null;
+  employeeCode: string | null;
   name: string;
   email: string;
   phone?: string | null;
@@ -70,7 +70,7 @@ const normalizeUser = (user: BackendUser): User => ({
   id: user.id,
   departmentId: user.departmentId ?? "",
   positionId: user.positionId ?? "",
-  employeeCode: user.employeeCode ?? "",
+  employeeCode: user.employeeCode ?? null,
   name: user.name ?? "",
   email: user.email ?? "",
   phone: user.phone ?? "",

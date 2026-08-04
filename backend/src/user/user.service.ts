@@ -15,7 +15,7 @@ interface UserRow {
   id: string;
   departmentId: string | null;
   positionId: string | null;
-  employeeCode: string;
+  employeeCode: string | null;
   name: string;
   email: string;
   phone: string;
@@ -37,7 +37,7 @@ interface UserRow {
 export interface UserData {
   departmentId: string | null;
   positionId: string | null;
-  employeeCode: string;
+  employeeCode: string | null;
   name: string;
   email: string;
   phone?: string;
@@ -91,7 +91,11 @@ const normalizeOptionalText = (value: string | undefined) => {
   // biến input rỗng thành null
   return normalized ? normalized : null;
 };
-const normalizeEmployeeCode = (value: string) => normalizeRequiredText(value).toUpperCase();
+const normalizeEmployeeCode = (value: string | null | undefined) => {
+  if (value == null) return null;
+  const normalized = value.trim();
+  return normalized ? normalized.toUpperCase() : null;
+};
 const EMPLOYEE_CODE_SUFFIX_REGEX = /^[A-Z0-9]{6}$/;
 
 const todayDate = () => new Date().toLocaleDateString("en-CA");
@@ -116,14 +120,18 @@ async function resolveEmployeeCodePrefix(departmentId: string) {
   return normalizeRequiredText(department.code).toUpperCase();
 }
 
-async function normalizeAndValidateEmployeeCode(role: EAccountRole, departmentId: string | null, employeeCode: string) {
+async function normalizeAndValidateEmployeeCode(role: EAccountRole, departmentId: string | null, employeeCode: string | null | undefined) {
   const normalizedCode = normalizeEmployeeCode(employeeCode);
   if (role === EAccountRole.ADMIN) {
-    return normalizedCode;
+    return null;
   }
 
   if (!departmentId) {
     throw new AppError("Department is required for non-admin users", 400);
+  }
+
+  if (!normalizedCode) {
+    throw new AppError("Employee code is required for non-admin users", 400);
   }
 
   const prefix = await resolveEmployeeCodePrefix(departmentId);
@@ -325,8 +333,10 @@ class UserService {
     const existingUser = await this.findByUsername(payload.username);
     if (existingUser) throw new AppError("Username already exists", 409);
 
-    const existingCode = await this.findByEmployeeCode(payload.employeeCode);
-    if (existingCode) throw new AppError("Employee code already exists", 409);
+    if (payload.employeeCode) {
+      const existingCode = await this.findByEmployeeCode(payload.employeeCode);
+      if (existingCode) throw new AppError("Employee code already exists", 409);
+    }
 
     const existingEmail = await this.findByEmail(payload.email);
     if (existingEmail) throw new AppError("Email already exists", 409);
@@ -464,7 +474,7 @@ class UserService {
   async requestPasswordReset(email: string, employeeCode: string) {
     const normalizedEmail = email.trim().toLowerCase();
     const user = await this.findByEmail(normalizedEmail);
-    if (!user || user.employeeCode.toUpperCase() !== employeeCode.trim().toUpperCase()) {
+    if (!user || !user.employeeCode || user.employeeCode.toUpperCase() !== employeeCode.trim().toUpperCase()) {
       throw new AppError("Email or employee code does not match any account", 400);
     }
 

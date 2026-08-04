@@ -27,18 +27,34 @@ const userSchema = z.object({
   status: z.boolean(),
 })
 
-type UserFormValues = z.infer<typeof userSchema>
+type UserFormValues = {
+  employeeCode: string | undefined
+  name: string
+  email: string
+  phone?: string
+  birthDate?: string
+  hireDate?: string
+  leaveDate?: string
+  gender: "male" | "female" | "other"
+  departmentId: string | undefined
+  positionId: string | undefined
+  username: string
+  password?: string
+  status: boolean
+}
+
+void userSchema
 
 const inputClass =
   "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
-function buildUserSchema(departments: Department[]) {
+function buildUserSchema(departments: Department[], allowAdminEmptyFields: boolean) {
   const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
 
   return z
     .object({
-      employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
+      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
       name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
       email: z.string().trim().email("Email không hợp lệ"),
       phone: z.string().trim().optional(),
@@ -46,17 +62,39 @@ function buildUserSchema(departments: Department[]) {
       hireDate: z.string().optional(),
       leaveDate: z.string().optional(),
       gender: z.enum(["male", "female", "other"]),
-      departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
-      positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
+      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn phòng ban"),
+      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn chức vụ"),
       username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
       password: z.string().optional(),
       status: z.boolean(),
     })
     .superRefine((data, ctx) => {
-      const departmentCode = departmentCodeMap.get(data.departmentId)
-      const employeeCode = data.employeeCode.trim().toUpperCase()
+      const employeeCode = (data.employeeCode ?? "").trim().toUpperCase()
+      const departmentId = data.departmentId?.trim() || ""
+      if (allowAdminEmptyFields && !employeeCode && !departmentId) return
 
-      if (!departmentCode) return
+      const departmentCode = departmentCodeMap.get(departmentId)
+      if (!departmentCode) {
+        if (allowAdminEmptyFields && !departmentId) return
+
+        ctx.addIssue({
+          code: "custom",
+          path: ["departmentId"],
+          message: "Vui lòng chọn phòng ban",
+        })
+        return
+      }
+
+      if (!employeeCode) {
+        if (allowAdminEmptyFields) return
+
+        ctx.addIssue({
+          code: "custom",
+          path: ["employeeCode"],
+          message: "Vui lòng nhập mã người dùng",
+        })
+        return
+      }
 
       if (!employeeCode.startsWith(departmentCode)) {
         ctx.addIssue({
@@ -98,7 +136,7 @@ function toFormValues(user?: User): UserFormValues {
   }
 
   return {
-    employeeCode: user.employeeCode,
+    employeeCode: user.employeeCode || "",
     name: user.name,
     email: user.email,
     phone: user.phone || "",
@@ -167,7 +205,7 @@ export default function UserDetail() {
         watch,
         formState: { errors, isValid },
       } = useForm<UserFormValues>({
-        resolver: zodResolver(buildUserSchema(departments)),
+        resolver: zodResolver(buildUserSchema(departments, editingUser?.role === "admin")),
         mode: "onChange",
         defaultValues: toFormValues(editingUser),
       })
@@ -397,7 +435,7 @@ export default function UserDetail() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2">
-          <Field label="Mã người dùng" value={user.employeeCode} />
+          <Field label="Mã người dùng" value={user.employeeCode || "—"} />
           <Field label="Tên đăng nhập" value={user.username} />
           <Field label="Họ và tên" value={user.name || "—"} />
           <Field label="Email" value={user.email || "—"} />

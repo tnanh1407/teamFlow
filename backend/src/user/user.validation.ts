@@ -2,9 +2,9 @@ import { z } from "zod";
 import { EGender } from "../enums/gender.enum.js";
 
 export const createUserSchema = z.object({
-  departmentId: z.string().min(1, "Department ID is required"),
-  positionId: z.string().min(1, "Position ID is required"),
-  employeeCode: z.string().min(1, "Employee code is required"),
+  departmentId: z.string().nullable().optional(),
+  positionId: z.string().nullable().optional(),
+  employeeCode: z.string().nullable().optional(),
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
   phone: z.string().optional(),
@@ -18,9 +18,9 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  departmentId: z.string().optional(),
-  positionId: z.string().optional(),
-  employeeCode: z.string().optional(),
+  departmentId: z.string().nullable().optional(),
+  positionId: z.string().nullable().optional(),
+  employeeCode: z.string().nullable().optional(),
   name: z.string().optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),

@@ -188,13 +188,13 @@ function buildEmployeeContributionData(
     .map((user) => {
       const count = counts.get(user.id)
       return {
-        label: `${user.employeeCode} - ${user.name}`,
+        label: `${user.employeeCode || "—"} - ${user.name}`,
         name: user.name,
         value: count?.total.size ?? 0,
         completed: count?.completed.size ?? 0,
         comments: commentCounts.get(user.id) ?? 0,
         processes: processCounts.get(user.id) ?? 0,
-        code: user.employeeCode,
+        code: user.employeeCode || "",
         department: departmentById.get(user.departmentId ?? "") ?? "",
         position: positionById.get(user.positionId ?? "") ?? "",
       }

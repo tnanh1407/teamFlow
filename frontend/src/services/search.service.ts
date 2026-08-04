@@ -8,7 +8,7 @@ export interface SearchUser {
   name: string;
   username: string;
   email: string;
-  employeeCode: string;
+  employeeCode: string | null;
   avatarURL?: string;
 }
 
