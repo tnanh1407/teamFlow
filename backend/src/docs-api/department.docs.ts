@@ -1,6 +1,16 @@
 export const departmentSchemas = {
   Department: {
     type: "object",
+    example: {
+      id: "10000000-0000-4000-a000-000000000001",
+      name: "Công nghệ thông tin",
+      code: "IT",
+      description: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+      managerId: "30000000-0000-4000-a000-000000000001",
+      isActive: true,
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    },
     properties: {
       id: { type: "string", format: "uuid" },
       name: { type: "string" },
@@ -15,6 +25,13 @@ export const departmentSchemas = {
   DepartmentInput: {
     type: "object",
     required: ["name", "code"],
+    example: {
+      name: "Nghiên cứu & Phát triển",
+      code: "RND",
+      description: "Phòng phụ trách nghiên cứu, thử nghiệm và xây dựng sản phẩm mới",
+      managerId: "30000000-0000-4000-a000-000000000003",
+      isActive: true,
+    },
     properties: {
       name: { type: "string" },
       code: { type: "string" },
@@ -25,6 +42,20 @@ export const departmentSchemas = {
   },
   PaginatedDepartments: {
     type: "object",
+    example: {
+      data: [
+        {
+          id: "10000000-0000-4000-a000-000000000001",
+          name: "Công nghệ thông tin",
+          code: "IT",
+          description: "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+          managerId: "30000000-0000-4000-a000-000000000001",
+          isActive: true,
+          createdAt: "2025-01-01T00:00:00.000Z",
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
+      ],
+    },
     properties: {
       data: {
         type: "array",
@@ -60,7 +91,7 @@ export const departmentPaths = {
       description: "Lấy đầy đủ thông tin của một phòng ban theo ID. Dùng khi cần xem chi tiết phòng ban, kiểm tra mô tả, trưởng phòng, trạng thái hoạt động hoặc hiển thị dữ liệu trước khi chỉnh sửa.",
       summary: "Lấy phòng ban theo ID",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
       responses: {
         200: { description: "Thông tin phòng ban", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Department" } } } } } },
         404: { description: "Không tìm thấy" },
@@ -71,7 +102,7 @@ export const departmentPaths = {
       description: "Cập nhật thông tin phòng ban theo ID. Có thể chỉnh tên, mã, mô tả, trưởng phòng và trạng thái hoạt động. Endpoint này phù hợp cho màn hình quản trị danh mục hoặc thao tác sửa trực tiếp từ chi tiết phòng ban.",
       summary: "Cập nhật phòng ban",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/DepartmentInput" } } } },
       responses: {
         200: { description: "Cập nhật thành công" },
@@ -83,8 +114,8 @@ export const departmentPaths = {
       description: "Xoá một phòng ban khỏi hệ thống theo ID. Nên chỉ dùng khi phòng ban không còn được sử dụng hoặc đã được chuyển dữ liệu sang phòng ban khác để tránh làm hỏng quan hệ nhân sự/dự án.",
       summary: "Xoá phòng ban",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-      responses: {
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
+        responses: {
         200: { description: "Xoá thành công" },
         404: { description: "Không tìm thấy" },
       },

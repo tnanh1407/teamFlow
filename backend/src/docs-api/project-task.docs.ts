@@ -1,6 +1,22 @@
 export const projectTaskSchemas = {
   ProjectTask: {
     type: "object",
+    example: {
+      id: "70000000-0000-4000-a000-000000000001",
+      projectId: "60000000-0000-4000-a000-000000000001",
+      title: "Tích hợp báo cáo doanh thu",
+      description: "Phát triển màn hình và API báo cáo doanh thu theo tháng",
+      status: "in_progress",
+      priority: "high",
+      assignedTo: "30000000-0000-4000-a000-000000000001",
+      assignedBy: "30000000-0000-4000-a000-000000000001",
+      assignedAt: "2026-08-04T08:00:00.000Z",
+      dueDate: "2026-08-20",
+      createdBy: "30000000-0000-4000-a000-000000000001",
+      completedAt: null,
+      createdAt: "2026-08-04T08:00:00.000Z",
+      updatedAt: "2026-08-04T08:30:00.000Z",
+    },
     properties: {
       id: { type: "string", format: "uuid" },
       projectId: { type: "string", format: "uuid" },
@@ -21,6 +37,15 @@ export const projectTaskSchemas = {
   ProjectTaskInput: {
     type: "object",
     required: ["projectId", "title"],
+    example: {
+      projectId: "60000000-0000-4000-a000-000000000001",
+      title: "Tích hợp báo cáo doanh thu",
+      description: "Phát triển màn hình và API báo cáo doanh thu theo tháng",
+      status: "todo",
+      priority: "high",
+      assignedTo: "30000000-0000-4000-a000-000000000001",
+      dueDate: "2026-08-20",
+    },
     properties: {
       projectId: { type: "string", format: "uuid" },
       title: { type: "string" },
@@ -39,7 +64,7 @@ const taskIdParam = {
   name: "id",
   in: "path",
   required: true,
-  schema: { type: "string", format: "uuid" },
+  schema: { type: "string", format: "uuid", example: "70000000-0000-4000-a000-000000000001" },
 };
 
 export const projectTaskPaths = {
@@ -60,9 +85,34 @@ export const projectTaskPaths = {
       ...taskAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectTaskInput" } } } },
       responses: {
-        201: { description: "Tạo task thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectTask" } } } } } },
-        400: { description: "Dữ liệu không hợp lệ" },
-        403: { description: "Không đủ quyền (chỉ Manager)" },
+        201: {
+          description: "Tạo hoặc giao task thành công và trả về task vừa được khởi tạo.",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectTask" } } },
+              example: {
+                data: {
+                  id: "70000000-0000-4000-a000-000000000001",
+                  projectId: "60000000-0000-4000-a000-000000000001",
+                  title: "Tích hợp báo cáo doanh thu",
+                  description: "Phát triển màn hình và API báo cáo doanh thu theo tháng",
+                  status: "todo",
+                  priority: "high",
+                  assignedTo: "30000000-0000-4000-a000-000000000001",
+                  assignedBy: "30000000-0000-4000-a000-000000000001",
+                  assignedAt: "2026-08-04T08:00:00.000Z",
+                  dueDate: "2026-08-20",
+                  createdBy: "30000000-0000-4000-a000-000000000001",
+                  completedAt: null,
+                  createdAt: "2026-08-04T08:00:00.000Z",
+                  updatedAt: "2026-08-04T08:00:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        400: { description: "Dữ liệu task không hợp lệ hoặc thiếu trường bắt buộc." },
+        403: { description: "Không đủ quyền vì chỉ Manager được tạo/giao task." },
       },
     },
   },
@@ -73,13 +123,13 @@ export const projectTaskPaths = {
       summary: "Lấy task theo dự án (lọc/tìm kiếm)",
       ...taskAuth,
       parameters: [
-        { name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } },
         { name: "q", in: "query", schema: { type: "string" }, description: "Tìm theo tiêu đề hoặc mô tả" },
         { name: "status", in: "query", schema: { type: "string", enum: ["todo", "in_progress", "review", "completed", "cancelled"] } },
-        { name: "assignedTo", in: "query", schema: { type: "string", format: "uuid" }, description: "Lọc theo nhân viên được giao" },
+        { name: "assignedTo", in: "query", schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000001" }, description: "Lọc theo nhân viên được giao" },
       ],
       responses: {
-        200: { description: "Danh sách task của dự án", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectTask" } } } } } } },
+        200: { description: "Trả về danh sách task thuộc dự án sau khi áp dụng các bộ lọc đã gửi lên.", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectTask" } } } } } } },
       },
     },
   },
@@ -89,9 +139,9 @@ export const projectTaskPaths = {
       description: "Lấy toàn bộ task được giao cho một nhân viên cụ thể để phục vụ hồ sơ cá nhân, màn hình công việc của tôi hoặc báo cáo tải công việc theo người.",
       summary: "Lấy task được giao cho một nhân viên",
       ...taskAuth,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000003" } }],
       responses: {
-        200: { description: "Danh sách task của nhân viên", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectTask" } } } } } } },
+        200: { description: "Trả về toàn bộ task đang được giao cho nhân viên đã chỉ định.", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectTask" } } } } } } },
       },
     },
   },
@@ -103,8 +153,8 @@ export const projectTaskPaths = {
       ...taskAuth,
       parameters: [taskIdParam],
       responses: {
-        200: { description: "Thông tin task", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectTask" } } } } } },
-        404: { description: "Không tìm thấy task" },
+        200: { description: "Trả về thông tin chi tiết của task theo ID.", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectTask" } } } } } },
+        404: { description: "Không tìm thấy task tương ứng với ID đã cung cấp." },
       },
     },
     patch: {
@@ -115,9 +165,9 @@ export const projectTaskPaths = {
       parameters: [taskIdParam],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectTaskInput" } } } },
       responses: {
-        200: { description: "Cập nhật task thành công" },
-        403: { description: "Không đủ quyền (chỉ Manager hoặc assignee)" },
-        404: { description: "Không tìm thấy task" },
+        200: { description: "Cập nhật task thành công và đồng bộ trạng thái mới nhất." },
+        403: { description: "Không đủ quyền vì chỉ Manager hoặc assignee mới được cập nhật." },
+        404: { description: "Không tìm thấy task cần cập nhật." },
       },
     },
     delete: {
@@ -127,8 +177,8 @@ export const projectTaskPaths = {
       ...taskAuth,
       parameters: [taskIdParam],
       responses: {
-        200: { description: "Xoá task thành công" },
-        403: { description: "Không đủ quyền (chỉ Manager)" },
+        200: { description: "Xoá task thành công khỏi hệ thống." },
+        403: { description: "Không đủ quyền vì chỉ Manager được xoá task." },
       },
     },
   },

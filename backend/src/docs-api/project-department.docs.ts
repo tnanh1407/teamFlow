@@ -1,6 +1,11 @@
 export const projectDepartmentSchemas = {
   ProjectDepartment: {
     type: "object",
+    example: {
+      projectId: "50000000-0000-4000-a000-000000000001",
+      departmentId: "10000000-0000-4000-a000-000000000001",
+      assignedAt: "2025-06-01T00:00:00.000Z",
+    },
     properties: {
       projectId: { type: "string", format: "uuid" },
       departmentId: { type: "string", format: "uuid" },
@@ -10,6 +15,10 @@ export const projectDepartmentSchemas = {
   ProjectDepartmentInput: {
     type: "object",
     required: ["projectId", "departmentId"],
+    example: {
+      projectId: "50000000-0000-4000-a000-000000000002",
+      departmentId: "10000000-0000-4000-a000-000000000006",
+    },
     properties: {
       projectId: { type: "string", format: "uuid" },
       departmentId: { type: "string", format: "uuid" },
@@ -62,7 +71,7 @@ export const projectDepartmentPaths = {
       description: "Lấy toàn bộ phòng ban đang tham gia một dự án cụ thể để phục vụ phần chi tiết dự án, bảng phân công liên phòng ban và các báo cáo phối hợp công việc.",
       summary: "Danh sách phòng ban của một dự án",
       ...pdAuth,
-      parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],
       responses: {
         200: { description: "Danh sách phòng ban của dự án", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectDepartment" } } } } } } },
       },

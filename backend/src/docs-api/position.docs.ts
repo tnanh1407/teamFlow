@@ -1,6 +1,15 @@
 export const positionSchemas = {
   Position: {
     type: "object",
+    example: {
+      id: "20000000-0000-4000-a000-000000000005",
+      name: "Nhân viên",
+      description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+      level: "Junior",
+      isActive: true,
+      createdAt: "2025-01-01T00:00:00.000Z",
+      updatedAt: "2025-01-01T00:00:00.000Z",
+    },
     properties: {
       id: { type: "string", format: "uuid" },
       name: { type: "string" },
@@ -14,6 +23,12 @@ export const positionSchemas = {
   PositionInput: {
     type: "object",
     required: ["name"],
+    example: {
+      name: "Senior Developer",
+      description: "Phụ trách phát triển, review code và định hướng kỹ thuật",
+      level: "Senior",
+      isActive: true,
+    },
     properties: {
       name: { type: "string" },
       description: { type: "string" },
@@ -23,6 +38,19 @@ export const positionSchemas = {
   },
   PaginatedPositions: {
     type: "object",
+    example: {
+      data: [
+        {
+          id: "20000000-0000-4000-a000-000000000005",
+          name: "Nhân viên",
+          description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+          level: "Junior",
+          isActive: true,
+          createdAt: "2025-01-01T00:00:00.000Z",
+          updatedAt: "2025-01-01T00:00:00.000Z",
+        },
+      ],
+    },
     properties: {
       data: {
         type: "array",
@@ -58,7 +86,7 @@ export const positionPaths = {
       description: "Lấy chi tiết một chức vụ theo ID để hiển thị thông tin đầy đủ trước khi sửa, hoặc để dùng ở các màn hình tra cứu nhân sự và mapping chức danh.",
       summary: "Lấy chức vụ theo ID",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
       responses: {
         200: { description: "Thông tin chức vụ", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/Position" } } } } } },
         404: { description: "Không tìm thấy" },
@@ -69,7 +97,7 @@ export const positionPaths = {
       description: "Cập nhật một chức vụ hiện có theo ID. Dùng để đổi tên chức vụ, chỉnh mô tả, thay đổi level hoặc bật/tắt trạng thái hoạt động khi danh mục chức vụ cần được làm sạch.",
       summary: "Cập nhật chức vụ",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/PositionInput" } } } },
       responses: {
         200: { description: "Cập nhật thành công" },
@@ -81,7 +109,7 @@ export const positionPaths = {
       description: "Xoá một chức vụ khỏi hệ thống theo ID. Chỉ nên thực hiện khi chắc chắn chức vụ đó không còn được tham chiếu trong dữ liệu nhân sự hoặc quy trình nghiệp vụ.",
       summary: "Xoá chức vụ",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
       responses: {
         200: { description: "Xoá thành công" },
         404: { description: "Không tìm thấy" },

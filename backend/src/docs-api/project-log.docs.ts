@@ -1,6 +1,14 @@
 export const projectLogSchemas = {
   ProjectLog: {
     type: "object",
+    example: {
+      id: "80000000-0000-4000-a000-000000000001",
+      projectId: "50000000-0000-4000-a000-000000000001",
+      employeeId: "30000000-0000-4000-a000-000000000001",
+      action: "created",
+      description: "Dự án được tạo bởi Nguyễn Văn Anh",
+      createdAt: "2025-06-01T00:00:00.000Z",
+    },
     properties: {
       id: { type: "string", format: "uuid" },
       projectId: { type: "string", format: "uuid" },
@@ -13,6 +21,12 @@ export const projectLogSchemas = {
   ProjectLogInput: {
     type: "object",
     required: ["projectId", "employeeId"],
+    example: {
+      projectId: "50000000-0000-4000-a000-000000000001",
+      employeeId: "30000000-0000-4000-a000-000000000001",
+      action: "updated",
+      description: "Cập nhật tiến độ dự án lên 60%",
+    },
     properties: {
       projectId: { type: "string", format: "uuid" },
       employeeId: { type: "string", format: "uuid" },
@@ -61,7 +75,7 @@ export const projectLogPaths = {
       description: "Lấy toàn bộ nhật ký liên quan đến một dự án theo ID. Dùng để audit lịch sử thay đổi, xem ai đã tạo/cập nhật/hoàn thành/cancel dự án và phục vụ màn hình lịch sử hoạt động của dự án.",
       summary: "Lấy nhật ký theo dự án",
       ...logAuth,
-      parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],
       responses: {
         200: { description: "Danh sách nhật ký của dự án", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } } } } },
         403: { description: "Không đủ quyền (chỉ Admin)" },
@@ -74,7 +88,7 @@ export const projectLogPaths = {
       description: "Lấy nhật ký hoạt động gắn với một nhân viên cụ thể để xem người đó đã tạo, cập nhật, được giao hay tương tác với dự án/task nào trong hệ thống.",
       summary: "Lấy nhật ký theo nhân viên",
       ...logAuth,
-      parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000001" } }],
       responses: {
         200: { description: "Danh sách nhật ký của nhân viên", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectLog" } } } } } } },
         403: { description: "Không đủ quyền (chỉ Admin)" },

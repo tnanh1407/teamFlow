@@ -1,6 +1,13 @@
 export const projectEmployeeSchemas = {
   ProjectEmployee: {
     type: "object",
+    example: {
+      id: "60000000-0000-4000-a000-000000000001",
+      projectId: "50000000-0000-4000-a000-000000000001",
+      employeeId: "30000000-0000-4000-a000-000000000001",
+      role: "leader",
+      assignedAt: "2025-06-01T00:00:00.000Z",
+    },
     properties: {
       id: { type: "string", format: "uuid" },
       projectId: { type: "string", format: "uuid" },
@@ -12,6 +19,11 @@ export const projectEmployeeSchemas = {
   ProjectEmployeeInput: {
     type: "object",
     required: ["projectId", "employeeId"],
+    example: {
+      projectId: "50000000-0000-4000-a000-000000000002",
+      employeeId: "30000000-0000-4000-a000-000000000003",
+      role: "member",
+    },
     properties: {
       projectId: { type: "string", format: "uuid" },
       employeeId: { type: "string", format: "uuid" },
@@ -21,6 +33,9 @@ export const projectEmployeeSchemas = {
   ProjectRoleInput: {
     type: "object",
     required: ["role"],
+    example: {
+      role: "reviewer",
+    },
     properties: {
       role: { type: "string", enum: ["leader", "member", "reviewer"] },
     },
@@ -67,7 +82,7 @@ export const projectEmployeePaths = {
       description: "Lấy toàn bộ các phân công dự án của một nhân viên cụ thể. Endpoint này hữu ích khi xem hồ sơ nhân sự, đánh giá khối lượng công việc hoặc hiển thị danh sách dự án mà nhân viên đó đang tham gia.",
       summary: "Lấy phân công theo nhân viên",
       ...peAuth,
-      parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000003" } }],
       responses: {
         200: { description: "Danh sách dự án của nhân viên", content: { "application/json": { schema: { type: "object", properties: { data: { type: "array", items: { $ref: "#/components/schemas/ProjectEmployee" } } } } } } },
       },
@@ -79,7 +94,7 @@ export const projectEmployeePaths = {
       description: "Lấy chi tiết một bản ghi phân công theo ID để xem nhân viên nào đang giữ vai trò gì trong dự án nào, phục vụ màn hình quản trị phân công và kiểm tra lịch sử gán việc.",
       summary: "Xem chi tiết phân công",
       ...peAuth,
-      parameters: [peIdParam],
+      parameters: [{ ...peIdParam, schema: { ...peIdParam.schema, example: "60000000-0000-4000-a000-000000000001" } }],
       responses: {
         200: { description: "Thông tin phân công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/ProjectEmployee" } } } } } },
         404: { description: "Không tìm thấy" },

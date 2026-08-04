@@ -1,6 +1,27 @@
 export const userSchemas = {
   User: {
     type: "object",
+    example: {
+      id: "30000000-0000-4000-a000-000000000001",
+      departmentId: "10000000-0000-4000-a000-000000000001",
+      positionId: "20000000-0000-4000-a000-000000000001",
+      employeeCode: "EMP001",
+      name: "Nguyễn Văn Anh",
+      email: "nguyenvananh@qlpbda.com",
+      phone: "0901234567",
+      birthDate: "1998-03-21",
+      hireDate: "2023-06-01",
+      leaveDate: null,
+      gender: "male",
+      username: "root",
+      role: "admin",
+      position: null,
+      status: true,
+      avatarURL: null,
+      lastLogin: null,
+      createdAt: "2026-01-01T08:00:00.000Z",
+      updatedAt: "2026-01-01T08:00:00.000Z",
+    },
     properties: {
       id: { type: "string", format: "uuid" },
       departmentId: { type: "string", format: "uuid" },
@@ -34,6 +55,22 @@ export const userSchemas = {
   UserInput: {
     type: "object",
     required: ["departmentId", "positionId", "employeeCode", "name", "email", "username", "password"],
+    example: {
+      departmentId: "10000000-0000-4000-a000-000000000001",
+      positionId: "20000000-0000-4000-a000-000000000005",
+      employeeCode: "EMP051",
+      name: "Trần Thị B",
+      email: "tranthib@qlpbda.com",
+      phone: "0912345678",
+      birthDate: "1999-07-10",
+      hireDate: "2026-01-01",
+      leaveDate: null,
+      gender: "female",
+      username: "tranthib",
+      password: "12345678",
+      position: "member",
+      status: true,
+    },
     properties: {
       departmentId: { type: "string", description: "Department UUID" },
       positionId: { type: "string", description: "Position UUID" },
@@ -63,6 +100,10 @@ export const userSchemas = {
   LoginInput: {
     type: "object",
     required: ["username", "password"],
+    example: {
+      username: "root",
+      password: "12345678",
+    },
     properties: {
       username: { type: "string" },
       password: { type: "string" },
@@ -70,6 +111,32 @@ export const userSchemas = {
   },
   LoginResponse: {
     type: "object",
+    example: {
+      data: {
+        user: {
+          id: "30000000-0000-4000-a000-000000000001",
+          departmentId: "40000000-0000-4000-a000-000000000010",
+          positionId: "50000000-0000-4000-a000-000000000010",
+          employeeCode: "EMP001",
+          name: "Nguyễn Văn Anh",
+          email: "nguyenvana@company.local",
+          phone: "0901234567",
+          birthDate: "1998-03-21",
+          hireDate: "2024-01-15",
+          leaveDate: null,
+          gender: "male",
+          username: "nguyenvana",
+          role: "user",
+          position: "member",
+          status: true,
+          avatarURL: null,
+          lastLogin: "2026-08-04T08:30:00.000Z",
+          createdAt: "2026-01-15T08:00:00.000Z",
+          updatedAt: "2026-08-04T08:30:00.000Z",
+        },
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+      },
+    },
     properties: {
       data: {
         type: "object",
@@ -83,6 +150,10 @@ export const userSchemas = {
   UpdateMeInput: {
     type: "object",
     required: ["currentPassword", "newPassword"],
+    example: {
+      currentPassword: "12345678",
+      newPassword: "87654321",
+    },
     properties: {
       currentPassword: { type: "string" },
       newPassword: { type: "string", minLength: 6 },
@@ -91,6 +162,10 @@ export const userSchemas = {
   ForgotPasswordInput: {
     type: "object",
     required: ["email", "employeeCode"],
+    example: {
+      email: "nguyenvananh@qlpbda.com",
+      employeeCode: "EMP001",
+    },
     properties: {
       email: { type: "string", format: "email" },
       employeeCode: { type: "string", description: "Mã nhân viên" },
@@ -99,6 +174,11 @@ export const userSchemas = {
   ResetPasswordInput: {
     type: "object",
     required: ["email", "code", "newPassword"],
+    example: {
+      email: "nguyenvananh@qlpbda.com",
+      code: "123456",
+      newPassword: "87654321",
+    },
     properties: {
       email: { type: "string", format: "email" },
       code: { type: "string", description: "Mã 6 số gửi qua email" },
@@ -113,6 +193,31 @@ export const userSchemas = {
   },
   PaginatedUsers: {
     type: "object",
+    example: {
+      data: [
+        {
+          id: "30000000-0000-4000-a000-000000000001",
+          departmentId: "10000000-0000-4000-a000-000000000001",
+          positionId: "20000000-0000-4000-a000-000000000001",
+          employeeCode: "EMP001",
+          name: "Nguyễn Văn Anh",
+          email: "nguyenvananh@qlpbda.com",
+          phone: "0901234001",
+          birthDate: "1985-03-15",
+          hireDate: "2023-06-01",
+          leaveDate: null,
+          gender: "male",
+          username: "root",
+          role: "admin",
+          position: null,
+          status: true,
+          avatarURL: null,
+          lastLogin: null,
+          createdAt: "2026-01-01T08:00:00.000Z",
+          updatedAt: "2026-01-01T08:00:00.000Z",
+        },
+      ],
+    },
     properties: {
       data: {
         type: "array",
@@ -130,9 +235,48 @@ export const userPaths = {
       summary: "Đăng nhập",
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/LoginInput" } } } },
       responses: {
-        200: { description: "Đăng nhập thành công", content: { "application/json": { schema: { $ref: "#/components/schemas/LoginResponse" } } } },
-        401: { description: "Sai tài khoản hoặc mật khẩu", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
-        403: { description: "Tài khoản đã nghỉ việc hoặc bị khóa", content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } } },
+        200: {
+          description: "Xác thực thành công, hệ thống trả về thông tin người dùng và token phiên đăng nhập.",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/LoginResponse" },
+              example: {
+                data: {
+                  user: {
+                    id: "30000000-0000-4000-a000-000000000001",
+                    departmentId: "10000000-0000-4000-a000-000000000001",
+                    positionId: "20000000-0000-4000-a000-000000000001",
+                    employeeCode: "EMP001",
+                    name: "Nguyễn Văn Anh",
+                    email: "nguyenvananh@qlpbda.com",
+                    phone: "0901234567",
+                    birthDate: "1998-03-21",
+                    hireDate: "2023-06-01",
+                    leaveDate: null,
+                    gender: "male",
+                    username: "root",
+                    role: "admin",
+                    position: null,
+                    status: true,
+                    avatarURL: null,
+                    lastLogin: null,
+                    createdAt: "2026-01-01T08:00:00.000Z",
+                    updatedAt: "2026-01-01T08:00:00.000Z",
+                  },
+                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.real.example",
+                },
+              },
+            },
+          },
+        },
+        401: {
+          description: "Tài khoản hoặc mật khẩu không đúng, nên người dùng chưa được cấp phiên đăng nhập mới.",
+          content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+        },
+        403: {
+          description: "Tài khoản đã nghỉ việc hoặc bị khóa, vì vậy không thể tạo session và không được phép truy cập hệ thống.",
+          content: { "application/json": { schema: { $ref: "#/components/schemas/Error" } } },
+        },
       },
     },
   },
@@ -160,7 +304,7 @@ export const userPaths = {
       description: "Lấy danh sách nhân viên thuộc một phòng ban cụ thể theo ID phòng ban. Endpoint này hỗ trợ các màn hình quản lý phòng ban, lọc nhân sự theo tổ chức và những form cần chọn thành viên trong cùng đơn vị.",
       summary: "Lấy người dùng theo phòng ban",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "departmentId", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "departmentId", in: "path", required: true, schema: { type: "string", example: "10000000-0000-4000-a000-000000000001" } }],
       responses: { 200: { description: "Danh sách người dùng trong phòng ban", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
     },
   },
@@ -170,7 +314,7 @@ export const userPaths = {
       description: "Lấy danh sách nhân viên có cùng chức vụ theo ID chức vụ. Thường dùng để lọc nhân sự theo cấp bậc/chức danh hoặc phục vụ logic phân công và báo cáo theo vị trí công việc.",
       summary: "Lấy người dùng theo chức vụ",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "positionId", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "positionId", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
       responses: { 200: { description: "Danh sách người dùng theo chức vụ", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } } },
     },
   },
@@ -189,8 +333,38 @@ export const userPaths = {
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
       responses: {
-        201: { description: "Tạo thành công", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } } } } },
-        409: { description: "Username đã tồn tại" },
+        201: {
+          description: "Tạo người dùng thành công và trả về hồ sơ người dùng vừa khởi tạo.",
+          content: {
+            "application/json": {
+              schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } },
+              example: {
+                data: {
+                  id: "30000000-0000-4000-a000-000000000051",
+                  departmentId: "10000000-0000-4000-a000-000000000001",
+                  positionId: "20000000-0000-4000-a000-000000000005",
+                  employeeCode: "EMP051",
+                  name: "Trần Thị B",
+                  email: "tranthib@qlpbda.com",
+                  phone: "0912345678",
+                  birthDate: "1999-07-10",
+                  hireDate: "2026-01-01",
+                  leaveDate: null,
+                  gender: "female",
+                  username: "tranthib",
+                  role: "user",
+                  position: "member",
+                  status: true,
+                  avatarURL: null,
+                  lastLogin: null,
+                  createdAt: "2026-08-04T08:30:00.000Z",
+                  updatedAt: "2026-08-04T08:30:00.000Z",
+                },
+              },
+            },
+          },
+        },
+        409: { description: "Username đã tồn tại trong hệ thống nên không thể tạo tài khoản mới." },
       },
     },
   },
@@ -200,7 +374,7 @@ export const userPaths = {
       description: "Lấy chi tiết hồ sơ của một nhân viên theo ID để hiển thị trang xem chi tiết, chuẩn bị form chỉnh sửa hoặc kiểm tra trạng thái tài khoản và thời gian làm việc.",
       summary: "Lấy người dùng theo ID",
       security: [{ cookieAuth: [] }],
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "30000000-0000-4000-a000-000000000001" } }],
       responses: {
         200: { description: "Thông tin người dùng", content: { "application/json": { schema: { type: "object", properties: { data: { $ref: "#/components/schemas/User" } } } } } },
         404: { description: "Không tìm thấy" },
@@ -214,8 +388,8 @@ export const userPaths = {
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UserInput" } } } },
       responses: {
-        200: { description: "Cập nhật thành công" },
-        404: { description: "Không tìm thấy" },
+        200: { description: "Cập nhật hồ sơ người dùng thành công và trả về dữ liệu mới nhất." },
+        404: { description: "Không tìm thấy người dùng cần cập nhật." },
       },
     },
     delete: {
@@ -225,8 +399,8 @@ export const userPaths = {
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       responses: {
-        200: { description: "Vô hiệu hoá thành công" },
-        404: { description: "Không tìm thấy" },
+        200: { description: "Vô hiệu hoá thành công, trạng thái tài khoản đã được cập nhật theo rule leaveDate/status." },
+        404: { description: "Không tìm thấy người dùng cần vô hiệu hoá." },
       },
     },
   },
@@ -237,7 +411,7 @@ export const userPaths = {
       summary: "Đổi mật khẩu cá nhân",
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/UpdateMeInput" } } } },
-      responses: { 200: { description: "Đổi mật khẩu thành công" } },
+      responses: { 200: { description: "Đổi mật khẩu cá nhân thành công." } },
     },
   },
   "/api/users/forgot-password": {
@@ -247,8 +421,8 @@ export const userPaths = {
       summary: "Quên mật khẩu — gửi mã 6 số qua email",
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ForgotPasswordInput" } } } },
       responses: {
-        200: { description: "Mã xác nhận đã được gửi (nếu email tồn tại)" },
-        400: { description: "Email hoặc mã nhân viên không khớp" },
+        200: { description: "Nếu email hợp lệ, hệ thống đã gửi mã xác nhận 6 số tới hộp thư tương ứng." },
+        400: { description: "Email hoặc mã nhân viên không khớp nên không thể khởi tạo luồng quên mật khẩu." },
       },
     },
   },
@@ -259,8 +433,8 @@ export const userPaths = {
       summary: "Đặt lại mật khẩu bằng mã xác nhận",
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ResetPasswordInput" } } } },
       responses: {
-        200: { description: "Đặt lại mật khẩu thành công" },
-        400: { description: "Mã không hợp lệ hoặc đã hết hạn" },
+        200: { description: "Đặt lại mật khẩu thành công và mã xác nhận đã được sử dụng." },
+        400: { description: "Mã không hợp lệ, không khớp hoặc đã hết hạn." },
       },
     },
   },
@@ -272,8 +446,8 @@ export const userPaths = {
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "multipart/form-data": { schema: { type: "object", required: ["avatar"], properties: { avatar: { type: "string", format: "binary" } } } } } },
       responses: {
-        200: { description: "Cập nhật avatar thành công" },
-        400: { description: "Thiếu file hoặc định dạng không hợp lệ" },
+        200: { description: "Cập nhật ảnh đại diện thành công và lưu URL mới vào hồ sơ người dùng." },
+        400: { description: "Thiếu file hoặc định dạng file không hợp lệ." },
       },
     },
     delete: {
@@ -281,7 +455,7 @@ export const userPaths = {
       description: "Xoá ảnh đại diện của tài khoản hiện tại, đồng thời dọn file trên Cloudinary và đưa avatar về trạng thái null để ứng dụng dùng ảnh mặc định.",
       summary: "Xoá avatar về mặc định (null)",
       security: [{ cookieAuth: [] }],
-      responses: { 200: { description: "Xoá avatar thành công" } },
+      responses: { 200: { description: "Xoá ảnh đại diện thành công và đưa avatar về trạng thái mặc định." } },
     },
   },
   "/api/users/search": {
@@ -296,8 +470,8 @@ export const userPaths = {
         { name: "limit", in: "query", schema: { type: "integer", default: 10, maximum: 100 } },
       ],
       responses: {
-        200: { description: "Kết quả tìm kiếm", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } },
-        403: { description: "Không đủ quyền (chỉ Admin)" },
+        200: { description: "Trả về danh sách người dùng khớp từ khoá tìm kiếm, có phân trang." , content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedUsers" } } } },
+        403: { description: "Không đủ quyền vì endpoint này chỉ dành cho Admin." },
       },
     },
   },
