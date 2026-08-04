@@ -4,7 +4,7 @@
     "name": "Công nghệ thông tin",
     "code": "IT",
     "description": "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
-    "managerId": "30000000-0000-4000-a000-000000000001",
+    "managerId": null,
     "isActive": true,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"

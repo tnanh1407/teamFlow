@@ -1,32 +1,5 @@
 [
   {
-    "id": "70000000-0000-4000-a000-000000000001",
-    "projectId": "50000000-0000-4000-a000-000000000001",
-    "employeeId": "30000000-0000-4000-a000-000000000001",
-    "content": "Đã hoàn thành giai đoạn 1 - xây dựng xong giao diện cơ bản. Cần review trước khi sang giai đoạn 2.",
-    "attachments": null,
-    "createdAt": "2025-06-15T00:00:00.000Z",
-    "updatedAt": "2025-06-15T00:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000002",
-    "projectId": "50000000-0000-4000-a000-000000000001",
-    "employeeId": "30000000-0000-4000-a000-000000000002",
-    "content": "Đã review giao diện. Có một số điểm cần chỉnh sửa về UX. Sẽ gửi feedback chi tiết sau.",
-    "attachments": null,
-    "createdAt": "2025-06-20T00:00:00.000Z",
-    "updatedAt": "2025-06-20T00:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000003",
-    "projectId": "50000000-0000-4000-a000-000000000003",
-    "employeeId": "30000000-0000-4000-a000-000000000002",
-    "content": "Đã nâng cấp firewall và cập nhật chứng chỉ SSL. Cần kiểm tra lại toàn bộ hệ thống.",
-    "attachments": null,
-    "createdAt": "2025-07-10T00:00:00.000Z",
-    "updatedAt": "2025-07-10T00:00:00.000Z"
-  },
-  {
     "id": "70000000-0000-4000-a000-000000000004",
     "projectId": "50000000-0000-4000-a000-000000000004",
     "employeeId": "30000000-0000-4000-a000-000000000008",
@@ -34,42 +7,6 @@
     "attachments": "ke-hoach-mkt-q4.pdf",
     "createdAt": "2025-09-05T00:00:00.000Z",
     "updatedAt": "2025-09-05T00:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000005",
-    "projectId": "50000000-0000-4000-a000-000000000005",
-    "employeeId": "30000000-0000-4000-a000-000000000010",
-    "content": "Dự án đã hoàn thành đúng tiến độ. Quy trình vận hành mới đã được áp dụng thành công.",
-    "attachments": null,
-    "createdAt": "2025-06-28T00:00:00.000Z",
-    "updatedAt": "2025-06-28T00:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000006",
-    "projectId": "50000000-0000-4000-a000-000000000006",
-    "employeeId": "30000000-0000-4000-a000-000000000001",
-    "content": "Đã hoàn thành thiết kế cơ sở dữ liệu và API cơ bản cho module chat. Đang phát triển giao diện.",
-    "attachments": null,
-    "createdAt": "2025-07-20T00:00:00.000Z",
-    "updatedAt": "2025-07-20T00:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000007",
-    "projectId": "50000000-0000-4000-a000-000000000006",
-    "employeeId": "30000000-0000-4000-a000-000000000036",
-    "content": "Đã gửi bản thiết kế UI/UX cho module chat. Bao gồm wireframe và prototype tương tác.",
-    "attachments": "chat-ui-prototype.fig",
-    "createdAt": "2025-07-25T00:00:00.000Z",
-    "updatedAt": "2025-07-25T00:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000008",
-    "projectId": "50000000-0000-4000-a000-000000000006",
-    "employeeId": "30000000-0000-4000-a000-000000000003",
-    "content": "Tích hợp WebSocket thành công. Tin nhắn real-time đã hoạt động ổn định trong môi trường test.",
-    "attachments": null,
-    "createdAt": "2025-08-05T00:00:00.000Z",
-    "updatedAt": "2025-08-05T00:00:00.000Z"
   },
   {
     "id": "70000000-0000-4000-a000-000000000009",
@@ -117,24 +54,6 @@
     "updatedAt": "2025-09-15T00:00:00.000Z"
   },
   {
-    "id": "70000000-0000-4000-a000-000000000014",
-    "projectId": "50000000-0000-4000-a000-000000000011",
-    "employeeId": "30000000-0000-4000-a000-000000000003",
-    "content": "Đã chốt luồng đăng nhập nội bộ, đang kiểm tra phần phân quyền theo trạng thái tài khoản.",
-    "attachments": null,
-    "createdAt": "2025-12-02T09:00:00.000Z",
-    "updatedAt": "2025-12-02T09:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000015",
-    "projectId": "50000000-0000-4000-a000-000000000012",
-    "employeeId": "30000000-0000-4000-a000-000000000002",
-    "content": "Đã liên hệ nhà cung cấp chữ ký số, cần xác nhận lại luồng ký và lưu vết hợp đồng.",
-    "attachments": null,
-    "createdAt": "2026-01-11T10:15:00.000Z",
-    "updatedAt": "2026-01-11T10:15:00.000Z"
-  },
-  {
     "id": "70000000-0000-4000-a000-000000000016",
     "projectId": "50000000-0000-4000-a000-000000000013",
     "employeeId": "30000000-0000-4000-a000-000000000019",
@@ -160,24 +79,6 @@
     "attachments": null,
     "createdAt": "2025-12-10T11:10:00.000Z",
     "updatedAt": "2025-12-10T11:10:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000019",
-    "projectId": "50000000-0000-4000-a000-000000000016",
-    "employeeId": "30000000-0000-4000-a000-000000000025",
-    "content": "Danh mục tài sản đang được nhập liệu, dự kiến tuần sau xong phần thiết bị văn phòng.",
-    "attachments": null,
-    "createdAt": "2026-02-03T08:50:00.000Z",
-    "updatedAt": "2026-02-03T08:50:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000020",
-    "projectId": "50000000-0000-4000-a000-000000000017",
-    "employeeId": "30000000-0000-4000-a000-000000000004",
-    "content": "Thông báo realtime đã có bản thử nghiệm, đang kiểm tra độ ổn định khi nhiều người dùng cùng thao tác.",
-    "attachments": null,
-    "createdAt": "2026-01-20T13:30:00.000Z",
-    "updatedAt": "2026-01-20T13:30:00.000Z"
   },
   {
     "id": "70000000-0000-4000-a000-000000000021",
@@ -207,15 +108,6 @@
     "updatedAt": "2026-03-22T09:20:00.000Z"
   },
   {
-    "id": "70000000-0000-4000-a000-000000000024",
-    "projectId": "50000000-0000-4000-a000-000000000021",
-    "employeeId": "30000000-0000-4000-a000-000000000026",
-    "content": "KPI đã có ngưỡng cảnh báo, cần chốt thêm mức ưu tiên cho từng chỉ số.",
-    "attachments": null,
-    "createdAt": "2026-02-18T16:00:00.000Z",
-    "updatedAt": "2026-02-18T16:00:00.000Z"
-  },
-  {
     "id": "70000000-0000-4000-a000-000000000025",
     "projectId": "50000000-0000-4000-a000-000000000022",
     "employeeId": "30000000-0000-4000-a000-000000000027",
@@ -232,33 +124,6 @@
     "attachments": null,
     "createdAt": "2026-01-14T08:35:00.000Z",
     "updatedAt": "2026-01-14T08:35:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000027",
-    "projectId": "50000000-0000-4000-a000-000000000024",
-    "employeeId": "30000000-0000-4000-a000-000000000014",
-    "content": "Bộ lọc tìm kiếm nâng cao đã xong phần backend, còn thiếu giao diện chọn nhiều điều kiện.",
-    "attachments": null,
-    "createdAt": "2026-04-05T10:00:00.000Z",
-    "updatedAt": "2026-04-05T10:00:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000028",
-    "projectId": "50000000-0000-4000-a000-000000000025",
-    "employeeId": "30000000-0000-4000-a000-000000000001",
-    "content": "Ma trận phân quyền đã được chuẩn hóa theo vai trò, cần kiểm tra lại màn hình settings.",
-    "attachments": null,
-    "createdAt": "2026-03-03T09:15:00.000Z",
-    "updatedAt": "2026-03-03T09:15:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000029",
-    "projectId": "50000000-0000-4000-a000-000000000026",
-    "employeeId": "30000000-0000-4000-a000-000000000005",
-    "content": "Bộ test backend đã chạy ổn trên môi trường staging, chờ tổng hợp kết quả cuối cùng.",
-    "attachments": null,
-    "createdAt": "2026-02-24T17:40:00.000Z",
-    "updatedAt": "2026-02-24T17:40:00.000Z"
   },
   {
     "id": "70000000-0000-4000-a000-000000000030",
@@ -286,14 +151,5 @@
     "attachments": null,
     "createdAt": "2026-06-20T15:45:00.000Z",
     "updatedAt": "2026-06-20T15:45:00.000Z"
-  },
-  {
-    "id": "70000000-0000-4000-a000-000000000033",
-    "projectId": "50000000-0000-4000-a000-000000000030",
-    "employeeId": "30000000-0000-4000-a000-000000000006",
-    "content": "Đang rà soát truy vấn chậm ở dashboard, ưu tiên cache cho các thống kê lớn.",
-    "attachments": null,
-    "createdAt": "2026-06-05T10:05:00.000Z",
-    "updatedAt": "2026-06-05T10:05:00.000Z"
   }
 ]
