@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 const Login = lazy(() => import("@/features/auth/Login"));
 const ForgotPassword = lazy(() => import("@/features/auth/ForgotPassword"));
-const UserList = lazy(() => import("@/features/user/UserList"));
+const UserList = lazy(() => import("@/features/user/UserList/UserList"));
 const UserDetail = lazy(() => import("@/features/user/UserDetail"));
 const PositionList = lazy(() => import("@/features/position/PositionList"));
 const ProjectList = lazy(() => import("@/features/project/ProjectList"));

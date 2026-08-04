@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import PageHeader from "@/components/PageHeader"
 import StatsGrid from "./components/StatsGrid"
 import GrowthChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
@@ -48,11 +49,10 @@ const departmentPalette = [
 ]
 
 const projectPalette = {
-  todo: "var(--chart-8)",
-  in_progress: "var(--chart-1)",
-  review: "var(--chart-3)",
-  completed: "var(--chart-2)",
-  cancelled: "var(--chart-5)",
+  low: "var(--chart-7)",
+  medium: "var(--chart-3)",
+  high: "var(--chart-2)",
+  critical: "var(--chart-5)",
 }
 
 const colors = {
@@ -63,22 +63,23 @@ const colors = {
   red: "var(--chart-5)",
 }
 
-function buildDepartmentData(users: User[], departments: Department[]): DashboardChartPoint[] {
+function buildActiveDepartmentData(users: User[], departments: Department[]): DashboardChartPoint[] {
+  const activeUsers = users.filter((user) => user.status === true)
+
   return departments
     .map((department) => ({
       name: department.name,
-      value: users.filter((user) => user.departmentId === department.id).length,
+      value: activeUsers.filter((user) => user.departmentId === department.id).length,
     }))
     .filter((department) => department.value > 0)
 }
 
-function buildProjectStatusData(projects: Project[]): DashboardChartPoint[] {
+function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
   return [
-    { name: "Cần làm", value: projects.filter((project) => project.status === "todo").length, color: projectPalette.todo },
-    { name: "Đang làm", value: projects.filter((project) => project.status === "in_progress").length, color: projectPalette.in_progress },
-    { name: "Đánh giá", value: projects.filter((project) => project.status === "review").length, color: projectPalette.review },
-    { name: "Hoàn thành", value: projects.filter((project) => project.status === "completed").length, color: projectPalette.completed },
-    { name: "Đã huỷ", value: projects.filter((project) => project.status === "cancelled").length, color: projectPalette.cancelled },
+    { name: "Thấp", value: projects.filter((project) => project.priority === "low").length, color: projectPalette.low },
+    { name: "Trung bình", value: projects.filter((project) => project.priority === "medium").length, color: projectPalette.medium },
+    { name: "Cao", value: projects.filter((project) => project.priority === "high").length, color: projectPalette.high },
+    { name: "Khẩn cấp", value: projects.filter((project) => project.priority === "critical").length, color: projectPalette.critical },
   ].filter((project) => project.value > 0)
 }
 
@@ -134,6 +135,7 @@ function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
   return result
 }
 
+// dữ liệu cho biểu đồ nhân sự
 function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
   const events: Record<string, { hires: number; leaves: number }> = {}
   const monthKeys = new Set<string>()
@@ -173,7 +175,7 @@ function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
 
     const [year, month] = key.split("-")
     result.push({
-      month: `Th${Number.parseInt(month, 10)}/${year}`,
+      month: `${Number.parseInt(month, 10)}/${year}`,
       active,
       departed,
       totalHires,
@@ -251,8 +253,8 @@ export default function AdminDashboard() {
   ]
 
   const growthData = buildGrowthData(users)
-  const deptData = buildDepartmentData(users, departments)
-  const projStatusData = buildProjectStatusData(projects)
+  const deptData = buildActiveDepartmentData(users, departments)
+  const projPriorityData = buildProjectPriorityData(projects)
   const projectOverviewData = buildProjectOverviewData(projects)
 
   if (loading) {
@@ -268,24 +270,31 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
+      <PageHeader title="Dashboard" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
       <StatsGrid stats={stats} />
       <GrowthChart data={growthData} currentTotal={activeUsersCount} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DonutChartCard
-          title="Phân bố phòng ban"
-          data={deptData}
-          total={users.length || 1}
-          index={0}
-          palette={departmentPalette}
-        />
-        <DonutChartCard title="Trạng thái dự án" data={projStatusData} total={projects.length || 1} index={1} />
-      </div>
       <ProjectOverviewChart
         data={projectOverviewData}
         currentTotal={projects.length}
         completedTotal={completedProjectsCount}
         incompleteTotal={incompleteProjectsCount}
       />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DonutChartCard
+          title="Phân bố nhân sự đang hoạt động theo phòng ban"
+          data={deptData}
+          total={activeUsersCount || 1}
+          index={0}
+          palette={departmentPalette}
+        />
+        <DonutChartCard
+          title="Phân bố độ ưu tiên dự án"
+          data={projPriorityData}
+          total={projects.length || 1}
+          index={1}
+        />
+      </div>
+
     </div>
   )
 }

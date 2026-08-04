@@ -16,8 +16,7 @@ export default function StatsGrid({ stats }: StatsGridProps) {
     <section className="rounded-2xl border border-zinc-200/70 bg-white p-5 shadow-sm dark:border-zinc-700/50 dark:bg-zinc-900">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Tổng quan hệ thống</p>
-          <h2 className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Thống kê toàn bộ phân hệ</h2>
+          <h2 className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Thống kê toàn bộ phân hệ</h2>
         </div>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Số liệu ngắn gọn, đủ để nhìn nhanh tình trạng vận hành

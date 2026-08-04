@@ -1,5 +1,4 @@
 import { motion } from "motion/react"
-import { TrendingUp } from "lucide-react"
 import {
   ResponsiveContainer,
   LineChart,
@@ -10,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts"
+import ChartLegend from "./ChartLegend"
 
 const chartPalette = [
   "var(--chart-1)",
@@ -27,54 +27,50 @@ interface GrowthChartProps {
   currentTotal: number
 }
 
-function GrowthTooltip({ active, payload, label }: any) {
+function GrowthTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
 
   const point = payload[0].payload as {
-    month: string
-    active: number
+    active: number 
     departed: number
-    totalHires: number
-    hires: number
-    leaves: number
+    hires: number 
+    leaves: number // nghỉ
   }
 
   return (
-    <div className="min-w-[220px] rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Tháng</p>
-          <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>
-        </div>
-        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Tổng tuyển {point.totalHires}</span>
-      </div>
-
-      <div className="mt-3 space-y-2 text-sm">
+    <div className="min-w-55 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="mt-3 space-y-2.5 text-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[1] }} />
-            <span>Đang làm</span>
-          </div>
+            Nhân sự đang làm
+          </span>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.active}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[4] }} />
-            <span>Đã nghỉ</span>
-          </div>
+            Nhân sự đã nghỉ
+          </span>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.departed}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-          <div className="rounded-lg bg-zinc-50 px-2.5 py-2 dark:bg-zinc-800/60">
-            <p className="text-zinc-500 dark:text-zinc-400">Tuyển mới</p>
-            <p className="mt-0.5 font-semibold text-zinc-900 dark:text-zinc-100">{point.hires}</p>
-          </div>
-          <div className="rounded-lg bg-zinc-50 px-2.5 py-2 dark:bg-zinc-800/60">
-            <p className="text-zinc-500 dark:text-zinc-400">Nghỉ việc</p>
-            <p className="mt-0.5 font-semibold text-zinc-900 dark:text-zinc-100">{point.leaves}</p>
-          </div>
+
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[3] }} />
+            Nhân sự tuyển mới
+          </span>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.hires}</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[0] }} />
+            Nhân sự nghỉ việc
+          </span>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.leaves}</span>
         </div>
       </div>
     </div>
@@ -93,28 +89,42 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
     >
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2.5">
-          <TrendingUp size={16} className="text-blue-500" />
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Nhân sự đang làm</h2>
+          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 uppercase">BIỀU ĐỒ NHÂN SỰ</h2>
         </div>
-        <span className="text-[11px] font-medium text-zinc-400">{currentTotal} đang làm hiện tại</span>
+        <span className="text-sm font-medium text-zinc-400">{currentTotal} nhân sự hiện tại đang làm việc</span>
       </div>
       <div className="p-5">
-        <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={data} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+        <ResponsiveContainer width="100%" height={360}>
+          <LineChart data={data} margin={{ top: 8, right: 16, left: 24, bottom: 24 }} >
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 12, fill: "#a1a1aa" }}
+              tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
               tickLine={false}
               axisLine={false}
+              height={36}
+              label={{
+                value: "Tháng",
+                position: "bottom",
+                offset: 8,
+                style: { fill: "var(--chart-label-color)" },
+              }}
             />
             <YAxis
-              tick={{ fontSize: 12, fill: "#a1a1aa" }}
-              tickLine={false}
-              axisLine={false}
+              width={72}
+              tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
+              tickLine={true}
+              axisLine={true}
+              label={{
+                value: "Thành viên",
+                angle: -90,
+                position: "insideLeft",
+                offset: 0,
+                style: { textAnchor: "middle", fill: "var(--chart-label-color)" },
+              }}
             />
             <Tooltip content={<GrowthTooltip />} />
-            <Legend />
+            <Legend content={<ChartLegend />} verticalAlign="top" align="center" wrapperStyle={{ paddingBottom: 20 }} />
             <Line
               type="monotone"
               dataKey="active"
@@ -132,6 +142,15 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
               strokeWidth={2.5}
               dot={{ r: 4, fill: chartPalette[4], stroke: "#fff", strokeWidth: 2 }}
               activeDot={{ r: 6, fill: chartPalette[4], stroke: "#fff", strokeWidth: 2 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="hires"
+              name="Tuyển mới"
+              stroke={chartPalette[3]}
+              strokeWidth={2.5}
+              dot={{ r: 4, fill: chartPalette[3], stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: chartPalette[3], stroke: "#fff", strokeWidth: 2 }}
             />
             <Line
               type="monotone"

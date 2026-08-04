@@ -69,6 +69,7 @@
   --secondary-700: #cc6936;
   --secondary-800: #b35a2f;
   --secondary-900: #8f4925;
+
   --danger: #dc2626;
   --success: #16a34a;
   --chart-1: var(--primary);
@@ -79,6 +80,8 @@
   --chart-6: #ef4444;
   --chart-7: #f59e0b;
   --chart-8: #ec4899;
+  --chart-grid-color: #e4e4e7;
+  --chart-label-color: #a1a1aa;
 }
 
 .dark {
@@ -117,6 +120,7 @@
   --chart-6: #f87171;
   --chart-7: #fbbf24;
   --chart-8: #f472b6;
+  --chart-gird-color: ##e4e4e7;
 }
 
 html,
@@ -125,4 +129,5 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
+  font-family: "Be Vietnam Pro", sans-serif;
 }

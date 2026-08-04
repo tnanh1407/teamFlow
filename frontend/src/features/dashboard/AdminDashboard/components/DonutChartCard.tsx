@@ -1,5 +1,4 @@
 import { motion } from "motion/react"
-import { TrendingUp } from "lucide-react"
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts"
 
 const chartPalette = [
@@ -33,10 +32,9 @@ export default function DonutChartCard({ title, data, total, index, palette }: D
     >
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2.5">
-          <TrendingUp size={16} className="text-zinc-400" />
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
+          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 uppercase">{title}</h2>
         </div>
-        <span className="text-[11px] font-medium text-zinc-400">{total} tổng</span>
+        <span className="text-sm font-medium text-zinc-400">{total} tổng</span>
       </div>
       <div className="p-5">
         <div className="flex items-start gap-4">
