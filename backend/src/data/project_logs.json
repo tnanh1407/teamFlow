@@ -158,5 +158,165 @@
     "action": "assigned",
     "description": "Phân công phòng Marketing và Engineering tham gia dự án CRM",
     "createdAt": "2025-09-05T00:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000021",
+    "projectId": "50000000-0000-4000-a000-000000000011",
+    "employeeId": "30000000-0000-4000-a000-000000000001",
+    "action": "created",
+    "description": "Dự án nâng cấp cổng đăng nhập nội bộ được khởi tạo",
+    "createdAt": "2025-12-01T08:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000022",
+    "projectId": "50000000-0000-4000-a000-000000000012",
+    "employeeId": "30000000-0000-4000-a000-000000000002",
+    "action": "created",
+    "description": "Dự án tích hợp chữ ký số hợp đồng được tạo mới",
+    "createdAt": "2026-01-10T09:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000023",
+    "projectId": "50000000-0000-4000-a000-000000000013",
+    "employeeId": "30000000-0000-4000-a000-000000000019",
+    "action": "updated",
+    "description": "Cập nhật phạm vi dashboard tài chính và bổ sung biểu đồ lợi nhuận",
+    "createdAt": "2026-02-20T14:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000024",
+    "projectId": "50000000-0000-4000-a000-000000000014",
+    "employeeId": "30000000-0000-4000-a000-000000000007",
+    "action": "assigned",
+    "description": "Phân công bộ phận HR phụ trách tối ưu quy trình tuyển dụng",
+    "createdAt": "2025-11-20T10:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000025",
+    "projectId": "50000000-0000-4000-a000-000000000015",
+    "employeeId": "30000000-0000-4000-a000-000000000008",
+    "action": "completed",
+    "description": "Hoàn thành hệ thống phản hồi nhân sự và đưa vào sử dụng",
+    "createdAt": "2025-12-18T14:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000026",
+    "projectId": "50000000-0000-4000-a000-000000000016",
+    "employeeId": "30000000-0000-4000-a000-000000000025",
+    "action": "created",
+    "description": "Khởi tạo dự án quản lý tài sản công ty",
+    "createdAt": "2026-02-01T09:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000027",
+    "projectId": "50000000-0000-4000-a000-000000000017",
+    "employeeId": "30000000-0000-4000-a000-000000000004",
+    "action": "updated",
+    "description": "Nâng cấp kênh thông báo realtime cho dự án",
+    "createdAt": "2026-03-05T12:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000028",
+    "projectId": "50000000-0000-4000-a000-000000000018",
+    "employeeId": "30000000-0000-4000-a000-000000000020",
+    "action": "completed",
+    "description": "Hoàn tất tự động hóa báo cáo tuần và bàn giao",
+    "createdAt": "2025-11-28T16:30:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000029",
+    "projectId": "50000000-0000-4000-a000-000000000019",
+    "employeeId": "30000000-0000-4000-a000-000000000013",
+    "action": "updated",
+    "description": "Tiến hành làm sạch dữ liệu nhân viên theo phòng ban",
+    "createdAt": "2026-04-18T11:20:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000030",
+    "projectId": "50000000-0000-4000-a000-000000000020",
+    "employeeId": "30000000-0000-4000-a000-000000000011",
+    "action": "created",
+    "description": "Tạo mới portal phúc lợi nhân viên",
+    "createdAt": "2026-03-20T09:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000031",
+    "projectId": "50000000-0000-4000-a000-000000000021",
+    "employeeId": "30000000-0000-4000-a000-000000000026",
+    "action": "updated",
+    "description": "Bổ sung bộ chỉ số KPI và cảnh báo theo ngưỡng",
+    "createdAt": "2026-04-02T15:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000032",
+    "projectId": "50000000-0000-4000-a000-000000000022",
+    "employeeId": "30000000-0000-4000-a000-000000000027",
+    "action": "completed",
+    "description": "Kho tài liệu quy trình đã hoàn tất",
+    "createdAt": "2025-10-28T10:30:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000033",
+    "projectId": "50000000-0000-4000-a000-000000000023",
+    "employeeId": "30000000-0000-4000-a000-000000000012",
+    "action": "updated",
+    "description": "Hoàn thiện lại luồng duyệt nghỉ phép và lịch nghỉ",
+    "createdAt": "2026-03-10T09:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000034",
+    "projectId": "50000000-0000-4000-a000-000000000024",
+    "employeeId": "30000000-0000-4000-a000-000000000014",
+    "action": "created",
+    "description": "Khởi tạo hạng mục bộ lọc tìm kiếm nâng cao",
+    "createdAt": "2026-04-01T08:30:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000035",
+    "projectId": "50000000-0000-4000-a000-000000000025",
+    "employeeId": "30000000-0000-4000-a000-000000000001",
+    "action": "updated",
+    "description": "Chuẩn hóa lại ma trận phân quyền theo vai trò",
+    "createdAt": "2026-04-12T10:15:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000036",
+    "projectId": "50000000-0000-4000-a000-000000000026",
+    "employeeId": "30000000-0000-4000-a000-000000000005",
+    "action": "completed",
+    "description": "Bộ test backend đã hoàn thành và sẵn sàng triển khai",
+    "createdAt": "2026-02-26T17:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000037",
+    "projectId": "50000000-0000-4000-a000-000000000027",
+    "employeeId": "30000000-0000-4000-a000-000000000021",
+    "action": "created",
+    "description": "Khởi tạo bản tin nội bộ cho toàn công ty",
+    "createdAt": "2026-05-01T08:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000038",
+    "projectId": "50000000-0000-4000-a000-000000000028",
+    "employeeId": "30000000-0000-4000-a000-000000000028",
+    "action": "updated",
+    "description": "Gắn chấm công theo dự án để phục vụ báo cáo hiệu suất",
+    "createdAt": "2026-06-01T09:00:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000039",
+    "projectId": "50000000-0000-4000-a000-000000000029",
+    "employeeId": "30000000-0000-4000-a000-000000000022",
+    "action": "updated",
+    "description": "Hoàn thiện các biểu đồ phân tích cho dashboard",
+    "createdAt": "2026-06-18T15:30:00.000Z"
+  },
+  {
+    "id": "80000000-0000-4000-a000-000000000040",
+    "projectId": "50000000-0000-4000-a000-000000000030",
+    "employeeId": "30000000-0000-4000-a000-000000000006",
+    "action": "created",
+    "description": "Khởi tạo hạng mục tối ưu hiệu năng truy vấn",
+    "createdAt": "2026-06-01T09:30:00.000Z"
   }
 ]
