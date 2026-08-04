@@ -64,6 +64,7 @@ export const projectEmployeePaths = {
   "/api/project-employees/employee/{employeeId}": {
     get: {
       tags: ["Project Employees"],
+      description: "Lấy toàn bộ các phân công dự án của một nhân viên cụ thể. Endpoint này hữu ích khi xem hồ sơ nhân sự, đánh giá khối lượng công việc hoặc hiển thị danh sách dự án mà nhân viên đó đang tham gia.",
       summary: "Lấy phân công theo nhân viên",
       ...peAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -75,6 +76,7 @@ export const projectEmployeePaths = {
   "/api/project-employees/{id}": {
     get: {
       tags: ["Project Employees"],
+      description: "Lấy chi tiết một bản ghi phân công theo ID để xem nhân viên nào đang giữ vai trò gì trong dự án nào, phục vụ màn hình quản trị phân công và kiểm tra lịch sử gán việc.",
       summary: "Xem chi tiết phân công",
       ...peAuth,
       parameters: [peIdParam],

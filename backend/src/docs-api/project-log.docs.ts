@@ -58,6 +58,7 @@ export const projectLogPaths = {
   "/api/project-logs/project/{projectId}": {
     get: {
       tags: ["Project Logs"],
+      description: "Lấy toàn bộ nhật ký liên quan đến một dự án theo ID. Dùng để audit lịch sử thay đổi, xem ai đã tạo/cập nhật/hoàn thành/cancel dự án và phục vụ màn hình lịch sử hoạt động của dự án.",
       summary: "Lấy nhật ký theo dự án",
       ...logAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -70,6 +71,7 @@ export const projectLogPaths = {
   "/api/project-logs/employee/{employeeId}": {
     get: {
       tags: ["Project Logs"],
+      description: "Lấy nhật ký hoạt động gắn với một nhân viên cụ thể để xem người đó đã tạo, cập nhật, được giao hay tương tác với dự án/task nào trong hệ thống.",
       summary: "Lấy nhật ký theo nhân viên",
       ...logAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -82,6 +84,7 @@ export const projectLogPaths = {
   "/api/project-logs/{id}": {
     get: {
       tags: ["Project Logs"],
+      description: "Xem chi tiết một bản ghi nhật ký theo ID, bao gồm hành động, mô tả, dự án liên quan, nhân viên thực hiện và thời điểm phát sinh.",
       summary: "Xem chi tiết nhật ký",
       ...logAuth,
       parameters: [logIdParam],

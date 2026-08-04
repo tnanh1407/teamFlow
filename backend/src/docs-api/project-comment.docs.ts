@@ -45,6 +45,7 @@ export const projectCommentPaths = {
   "/api/project-comments": {
     get: {
       tags: ["Project Comments"],
+      description: "Lấy danh sách tất cả bình luận mà người dùng có quyền xem. Endpoint này phù hợp cho màn hình kiểm duyệt, thống kê tương tác hoặc các view tổng hợp hoạt động trao đổi trong hệ thống.",
       summary: "Lấy danh sách bình luận",
       ...cmtAuth,
       responses: {
@@ -66,6 +67,7 @@ export const projectCommentPaths = {
   "/api/project-comments/project/{projectId}": {
     get: {
       tags: ["Project Comments"],
+      description: "Lấy các bình luận thuộc về một dự án cụ thể để hiển thị ở màn hình trao đổi của dự án hoặc luồng thảo luận theo công việc.",
       summary: "Lấy bình luận theo dự án",
       ...cmtAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -77,6 +79,7 @@ export const projectCommentPaths = {
   "/api/project-comments/employee/{employeeId}": {
     get: {
       tags: ["Project Comments"],
+      description: "Lấy toàn bộ bình luận do một nhân viên đăng để xem lịch sử trao đổi, dấu vết tham gia và mức độ đóng góp trong các dự án/task.",
       summary: "Lấy bình luận theo nhân viên",
       ...cmtAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -115,6 +118,7 @@ export const projectCommentPaths = {
   "/api/project-comments/{id}": {
     get: {
       tags: ["Project Comments"],
+      description: "Lấy chi tiết một bình luận theo ID, bao gồm nội dung, file đính kèm, người tạo và thời điểm tạo/cập nhật.",
       summary: "Xem chi tiết bình luận",
       ...cmtAuth,
       parameters: [cmtIdParam],
@@ -125,6 +129,7 @@ export const projectCommentPaths = {
     },
     patch: {
       tags: ["Project Comments"],
+      description: "Cập nhật nội dung hoặc danh sách file đính kèm của một bình luận hiện có. Dùng khi người dùng cần sửa lại nội dung trao đổi hoặc cập nhật tài liệu liên quan.",
       summary: "Cập nhật bình luận",
       ...cmtAuth,
       parameters: [cmtIdParam],
@@ -136,6 +141,7 @@ export const projectCommentPaths = {
     },
     delete: {
       tags: ["Project Comments"],
+      description: "Xoá một bình luận khỏi hệ thống theo ID. Thường dùng khi bình luận bị gửi nhầm, sai nội dung hoặc cần dọn dữ liệu không còn hợp lệ.",
       summary: "Xoá bình luận",
       ...cmtAuth,
       parameters: [cmtIdParam],

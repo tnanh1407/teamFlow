@@ -117,6 +117,7 @@ export const projectPaths = {
   "/api/projects/priority/{priority}": {
     get: {
       tags: ["Projects"],
+      description: "Lọc danh sách dự án theo mức độ ưu tiên để ưu tiên hiển thị các công việc quan trọng trước. Hữu ích cho dashboard, báo cáo và các màn hình theo dõi tiến độ tập trung vào độ gấp của dự án.",
       summary: "Lọc dự án theo độ ưu tiên",
       ...projectAuth,
       parameters: [{ name: "priority", in: "path", required: true, schema: { type: "string", enum: ["low", "medium", "high", "critical"] } }],
@@ -128,6 +129,7 @@ export const projectPaths = {
   "/api/projects/created-by/{employeeId}": {
     get: {
       tags: ["Projects"],
+      description: "Trả về toàn bộ dự án do một nhân viên cụ thể tạo ra. Dùng để theo dõi phạm vi trách nhiệm của người tạo dự án, phục vụ màn hình hồ sơ nhân sự hoặc báo cáo quản lý công việc.",
       summary: "Lấy dự án theo người tạo",
       ...projectAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -139,6 +141,7 @@ export const projectPaths = {
   "/api/projects/{id}": {
     get: {
       tags: ["Projects"],
+      description: "Lấy thông tin chi tiết của một dự án theo ID, bao gồm mô tả, trạng thái, mức ưu tiên, tiến độ, thời gian dự kiến và các mốc thời gian liên quan. Endpoint này thường dùng khi mở màn hình chi tiết hoặc form sửa dự án.",
       summary: "Xem chi tiết dự án",
       ...projectAuth,
       parameters: [projectIdParam],
@@ -163,6 +166,7 @@ export const projectPaths = {
     },
     delete: {
       tags: ["Projects"],
+      description: "Xoá một dự án khỏi hệ thống theo ID. Chỉ dùng khi dự án không còn cần theo dõi hoặc đã được chuyển sang trạng thái phù hợp; thao tác này nên được thực hiện thận trọng vì có thể ảnh hưởng đến task, phân công và nhật ký liên quan.",
       summary: "Xoá dự án",
       ...projectAuth,
       parameters: [projectIdParam],
@@ -175,6 +179,7 @@ export const projectPaths = {
   "/api/projects/{id}/employees": {
     get: {
       tags: ["Projects"],
+      description: "Lấy danh sách tất cả nhân viên đang được gán vào dự án để hiển thị thành viên dự án, vai trò của từng người và phục vụ các thao tác quản trị phân công.",
       summary: "Danh sách nhân viên được gán cho dự án",
       ...projectAuth,
       parameters: [projectIdParam],

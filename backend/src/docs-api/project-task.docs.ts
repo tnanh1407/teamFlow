@@ -46,6 +46,7 @@ export const projectTaskPaths = {
   "/api/project-tasks": {
     get: {
       tags: ["Project Tasks"],
+      description: "Trả về toàn bộ task trong hệ thống mà người dùng có quyền xem. Endpoint này phù hợp cho màn hình tổng quan công việc, bộ lọc admin và các view theo dõi trạng thái công việc trên nhiều dự án.",
       summary: "Lấy danh sách tất cả task",
       ...taskAuth,
       responses: {
@@ -68,6 +69,7 @@ export const projectTaskPaths = {
   "/api/project-tasks/project/{projectId}": {
     get: {
       tags: ["Project Tasks"],
+      description: "Lấy danh sách task thuộc một dự án cụ thể, đồng thời hỗ trợ lọc theo trạng thái, nhân viên được giao và từ khoá tìm kiếm. Đây là endpoint chính cho màn hình chi tiết dự án và bảng công việc của dự án.",
       summary: "Lấy task theo dự án (lọc/tìm kiếm)",
       ...taskAuth,
       parameters: [
@@ -84,6 +86,7 @@ export const projectTaskPaths = {
   "/api/project-tasks/employee/{id}": {
     get: {
       tags: ["Project Tasks"],
+      description: "Lấy toàn bộ task được giao cho một nhân viên cụ thể để phục vụ hồ sơ cá nhân, màn hình công việc của tôi hoặc báo cáo tải công việc theo người.",
       summary: "Lấy task được giao cho một nhân viên",
       ...taskAuth,
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
@@ -95,6 +98,7 @@ export const projectTaskPaths = {
   "/api/project-tasks/{id}": {
     get: {
       tags: ["Project Tasks"],
+      description: "Lấy thông tin chi tiết của một task theo ID, bao gồm tiêu đề, mô tả, trạng thái, độ ưu tiên, người được giao và các mốc thời gian liên quan. Dùng cho màn hình chi tiết và form chỉnh sửa task.",
       summary: "Xem chi tiết task",
       ...taskAuth,
       parameters: [taskIdParam],
@@ -118,6 +122,7 @@ export const projectTaskPaths = {
     },
     delete: {
       tags: ["Project Tasks"],
+      description: "Xoá một task khỏi hệ thống theo ID. Thao tác này thường chỉ dành cho Manager và nên thực hiện khi task được tạo nhầm hoặc không còn hợp lệ.",
       summary: "Xoá task",
       ...taskAuth,
       parameters: [taskIdParam],

@@ -25,6 +25,7 @@ API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục v
 - **Xác thực:** Đăng nhập (\`POST /api/users/login\`), Đăng xuất (\`POST /api/users/logout\`), Đổi mật khẩu (\`PATCH /api/users/updatePs\`), Quên mật khẩu – gửi mã 6 số qua email (\`POST /api/users/forgot-password\`, \`POST /api/users/reset-password\`).
 - **Hồ sơ cá nhân:** Cập nhật ảnh đại diện (\`POST /api/users/me/avatar\`).
 - **Quản trị Nhân viên:** Danh sách phân trang (\`GET /api/users\`), Toàn bộ nhân viên (\`GET /api/users/all\`), Tìm kiếm (\`GET /api/users/search\`), Xem chi tiết (\`GET /api/users/{id}\`), Tạo mới (\`POST /api/users\`), Cập nhật (\`PATCH /api/users/{id}\`), Vô hiệu hoá tài khoản (\`DELETE /api/users/{id}\`).
+- **Trạng thái tài khoản:** Hệ thống lưu đồng thời \`status\` và \`leaveDate\`; nếu nhân viên đã nghỉ việc hoặc bị khoá thì API đăng nhập và middleware xác thực sẽ từ chối truy cập với mã \`403 Forbidden\`.
 - **Lọc theo tiêu chí:** Nhân viên theo phòng ban (\`GET /api/users/department/{departmentId}\`), theo chức vụ (\`GET /api/users/position/{positionId}\`).
 
 #### 2. Quản Lý Phòng Ban (Departments)

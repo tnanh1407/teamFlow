@@ -36,12 +36,14 @@ export const positionPaths = {
   "/api/positions": {
     get: {
       tags: ["Positions"],
+      description: "Trả về danh sách chức vụ/cấp bậc đang được cấu hình trong hệ thống theo dạng phân trang. Endpoint này hỗ trợ các màn hình quản trị danh mục chức vụ và các form gán vị trí công việc cho nhân viên.",
       summary: "Lấy danh sách chức vụ",
       security: [{ cookieAuth: [] }],
       responses: { 200: { description: "Danh sách chức vụ", content: { "application/json": { schema: { $ref: "#/components/schemas/PaginatedPositions" } } } } },
     },
     post: {
       tags: ["Positions"],
+      description: "Tạo mới một chức vụ trong hệ thống. Có thể khai báo tên, mô tả, level và trạng thái hoạt động. Endpoint này thường chỉ dành cho quản trị viên để bổ sung các cấp bậc nhân sự khi cơ cấu tổ chức thay đổi.",
       summary: "Tạo chức vụ mới",
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/PositionInput" } } } },
@@ -53,6 +55,7 @@ export const positionPaths = {
   "/api/positions/{id}": {
     get: {
       tags: ["Positions"],
+      description: "Lấy chi tiết một chức vụ theo ID để hiển thị thông tin đầy đủ trước khi sửa, hoặc để dùng ở các màn hình tra cứu nhân sự và mapping chức danh.",
       summary: "Lấy chức vụ theo ID",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
@@ -63,6 +66,7 @@ export const positionPaths = {
     },
     patch: {
       tags: ["Positions"],
+      description: "Cập nhật một chức vụ hiện có theo ID. Dùng để đổi tên chức vụ, chỉnh mô tả, thay đổi level hoặc bật/tắt trạng thái hoạt động khi danh mục chức vụ cần được làm sạch.",
       summary: "Cập nhật chức vụ",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
@@ -74,6 +78,7 @@ export const positionPaths = {
     },
     delete: {
       tags: ["Positions"],
+      description: "Xoá một chức vụ khỏi hệ thống theo ID. Chỉ nên thực hiện khi chắc chắn chức vụ đó không còn được tham chiếu trong dữ liệu nhân sự hoặc quy trình nghiệp vụ.",
       summary: "Xoá chức vụ",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],

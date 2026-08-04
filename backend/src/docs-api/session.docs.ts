@@ -18,6 +18,7 @@ export const sessionPaths = {
   "/api/sessions/me": {
     get: {
       tags: ["Sessions"],
+      description: "Lấy danh sách các phiên đăng nhập đang còn hiệu lực của tài khoản hiện tại, bao gồm thiết bị, IP, thời điểm hết hạn và đánh dấu phiên nào là phiên hiện tại.",
       summary: "Danh sách phiên đăng nhập của tôi",
       security: [{ cookieAuth: [] }],
       responses: {
@@ -39,6 +40,7 @@ export const sessionPaths = {
     delete: {
       tags: ["Sessions"],
       summary: "Đăng xuất tất cả thiết bị khác",
+      description: "Thu hồi mọi phiên khác của tài khoản hiện tại, giữ lại phiên đang dùng.",
       security: [{ cookieAuth: [] }],
       responses: { 200: { description: "Đã thu hồi toàn bộ phiên khác" } },
     },
@@ -47,6 +49,7 @@ export const sessionPaths = {
     delete: {
       tags: ["Sessions"],
       summary: "Thu hồi một phiên đăng nhập từ xa",
+      description: "Dùng để vô hiệu hoá một phiên cụ thể theo ID phiên.",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
       responses: {
