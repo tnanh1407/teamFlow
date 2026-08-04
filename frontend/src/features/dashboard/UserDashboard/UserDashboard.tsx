@@ -19,7 +19,9 @@ export default function UserDashboard() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        if (user?.position === "member") {
+        if (!user) return
+
+        if (user.position !== "manager") {
           const [projRes, userRes, deptRes] = await Promise.all([
             projectService.getMyProjects(),
             userService.getAll(),
@@ -42,9 +44,7 @@ export default function UserDashboard() {
             const deptEmpIds = userRes.data.data
               .filter((e) => e.departmentId === myUser.departmentId)
               .map((e) => e.id)
-            const deptUsers = userRes.data.data.filter((u) =>
-              deptEmpIds.includes(u.id) && u.id !== user.id
-            )
+            const deptUsers = userRes.data.data.filter((u) => deptEmpIds.includes(u.id) && u.id !== user.id)
             setDeptMembers(deptUsers)
           }
         } else {
@@ -56,7 +56,7 @@ export default function UserDashboard() {
           setProjects(projRes.data.data)
           setMembers(userRes.data.data)
 
-          const myUser = userRes.data.data.find((e) => e.id === user!.id)
+          const myUser = userRes.data.data.find((e) => e.id === user.id)
 
           const managedDept = deptRes.data.data.find((d) => d.managerId === user!.id)
           if (managedDept) {
@@ -66,9 +66,7 @@ export default function UserDashboard() {
             const deptEmpIds = userRes.data.data
               .filter((e) => e.departmentId === managedDept.id)
               .map((e) => e.id)
-            const deptUsers = userRes.data.data.filter((u) =>
-              deptEmpIds.includes(u.id) && u.id !== user!.id
-            )
+            const deptUsers = userRes.data.data.filter((u) => deptEmpIds.includes(u.id) && u.id !== user.id)
             setDeptMembers(deptUsers)
           } else if (myUser?.departmentId) {
             const myDept = deptRes.data.data.find((d) => d.id === myUser.departmentId)
@@ -333,7 +331,7 @@ export default function UserDashboard() {
             )}
           </div>
           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {(user?.position === "member" || user?.position === "manager") && dept ? (
+            {(user?.position === "staff" || user?.position === "intern" || user?.position === "manager") && dept ? (
               <>
                 {deptManager && user?.position !== "manager" && (
                   <div className="px-5 py-3 flex items-center gap-3 bg-amber-50/50 dark:bg-amber-950/20">
@@ -374,10 +372,10 @@ export default function UserDashboard() {
               </>
             ) : (
               <>
-                {members.filter((m) => m.position === "member").slice(0, 5).length === 0 ? (
+                {members.filter((m) => m.position !== "manager").slice(0, 5).length === 0 ? (
                   <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có thành viên nào</p>
                 ) : (
-                  members.filter((m) => m.position === "member").slice(0, 5).map((m) => (
+                  members.filter((m) => m.position !== "manager").slice(0, 5).map((m) => (
                     <div key={m.id} className="px-5 py-3 flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {m.avatarURL ? (

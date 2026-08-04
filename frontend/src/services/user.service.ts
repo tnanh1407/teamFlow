@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 
 export type AccountRole = "admin" | "user";
-export type AccountPosition = "manager" | "member";
+export type AccountPosition = "manager" | "staff" | "intern";
 export type UserGender = "male" | "female" | "other";
 
 export interface User {
@@ -18,7 +18,7 @@ export interface User {
   gender: UserGender;
   username: string;
   role: AccountRole;
-  position: AccountPosition;
+  position: AccountPosition | null;
   status: boolean;
   avatarURL: string;
   createdAt: string;
@@ -80,7 +80,15 @@ const normalizeUser = (user: BackendUser): User => ({
   gender: (user.gender as UserGender) ?? "other",
   username: user.username ?? "",
   role: (user.role as AccountRole) ?? "user",
-  position: (user.position as AccountPosition) ?? "member",
+  position:
+    (user.position ??
+    (user.positionId === "20000000-0000-4000-a000-000000000001"
+      ? "manager"
+      : user.positionId === "20000000-0000-4000-a000-000000000005"
+        ? "staff"
+        : user.positionId === "20000000-0000-4000-a000-000000000006"
+          ? "intern"
+          : null)) as AccountPosition | null,
   status: user.status ?? true,
   avatarURL: user.avatarURL ?? "",
   createdAt: user.createdAt,

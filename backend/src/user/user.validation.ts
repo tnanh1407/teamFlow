@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { EAccountPosition } from "../enums/account-role.enum.js";
 import { EGender } from "../enums/gender.enum.js";
 
 export const createUserSchema = z.object({
@@ -15,7 +14,6 @@ export const createUserSchema = z.object({
   gender: z.enum(Object.values(EGender) as [string, ...string[]]).default(EGender.OTHER),
   username: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  position: z.enum([EAccountPosition.MANAGER, EAccountPosition.MEMBER]).default(EAccountPosition.MEMBER),
   avatarURL: z.string().optional(),
 });
 
@@ -32,7 +30,6 @@ export const updateUserSchema = z.object({
   gender: z.enum(Object.values(EGender) as [string, ...string[]]).optional(),
   username: z.string().optional(),
   password: z.string().min(6).optional(),
-  position: z.enum([EAccountPosition.MANAGER, EAccountPosition.MEMBER]).optional(),
   status: z.boolean().optional(),
   avatarURL: z.string().optional(),
 });

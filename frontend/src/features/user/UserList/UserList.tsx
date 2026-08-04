@@ -86,7 +86,7 @@ export default function UserList() {
     if (!currentUser) return false
     if (currentUser.role === "admin") return target.id !== currentUser.id
     if (currentUser.position === "manager") {
-      return target.id !== currentUser.id && target.position === "member"
+      return target.id !== currentUser.id && target.position !== "manager"
     }
     return false
   }

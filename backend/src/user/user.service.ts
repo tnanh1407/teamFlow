@@ -25,7 +25,6 @@ interface UserRow {
   username: string;
   password: string;
   role: EAccountRole;
-  position: EAccountPosition | null;
   status: boolean;
   avatarURL: string;
   lastLogin: Date | null;
@@ -48,7 +47,6 @@ export interface UserData {
   username: string;
   password: string;
   role: EAccountRole;
-  position: EAccountPosition;
   status?: boolean;
   avatarURL?: string;
 }
@@ -72,6 +70,19 @@ const userColumns = UserSchema.columns;
 
 const normalizeRequiredText = (value: string) => value.trim();
 
+const normalizePositionFromName = (value: string | undefined) => {
+  if (!value) return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes("quản")) return EAccountPosition.MANAGER;
+  if (normalized.includes("nhân viên")) return EAccountPosition.STAFF;
+  if (normalized.includes("thực tập")) return EAccountPosition.INTERN;
+  return undefined;
+};
+
+const hydrateUser = async (user: UserRow) => {
+  return user;
+};
+
 
 const normalizeOptionalText = (value: string | undefined) => {
   //  tránh lưu chuỗi khoảng trắng vào database
@@ -80,6 +91,20 @@ const normalizeOptionalText = (value: string | undefined) => {
   return normalized ? normalized : null;
 };
 const todayDate = () => new Date().toLocaleDateString("en-CA");
+
+async function findPositionById(positionId: string) {
+  const { rows } = await pool.query<{ id: string; name: string; level: string; isActive: boolean }>(
+    `SELECT id, name, level, is_active as "isActive" FROM positions WHERE id = $1`,
+    [positionId]
+  );
+  return rows[0] || null;
+}
+
+async function resolvePositionById(positionId: string): Promise<EAccountPosition | null> {
+  const position = await findPositionById(positionId);
+  if (!position) return null;
+  return normalizePositionFromName(position.name) ?? null;
+}
 
 // Chuẩn hóa nhân sự
 function resolveEmploymentState(status: boolean | undefined, leaveDate: string | undefined) {
@@ -120,9 +145,8 @@ class UserService {
 
     const jti = generateJti();
     await sessionService.createSession(user.id, jti, userAgent, ip);
-
     const token = jwt.sign(
-      { id: user.id, role: user.role, position: user.position, jti },
+      { id: user.id, role: user.role, position: await resolvePositionById(user.positionId), jti },
       env.JWT_SECRET,
       { expiresIn: TOKEN_EXPIRES_IN }
     );
@@ -139,7 +163,7 @@ class UserService {
     const { rows } = await pool.query<UserRow>(
       `SELECT ${userColumns} FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]
     );
-    return { data: rows, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { data: await Promise.all(rows.map((row) => hydrateUser(row))), total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async findById(id: string) {
@@ -147,7 +171,7 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE id = $1`,
       [id]
     );
-    return rows[0] || null;
+    return rows[0] ? hydrateUser(rows[0]) : null;
   }
 
   async findByUsername(username: string) {
@@ -155,7 +179,7 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE username = $1`,
       [username]
     );
-    return rows[0] || null;
+    return rows[0] ? hydrateUser(rows[0]) : null;
   }
 
   async findByEmployeeCode(code: string) {
@@ -163,7 +187,7 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE employee_code = $1`,
       [code]
     );
-    return rows[0] || null;
+    return rows[0] ? hydrateUser(rows[0]) : null;
   }
 
   async findByEmail(email: string) {
@@ -171,7 +195,7 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE email = $1`,
       [email]
     );
-    return rows[0] || null;
+    return rows[0] ? hydrateUser(rows[0]) : null;
   }
 
   async findByPhone(phone: string) {
@@ -179,7 +203,7 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE phone = $1`,
       [phone]
     );
-    return rows[0] || null;
+    return rows[0] ? hydrateUser(rows[0]) : null;
   }
 
   async findByDepartment(departmentId: string) {
@@ -187,7 +211,7 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE department_id = $1 ORDER BY created_at DESC`,
       [departmentId]
     );
-    return rows;
+    return Promise.all(rows.map((row) => hydrateUser(row)));
   }
 
   async findByPosition(positionId: string) {
@@ -195,14 +219,14 @@ class UserService {
       `SELECT ${userColumns} FROM users WHERE position_id = $1 ORDER BY created_at DESC`,
       [positionId]
     );
-    return rows;
+    return Promise.all(rows.map((row) => hydrateUser(row)));
   }
 
   async findAllRaw() {
     const { rows } = await pool.query<UserRow>(
       `SELECT ${userColumns} FROM users ORDER BY created_at DESC`
     );
-    return rows;
+    return Promise.all(rows.map((row) => hydrateUser(row)));
   }
 
   async search(keyword: string) {
@@ -221,11 +245,15 @@ class UserService {
        ORDER BY created_at DESC`,
       [`%${q}%`]
     );
-    return rows;
+    return Promise.all(rows.map((row) => hydrateUser(row)));
   }
 
   async create(data: CreateUserDataInput) {
     const employment = resolveEmploymentState(data.status, data.leaveDate);
+    const positionRecord = await findPositionById(data.positionId);
+    if (!positionRecord) throw new AppError("Position not found", 404);
+    if (!positionRecord.isActive) throw new AppError("Position is inactive", 400);
+
     const payload = {
       departmentId: data.departmentId,
       positionId: data.positionId,
@@ -239,7 +267,6 @@ class UserService {
       gender: data.gender ?? "other",
       username: normalizeRequiredText(data.username).toLowerCase(),
       password: data.password,
-      position: data.position,
       status: employment.status ?? (data.status ?? true),
       avatarURL: normalizeOptionalText(data.avatarURL),
       role: EAccountRole.USER,
@@ -266,12 +293,12 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(payload.password, 10);
     const { rows } = await pool.query<UserRow>(
-      `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, position, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING ${userColumns}`,
+      `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING ${userColumns}`,
       [
         payload.departmentId, payload.positionId, payload.employeeCode, payload.name,
         payload.email, payload.phone, payload.birthDate,
         payload.hireDate, payload.leaveDate, payload.gender,
-        payload.username, hashedPassword, payload.role, payload.position,
+        payload.username, hashedPassword, payload.role,
         payload.status, payload.avatarURL,
       ]
     );
@@ -321,9 +348,21 @@ class UserService {
     if (data.gender !== undefined) payload.gender = data.gender;
     if (data.username !== undefined) payload.username = normalizeRequiredText(data.username).toLowerCase();
     if (data.role !== undefined) payload.role = data.role;
-    if (data.position !== undefined) payload.position = data.position;
     if (employment.status !== undefined) payload.status = employment.status;
     if (data.avatarURL !== undefined) payload.avatarURL = normalizeOptionalText(data.avatarURL) ?? undefined;
+
+    const positionRecord = payload.positionId !== undefined
+      ? await findPositionById(payload.positionId)
+      : previous.positionId
+        ? await findPositionById(previous.positionId)
+        : null;
+
+    if (payload.positionId !== undefined && !positionRecord) {
+      throw new AppError("Position not found", 404);
+    }
+    if (positionRecord && !positionRecord.isActive) {
+      throw new AppError("Position is inactive", 400);
+    }
 
     if (payload.username) {
       const existing = await this.findByUsername(payload.username);
@@ -358,7 +397,6 @@ class UserService {
     if (payload.gender !== undefined) { setClauses.push(`gender = $${idx++}`); values.push(payload.gender); }
     if (payload.username !== undefined) { setClauses.push(`username = $${idx++}`); values.push(payload.username); }
     if (payload.role !== undefined) { setClauses.push(`role = $${idx++}`); values.push(payload.role); }
-    if (payload.position !== undefined) { setClauses.push(`position = $${idx++}`); values.push(payload.position); }
     if (payload.status !== undefined) { setClauses.push(`status = $${idx++}`); values.push(payload.status); }
     if (data.avatarURL !== undefined) { setClauses.push(`avatar_url = $${idx++}`); values.push(normalizeOptionalText(data.avatarURL)); }
 
@@ -374,7 +412,7 @@ class UserService {
     if (!rows[0]) throw new AppError("User not found", 404);
 
     const roleChanged = payload.role !== undefined && payload.role !== previous.role;
-    const positionChanged = payload.position !== undefined && payload.position !== previous.position;
+    const positionChanged = payload.positionId !== undefined && payload.positionId !== previous.positionId;
     const disabled = payload.status === false;
 
     if (disabled || roleChanged || positionChanged) {

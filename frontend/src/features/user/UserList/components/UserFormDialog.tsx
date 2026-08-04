@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { type AccountPosition, type User } from "@/services/user.service"
+import { type User } from "@/services/user.service"
 import type { Department } from "@/services/department.service"
 import type { Position } from "@/services/position.service"
 import { MySwal } from "@/lib/swal"
@@ -31,7 +31,6 @@ interface FormData {
   positionId: string
   username: string
   password: string
-  position: AccountPosition
   status: boolean
 }
 
@@ -48,7 +47,6 @@ const userSchema = z.object({
   positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
   username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
   password: z.string().optional(),
-  position: z.enum(["manager", "member"]),
   status: z.boolean(),
 })
 
@@ -67,14 +65,8 @@ const emptyForm: FormData = {
   positionId: "",
   username: "",
   password: "",
-  position: "member",
   status: true,
 }
-
-const positionOptions: { value: AccountPosition; label: string }[] = [
-  { value: "manager", label: "Manager" },
-  { value: "member", label: "Member" },
-]
 
 const inputClass =
   "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
@@ -95,7 +87,6 @@ function toFormValues(user?: User): UserFormValues {
     positionId: user.positionId,
     username: user.username,
     password: "",
-    position: user.position,
     status: user.status,
   }
 }
@@ -123,7 +114,6 @@ function isSameEditPayload(editingUser: User, payload: Record<string, unknown>) 
     String(payload.departmentId ?? "") === editingUser.departmentId &&
     String(payload.positionId ?? "") === editingUser.positionId &&
     String(payload.username ?? "") === editingUser.username &&
-    String(payload.position ?? "") === editingUser.position &&
     Boolean(payload.status) === editingUser.status
   )
 }
@@ -224,16 +214,6 @@ export default async function openUserFormDialog({
             </label>
             <input type="password" {...register("password")} className={inputClass} />
           </div>
-          <div>
-            <label className={labelClass}>Vai trò</label>
-            <select {...register("position")} className={`${inputClass} appearance-none`}>
-              {positionOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -307,7 +287,6 @@ export default async function openUserFormDialog({
     departmentId: result.value.departmentId,
     positionId: result.value.positionId,
     username: result.value.username,
-    position: result.value.position,
     status: result.value.status,
   }
 

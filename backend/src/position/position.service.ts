@@ -2,6 +2,14 @@ import pool from "../config/database.js";
 import { AppError } from "../utils/errors/app-error.js";
 import { PositionSchema } from "../schemas/index.js";
 
+const SYSTEM_POSITIONS = [
+  { name: "Quản lí", level: "Manager" },
+  { name: "Nhân viên", level: "Junior" },
+  { name: "Thực tập sinh", level: "Intern" },
+] as const;
+
+const SYSTEM_POSITION_NAMES = new Set(SYSTEM_POSITIONS.map((position) => position.name.toLowerCase()));
+
 // dữ liệu database
 interface PositionRow {
   id: string;
@@ -30,6 +38,8 @@ const normalizeOptionalText = (value: string | undefined) => {
   return normalized ? normalized : null;
 };
 
+const normalizePositionName = (value: string) => value.trim();
+
 class PositionService {
   async findAll() {
     const { rows } = await pool.query<PositionRow>(
@@ -48,20 +58,28 @@ class PositionService {
 
   async findByName(name: string) {
     const { rows } = await pool.query<PositionRow>(
-      `SELECT ${positionColumns} FROM positions WHERE name = $1`,
-      [name]
+      `SELECT ${positionColumns} FROM positions WHERE LOWER(name) = LOWER($1)`,
+      [normalizePositionName(name)]
     );
     return rows[0] || null;
   }
 
   async create(data: CreatePositionDataInput) {
-    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
     const payload = {
-      name: normalizeRequiredText(data.name).toLowerCase(),
+      name: normalizeRequiredText(data.name),
       description: normalizeOptionalText(data.description),
-      level: data.level || null,
+      level: normalizeRequiredText(data.level).toLowerCase(),
       isActive: data.isActive ?? true,
     };
+
+    if (!SYSTEM_POSITION_NAMES.has(payload.name.toLowerCase())) {
+      throw new AppError("Chỉ được phép sử dụng 3 chức vụ hệ thống: Quản lí, Nhân viên, Thực tập sinh", 400);
+    }
+
+    const allowed = SYSTEM_POSITIONS.find((position) => position.name.toLowerCase() === payload.name.toLowerCase());
+    if (!allowed || allowed.level !== payload.level) {
+      throw new AppError("Chức vụ hệ thống không hợp lệ", 400);
+    }
 
     const existing = await this.findByName(payload.name);
     if (existing) throw new AppError("Position name already exists", 409);
@@ -74,26 +92,33 @@ class PositionService {
   }
 
   async update(id: string, data: UpdatePositionDataInput) {
-    // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    const current = await this.findById(id);
+    if (!current) throw new AppError("Position not found", 404);
+
     const payload: UpdatePositionDataInput = {};
 
-    if (data.name !== undefined) payload.name = normalizeRequiredText(data.name).toLowerCase();
-    if (data.description !== undefined) payload.description = normalizeOptionalText(data.description) ?? undefined;
-    if (data.level !== undefined) payload.level = data.level;
-    if (data.isActive !== undefined) payload.isActive = data.isActive;
-
-    if (payload.name !== undefined) {
-      const existing = await this.findByName(payload.name);
-      if (existing && existing.id !== id) throw new AppError("Position name already exists", 409);
+    if (data.name !== undefined) {
+      const normalizedName = normalizeRequiredText(data.name);
+      if (normalizedName.toLowerCase() !== current.name.toLowerCase()) {
+        throw new AppError("Không được đổi tên các chức vụ hệ thống", 400);
+      }
     }
+
+    if (data.level !== undefined) {
+      const normalizedLevel = normalizeRequiredText(data.level).toLowerCase();
+      if (normalizedLevel !== current.level.toLowerCase()) {
+        throw new AppError("Không được đổi mã chức vụ hệ thống", 400);
+      }
+    }
+
+    if (data.description !== undefined) payload.description = normalizeOptionalText(data.description) ?? undefined;
+    if (data.isActive !== undefined) payload.isActive = data.isActive;
 
     const setClauses: string[] = [];
     const values: any[] = [];
     let idx = 1;
 
-    if (payload.name !== undefined) { setClauses.push(`name = $${idx++}`); values.push(payload.name); }
     if (payload.description !== undefined) { setClauses.push(`description = $${idx++}`); values.push(payload.description); }
-    if (payload.level !== undefined) { setClauses.push(`level = $${idx++}`); values.push(payload.level); }
     if (payload.isActive !== undefined) { setClauses.push(`is_active = $${idx++}`); values.push(payload.isActive); }
 
     if (setClauses.length === 0) return this.findById(id);
@@ -108,6 +133,11 @@ class PositionService {
   }
 
   async delete(id: string): Promise<void> {
+    const current = await this.findById(id);
+    if (!current) throw new AppError("Position not found", 404);
+    if (SYSTEM_POSITION_NAMES.has(current.name.toLowerCase())) {
+      throw new AppError("Không được xoá các chức vụ hệ thống", 400);
+    }
     const { rows } = await pool.query<PositionRow>(
       `DELETE FROM positions WHERE id = $1 RETURNING ${positionColumns}`,
       [id]

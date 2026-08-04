@@ -38,7 +38,7 @@ export default function UserListTable({
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Mã người dùng</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Họ và tên</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Tên đăng nhập</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Vai trò</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Chức vụ</th>
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Trạng thái</th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Thao tác</th>
             </tr>
@@ -126,12 +126,10 @@ export default function UserListTable({
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           item.role === "admin"
                             ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-                            : item.position === "manager"
-                              ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300"
-                              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
                         }`}
                       >
-                        {item.role === "admin" ? "Admin" : item.position === "manager" ? "Manager" : "Member"}
+                        {item.role === "admin" ? "Admin" : posName}
                       </span>
                     </td>
 

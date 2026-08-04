@@ -40,7 +40,7 @@ function RoleRedirect({ children, roles }: { children: ReactNode; roles: string[
   }
   if (!user) return <Navigate to="/login" replace />;
   if (!roles.includes(user.role)) {
-    const redirect = positionHome[user.position] || "/";
+    const redirect = user.position ? positionHome[user.position] || "/" : "/";
     return <Navigate to={redirect} replace />;
   }
   return <>{children}</>;

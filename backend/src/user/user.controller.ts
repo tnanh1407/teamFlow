@@ -8,6 +8,8 @@ import { uploadToCloudinary, deleteCloudinaryFile } from "../utils/upload/cloudi
 import sessionService, { SESSION_TTL_MS } from "../session/session.service.js";
 import { sendResetCodeEmail } from "../utils/mail/mailer.js";
 
+const MANAGER_POSITION_ID = "20000000-0000-4000-a000-000000000001";
+
 class UserController {
   async me(req: AuthRequest, res: Response) {
     const user = await userService.findById(req.user!.id);
@@ -92,8 +94,8 @@ class UserController {
       if (id === currentUser.id) {
         throw new AppError("Managers cannot edit themselves here. Use personal settings.", 403);
       }
-      if (target.position !== EAccountPosition.MEMBER) {
-        throw new AppError("Managers can only edit members", 403);
+      if (target.positionId === MANAGER_POSITION_ID) {
+        throw new AppError("Managers cannot edit other managers", 403);
       }
     }
 
@@ -125,8 +127,8 @@ class UserController {
       if (id === currentUser.id) {
         throw new AppError("Managers cannot delete themselves", 403);
       }
-      if (target.position !== EAccountPosition.MEMBER) {
-        throw new AppError("Managers can only delete members", 403);
+      if (target.positionId === MANAGER_POSITION_ID) {
+        throw new AppError("Managers cannot delete other managers", 403);
       }
     }
 

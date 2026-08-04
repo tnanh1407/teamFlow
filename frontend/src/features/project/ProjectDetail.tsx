@@ -733,8 +733,9 @@ export default function ProjectDetail() {
 
       const roleLabel: Record<string, string> = {
         admin: "Admin",
-        manager: "Manager",
-        member: "Member",
+        manager: "Quản lí",
+        staff: "Nhân viên",
+        intern: "Thực tập sinh",
       }
 
       const changed: string[] = []
@@ -747,7 +748,7 @@ export default function ProjectDetail() {
       }
 
       if (user?.id) {
-        const roleStr = roleLabel[user.position] || user.position
+        const roleStr = user.position ? (roleLabel[user.position] || user.position) : "Admin"
         await projectLogService.create({
           projectId: project.id,
           userId: user.id,

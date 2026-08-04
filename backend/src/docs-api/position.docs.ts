@@ -4,7 +4,7 @@ export const positionSchemas = {
     example: {
       id: "20000000-0000-4000-a000-000000000005",
       name: "Nhân viên",
-      description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+      description: "Nhân viên chính thức thực thi công việc chuyên môn",
       level: "Junior",
       isActive: true,
       createdAt: "2025-01-01T00:00:00.000Z",
@@ -14,7 +14,7 @@ export const positionSchemas = {
       id: { type: "string", format: "uuid" },
       name: { type: "string" },
       description: { type: "string", nullable: true },
-      level: { type: "string", enum: ["Intern", "Junior", "Middle", "Senior", "Leader", "Manager"], nullable: true },
+      level: { type: "string", enum: ["Manager", "Junior", "Intern"], nullable: true },
       isActive: { type: "boolean" },
       createdAt: { type: "string", format: "date-time" },
       updatedAt: { type: "string", format: "date-time" },
@@ -24,15 +24,15 @@ export const positionSchemas = {
     type: "object",
     required: ["name"],
     example: {
-      name: "Senior Developer",
-      description: "Phụ trách phát triển, review code và định hướng kỹ thuật",
-      level: "Senior",
+      name: "Nhân viên",
+      description: "Nhân viên chính thức thực thi công việc chuyên môn",
+      level: "Junior",
       isActive: true,
     },
     properties: {
       name: { type: "string" },
       description: { type: "string" },
-      level: { type: "string", enum: ["Intern", "Junior", "Middle", "Senior", "Leader", "Manager"] },
+      level: { type: "string", enum: ["Manager", "Junior", "Intern"] },
       isActive: { type: "boolean" },
     },
   },
@@ -43,7 +43,7 @@ export const positionSchemas = {
         {
           id: "20000000-0000-4000-a000-000000000005",
           name: "Nhân viên",
-          description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+          description: "Nhân viên chính thức thực thi công việc chuyên môn",
           level: "Junior",
           isActive: true,
           createdAt: "2025-01-01T00:00:00.000Z",
@@ -64,7 +64,7 @@ export const positionPaths = {
   "/api/positions": {
     get: {
       tags: ["Positions"],
-      description: "Trả về danh sách chức vụ/cấp bậc đang được cấu hình trong hệ thống theo dạng phân trang. Endpoint này hỗ trợ các màn hình quản trị danh mục chức vụ và các form gán vị trí công việc cho nhân viên.",
+      description: "Trả về danh sách 3 chức vụ hệ thống: Quản lí, Nhân viên và Thực tập sinh. Đây là danh mục cố định được dùng để gán cho nhân viên thông qua `positionId`.",
       summary: "Danh sách chức vụ",
       security: [{ cookieAuth: [] }],
       responses: {
@@ -93,7 +93,7 @@ export const positionPaths = {
     },
     post: {
       tags: ["Positions"],
-      description: "Tạo mới một chức vụ trong hệ thống. Có thể khai báo tên, mô tả, level và trạng thái hoạt động. Endpoint này thường chỉ dành cho quản trị viên để bổ sung các cấp bậc nhân sự khi cơ cấu tổ chức thay đổi.",
+      description: "Tạo hoặc khôi phục một trong 3 chức vụ hệ thống. Backend chỉ chấp nhận đúng 3 giá trị cố định: Quản lí, Nhân viên và Thực tập sinh. Không hỗ trợ tạo chức vụ tuỳ ý.",
       summary: "Tạo chức vụ",
       security: [{ cookieAuth: [] }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/PositionInput" } } } },
@@ -106,9 +106,9 @@ export const positionPaths = {
               example: {
                 data: {
                   id: "20000000-0000-4000-a000-000000000010",
-                  name: "Senior Developer",
-                  description: "Phụ trách phát triển, review code và định hướng kỹ thuật",
-                  level: "Senior",
+                  name: "Nhân viên",
+                  description: "Nhân viên chính thức thực thi công việc chuyên môn",
+                  level: "Junior",
                   isActive: true,
                   createdAt: "2026-08-04T08:30:00.000Z",
                   updatedAt: "2026-08-04T08:30:00.000Z",
@@ -123,7 +123,7 @@ export const positionPaths = {
   "/api/positions/{id}": {
     get: {
       tags: ["Positions"],
-      description: "Lấy chi tiết một chức vụ theo ID để hiển thị thông tin đầy đủ trước khi sửa, hoặc để dùng ở các màn hình tra cứu nhân sự và mapping chức danh.",
+      description: "Lấy chi tiết một trong 3 chức vụ hệ thống theo ID để hiển thị thông tin đầy đủ trước khi sửa, hoặc dùng để map nhân sự theo `positionId`.",
       summary: "Chi tiết chức vụ",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
@@ -137,7 +137,7 @@ export const positionPaths = {
                 data: {
                   id: "20000000-0000-4000-a000-000000000005",
                   name: "Nhân viên",
-                  description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+                  description: "Nhân viên chính thức thực thi công việc chuyên môn",
                   level: "Junior",
                   isActive: true,
                   createdAt: "2025-01-01T00:00:00.000Z",
@@ -155,7 +155,7 @@ export const positionPaths = {
     },
     patch: {
       tags: ["Positions"],
-      description: "Cập nhật một chức vụ hiện có theo ID. Dùng để đổi tên chức vụ, chỉnh mô tả, thay đổi level hoặc bật/tắt trạng thái hoạt động khi danh mục chức vụ cần được làm sạch.",
+      description: "Cập nhật mô tả hoặc trạng thái hoạt động của một trong 3 chức vụ hệ thống. Backend không cho đổi tên hay đổi mã chức vụ để đảm bảo bảng positions luôn chỉ có 3 giá trị cố định.",
       summary: "Cập nhật chức vụ",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],
@@ -169,7 +169,7 @@ export const positionPaths = {
                 data: {
                   id: "20000000-0000-4000-a000-000000000005",
                   name: "Nhân viên",
-                  description: "Nhân viên - vị trí thực thi công việc chuyên môn",
+                  description: "Nhân viên chính thức thực thi công việc chuyên môn",
                   level: "Junior",
                   isActive: true,
                   createdAt: "2025-01-01T00:00:00.000Z",
@@ -187,7 +187,7 @@ export const positionPaths = {
     },
     delete: {
       tags: ["Positions"],
-      description: "Xoá một chức vụ khỏi hệ thống theo ID. Chỉ nên thực hiện khi chắc chắn chức vụ đó không còn được tham chiếu trong dữ liệu nhân sự hoặc quy trình nghiệp vụ.",
+      description: "Xoá một chức vụ khỏi hệ thống theo ID. Các chức vụ hệ thống cố định như Quản lí, Nhân viên, Thực tập sinh sẽ bị backend từ chối xoá.",
       summary: "Xoá chức vụ",
       security: [{ cookieAuth: [] }],
       parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "20000000-0000-4000-a000-000000000005" } }],

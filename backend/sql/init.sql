@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- ══════════════════════════════════════════════════════════
 
 CREATE TYPE EUserRole AS ENUM ('user', 'admin');
-CREATE TYPE Eposition AS ENUM ('member', 'manager');
+CREATE TYPE Eposition AS ENUM ('member', 'manager', 'staff', 'intern');
 CREATE TYPE EProjectStatus AS ENUM ('todo', 'in_progress', 'review', 'completed', 'cancelled');
 CREATE TYPE ENotificationType AS ENUM ('project', 'comment', 'system');
 CREATE TYPE EPriority AS ENUM ('low', 'medium', 'high', 'critical');
@@ -55,16 +55,11 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR UNIQUE NOT NULL,
   password VARCHAR NOT NULL,
   role EUserRole DEFAULT 'user' NOT NULL,
-  position Eposition DEFAULT 'member',
   status BOOLEAN NOT NULL DEFAULT true,
   avatar_url VARCHAR,
   last_login TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  CONSTRAINT ck_users_position CHECK (
-    (role = 'admin' AND position IS NULL) OR
-    (role = 'user' AND position IS NOT NULL)
-  )
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS projects (

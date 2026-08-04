@@ -19,11 +19,23 @@ const pwdFor = (username: string): string => {
   return "123456";
 };
 
+const normalizePosition = (value: string | undefined) => {
+  if (!value) return null;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "member") return "staff";
+  if (normalized === "manager" || normalized === "staff" || normalized === "intern") return normalized;
+  return null;
+};
+
 const seed = async () => {
   const client = await pool.connect();
   try {
+    await client.query(`ALTER TYPE Eposition ADD VALUE IF NOT EXISTS 'staff'`);
+    await client.query(`ALTER TYPE Eposition ADD VALUE IF NOT EXISTS 'intern'`);
     await client.query("BEGIN");
 
+    await client.query(`ALTER TABLE users DROP CONSTRAINT IF EXISTS ck_users_position`);
+    await client.query(`ALTER TABLE users DROP COLUMN IF EXISTS position`);
     await client.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS leave_date DATE`);
 
     await client.query("DELETE FROM project_logs");
@@ -70,11 +82,15 @@ const seed = async () => {
 
     if (has("users")) {
       const data = loadJSON<any>("users");
+      const positions = has("positions") ? loadJSON<any>("positions") : [];
+      const positionById = new Map<string, string>(
+        positions.map((position) => [position.id, normalizePosition(position.level) ?? normalizePosition(position.name) ?? "staff"])
+      );
       for (const u of data) {
         const hashed = bcrypt.hashSync(pwdFor(u.username), 10);
         await client.query(
-          `INSERT INTO users (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, position, status, avatar_url, last_login, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
-          [u.id, u.departmentId, u.positionId, u.employeeCode, u.name, u.email, u.phone, u.birthDate, u.hireDate, u.leaveDate ?? null, u.gender, u.username, hashed, u.role, u.position, u.status, u.avatarURL, u.lastLogin, u.createdAt, u.updatedAt]
+          `INSERT INTO users (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url, last_login, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
+          [u.id, u.departmentId, u.positionId, u.employeeCode, u.name, u.email, u.phone, u.birthDate, u.hireDate, u.leaveDate ?? null, u.gender, u.username, hashed, u.role, u.status, u.avatarURL, u.lastLogin, u.createdAt, u.updatedAt]
         );
       }
       counts.users = data.length;

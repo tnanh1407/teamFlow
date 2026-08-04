@@ -4,10 +4,15 @@ import StatsGrid from "./components/StatsGrid"
 import GrowthChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
 import ProjectOverviewChart from "./components/ProjectOverviewChart"
+import ContributionBarChart from "./components/ContributionBarChart"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
-import positionService from "@/services/position.service"
+import positionService, { type Position } from "@/services/position.service"
 import projectService, { type Project } from "@/services/project.service"
+import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
+import projectMemberService, { type ProjectMember } from "@/services/project-member.service"
+import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
+import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 
 interface DashboardGrowthPoint {
   month: string
@@ -22,6 +27,15 @@ interface DashboardChartPoint {
   name: string
   value: number
   color?: string
+}
+
+interface DashboardContributionPoint {
+  label: string
+  name: string
+  value: number
+  completed: number
+  comments: number
+  processes: number
 }
 
 interface ProjectPriorityTooltipProps {
@@ -95,6 +109,99 @@ function buildActiveDepartmentData(users: User[], departments: Department[]): Da
       value: activeUsers.filter((user) => user.departmentId === department.id).length,
     }))
     .filter((department) => department.value > 0)
+}
+
+function buildDepartmentContributionData(
+  projects: Project[],
+  departments: Department[],
+  assignments: ProjectDepartment[]
+): DashboardContributionPoint[] {
+  const projectById = new Map(projects.map((project) => [project.id, project]))
+  const counts = new Map<string, { total: Set<string>; completed: Set<string> }>()
+
+  assignments.forEach((assignment) => {
+    const project = projectById.get(assignment.projectId)
+    if (!project) return
+
+    const current = counts.get(assignment.departmentId) ?? { total: new Set<string>(), completed: new Set<string>() }
+    current.total.add(project.id)
+    if (project.status === "completed") current.completed.add(project.id)
+    counts.set(assignment.departmentId, current)
+  })
+
+  return departments
+    .map((department) => {
+      const count = counts.get(department.id)
+      return {
+        label: department.name,
+        name: department.name,
+        value: count?.total.size ?? 0,
+        completed: count?.completed.size ?? 0,
+        comments: 0,
+        processes: 0,
+      }
+    })
+    .sort((a, b) => b.value - a.value)
+}
+
+function buildEmployeeContributionData(
+  projects: Project[],
+  users: User[],
+  departments: Department[],
+  positions: Position[],
+  assignments: ProjectMember[],
+  comments: ProjectComment[],
+  logs: ProjectLog[]
+): DashboardContributionPoint[] {
+  const projectById = new Map(projects.map((project) => [project.id, project]))
+  const departmentById = new Map(departments.map((department) => [department.id, department.name]))
+  const positionById = new Map(positions.map((position) => [position.id, position.name]))
+  const activeUsers = users.filter((user) => user.status === true)
+  const activeUserIds = new Set(activeUsers.map((user) => user.id))
+  const commentCounts = new Map<string, number>()
+  const processCounts = new Map<string, number>()
+  const counts = new Map<string, { total: Set<string>; completed: Set<string> }>()
+
+  comments.forEach((comment) => {
+    if (!activeUserIds.has(comment.userId)) return
+    commentCounts.set(comment.userId, (commentCounts.get(comment.userId) ?? 0) + 1)
+  })
+
+  logs.forEach((log) => {
+    if (!activeUserIds.has(log.userId)) return
+    processCounts.set(log.userId, (processCounts.get(log.userId) ?? 0) + 1)
+  })
+
+  assignments.forEach((assignment) => {
+    if (!activeUserIds.has(assignment.userId)) return
+
+    const project = projectById.get(assignment.projectId)
+    if (!project) return
+
+    const current = counts.get(assignment.userId) ?? { total: new Set<string>(), completed: new Set<string>() }
+    current.total.add(project.id)
+    if (project.status === "completed") current.completed.add(project.id)
+    counts.set(assignment.userId, current)
+  })
+
+  return activeUsers
+    .map((user) => {
+      const count = counts.get(user.id)
+      return {
+        label: `${user.employeeCode} - ${user.name}`,
+        name: user.name,
+        value: count?.total.size ?? 0,
+        completed: count?.completed.size ?? 0,
+        comments: commentCounts.get(user.id) ?? 0,
+        processes: processCounts.get(user.id) ?? 0,
+        code: user.employeeCode,
+        department: departmentById.get(user.departmentId) ?? "",
+        position: positionById.get(user.positionId) ?? "",
+      }
+    })
+    .filter((user) => user.value > 0 || user.comments > 0 || user.processes > 0)
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 6)
 }
 
 function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
@@ -265,6 +372,11 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
+  const [positions, setPositions] = useState<Position[]>([])
+  const [projectDepartments, setProjectDepartments] = useState<ProjectDepartment[]>([])
+  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([])
+  const [projectComments, setProjectComments] = useState<ProjectComment[]>([])
+  const [projectLogs, setProjectLogs] = useState<ProjectLog[]>([])
   const [positionsCount, setPositionsCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -273,11 +385,15 @@ export default function AdminDashboard() {
 
     const fetchDashboard = async () => {
       try {
-        const [usersRes, deptRes, posRes, projRes] = await Promise.all([
+        const [usersRes, deptRes, posRes, projRes, projectDepartmentsRes, projectMembersRes, projectCommentsRes, projectLogsRes] = await Promise.all([
           userService.getAll(),
           departmentService.getAll(),
           positionService.getAll(),
           projectService.getAll({ limit: 100 }),
+          projectDepartmentService.getAll(),
+          projectMemberService.getAll(),
+          projectCommentService.getAll(),
+          projectLogService.getAll(),
         ])
 
         if (!alive) return
@@ -285,7 +401,12 @@ export default function AdminDashboard() {
         setUsers(usersRes.data.data)
         setProjects(projRes.data.data)
         setDepartments(deptRes.data.data)
+        setPositions(posRes.data.data)
         setPositionsCount(posRes.data.data.length)
+        setProjectDepartments(projectDepartmentsRes.data.data)
+        setProjectMembers(projectMembersRes.data.data)
+        setProjectComments(projectCommentsRes.data.data)
+        setProjectLogs(projectLogsRes.data.data)
       } catch {
         if (!alive) return
         console.error("Failed to fetch dashboard stats")
@@ -322,6 +443,16 @@ export default function AdminDashboard() {
   const deptData = buildActiveDepartmentData(users, departments)
   const projPriorityData = buildProjectPriorityData(projects)
   const projectOverviewData = buildProjectOverviewData(projects)
+  const departmentContributionData = buildDepartmentContributionData(projects, departments, projectDepartments)
+  const employeeContributionData = buildEmployeeContributionData(
+    projects,
+    users,
+    departments,
+    positions,
+    projectMembers,
+    projectComments,
+    projectLogs
+  )
 
   if (loading) {
     return (
@@ -345,6 +476,22 @@ export default function AdminDashboard() {
         completedTotal={completedProjectsCount}
         incompleteTotal={incompleteProjectsCount}
       />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ContributionBarChart
+          title="Đóng góp dự án theo phòng ban"
+          description="Xếp hạng phòng ban theo số dự án được phân công."
+          data={departmentContributionData}
+          accent="var(--chart-2)"
+          emptyText="Chưa có dữ liệu phân công cho phòng ban"
+        />
+        <ContributionBarChart
+          title="Đóng góp dự án theo nhân sự"
+          description="Xếp hạng nhân sự đang hoạt động theo số dự án tham gia."
+          data={employeeContributionData}
+          accent="var(--chart-1)"
+          emptyText="Chưa có dữ liệu phân công cho nhân sự"
+        />
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DonutChartCard
           title="Phân bố nhân sự đang hoạt động theo phòng ban"
