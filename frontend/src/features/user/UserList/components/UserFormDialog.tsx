@@ -18,41 +18,23 @@ type OpenUserFormDialogResult =
   | { submitted: false; changed: false }
   | { submitted: true; changed: true }
 
-interface FormData {
+interface UserFormValues {
   employeeCode: string
   name: string
   email: string
-  phone: string
-  birthDate: string
-  hireDate: string
-  leaveDate: string
+  phone?: string
+  birthDate?: string
+  hireDate?: string
+  leaveDate?: string
   gender: "male" | "female" | "other"
   departmentId: string
   positionId: string
   username: string
-  password: string
+  password?: string
   status: boolean
 }
 
-const userSchema = z.object({
-  employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
-  name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
-  email: z.string().trim().email("Email không hợp lệ"),
-  phone: z.string().trim().optional(),
-  birthDate: z.string().optional(),
-  hireDate: z.string().optional(),
-  leaveDate: z.string().optional(),
-  gender: z.enum(["male", "female", "other"]),
-  departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
-  positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
-  username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
-  password: z.string().optional(),
-  status: z.boolean(),
-})
-
-type UserFormValues = z.infer<typeof userSchema>
-
-const emptyForm: FormData = {
+const emptyForm: UserFormValues = {
   employeeCode: "",
   name: "",
   email: "",
@@ -71,6 +53,51 @@ const emptyForm: FormData = {
 const inputClass =
   "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
+
+function buildUserSchema(departments: Department[]) {
+  const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
+
+  return z
+    .object({
+      employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
+      name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
+      email: z.string().trim().email("Email không hợp lệ"),
+      phone: z.string().trim().optional(),
+      birthDate: z.string().optional(),
+      hireDate: z.string().optional(),
+      leaveDate: z.string().optional(),
+      gender: z.enum(["male", "female", "other"]),
+      departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
+      positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
+      username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
+      password: z.string().optional(),
+      status: z.boolean(),
+    })
+    .superRefine((data, ctx) => {
+      const departmentCode = departmentCodeMap.get(data.departmentId)
+      const employeeCode = data.employeeCode.trim().toUpperCase()
+
+      if (!departmentCode) return
+
+      if (!employeeCode.startsWith(departmentCode)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["employeeCode"],
+          message: `Mã người dùng phải bắt đầu bằng mã phòng ban ${departmentCode}`,
+        })
+        return
+      }
+
+      const suffix = employeeCode.slice(departmentCode.length)
+      if (!/^[A-Z0-9]{6}$/.test(suffix)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["employeeCode"],
+          message: "Phần sau mã phòng ban phải gồm đúng 6 ký tự chữ hoặc số",
+        })
+      }
+    })
+}
 
 function toFormValues(user?: User): UserFormValues {
   if (!user) return emptyForm
@@ -128,11 +155,7 @@ export default async function openUserFormDialog({
   const dataRef: { current: UserFormValues | null } = { current: null }
   const validRef: { current: boolean } = { current: false }
 
-  const formSchema = isEdit
-    ? userSchema
-    : userSchema.extend({
-        password: z.string().trim().min(1, "Vui lòng nhập mật khẩu"),
-      })
+  const formSchema = buildUserSchema(departments)
 
   function FormComponent() {
     const {
@@ -160,7 +183,13 @@ export default async function openUserFormDialog({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <label className={labelClass}>Mã người dùng</label>
-            <input {...register("employeeCode")} className={inputClass} />
+            <input {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })} className={inputClass} placeholder="VD: hrABC123" />
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Mã phòng ban + 6 ký tự. Ví dụ:{" "}
+              <span className="font-medium text-zinc-700">
+                {(departments.find((d) => d.id === watch("departmentId"))?.code || "DEPT").trim().toUpperCase()}ABC123
+              </span>
+            </p>
             {errors.employeeCode?.message && <p className="mt-1 text-xs text-red-500">{errors.employeeCode.message}</p>}
           </div>
           <div>
@@ -267,6 +296,10 @@ export default async function openUserFormDialog({
       }
       if (!validRef.current) {
         MySwal.showValidationMessage("Vui lòng kiểm tra lại các trường bắt buộc")
+        return false
+      }
+      if (!isEdit && !d.password?.trim()) {
+        MySwal.showValidationMessage("Vui lòng nhập mật khẩu")
         return false
       }
       return d

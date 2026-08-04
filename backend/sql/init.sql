@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS positions (
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  department_id UUID NOT NULL,
-  position_id UUID NOT NULL,
+  department_id UUID,
+  position_id UUID,
   employee_code VARCHAR UNIQUE NOT NULL,
   name TEXT NOT NULL,
   email VARCHAR UNIQUE NOT NULL,
@@ -61,6 +61,14 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+ALTER TABLE users
+  ADD CONSTRAINT ck_users_admin_assignment
+  CHECK (
+    (role = 'admin' AND department_id IS NULL AND position_id IS NULL)
+    OR
+    (role <> 'admin' AND department_id IS NOT NULL AND position_id IS NOT NULL)
+  );
 
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

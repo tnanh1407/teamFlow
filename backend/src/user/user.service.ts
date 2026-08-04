@@ -8,12 +8,13 @@ import { EGender } from "@/enums/gender.enum.js";
 import env from "../config/env.js";
 import sessionService, { generateJti, TOKEN_EXPIRES_IN } from "../session/session.service.js";
 import { generateResetCode } from "../utils/mail/mailer.js";
+import departmentService from "../department/department.service.js";
 
 // dữ liệu database
 interface UserRow {
   id: string;
-  departmentId: string;
-  positionId: string;
+  departmentId: string | null;
+  positionId: string | null;
   employeeCode: string;
   name: string;
   email: string;
@@ -34,8 +35,8 @@ interface UserRow {
 
 // dữ liệu đầu vào
 export interface UserData {
-  departmentId: string;
-  positionId: string;
+  departmentId: string | null;
+  positionId: string | null;
   employeeCode: string;
   name: string;
   email: string;
@@ -90,6 +91,9 @@ const normalizeOptionalText = (value: string | undefined) => {
   // biến input rỗng thành null
   return normalized ? normalized : null;
 };
+const normalizeEmployeeCode = (value: string) => normalizeRequiredText(value).toUpperCase();
+const EMPLOYEE_CODE_SUFFIX_REGEX = /^[A-Z0-9]{6}$/;
+
 const todayDate = () => new Date().toLocaleDateString("en-CA");
 
 async function findPositionById(positionId: string) {
@@ -104,6 +108,51 @@ async function resolvePositionById(positionId: string): Promise<EAccountPosition
   const position = await findPositionById(positionId);
   if (!position) return null;
   return normalizePositionFromName(position.name) ?? null;
+}
+
+async function resolveEmployeeCodePrefix(departmentId: string) {
+  const department = await departmentService.findById(departmentId);
+  if (!department) throw new AppError("Department not found", 404);
+  return normalizeRequiredText(department.code).toUpperCase();
+}
+
+async function normalizeAndValidateEmployeeCode(role: EAccountRole, departmentId: string | null, employeeCode: string) {
+  const normalizedCode = normalizeEmployeeCode(employeeCode);
+  if (role === EAccountRole.ADMIN) {
+    return normalizedCode;
+  }
+
+  if (!departmentId) {
+    throw new AppError("Department is required for non-admin users", 400);
+  }
+
+  const prefix = await resolveEmployeeCodePrefix(departmentId);
+  const suffix = normalizedCode.slice(prefix.length);
+
+  if (!normalizedCode.startsWith(prefix) || !EMPLOYEE_CODE_SUFFIX_REGEX.test(suffix)) {
+    throw new AppError(`Employee code must start with ${prefix} and end with 6 alphanumeric characters`, 400);
+  }
+
+  return normalizedCode;
+}
+
+async function resolveUserAssignments(role: EAccountRole, departmentId: string | null | undefined, positionId: string | null | undefined) {
+  if (role === EAccountRole.ADMIN) {
+    return { departmentId: null, positionId: null };
+  }
+
+  if (!departmentId || !positionId) {
+    throw new AppError("Department and position are required for non-admin users", 400);
+  }
+
+  const department = await departmentService.findById(departmentId);
+  if (!department) throw new AppError("Department not found", 404);
+
+  const positionRecord = await findPositionById(positionId);
+  if (!positionRecord) throw new AppError("Position not found", 404);
+  if (!positionRecord.isActive) throw new AppError("Position is inactive", 400);
+
+  return { departmentId, positionId };
 }
 
 // Chuẩn hóa nhân sự
@@ -146,7 +195,7 @@ class UserService {
     const jti = generateJti();
     await sessionService.createSession(user.id, jti, userAgent, ip);
     const token = jwt.sign(
-      { id: user.id, role: user.role, position: await resolvePositionById(user.positionId), jti },
+      { id: user.id, role: user.role, position: user.positionId ? await resolvePositionById(user.positionId) : null, jti },
       env.JWT_SECRET,
       { expiresIn: TOKEN_EXPIRES_IN }
     );
@@ -250,14 +299,13 @@ class UserService {
 
   async create(data: CreateUserDataInput) {
     const employment = resolveEmploymentState(data.status, data.leaveDate);
-    const positionRecord = await findPositionById(data.positionId);
-    if (!positionRecord) throw new AppError("Position not found", 404);
-    if (!positionRecord.isActive) throw new AppError("Position is inactive", 400);
+    const assignments = await resolveUserAssignments(data.role, data.departmentId, data.positionId);
+    const employeeCode = await normalizeAndValidateEmployeeCode(data.role, assignments.departmentId, data.employeeCode);
 
     const payload = {
-      departmentId: data.departmentId,
-      positionId: data.positionId,
-      employeeCode: normalizeRequiredText(data.employeeCode).toUpperCase(),
+      departmentId: assignments.departmentId,
+      positionId: assignments.positionId,
+      employeeCode,
       name: normalizeRequiredText(data.name),
       email: normalizeRequiredText(data.email).toLowerCase(),
       phone: normalizeOptionalText(data.phone),
@@ -336,10 +384,14 @@ class UserService {
 
     const payload: UpdateUserDataInput = {};
     const employment = resolveEmploymentState(data.status, data.leaveDate);
+    const nextRole = data.role ?? previous.role;
+    const assignments = await resolveUserAssignments(nextRole, data.departmentId ?? previous.departmentId, data.positionId ?? previous.positionId);
+    const nextEmployeeCode = data.employeeCode ?? previous.employeeCode;
+    const normalizedEmployeeCode = await normalizeAndValidateEmployeeCode(nextRole, assignments.departmentId, nextEmployeeCode);
 
-    if (data.departmentId !== undefined) payload.departmentId = data.departmentId;
-    if (data.positionId !== undefined) payload.positionId = data.positionId;
-    if (data.employeeCode !== undefined) payload.employeeCode = normalizeRequiredText(data.employeeCode).toUpperCase();
+    if (data.departmentId !== undefined || nextRole === EAccountRole.ADMIN) payload.departmentId = assignments.departmentId;
+    if (data.positionId !== undefined || nextRole === EAccountRole.ADMIN) payload.positionId = assignments.positionId;
+    if (data.employeeCode !== undefined) payload.employeeCode = normalizedEmployeeCode;
     if (data.name !== undefined) payload.name = normalizeRequiredText(data.name);
     if (data.email !== undefined) payload.email = normalizeRequiredText(data.email).toLowerCase();
     if (data.phone !== undefined) payload.phone = normalizeOptionalText(data.phone) ?? undefined;
@@ -350,19 +402,6 @@ class UserService {
     if (data.role !== undefined) payload.role = data.role;
     if (employment.status !== undefined) payload.status = employment.status;
     if (data.avatarURL !== undefined) payload.avatarURL = normalizeOptionalText(data.avatarURL) ?? undefined;
-
-    const positionRecord = payload.positionId !== undefined
-      ? await findPositionById(payload.positionId)
-      : previous.positionId
-        ? await findPositionById(previous.positionId)
-        : null;
-
-    if (payload.positionId !== undefined && !positionRecord) {
-      throw new AppError("Position not found", 404);
-    }
-    if (positionRecord && !positionRecord.isActive) {
-      throw new AppError("Position is inactive", 400);
-    }
 
     if (payload.username) {
       const existing = await this.findByUsername(payload.username);

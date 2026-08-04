@@ -33,6 +33,51 @@ const inputClass =
   "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
+function buildUserSchema(departments: Department[]) {
+  const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
+
+  return z
+    .object({
+      employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
+      name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
+      email: z.string().trim().email("Email không hợp lệ"),
+      phone: z.string().trim().optional(),
+      birthDate: z.string().optional(),
+      hireDate: z.string().optional(),
+      leaveDate: z.string().optional(),
+      gender: z.enum(["male", "female", "other"]),
+      departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
+      positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
+      username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
+      password: z.string().optional(),
+      status: z.boolean(),
+    })
+    .superRefine((data, ctx) => {
+      const departmentCode = departmentCodeMap.get(data.departmentId)
+      const employeeCode = data.employeeCode.trim().toUpperCase()
+
+      if (!departmentCode) return
+
+      if (!employeeCode.startsWith(departmentCode)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["employeeCode"],
+          message: `Mã người dùng phải bắt đầu bằng mã phòng ban ${departmentCode}`,
+        })
+        return
+      }
+
+      const suffix = employeeCode.slice(departmentCode.length)
+      if (!/^[A-Z0-9]{6}$/.test(suffix)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["employeeCode"],
+          message: "Phần sau mã phòng ban phải gồm đúng 6 ký tự chữ hoặc số",
+        })
+      }
+    })
+}
+
 function toFormValues(user?: User): UserFormValues {
   if (!user) {
     return {
@@ -122,7 +167,7 @@ export default function UserDetail() {
         watch,
         formState: { errors, isValid },
       } = useForm<UserFormValues>({
-        resolver: zodResolver(userSchema),
+        resolver: zodResolver(buildUserSchema(departments)),
         mode: "onChange",
         defaultValues: toFormValues(editingUser),
       })
@@ -142,7 +187,13 @@ export default function UserDetail() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label className={labelClass}>Mã người dùng</label>
-              <input {...register("employeeCode")} className={inputClass} />
+              <input {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })} className={inputClass} placeholder="VD: hrABC123" />
+              <p className="mt-1 text-[11px] text-zinc-500">
+                Mã phòng ban + 6 ký tự. Ví dụ:{" "}
+                <span className="font-medium text-zinc-700">
+                  {(departments.find((d) => d.id === watch("departmentId"))?.code || "DEPT").trim().toUpperCase()}ABC123
+                </span>
+              </p>
               {errors.employeeCode?.message && <p className="mt-1 text-xs text-red-500">{errors.employeeCode.message}</p>}
             </div>
             <div>
