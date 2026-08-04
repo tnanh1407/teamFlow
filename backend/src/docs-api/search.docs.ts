@@ -5,9 +5,9 @@ export const searchSchemas = {
       users: [
         {
           id: "30000000-0000-4000-a000-000000000001",
-          departmentId: "10000000-0000-4000-a000-000000000001",
-          positionId: "20000000-0000-4000-a000-000000000001",
-          employeeCode: "EMP001",
+          departmentId: null,
+          positionId: null,
+          employeeCode: null,
           name: "Nguyễn Văn Anh",
           email: "nguyenvananh@qlpbda.com",
           phone: "0901234001",
@@ -104,7 +104,7 @@ export const searchPaths = {
       description:
         "Tìm kiếm gộp trong một lần gọi: nhân viên, dự án, task, phòng ban, chức vụ — mỗi nhóm tối đa 5 kết quả. " +
         "Nhân viên thường chỉ nhận kết quả thuộc phạm vi của mình (dự án/task được phân công, người tạo hoặc cùng phòng ban); phòng ban/chức vụ chỉ trả về cho Admin. " +
-        "Tìm không phân biệt hoa thường, hỗ trợ ký tự `%`/`_` như wildcard.",
+        "Nhân sự hệ thống có thể là admin với departmentId, positionId và employeeCode = null; tìm không phân biệt hoa thường, hỗ trợ ký tự `%`/`_` như wildcard.",
       security: [{ cookieAuth: [] }],
       parameters: [
         { name: "q", in: "query", required: true, schema: { type: "string", minLength: 1, example: "CRM" }, description: "Từ khoá tìm kiếm" },
@@ -120,9 +120,9 @@ export const searchPaths = {
                 users: [
                   {
                     id: "30000000-0000-4000-a000-000000000001",
-                    departmentId: "10000000-0000-4000-a000-000000000001",
-                    positionId: "20000000-0000-4000-a000-000000000005",
-                    employeeCode: "EMP001",
+                    departmentId: null,
+                    positionId: null,
+                    employeeCode: null,
                     name: "Nguyễn Văn Anh",
                     email: "nguyenvananh@qlpbda.com",
                     phone: "0901234001",
