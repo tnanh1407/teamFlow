@@ -35,7 +35,7 @@ export default function DepartmentDetail() {
     fetch()
   }, [id])
 
-  const getPosName = (posId: string) => positions.find((p) => p.id === posId)?.name || posId
+  const getPosName = (posId: string | null) => (posId ? positions.find((p) => p.id === posId)?.name || posId : "—")
   const activeMembers = members.filter((m) => m.status).length
 
   if (loading) {

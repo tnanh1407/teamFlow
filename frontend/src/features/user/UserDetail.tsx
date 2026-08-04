@@ -106,8 +106,8 @@ function toFormValues(user?: User): UserFormValues {
     hireDate: user.hireDate ? user.hireDate.slice(0, 10) : "",
     leaveDate: user.leaveDate ? user.leaveDate.slice(0, 10) : "",
     gender: user.gender || "other",
-    departmentId: user.departmentId,
-    positionId: user.positionId,
+    departmentId: user.departmentId || "",
+    positionId: user.positionId || "",
     username: user.username,
     password: "",
     status: user.status,
@@ -404,8 +404,8 @@ export default function UserDetail() {
           <Field label="Số điện thoại" value={user.phone || "—"} />
           <Field label="Ngày vào làm" value={user.hireDate ? user.hireDate.slice(0, 10) : "—"} />
           <Field label="Ngày nghỉ việc" value={user.leaveDate ? user.leaveDate.slice(0, 10) : "—"} />
-          <Field label="Phòng ban" value={deptNameMap.get(user.departmentId) || "—"} />
-          <Field label="Chức vụ" value={posNameMap.get(user.positionId) || "—"} />
+          <Field label="Phòng ban" value={deptNameMap.get(user.departmentId || "") || "—"} />
+          <Field label="Chức vụ" value={posNameMap.get(user.positionId || "") || "—"} />
           <Field label="Loại tài khoản" value={user.role === "admin" ? "Admin" : "Người dùng"} />
           <Field label="Trạng thái" value={user.status ? "Hoạt động" : "Vô hiệu"} />
           <Field label="Ngày tạo" value={new Date(user.createdAt).toLocaleString("vi-VN")} />

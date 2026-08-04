@@ -70,6 +70,10 @@ ALTER TABLE users
     (role <> 'admin' AND department_id IS NOT NULL AND position_id IS NOT NULL)
   );
 
+ALTER TABLE users
+  ADD CONSTRAINT ck_users_employee_code_not_blank
+  CHECK (length(trim(employee_code)) > 0);
+
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR NOT NULL,

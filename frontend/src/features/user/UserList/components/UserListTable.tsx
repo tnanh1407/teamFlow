@@ -59,8 +59,8 @@ export default function UserListTable({
               </tr>
             ) : (
               users.map((item) => {
-                const deptName = deptNameMap.get(item.departmentId) || "—"
-                const posName = posNameMap.get(item.positionId) || "—"
+                const deptName = deptNameMap.get(item.departmentId || "") || "—"
+                const posName = posNameMap.get(item.positionId || "") || "—"
 
                 return (
                   <tr key={item.id} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">

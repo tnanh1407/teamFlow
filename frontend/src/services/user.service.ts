@@ -6,8 +6,8 @@ export type UserGender = "male" | "female" | "other";
 
 export interface User {
   id: string;
-  departmentId: string;
-  positionId: string;
+  departmentId: string | null;
+  positionId: string | null;
   employeeCode: string;
   name: string;
   email: string;
@@ -31,7 +31,7 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  user: User;
+  user: BackendUser;
   token: string;
 }
 

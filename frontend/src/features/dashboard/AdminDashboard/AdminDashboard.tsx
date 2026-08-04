@@ -195,8 +195,8 @@ function buildEmployeeContributionData(
         comments: commentCounts.get(user.id) ?? 0,
         processes: processCounts.get(user.id) ?? 0,
         code: user.employeeCode,
-        department: departmentById.get(user.departmentId) ?? "",
-        position: positionById.get(user.positionId) ?? "",
+        department: departmentById.get(user.departmentId ?? "") ?? "",
+        position: positionById.get(user.positionId ?? "") ?? "",
       }
     })
     .filter((user) => user.value > 0 || user.comments > 0 || user.processes > 0)

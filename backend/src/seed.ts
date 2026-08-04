@@ -49,6 +49,11 @@ const seed = async () => {
         (role <> 'admin' AND department_id IS NOT NULL AND position_id IS NOT NULL)
       )
     `);
+    await client.query(`
+      ALTER TABLE users
+      ADD CONSTRAINT ck_users_employee_code_not_blank
+      CHECK (length(trim(employee_code)) > 0)
+    `);
 
     await client.query("DELETE FROM project_logs");
     await client.query("DELETE FROM project_tasks");
