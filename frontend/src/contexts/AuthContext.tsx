@@ -15,8 +15,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    localStorage.removeItem("user");
-
     let cancelled = false;
 
     const bootstrapAuth = async () => {

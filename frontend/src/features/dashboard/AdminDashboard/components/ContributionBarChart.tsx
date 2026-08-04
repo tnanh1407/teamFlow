@@ -37,25 +37,9 @@ function ContributionTooltip({ active, payload }: any) {
 
   return (
     <div className="min-w-56 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
-            {point.code ? `${point.code} · ` : ""}
-            {point.name}
-          </p>
-          <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">{point.label}</p>
-        </div>
-      </div>
-      {(point.department || point.position) && (
-        <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-          {point.department ? `Phòng ban: ${point.department}` : ""}
-          {point.department && point.position ? " · " : ""}
-          {point.position ? `Chức vụ: ${point.position}` : ""}
-        </p>
-      )}
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Tổng dự án</span>
+          <span className="text-zinc-600 dark:text-zinc-300">Tổng dự án tham gia</span>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.value}</span>
         </div>
         <div className="flex items-center justify-between">
@@ -67,11 +51,11 @@ function ContributionTooltip({ active, payload }: any) {
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{completionRate}%</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Comment</span>
+          <span className="text-zinc-600 dark:text-zinc-300">Bình luận</span>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.comments}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Process</span>
+          <span className="text-zinc-600 dark:text-zinc-300">Quy trình</span>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.processes}</span>
         </div>
       </div>

@@ -16,7 +16,8 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import dashboardImg from "@/assets/dashboard.png"
+import { showConfirm } from "@/lib/swal"
+import dashboardImg from "@/assets/speedometer.png"
 
 interface ISidebarItem {
   label: string;
@@ -168,6 +169,17 @@ export default function Sidebar({ collapsed }: SidebarProps) {
     .filter((item): item is ISidebarItem => item !== null)
 
   const handleLogout = async () => {
+    const confirmed = await showConfirm({
+      title: "Xác nhận đăng xuất",
+      html: "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?",
+      confirmText: "Đăng xuất",
+      cancelText: "Huỷ",
+      icon: "warning",
+      confirmButtonColor: "#dc2626",
+    })
+
+    if (!confirmed) return
+
     await logout()
     navigate("/login")
   }
@@ -178,7 +190,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         }`}
     >
       <div className={`h-16 flex items-center ${collapsed ? "justify-center" : "gap-3"} h-14 px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0`}>
-      <img src={dashboardImg} alt="dashboard_img" className={`object-contain shrink-0 transition-all duration-300 ease-in-out ${collapsed ? "h-7 w-7" : "h-9 w-9"}`}></img>
+      <img src={dashboardImg} alt="dashboard_img" className={`object-contain shrink-0 transition-all duration-300 ease-in-out h-7 w-7`}></img>
         <AnimatePresence>
           {!collapsed && (
             <motion.span
@@ -224,10 +236,10 @@ export default function Sidebar({ collapsed }: SidebarProps) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                    {user.username}
+                    {user.role}
                   </p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    HELLO
+                    {user.name}
                   </p>
                 </div>
               </div>
