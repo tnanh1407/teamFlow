@@ -2,17 +2,42 @@ import { motion } from "motion/react"
 import { TrendingUp } from "lucide-react"
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
 } from "recharts"
 
 interface GrowthChartProps {
-  data: { month: string; value: number }[]
+  data: { month: string; active: number; departed: number; hires: number; leaves: number }[]
   currentTotal: number
+}
+
+function GrowthTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+
+  const point = payload[0].payload as {
+    month: string
+    active: number
+    departed: number
+    hires: number
+    leaves: number
+  }
+
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{label}</p>
+      <div className="mt-1 space-y-1 text-xs text-zinc-700 dark:text-zinc-200">
+        <p>Đang làm: {point.active}</p>
+        <p>Đã nghỉ: {point.departed}</p>
+        <p>Tuyển mới: {point.hires}</p>
+        <p>Nghỉ việc: {point.leaves}</p>
+      </div>
+    </div>
+  )
 }
 
 export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
@@ -28,19 +53,13 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-2.5">
           <TrendingUp size={16} className="text-blue-500" />
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Tăng trưởng nhân viên</h2>
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Nhân sự đang làm</h2>
         </div>
-        <span className="text-[11px] font-medium text-zinc-400">{currentTotal} hiện tại</span>
+        <span className="text-[11px] font-medium text-zinc-400">{currentTotal} đang làm hiện tại</span>
       </div>
       <div className="p-5">
         <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={data} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-            <defs>
-              <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+          <LineChart data={data} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
             <XAxis
               dataKey="month"
@@ -53,25 +72,27 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
               tickLine={false}
               axisLine={false}
             />
-            <Tooltip
-              contentStyle={{
-                borderRadius: "10px",
-                border: "1px solid #e4e4e7",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                fontSize: "13px",
-                padding: "8px 12px",
-              }}
-            />
-            <Area
+            <Tooltip content={<GrowthTooltip />} />
+            <Legend />
+            <Line
               type="monotone"
-              dataKey="value"
-              stroke="#3b82f6"
+              dataKey="active"
+              name="Đang làm"
+              stroke="#10b981"
               strokeWidth={2.5}
-              fill="url(#growthGrad)"
-              dot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+              dot={{ r: 4, fill: "#10b981", stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "#10b981", stroke: "#fff", strokeWidth: 2 }}
             />
-          </AreaChart>
+            <Line
+              type="monotone"
+              dataKey="departed"
+              name="Đã nghỉ"
+              stroke="#ef4444"
+              strokeWidth={2.5}
+              dot={{ r: 4, fill: "#ef4444", stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "#ef4444", stroke: "#fff", strokeWidth: 2 }}
+            />
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </motion.div>

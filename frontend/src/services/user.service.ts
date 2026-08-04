@@ -14,6 +14,7 @@ export interface User {
   phone: string;
   birthDate: string;
   hireDate: string;
+  leaveDate: string;
   gender: UserGender;
   username: string;
   role: AccountRole;
@@ -54,6 +55,7 @@ type BackendUser = {
   phone?: string | null;
   birthDate?: string | null;
   hireDate?: string | null;
+  leaveDate?: string | null;
   gender?: UserGender | string | null;
   username: string;
   role?: AccountRole | string | null;
@@ -74,6 +76,7 @@ const normalizeUser = (user: BackendUser): User => ({
   phone: user.phone ?? "",
   birthDate: user.birthDate ?? "",
   hireDate: user.hireDate ?? "",
+  leaveDate: user.leaveDate ?? "",
   gender: (user.gender as UserGender) ?? "other",
   username: user.username ?? "",
   role: (user.role as AccountRole) ?? "user",

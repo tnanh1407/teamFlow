@@ -1,21 +1,20 @@
 import { motion } from "motion/react"
 import { TrendingUp } from "lucide-react"
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-} from "recharts"
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts"
+
+const defaultColors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#ec4899", "#06b6d4", "#84cc16"]
 
 interface DonutChartCardProps {
   title: string
-  data: { name: string; value: number; color: string }[]
+  data: { name: string; value: number; color?: string }[]
   total: number
   index: number
+  palette?: string[]
 }
 
-export default function DonutChartCard({ title, data, total, index }: DonutChartCardProps) {
+export default function DonutChartCard({ title, data, total, index, palette }: DonutChartCardProps) {
+  const colors = palette?.length ? palette : defaultColors
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -34,17 +33,9 @@ export default function DonutChartCard({ title, data, total, index }: DonutChart
         <div className="flex items-start gap-4">
           <ResponsiveContainer width="55%" height={220}>
             <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={52}
-                outerRadius={82}
-                paddingAngle={3}
-                dataKey="value"
-              >
-                {data.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} />
+              <Pie data={data} cx="50%" cy="50%" innerRadius={52} outerRadius={82} paddingAngle={3} dataKey="value">
+                {data.map((entry, entryIndex) => (
+                  <Cell key={entry.name} fill={entry.color ?? colors[entryIndex % colors.length]} />
                 ))}
               </Pie>
               <Tooltip
@@ -59,24 +50,18 @@ export default function DonutChartCard({ title, data, total, index }: DonutChart
             </PieChart>
           </ResponsiveContainer>
           <div className="flex-1 space-y-2.5 pt-1">
-            {data.map((entry) => {
+            {data.map((entry, entryIndex) => {
+              const color = entry.color ?? colors[entryIndex % colors.length]
               const pct = ((entry.value / total) * 100).toFixed(0)
               return (
                 <div key={entry.name}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: entry.color }}
-                      />
-                      <span className="text-xs text-zinc-600 dark:text-zinc-400">
-                        {entry.name}
-                      </span>
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                      <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                        {entry.value}
-                      </span>
+                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
                       <span className="text-[10px] text-zinc-400 font-medium">{pct}%</span>
                     </div>
                   </div>
@@ -90,7 +75,7 @@ export default function DonutChartCard({ title, data, total, index }: DonutChart
                         ease: "easeOut",
                       }}
                       className="h-full rounded-full"
-                      style={{ backgroundColor: entry.color }}
+                      style={{ backgroundColor: color }}
                     />
                   </div>
                 </div>

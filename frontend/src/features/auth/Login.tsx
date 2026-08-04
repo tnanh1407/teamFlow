@@ -104,11 +104,11 @@ export default function Login() {
             <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-5" noValidate>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Tài khoản
+                  Tên đăng nhập
                 </label>
                 <input
                   type="text"
-                  placeholder="Nhập tên tài khoản"
+                  placeholder="Nhập tên đăng nhập"
                   aria-invalid={Boolean(errors.username)}
                   className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
                     errors.username

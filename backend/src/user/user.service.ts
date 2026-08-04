@@ -20,6 +20,7 @@ interface UserRow {
   phone: string;
   birthDate: string;
   hireDate: string;
+  leaveDate: string;
   gender: EGender;
   username: string;
   password: string;
@@ -42,6 +43,7 @@ export interface UserData {
   phone?: string;
   birthDate?: string;
   hireDate?: string;
+  leaveDate?: string;
   gender?: EGender;
   username: string;
   password: string;
@@ -203,6 +205,7 @@ class UserService {
       phone: normalizeOptionalText(data.phone),
       birthDate: normalizeOptionalText(data.birthDate),
       hireDate: normalizeOptionalText(data.hireDate),
+      leaveDate: normalizeOptionalText(data.leaveDate),
       gender: data.gender ?? "other",
       username: normalizeRequiredText(data.username).toLowerCase(),
       password: data.password,
@@ -233,11 +236,11 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(payload.password, 10);
     const { rows } = await pool.query<UserRow>(
-      `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, gender, username, password, role, position, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING ${userColumns}`,
+      `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, position, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING ${userColumns}`,
       [
         payload.departmentId, payload.positionId, payload.employeeCode, payload.name,
         payload.email, payload.phone, payload.birthDate,
-        payload.hireDate, payload.gender,
+        payload.hireDate, payload.leaveDate, payload.gender,
         payload.username, hashedPassword, payload.role, payload.position,
         payload.status, payload.avatarURL,
       ]
@@ -284,6 +287,7 @@ class UserService {
     if (data.phone !== undefined) payload.phone = normalizeOptionalText(data.phone) ?? undefined;
     if (data.birthDate !== undefined) payload.birthDate = normalizeOptionalText(data.birthDate) ?? undefined;
     if (data.hireDate !== undefined) payload.hireDate = normalizeOptionalText(data.hireDate) ?? undefined;
+    if (data.leaveDate !== undefined) payload.leaveDate = normalizeOptionalText(data.leaveDate) ?? undefined;
     if (data.gender !== undefined) payload.gender = data.gender;
     if (data.username !== undefined) payload.username = normalizeRequiredText(data.username).toLowerCase();
     if (data.role !== undefined) payload.role = data.role;
@@ -320,6 +324,7 @@ class UserService {
     if (data.phone !== undefined) { setClauses.push(`phone = $${idx++}`); values.push(normalizeOptionalText(data.phone)); }
     if (data.birthDate !== undefined) { setClauses.push(`birth_date = $${idx++}`); values.push(normalizeOptionalText(data.birthDate)); }
     if (data.hireDate !== undefined) { setClauses.push(`hire_date = $${idx++}`); values.push(normalizeOptionalText(data.hireDate)); }
+    if (data.leaveDate !== undefined) { setClauses.push(`leave_date = $${idx++}`); values.push(normalizeOptionalText(data.leaveDate)); }
     if (payload.gender !== undefined) { setClauses.push(`gender = $${idx++}`); values.push(payload.gender); }
     if (payload.username !== undefined) { setClauses.push(`username = $${idx++}`); values.push(payload.username); }
     if (payload.role !== undefined) { setClauses.push(`role = $${idx++}`); values.push(payload.role); }

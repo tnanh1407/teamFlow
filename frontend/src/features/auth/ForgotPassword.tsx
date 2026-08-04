@@ -11,7 +11,7 @@ import userService from "@/services/user.service"
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
-  employeeCode: z.string().trim().min(1, "Vui lòng nhập mã nhân viên"),
+  employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
 })
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
@@ -102,7 +102,7 @@ export default function ForgotPassword() {
               Quên mật khẩu
             </h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Nhập email và mã nhân viên để nhận link đặt lại mật khẩu
+              Nhập email và mã người dùng để nhận link đặt lại mật khẩu
             </p>
           </div>
 
@@ -131,11 +131,11 @@ export default function ForgotPassword() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Mã nhân viên
+                  Mã người dùng
                 </label>
                 <input
                   type="text"
-                  placeholder="Nhập mã nhân viên"
+                  placeholder="Nhập mã người dùng"
                   aria-invalid={Boolean(errors.employeeCode)}
                   className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
                     errors.employeeCode

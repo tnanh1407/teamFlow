@@ -18,6 +18,7 @@ const userSchema = z.object({
   phone: z.string().trim().optional(),
   birthDate: z.string().optional(),
   hireDate: z.string().optional(),
+  leaveDate: z.string().optional(),
   gender: z.enum(["male", "female", "other"]),
   departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
   positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
@@ -47,6 +48,7 @@ function toFormValues(user?: User): UserFormValues {
       phone: "",
       birthDate: "",
       hireDate: "",
+      leaveDate: "",
       gender: "other",
       departmentId: "",
       positionId: "",
@@ -64,6 +66,7 @@ function toFormValues(user?: User): UserFormValues {
     phone: user.phone || "",
     birthDate: user.birthDate ? user.birthDate.slice(0, 10) : "",
     hireDate: user.hireDate ? user.hireDate.slice(0, 10) : "",
+    leaveDate: user.leaveDate ? user.leaveDate.slice(0, 10) : "",
     gender: user.gender || "other",
     departmentId: user.departmentId,
     positionId: user.positionId,
@@ -144,7 +147,7 @@ export default function UserDetail() {
 
       return (
         <div className="space-y-3 text-left">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label className={labelClass}>Mã người dùng</label>
               <input {...register("employeeCode")} className={inputClass} />
@@ -221,6 +224,10 @@ export default function UserDetail() {
               <label className={labelClass}>Ngày vào làm</label>
               <input type="date" {...register("hireDate")} className={inputClass} />
             </div>
+            <div>
+              <label className={labelClass}>Ngày nghỉ việc</label>
+              <input type="date" {...register("leaveDate")} className={inputClass} />
+            </div>
           </div>
           <div className="flex items-center gap-2 pt-1">
             <input type="checkbox" {...register("status")} />
@@ -262,6 +269,7 @@ export default function UserDetail() {
         phone: result.value.phone,
         birthDate: result.value.birthDate || undefined,
         hireDate: result.value.hireDate || undefined,
+        leaveDate: result.value.leaveDate || undefined,
         gender: result.value.gender,
         departmentId: result.value.departmentId,
         positionId: result.value.positionId,
@@ -358,6 +366,8 @@ export default function UserDetail() {
           <Field label="Họ và tên" value={user.name || "—"} />
           <Field label="Email" value={user.email || "—"} />
           <Field label="Số điện thoại" value={user.phone || "—"} />
+          <Field label="Ngày vào làm" value={user.hireDate ? user.hireDate.slice(0, 10) : "—"} />
+          <Field label="Ngày nghỉ việc" value={user.leaveDate ? user.leaveDate.slice(0, 10) : "—"} />
           <Field label="Phòng ban" value={deptNameMap.get(user.departmentId) || "—"} />
           <Field label="Chức vụ" value={posNameMap.get(user.positionId) || "—"} />
           <Field label="Vai trò" value={user.role === "admin" ? "Admin" : user.position === "manager" ? "Manager" : "Member"} />

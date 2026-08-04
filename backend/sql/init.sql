@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR UNIQUE,
   birth_date DATE,
   hire_date DATE,
+  leave_date DATE,
   gender EGender DEFAULT 'other',
   username VARCHAR UNIQUE NOT NULL,
   password VARCHAR NOT NULL,
@@ -186,6 +187,7 @@ CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
 
 ALTER TABLE users ADD CONSTRAINT fk_users_department FOREIGN KEY (department_id) REFERENCES departments(id);
 ALTER TABLE users ADD CONSTRAINT fk_users_position FOREIGN KEY (position_id) REFERENCES positions(id);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS leave_date DATE;
 ALTER TABLE departments ADD CONSTRAINT fk_departments_manager FOREIGN KEY (manager_id) REFERENCES users(id);
 ALTER TABLE sessions ADD CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE password_resets ADD CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;

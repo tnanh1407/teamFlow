@@ -18,7 +18,8 @@
     "avatarURL": null,
     "lastLogin": null,
     "createdAt": "2026-01-01T08:00:00.000Z",
-    "updatedAt": "2026-01-01T08:00:00.000Z"
+    "updatedAt": "2026-01-01T08:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000002",
@@ -38,8 +39,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-03T10:30:00.000Z",
-    "updatedAt": "2026-01-03T10:30:00.000Z"
+    "createdAt": "2026-01-05T15:50:12.245Z",
+    "updatedAt": "2026-01-03T10:30:00.000Z",
+    "leaveDate": "2026-01-15"
   },
   {
     "id": "30000000-0000-4000-a000-000000000003",
@@ -59,8 +61,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-06T14:15:00.000Z",
-    "updatedAt": "2026-01-06T14:15:00.000Z"
+    "createdAt": "2026-01-09T23:40:24.490Z",
+    "updatedAt": "2026-01-06T14:15:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000004",
@@ -80,8 +83,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-09T09:45:00.000Z",
-    "updatedAt": "2026-01-09T09:45:00.000Z"
+    "createdAt": "2026-01-14T07:30:36.735Z",
+    "updatedAt": "2026-01-09T09:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000005",
@@ -101,8 +105,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-12T11:00:00.000Z",
-    "updatedAt": "2026-01-12T11:00:00.000Z"
+    "createdAt": "2026-01-18T15:20:48.980Z",
+    "updatedAt": "2026-01-12T11:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000006",
@@ -122,8 +127,9 @@
     "status": false,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-15T16:30:00.000Z",
-    "updatedAt": "2026-01-15T16:30:00.000Z"
+    "createdAt": "2026-01-22T23:11:01.224Z",
+    "updatedAt": "2026-01-15T16:30:00.000Z",
+    "leaveDate": "2026-02-10"
   },
   {
     "id": "30000000-0000-4000-a000-000000000007",
@@ -143,8 +149,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-18T08:20:00.000Z",
-    "updatedAt": "2026-01-18T08:20:00.000Z"
+    "createdAt": "2026-01-27T07:01:13.469Z",
+    "updatedAt": "2026-01-18T08:20:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000008",
@@ -164,8 +171,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-21T13:10:00.000Z",
-    "updatedAt": "2026-01-21T13:10:00.000Z"
+    "createdAt": "2026-01-31T14:51:25.714Z",
+    "updatedAt": "2026-01-21T13:10:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000009",
@@ -185,8 +193,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-24T15:45:00.000Z",
-    "updatedAt": "2026-01-24T15:45:00.000Z"
+    "createdAt": "2026-02-04T22:41:37.959Z",
+    "updatedAt": "2026-01-24T15:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000010",
@@ -206,8 +215,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-27T10:00:00.000Z",
-    "updatedAt": "2026-01-27T10:00:00.000Z"
+    "createdAt": "2026-02-09T06:31:50.204Z",
+    "updatedAt": "2026-01-27T10:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000011",
@@ -227,8 +237,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-01-30T09:30:00.000Z",
-    "updatedAt": "2026-01-30T09:30:00.000Z"
+    "createdAt": "2026-02-13T14:22:02.449Z",
+    "updatedAt": "2026-01-30T09:30:00.000Z",
+    "leaveDate": "2026-03-05"
   },
   {
     "id": "30000000-0000-4000-a000-000000000012",
@@ -248,8 +259,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-02T14:00:00.000Z",
-    "updatedAt": "2026-02-02T14:00:00.000Z"
+    "createdAt": "2026-02-17T22:12:14.694Z",
+    "updatedAt": "2026-02-02T14:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000013",
@@ -269,8 +281,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-05T11:15:00.000Z",
-    "updatedAt": "2026-02-05T11:15:00.000Z"
+    "createdAt": "2026-02-22T06:02:26.939Z",
+    "updatedAt": "2026-02-05T11:15:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000014",
@@ -290,8 +303,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-08T16:45:00.000Z",
-    "updatedAt": "2026-02-08T16:45:00.000Z"
+    "createdAt": "2026-02-26T13:52:39.184Z",
+    "updatedAt": "2026-02-08T16:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000015",
@@ -311,8 +325,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-11T08:30:00.000Z",
-    "updatedAt": "2026-02-11T08:30:00.000Z"
+    "createdAt": "2026-03-02T21:42:51.429Z",
+    "updatedAt": "2026-02-11T08:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000016",
@@ -332,8 +347,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-14T12:00:00.000Z",
-    "updatedAt": "2026-02-14T12:00:00.000Z"
+    "createdAt": "2026-03-07T05:33:03.673Z",
+    "updatedAt": "2026-02-14T12:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000017",
@@ -353,8 +369,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-17T10:30:00.000Z",
-    "updatedAt": "2026-02-17T10:30:00.000Z"
+    "createdAt": "2026-03-11T13:23:15.918Z",
+    "updatedAt": "2026-02-17T10:30:00.000Z",
+    "leaveDate": "2026-04-18"
   },
   {
     "id": "30000000-0000-4000-a000-000000000018",
@@ -374,8 +391,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-20T15:00:00.000Z",
-    "updatedAt": "2026-02-20T15:00:00.000Z"
+    "createdAt": "2026-03-15T21:13:28.163Z",
+    "updatedAt": "2026-02-20T15:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000019",
@@ -395,8 +413,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-23T09:00:00.000Z",
-    "updatedAt": "2026-02-23T09:00:00.000Z"
+    "createdAt": "2026-03-20T05:03:40.408Z",
+    "updatedAt": "2026-02-23T09:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000020",
@@ -416,8 +435,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-02-26T14:30:00.000Z",
-    "updatedAt": "2026-02-26T14:30:00.000Z"
+    "createdAt": "2026-03-24T12:53:52.653Z",
+    "updatedAt": "2026-02-26T14:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000021",
@@ -437,8 +457,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-01T11:45:00.000Z",
-    "updatedAt": "2026-03-01T11:45:00.000Z"
+    "createdAt": "2026-03-28T20:44:04.898Z",
+    "updatedAt": "2026-03-01T11:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000022",
@@ -458,8 +479,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-04T08:15:00.000Z",
-    "updatedAt": "2026-03-04T08:15:00.000Z"
+    "createdAt": "2026-04-02T04:34:17.143Z",
+    "updatedAt": "2026-03-04T08:15:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000023",
@@ -479,8 +501,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-07T16:00:00.000Z",
-    "updatedAt": "2026-03-07T16:00:00.000Z"
+    "createdAt": "2026-04-06T12:24:29.388Z",
+    "updatedAt": "2026-03-07T16:00:00.000Z",
+    "leaveDate": "2026-05-12"
   },
   {
     "id": "30000000-0000-4000-a000-000000000024",
@@ -500,8 +523,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-10T10:30:00.000Z",
-    "updatedAt": "2026-03-10T10:30:00.000Z"
+    "createdAt": "2026-04-10T20:14:41.633Z",
+    "updatedAt": "2026-03-10T10:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000025",
@@ -521,8 +545,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-13T13:00:00.000Z",
-    "updatedAt": "2026-03-13T13:00:00.000Z"
+    "createdAt": "2026-04-15T04:04:53.878Z",
+    "updatedAt": "2026-03-13T13:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000026",
@@ -542,8 +567,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-16T09:45:00.000Z",
-    "updatedAt": "2026-03-16T09:45:00.000Z"
+    "createdAt": "2026-04-19T11:55:06.122Z",
+    "updatedAt": "2026-03-16T09:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000027",
@@ -563,8 +589,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-19T15:30:00.000Z",
-    "updatedAt": "2026-03-19T15:30:00.000Z"
+    "createdAt": "2026-04-23T19:45:18.367Z",
+    "updatedAt": "2026-03-19T15:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000028",
@@ -584,8 +611,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-22T11:00:00.000Z",
-    "updatedAt": "2026-03-22T11:00:00.000Z"
+    "createdAt": "2026-04-28T03:35:30.612Z",
+    "updatedAt": "2026-03-22T11:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000029",
@@ -605,8 +633,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-25T14:15:00.000Z",
-    "updatedAt": "2026-03-25T14:15:00.000Z"
+    "createdAt": "2026-05-02T11:25:42.857Z",
+    "updatedAt": "2026-03-25T14:15:00.000Z",
+    "leaveDate": "2026-06-20"
   },
   {
     "id": "30000000-0000-4000-a000-000000000030",
@@ -626,8 +655,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-28T08:00:00.000Z",
-    "updatedAt": "2026-03-28T08:00:00.000Z"
+    "createdAt": "2026-05-06T19:15:55.102Z",
+    "updatedAt": "2026-03-28T08:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000031",
@@ -647,8 +677,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-03-31T16:45:00.000Z",
-    "updatedAt": "2026-03-31T16:45:00.000Z"
+    "createdAt": "2026-05-11T03:06:07.347Z",
+    "updatedAt": "2026-03-31T16:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000032",
@@ -668,8 +699,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-03T10:30:00.000Z",
-    "updatedAt": "2026-04-03T10:30:00.000Z"
+    "createdAt": "2026-05-15T10:56:19.592Z",
+    "updatedAt": "2026-04-03T10:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000033",
@@ -689,8 +721,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-06T13:15:00.000Z",
-    "updatedAt": "2026-04-06T13:15:00.000Z"
+    "createdAt": "2026-05-19T18:46:31.837Z",
+    "updatedAt": "2026-04-06T13:15:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000034",
@@ -710,8 +743,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-09T09:00:00.000Z",
-    "updatedAt": "2026-04-09T09:00:00.000Z"
+    "createdAt": "2026-05-24T02:36:44.082Z",
+    "updatedAt": "2026-04-09T09:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000035",
@@ -731,8 +765,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-12T14:30:00.000Z",
-    "updatedAt": "2026-04-12T14:30:00.000Z"
+    "createdAt": "2026-05-28T10:26:56.327Z",
+    "updatedAt": "2026-04-12T14:30:00.000Z",
+    "leaveDate": "2026-07-08"
   },
   {
     "id": "30000000-0000-4000-a000-000000000036",
@@ -752,8 +787,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-15T11:45:00.000Z",
-    "updatedAt": "2026-04-15T11:45:00.000Z"
+    "createdAt": "2026-06-01T18:17:08.571Z",
+    "updatedAt": "2026-04-15T11:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000037",
@@ -773,8 +809,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-18T08:00:00.000Z",
-    "updatedAt": "2026-04-18T08:00:00.000Z"
+    "createdAt": "2026-06-06T02:07:20.816Z",
+    "updatedAt": "2026-04-18T08:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000038",
@@ -794,8 +831,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-21T15:30:00.000Z",
-    "updatedAt": "2026-04-21T15:30:00.000Z"
+    "createdAt": "2026-06-10T09:57:33.061Z",
+    "updatedAt": "2026-04-21T15:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000039",
@@ -815,8 +853,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-24T10:00:00.000Z",
-    "updatedAt": "2026-04-24T10:00:00.000Z"
+    "createdAt": "2026-06-14T17:47:45.306Z",
+    "updatedAt": "2026-04-24T10:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000040",
@@ -836,8 +875,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-27T13:15:00.000Z",
-    "updatedAt": "2026-04-27T13:15:00.000Z"
+    "createdAt": "2026-06-19T01:37:57.551Z",
+    "updatedAt": "2026-04-27T13:15:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000041",
@@ -857,8 +897,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-04-30T09:30:00.000Z",
-    "updatedAt": "2026-04-30T09:30:00.000Z"
+    "createdAt": "2026-06-23T09:28:09.796Z",
+    "updatedAt": "2026-04-30T09:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000042",
@@ -878,8 +919,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-04T14:00:00.000Z",
-    "updatedAt": "2026-05-04T14:00:00.000Z"
+    "createdAt": "2026-06-27T17:18:22.041Z",
+    "updatedAt": "2026-05-04T14:00:00.000Z",
+    "leaveDate": "2026-07-25"
   },
   {
     "id": "30000000-0000-4000-a000-000000000043",
@@ -899,8 +941,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-08T11:00:00.000Z",
-    "updatedAt": "2026-05-08T11:00:00.000Z"
+    "createdAt": "2026-07-02T01:08:34.286Z",
+    "updatedAt": "2026-05-08T11:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000044",
@@ -920,8 +963,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-12T16:30:00.000Z",
-    "updatedAt": "2026-05-12T16:30:00.000Z"
+    "createdAt": "2026-07-06T08:58:46.531Z",
+    "updatedAt": "2026-05-12T16:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000045",
@@ -941,8 +985,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-16T08:45:00.000Z",
-    "updatedAt": "2026-05-16T08:45:00.000Z"
+    "createdAt": "2026-07-10T16:48:58.776Z",
+    "updatedAt": "2026-05-16T08:45:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000046",
@@ -962,8 +1007,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-20T12:15:00.000Z",
-    "updatedAt": "2026-05-20T12:15:00.000Z"
+    "createdAt": "2026-07-15T00:39:11.020Z",
+    "updatedAt": "2026-05-20T12:15:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000047",
@@ -983,8 +1029,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-24T15:00:00.000Z",
-    "updatedAt": "2026-05-24T15:00:00.000Z"
+    "createdAt": "2026-07-19T08:29:23.265Z",
+    "updatedAt": "2026-05-24T15:00:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000048",
@@ -1004,8 +1051,9 @@
     "status": false,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-05-28T10:30:00.000Z",
-    "updatedAt": "2026-05-28T10:30:00.000Z"
+    "createdAt": "2026-07-23T16:19:35.510Z",
+    "updatedAt": "2026-05-28T10:30:00.000Z",
+    "leaveDate": null
   },
   {
     "id": "30000000-0000-4000-a000-000000000049",
@@ -1025,8 +1073,9 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-06-05T09:00:00.000Z",
-    "updatedAt": "2026-06-05T09:00:00.000Z"
+    "createdAt": "2026-07-28T00:09:47.755Z",
+    "updatedAt": "2026-06-05T09:00:00.000Z",
+    "leaveDate": "2026-08-01"
   },
   {
     "id": "30000000-0000-4000-a000-000000000050",
@@ -1046,7 +1095,8 @@
     "status": true,
     "avatarURL": null,
     "lastLogin": null,
-    "createdAt": "2026-06-15T14:30:00.000Z",
-    "updatedAt": "2026-06-15T14:30:00.000Z"
+    "createdAt": "2026-08-01T08:00:00.000Z",
+    "updatedAt": "2026-06-15T14:30:00.000Z",
+    "leaveDate": null
   }
 ]

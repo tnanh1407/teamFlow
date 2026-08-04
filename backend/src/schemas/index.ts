@@ -33,6 +33,7 @@ export const UserSchema = {
   phone,
   birth_date,
   hire_date,
+  leave_date,
   gender,
   username,
   password,

@@ -4,7 +4,7 @@ import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Che
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
-import projectMemberService, { type ProjectMember } from "@/services/project-employee.service"
+import projectMemberService, { type ProjectMember } from "@/services/project-member.service"
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
 import departmentService, { type Department } from "@/services/department.service"
 import userService, { type User } from "@/services/user.service"
@@ -327,7 +327,7 @@ export default function ProjectDetail() {
                 <label className={labelClass}>Chọn thành viên ({availableEmps.length} người)</label>
                 <div className="max-h-56 overflow-y-auto space-y-1 rounded-lg border border-zinc-200 dark:border-zinc-700 p-1">
                   {availableEmps.length === 0 ? (
-                    <p className="px-3 py-4 text-sm text-zinc-400 text-center">Tất cả nhân viên phòng ban này đã ở trong dự án</p>
+                    <p className="px-3 py-4 text-sm text-zinc-400 text-center">Tất cả người dùng phòng ban này đã ở trong dự án</p>
                   ) : (
                     availableEmps.map((emp) => {
                       const checked = selectedEmpIds.includes(emp.id)
@@ -782,7 +782,7 @@ export default function ProjectDetail() {
             </div>
             <div>
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{emp?.name || "—"}</p>
-              <p className="text-xs text-zinc-400">{emp?.employeeCode ? `Mã NV: ${emp.employeeCode}` : ""}</p>
+              <p className="text-xs text-zinc-400">{emp?.employeeCode ? `Mã người dùng: ${emp.employeeCode}` : ""}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

@@ -178,7 +178,7 @@ export default function Settings() {
     return (
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-semibold text-slate-900">Cài đặt</h1>
-        <p className="mt-2 text-sm text-slate-500">Tài khoản này chưa có dữ liệu hồ sơ.</p>
+        <p className="mt-2 text-sm text-slate-500">Người dùng này chưa có dữ liệu hồ sơ.</p>
       </div>
     )
   }

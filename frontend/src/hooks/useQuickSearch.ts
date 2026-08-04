@@ -10,7 +10,7 @@ const useQuickSearch = (onSearch : (key : string) => void) => {
     const { value: keyword } = await Swal.fire({
       title: "Tìm Kiếm Nhanh",
       input: "text",
-      inputPlaceholder: "Nhập tên nhân viên , phòng ban , dự án , ...",
+      inputPlaceholder: "Nhập tên người dùng, phòng ban, dự án, ...",
       showCancelButton: true,
       confirmButtonText : "Tìm kiếm",
       cancelButtonText : "Hủy",

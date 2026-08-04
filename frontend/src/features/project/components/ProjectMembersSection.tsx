@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Users, Plus, Building2, X } from "lucide-react"
-import type { ProjectMember } from "@/services/project-employee.service"
+import type { ProjectMember } from "@/services/project-member.service"
 import type { Department } from "@/services/department.service"
 import type { User } from "@/services/user.service"
 
