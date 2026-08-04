@@ -34,7 +34,7 @@ interface CommandPaletteProps {
 
 const roleScopedRoutes = (role: string) => [
   ...(role === "admin" ? [{ label: "Tổng quan", path: "/dashboard", icon: <LayoutDashboard size={18} /> }] : []),
-  { label: "Dự án", path: "/projects", icon: <FolderKanban size={18} /> },
+  ...(role !== "admin" ? [{ label: "Dự án", path: "/projects", icon: <FolderKanban size={18} /> }] : []),
   { label: "Người dùng", path: "/users", icon: <Users size={18} /> },
   ...(role === "admin"
     ? [
@@ -116,26 +116,28 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       return list;
     }
 
-    for (const p of results.projects) {
-      list.push({
-        id: `project-${p.id}`,
-        group: "Dự án",
-        label: p.title,
-        sublabel: p.status,
-        icon: <FolderKanban size={18} />,
-        onSelect: () => go(`/projects/${p.id}`),
-      });
-    }
+    if (user?.role !== "admin") {
+      for (const p of results.projects) {
+        list.push({
+          id: `project-${p.id}`,
+          group: "Dự án",
+          label: p.title,
+          sublabel: p.status,
+          icon: <FolderKanban size={18} />,
+          onSelect: () => go(`/projects/${p.id}`),
+        });
+      }
 
-    for (const t of results.tasks) {
-      list.push({
-        id: `task-${t.id}`,
-        group: "Công việc",
-        label: t.title,
-        sublabel: t.status,
-        icon: <ListChecks size={18} />,
-        onSelect: () => go(`/projects/${t.projectId}`),
-      });
+      for (const t of results.tasks) {
+        list.push({
+          id: `task-${t.id}`,
+          group: "Công việc",
+          label: t.title,
+          sublabel: t.status,
+          icon: <ListChecks size={18} />,
+          onSelect: () => go(`/projects/${t.projectId}`),
+        });
+      }
     }
 
     for (const u of results.users) {

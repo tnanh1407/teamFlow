@@ -141,7 +141,17 @@ function buildDepartmentContributionData(
         processes: 0,
       }
     })
-    .sort((a, b) => b.value - a.value)
+    .sort((a, b) => {
+      if (b.value !== a.value) return b.value - a.value
+
+      const aRate = a.value > 0 ? a.completed / a.value : 0
+      const bRate = b.value > 0 ? b.completed / b.value : 0
+      if (bRate !== aRate) return bRate - aRate
+
+      if (b.completed !== a.completed) return b.completed - a.completed
+
+      return a.name.localeCompare(b.name)
+    })
 }
 
 function buildEmployeeContributionData(

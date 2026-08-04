@@ -23,6 +23,7 @@ interface ISidebarItem {
   icon: LucideIcon;
   to?: string;
   children?: ISidebarItem[];
+  roles?: Array<"admin" | "user">;
 }
 
 const sidebarItems: ISidebarItem[] = [
@@ -54,6 +55,7 @@ const sidebarItems: ISidebarItem[] = [
         label: "Dự án",
         to: "/projects",
         icon: CheckSquare,
+        roles: ["user"],
       },
     ],
   },
@@ -153,6 +155,17 @@ function SidebarItem({ item, collapsed }: SidebarItemProps) {
 export default function Sidebar({ collapsed }: SidebarProps) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const visibleItems = sidebarItems
+    .map((item) => {
+      if (item.roles && user?.role && !item.roles.includes(user.role)) return null
+      if (!item.children) return item
+
+      const children = item.children.filter((child) => !child.roles || !user?.role || child.roles.includes(user.role))
+      if (children.length === 0) return null
+
+      return { ...item, children }
+    })
+    .filter((item): item is ISidebarItem => item !== null)
 
   const handleLogout = async () => {
     await logout()
@@ -182,7 +195,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
       </div>
 
       <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
-        {sidebarItems.map((item) => (
+        {visibleItems.map((item) => (
           <SidebarItem
             key={item.label}
             item={item}
