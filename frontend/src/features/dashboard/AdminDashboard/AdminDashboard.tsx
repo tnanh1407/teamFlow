@@ -24,6 +24,29 @@ interface DashboardChartPoint {
   color?: string
 }
 
+interface ProjectPriorityTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: {
+      name: string
+      value: number
+      color?: string
+    }
+  }>
+  total: number
+}
+
+interface DepartmentTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: {
+      name: string
+      value: number
+      color?: string
+    }
+  }>
+}
+
 interface ProjectOverviewPoint {
   month: string
   total: number
@@ -75,12 +98,53 @@ function buildActiveDepartmentData(users: User[], departments: Department[]): Da
 }
 
 function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
+  const incompleteProjects = projects.filter((project) => project.status !== "completed")
+
   return [
-    { name: "Thấp", value: projects.filter((project) => project.priority === "low").length, color: projectPalette.low },
-    { name: "Trung bình", value: projects.filter((project) => project.priority === "medium").length, color: projectPalette.medium },
-    { name: "Cao", value: projects.filter((project) => project.priority === "high").length, color: projectPalette.high },
-    { name: "Khẩn cấp", value: projects.filter((project) => project.priority === "critical").length, color: projectPalette.critical },
+    { name: "Thấp", value: incompleteProjects.filter((project) => project.priority === "low").length, color: projectPalette.low },
+    { name: "Trung bình", value: incompleteProjects.filter((project) => project.priority === "medium").length, color: projectPalette.medium },
+    { name: "Cao", value: incompleteProjects.filter((project) => project.priority === "high").length, color: projectPalette.high },
+    { name: "Khẩn cấp", value: incompleteProjects.filter((project) => project.priority === "critical").length, color: projectPalette.critical },
   ].filter((project) => project.value > 0)
+}
+
+function ProjectPriorityTooltip({ active, payload, total }: ProjectPriorityTooltipProps) {
+  if (!active || !payload?.length) return null
+
+  const point = payload[0].payload
+  const percent = total > 0 ? Math.round((point.value / total) * 100) : 0
+
+  return (
+    <div className="min-w-[180px] rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+      <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Mức độ ưu tiên</p>
+      <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{point.name}</p>
+      <div className="mt-3 space-y-2 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-zinc-600 dark:text-zinc-300">Số lượng</span>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.value}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-zinc-600 dark:text-zinc-300">Tỷ lệ</span>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{percent}%</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DepartmentTooltip({ active, payload }: DepartmentTooltipProps) {
+  if (!active || !payload?.length) return null
+
+  const point = payload[0].payload
+
+  return (
+    <div className="min-w-45 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+      <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Phòng ban</p>
+      <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+        {point.name} : {point.value} thành viên
+      </p>
+    </div>
+  )
 }
 
 function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
@@ -286,12 +350,14 @@ export default function AdminDashboard() {
           total={activeUsersCount || 1}
           index={0}
           palette={departmentPalette}
+          tooltipContent={<DepartmentTooltip />}
         />
         <DonutChartCard
-          title="Phân bố độ ưu tiên dự án"
+          title="Phân bố độ ưu tiên dự án chưa hoàn thành"
           data={projPriorityData}
-          total={projects.length || 1}
+          total={incompleteProjectsCount || 1}
           index={1}
+          tooltipContent={<ProjectPriorityTooltip total={incompleteProjectsCount || 1} />}
         />
       </div>
 

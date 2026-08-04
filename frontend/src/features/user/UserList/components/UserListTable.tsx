@@ -1,5 +1,5 @@
 import { type MouseEvent } from "react"
-import { Copy, Eye, Fingerprint, Pencil, Trash2 } from "lucide-react"
+import { Copy, Fingerprint, Pencil, Trash2 } from "lucide-react"
 import { type User } from "@/services/user.service"
 
 interface UserListTableProps {
@@ -158,13 +158,6 @@ export default function UserListTable({
 
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => onView(item)}
-                          className="border-none rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400"
-                          title="Xem chi tiết"
-                        >
-                          <Eye size={15} />
-                        </button>
                         {canEdit(item) && (
                           <button
                             onClick={() => onEdit(item)}

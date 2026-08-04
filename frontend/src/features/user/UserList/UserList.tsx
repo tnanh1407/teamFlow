@@ -95,7 +95,7 @@ export default function UserList() {
 
   const openFormDialog = async (editingUser?: User) => {
     try {
-      await openUserFormDialog({
+      const result = await openUserFormDialog({
         editingUser,
         departments,
         positions,
@@ -107,6 +107,7 @@ export default function UserList() {
           }
         },
       })
+      if (!result || !result.changed) return
       toast.success(editingUser ? "Cập nhật thành công" : "Tạo mới thành công")
       fetchUsers()
     } catch (err: any) {

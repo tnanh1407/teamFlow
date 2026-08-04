@@ -14,6 +14,10 @@ type OpenUserFormDialogParams = {
   onSubmit: (payload: Record<string, unknown>) => Promise<void>
 }
 
+type OpenUserFormDialogResult =
+  | { submitted: false; changed: false }
+  | { submitted: true; changed: true }
+
 interface FormData {
   employeeCode: string
   name: string
@@ -96,12 +100,40 @@ function toFormValues(user?: User): UserFormValues {
   }
 }
 
+function normalizeComparable(value: string | undefined) {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function normalizePayloadValue(value: unknown) {
+  if (typeof value !== "string") return undefined
+  return normalizeComparable(value)
+}
+
+function isSameEditPayload(editingUser: User, payload: Record<string, unknown>) {
+  return (
+    normalizePayloadValue(payload.employeeCode) === normalizeComparable(editingUser.employeeCode) &&
+    normalizePayloadValue(payload.name) === normalizeComparable(editingUser.name) &&
+    normalizePayloadValue(payload.email) === normalizeComparable(editingUser.email) &&
+    normalizePayloadValue(payload.phone) === normalizeComparable(editingUser.phone) &&
+    normalizePayloadValue(payload.birthDate) === normalizeComparable(editingUser.birthDate || undefined) &&
+    normalizePayloadValue(payload.hireDate) === normalizeComparable(editingUser.hireDate || undefined) &&
+    normalizePayloadValue(payload.leaveDate) === normalizeComparable(editingUser.leaveDate || undefined) &&
+    String(payload.gender ?? "") === editingUser.gender &&
+    String(payload.departmentId ?? "") === editingUser.departmentId &&
+    String(payload.positionId ?? "") === editingUser.positionId &&
+    String(payload.username ?? "") === editingUser.username &&
+    String(payload.position ?? "") === editingUser.position &&
+    Boolean(payload.status) === editingUser.status
+  )
+}
+
 export default async function openUserFormDialog({
   editingUser,
   departments,
   positions,
   onSubmit,
-}: OpenUserFormDialogParams) {
+}: OpenUserFormDialogParams): Promise<OpenUserFormDialogResult | undefined> {
   const isEdit = !!editingUser
   const dataRef: { current: UserFormValues | null } = { current: null }
   const validRef: { current: boolean } = { current: false }
@@ -281,5 +313,10 @@ export default async function openUserFormDialog({
 
   if (result.value.password?.trim()) payload.password = result.value.password
 
+  if (isEdit && editingUser && isSameEditPayload(editingUser, payload)) {
+    return { submitted: false, changed: false }
+  }
+
   await onSubmit(payload)
+  return { submitted: true, changed: true }
 }

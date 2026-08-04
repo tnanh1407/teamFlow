@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import type { ReactElement } from "react"
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts"
 
 const chartPalette = [
@@ -18,9 +19,10 @@ interface DonutChartCardProps {
   total: number
   index: number
   palette?: string[]
+  tooltipContent?: ReactElement
 }
 
-export default function DonutChartCard({ title, data, total, index, palette }: DonutChartCardProps) {
+export default function DonutChartCard({ title, data, total, index, palette, tooltipContent }: DonutChartCardProps) {
   const colors = palette?.length ? palette : chartPalette
 
   return (
@@ -46,6 +48,7 @@ export default function DonutChartCard({ title, data, total, index, palette }: D
                 ))}
               </Pie>
               <Tooltip
+                content={tooltipContent}
                 contentStyle={{
                   borderRadius: "10px",
                   border: "1px solid #e4e4e7",
