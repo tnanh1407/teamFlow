@@ -71,10 +71,36 @@ export interface ResetPasswordInput {
 const userColumns = UserSchema.columns;
 
 const normalizeRequiredText = (value: string) => value.trim();
+
+
 const normalizeOptionalText = (value: string | undefined) => {
+  //  tránh lưu chuỗi khoảng trắng vào database
   const normalized = value?.trim();
+  // biến input rỗng thành null
   return normalized ? normalized : null;
 };
+const todayDate = () => new Date().toLocaleDateString("en-CA");
+
+// Chuẩn hóa nhân sự
+function resolveEmploymentState(status: boolean | undefined, leaveDate: string | undefined) {
+  // lấy ra thời gian nhân sự rời đi
+  const normalizedLeaveDate = normalizeOptionalText(leaveDate);
+
+  // nếu tồn tại thì set status thành true
+  if (normalizedLeaveDate) {
+    return { status: false, leaveDate: normalizedLeaveDate };
+  }
+
+  if (status === false) {
+    return { status: false, leaveDate: todayDate() };
+  }
+
+  if (status === true) {
+    return { status: true, leaveDate: null as string | null };
+  }
+
+  return { status: undefined as boolean | undefined, leaveDate: undefined as string | undefined };
+}
 
 const RESET_CODE_TTL_MS = 10 * 60 * 1000;
 
@@ -82,7 +108,10 @@ class UserService {
   async login(username: string, password: string, userAgent?: string, ip?: string) {
     const user = await this.findByUsername(username);
     if (!user) throw new AppError("Invalid credentials", 401);
-    if (!user.status) throw new AppError("Account is disabled", 403);
+    if (!user.status || user.leaveDate) {
+      await sessionService.revokeAllByUserId(user.id);
+      throw new AppError("Account is disabled", 403);
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new AppError("Invalid credentials", 401);
@@ -196,6 +225,7 @@ class UserService {
   }
 
   async create(data: CreateUserDataInput) {
+    const employment = resolveEmploymentState(data.status, data.leaveDate);
     const payload = {
       departmentId: data.departmentId,
       positionId: data.positionId,
@@ -205,12 +235,12 @@ class UserService {
       phone: normalizeOptionalText(data.phone),
       birthDate: normalizeOptionalText(data.birthDate),
       hireDate: normalizeOptionalText(data.hireDate),
-      leaveDate: normalizeOptionalText(data.leaveDate),
+      leaveDate: employment.leaveDate,
       gender: data.gender ?? "other",
       username: normalizeRequiredText(data.username).toLowerCase(),
       password: data.password,
       position: data.position,
-      status: data.status ?? true,
+      status: employment.status ?? (data.status ?? true),
       avatarURL: normalizeOptionalText(data.avatarURL),
       role: EAccountRole.USER,
     };
@@ -278,6 +308,7 @@ class UserService {
     if (!previous) throw new AppError("User not found", 404);
 
     const payload: UpdateUserDataInput = {};
+    const employment = resolveEmploymentState(data.status, data.leaveDate);
 
     if (data.departmentId !== undefined) payload.departmentId = data.departmentId;
     if (data.positionId !== undefined) payload.positionId = data.positionId;
@@ -287,12 +318,11 @@ class UserService {
     if (data.phone !== undefined) payload.phone = normalizeOptionalText(data.phone) ?? undefined;
     if (data.birthDate !== undefined) payload.birthDate = normalizeOptionalText(data.birthDate) ?? undefined;
     if (data.hireDate !== undefined) payload.hireDate = normalizeOptionalText(data.hireDate) ?? undefined;
-    if (data.leaveDate !== undefined) payload.leaveDate = normalizeOptionalText(data.leaveDate) ?? undefined;
     if (data.gender !== undefined) payload.gender = data.gender;
     if (data.username !== undefined) payload.username = normalizeRequiredText(data.username).toLowerCase();
     if (data.role !== undefined) payload.role = data.role;
     if (data.position !== undefined) payload.position = data.position;
-    if (data.status !== undefined) payload.status = data.status;
+    if (employment.status !== undefined) payload.status = employment.status;
     if (data.avatarURL !== undefined) payload.avatarURL = normalizeOptionalText(data.avatarURL) ?? undefined;
 
     if (payload.username) {
@@ -324,7 +354,7 @@ class UserService {
     if (data.phone !== undefined) { setClauses.push(`phone = $${idx++}`); values.push(normalizeOptionalText(data.phone)); }
     if (data.birthDate !== undefined) { setClauses.push(`birth_date = $${idx++}`); values.push(normalizeOptionalText(data.birthDate)); }
     if (data.hireDate !== undefined) { setClauses.push(`hire_date = $${idx++}`); values.push(normalizeOptionalText(data.hireDate)); }
-    if (data.leaveDate !== undefined) { setClauses.push(`leave_date = $${idx++}`); values.push(normalizeOptionalText(data.leaveDate)); }
+    if (data.leaveDate !== undefined || data.status !== undefined) { setClauses.push(`leave_date = $${idx++}`); values.push(employment.leaveDate); }
     if (payload.gender !== undefined) { setClauses.push(`gender = $${idx++}`); values.push(payload.gender); }
     if (payload.username !== undefined) { setClauses.push(`username = $${idx++}`); values.push(payload.username); }
     if (payload.role !== undefined) { setClauses.push(`role = $${idx++}`); values.push(payload.role); }
@@ -427,8 +457,8 @@ class UserService {
 
   async delete(id: string) : Promise<void> {
     const { rows } = await pool.query<UserRow>(
-      `UPDATE users SET status = false WHERE id = $1 RETURNING ${userColumns}`,
-      [id]
+      `UPDATE users SET status = false, leave_date = COALESCE(leave_date, $2) WHERE id = $1 RETURNING ${userColumns}`,
+      [id, todayDate()]
     );
     if (!rows[0]) throw new AppError("User not found", 404);
     await sessionService.revokeAllByUserId(id);

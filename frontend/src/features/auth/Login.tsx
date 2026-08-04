@@ -55,10 +55,13 @@ export default function Login() {
       toast.success(`Xin chào ${user.username}!`)
       navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
     } catch (error) {
+      const status = error && typeof error === "object" && "response" in error ? (error as { response?: { status?: number } }).response?.status : undefined
       const message =
-        error && typeof error === "object" && "response" in error
-          ? "Sai tài khoản hoặc mật khẩu"
-          : "Không thể đăng nhập lúc này"
+        status === 403
+          ? "Tài khoản đã nghỉ việc hoặc bị khóa"
+          : status === 401
+            ? "Sai tài khoản hoặc mật khẩu"
+            : "Không thể đăng nhập lúc này"
 
       Swal.fire({
         icon: "error",

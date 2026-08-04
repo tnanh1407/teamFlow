@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import env from "../config/env.js"
 import sessionService from "../session/session.service.js";
+import userService from "../user/user.service.js";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -34,6 +35,13 @@ export const authenticate = async (
     const session = await sessionService.validateAndTouch(decoded.jti);
     if (!session) {
       return res.status(401).json({ message: "Session expired or revoked" });
+    }
+
+    const user = await userService.findById(decoded.id);
+    if (!user || !user.status || user.leaveDate) {
+      await sessionService.revokeAllByUserId(decoded.id);
+      res.clearCookie("token");
+      return res.status(403).json({ message: "Account is disabled" });
     }
 
     req.user = decoded;

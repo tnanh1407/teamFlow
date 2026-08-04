@@ -29,14 +29,42 @@ function GrowthTooltip({ active, payload, label }: any) {
   }
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{label}</p>
-      <div className="mt-1 space-y-1 text-xs text-zinc-700 dark:text-zinc-200">
-        <p>Đang làm: {point.active}</p>
-        <p>Đã nghỉ: {point.departed}</p>
-        <p>Tổng tuyển: {point.totalHires}</p>
-        <p>Tuyển mới: {point.hires}</p>
-        <p>Nghỉ việc: {point.leaves}</p>
+    <div className="min-w-[220px] rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Tháng</p>
+          <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</p>
+        </div>
+        <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Tổng tuyển {point.totalHires}</span>
+      </div>
+
+      <div className="mt-3 space-y-2 text-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span>Đang làm</span>
+          </div>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.active}</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+            <span className="h-2 w-2 rounded-full bg-red-500" />
+            <span>Đã nghỉ</span>
+          </div>
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.departed}</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+          <div className="rounded-lg bg-zinc-50 px-2.5 py-2 dark:bg-zinc-800/60">
+            <p className="text-zinc-500 dark:text-zinc-400">Tuyển mới</p>
+            <p className="mt-0.5 font-semibold text-zinc-900 dark:text-zinc-100">{point.hires}</p>
+          </div>
+          <div className="rounded-lg bg-zinc-50 px-2.5 py-2 dark:bg-zinc-800/60">
+            <p className="text-zinc-500 dark:text-zinc-400">Nghỉ việc</p>
+            <p className="mt-0.5 font-semibold text-zinc-900 dark:text-zinc-100">{point.leaves}</p>
+          </div>
+        </div>
       </div>
     </div>
   )

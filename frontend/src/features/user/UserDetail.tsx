@@ -269,7 +269,7 @@ export default function UserDetail() {
         phone: result.value.phone,
         birthDate: result.value.birthDate || undefined,
         hireDate: result.value.hireDate || undefined,
-        leaveDate: result.value.leaveDate || undefined,
+        leaveDate: result.value.status ? undefined : (result.value.leaveDate || undefined),
         gender: result.value.gender,
         departmentId: result.value.departmentId,
         positionId: result.value.positionId,
