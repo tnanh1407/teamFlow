@@ -95,18 +95,21 @@ export default function AdminDashboard() {
     const end = new Date(`${sorted[sorted.length - 1]}-01T00:00:00Z`)
     let cumActive = 0
     let cumDeparted = 0
-    const data: { month: string; active: number; departed: number; hires: number; leaves: number }[] = []
+    let cumHired = 0
+    const data: { month: string; active: number; departed: number; totalHires: number; hires: number; leaves: number }[] = []
 
     for (let cursor = new Date(start); cursor <= end; cursor.setMonth(cursor.getMonth() + 1)) {
       const key = cursor.toISOString().slice(0, 7)
       const monthEvent = events[key] || { hires: 0, leaves: 0 }
       cumActive += monthEvent.hires - monthEvent.leaves
       cumDeparted += monthEvent.leaves
+      cumHired += monthEvent.hires
       const [y, mo] = key.split("-")
       data.push({
         month: `Th${Number.parseInt(mo, 10)}/${y}`,
         active: cumActive,
         departed: cumDeparted,
+        totalHires: cumHired,
         hires: monthEvent.hires,
         leaves: monthEvent.leaves,
       })

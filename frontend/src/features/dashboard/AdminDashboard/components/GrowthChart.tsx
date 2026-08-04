@@ -12,7 +12,7 @@ import {
 } from "recharts"
 
 interface GrowthChartProps {
-  data: { month: string; active: number; departed: number; hires: number; leaves: number }[]
+  data: { month: string; active: number; departed: number; totalHires: number; hires: number; leaves: number }[]
   currentTotal: number
 }
 
@@ -23,6 +23,7 @@ function GrowthTooltip({ active, payload, label }: any) {
     month: string
     active: number
     departed: number
+    totalHires: number
     hires: number
     leaves: number
   }
@@ -33,6 +34,7 @@ function GrowthTooltip({ active, payload, label }: any) {
       <div className="mt-1 space-y-1 text-xs text-zinc-700 dark:text-zinc-200">
         <p>Đang làm: {point.active}</p>
         <p>Đã nghỉ: {point.departed}</p>
+        <p>Tổng tuyển: {point.totalHires}</p>
         <p>Tuyển mới: {point.hires}</p>
         <p>Nghỉ việc: {point.leaves}</p>
       </div>
@@ -91,6 +93,16 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
               strokeWidth={2.5}
               dot={{ r: 4, fill: "#ef4444", stroke: "#fff", strokeWidth: 2 }}
               activeDot={{ r: 6, fill: "#ef4444", stroke: "#fff", strokeWidth: 2 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="totalHires"
+              name="Tổng tuyển"
+              stroke="#3b82f6"
+              strokeWidth={2.5}
+              strokeDasharray="6 4"
+              dot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>
