@@ -26,12 +26,14 @@ interface StatsGridProps {
 
 export default function StatsGrid({ stats, range, onRangeChange }: StatsGridProps) {
   return (
-    <section className="rounded-xl border border-zinc-200/70 bg-white p-5 shadow-sm dark:border-zinc-700/50 dark:bg-zinc-900">
+    <section className="rounded-xl border border-border bg-background p-4 shadow-sm">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className=" text-base text-zinc-900 dark:text-zinc-400 uppercase font-semibold">Thống kê toàn bộ phân hệ</h2>
+          <h2 className="text-base font-semibold uppercase text-foreground">
+            Thống kê toàn bộ phân hệ
+          </h2>
         </div>
-        <div className="flex flex-wrap items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
+        <div className="flex flex-wrap items-center gap-1 rounded-full border border-border bg-muted p-1">
           {timeRangeOptions.map((option) => (
             <button
               key={option.key}
@@ -39,8 +41,8 @@ export default function StatsGrid({ stats, range, onRangeChange }: StatsGridProp
               onClick={() => onRangeChange(option.key)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 range === option.key
-                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
-                  : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {option.label}
@@ -59,12 +61,12 @@ export default function StatsGrid({ stats, range, onRangeChange }: StatsGridProp
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05, duration: 0.35 }}
-              className="group rounded-[28px] border border-zinc-200/70 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-700/50 dark:bg-zinc-900"
+              className="group rounded-3xl border border-border bg-background p-4 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[15px] font-medium text-zinc-500 dark:text-zinc-400">{stat.label}</p>
-                  <div className="mt-6 flex items-end gap-2 overflow-hidden">
+                  <p className="text-sm font-medium capitalize text-muted-foreground">{stat.label}</p>
+                  <div className="mt-4 flex items-end gap-2 overflow-hidden">
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.p
                         key={`${stat.label}-${range}`}
@@ -72,7 +74,7 @@ export default function StatsGrid({ stats, range, onRangeChange }: StatsGridProp
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.98 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="text-5xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
+                        className="text-4xl font-semibold tracking-tight text-foreground"
                       >
                         {stat.value.toLocaleString("en-US")}
                       </motion.p>
@@ -80,19 +82,19 @@ export default function StatsGrid({ stats, range, onRangeChange }: StatsGridProp
                   </div>
                 </div>
 
-                <div
-                  className="flex h-28 w-28 shrink-0 items-center justify-center rounded-[34px]"
-                  style={{
-                    backgroundColor: `color-mix(in srgb, ${stat.color} 18%, white)`,
-                    color: stat.color,
-                  }}
-                >
-                  <Icon size={54} strokeWidth={1.9} />
-                </div>
+              <div
+                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[28px]"
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${stat.color} 18%, var(--background))`,
+                  color: stat.color,
+                }}
+              >
+                <Icon size={40} strokeWidth={1.8} />
               </div>
+            </div>
 
-              <div className="mt-10 flex items-center gap-2 overflow-hidden text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                <ArrowUpRight size={18} className="text-emerald-500" />
+              <div className="mt-6 flex items-center gap-2 overflow-hidden text-xs font-medium text-muted-foreground">
+                <ArrowUpRight size={16} className="text-emerald-500" />
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.span
                     key={range}

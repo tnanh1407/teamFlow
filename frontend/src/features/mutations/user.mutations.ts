@@ -30,14 +30,14 @@ export function useForgotPasswordMutation(
   })
 }
 
-export function useUsersQuery() {
-  return useQuery<User[]>({
-    queryKey: userQueryKeys.all,
-    queryFn: async () => {
+export function useUsersQuery() { // custom hook
+  return useQuery<User[]>({ // biết dữ liệu trả về
+    queryKey: userQueryKeys.all, // tên định danh của query
+    queryFn: async () => { // hàm gọi api
       const { data } = await userService.getAll()
-      return data.data
+      return data.data 
     },
-    staleTime: 30_000,
+    staleTime: 30_000, // thời gian data được xem là mới (30s)
   })
 }
 
