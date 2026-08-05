@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Edit2, Pin, Plus, Trash2 } from "lucide-react"
+import { CheckCircle2, Edit2, Pin, Plus, Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import systemNotificationService, { type SystemNotification } from "@/services/system-notification.service"
 import { showDeleteConfirm, showSuccessToast } from "@/lib/swal"
@@ -54,6 +54,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
   const [saving, setSaving] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(defaultForm)
+  const unreadCount = items.filter((item) => !item.isRead).length
 
   const fetchNotifications = async () => {
     setLoading(true)
@@ -151,6 +152,21 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
     }
   }
 
+  const handleToggleRead = async (notification: SystemNotification) => {
+    try {
+      if (notification.isRead) {
+        await systemNotificationService.markUnread(notification.id)
+        await showSuccessToast("Đã chuyển sang chưa đọc")
+      } else {
+        await systemNotificationService.markRead(notification.id)
+        await showSuccessToast("Đã đánh dấu đã đọc")
+      }
+      await fetchNotifications()
+    } catch {
+      console.error("Failed to update read state")
+    }
+  }
+
   return (
     <section className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
@@ -162,16 +178,21 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
             {canManage ? "Admin tạo và quản lí thông báo cho toàn hệ thống." : "Thông báo phù hợp với vai trò của bạn."}
           </p>
         </div>
-        {canManage && (
-          <button
-            type="button"
-            onClick={resetForm}
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            <Plus size={14} />
-            Thông báo mới
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+            Chưa đọc: {unreadCount}
+          </span>
+          {canManage && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              <Plus size={14} />
+              Thông báo mới
+            </button>
+          )}
+        </div>
       </div>
 
       {canManage && (
@@ -282,37 +303,63 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                     <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
                       {priorityLabels[item.priority]}
                     </span>
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                      {audienceLabels[item.targetAudience]}
-                    </span>
+                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                    {audienceLabels[item.targetAudience]}
+                  </span>
                     <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
                       {sourceLabels[item.source]}
                     </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                      item.isRead
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                        : "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+                    }`}
+                  >
+                    {item.isRead ? "Đã đọc" : "Chưa đọc"}
+                  </span>
                   </div>
-                  <h3 className="mt-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{item.title}</h3>
+                  <h3 className={`mt-2 text-sm font-semibold ${item.isRead ? "text-zinc-800 dark:text-zinc-200" : "text-zinc-950 dark:text-white"}`}>
+                    {item.title}
+                  </h3>
                   <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{item.content}</p>
                 </div>
 
-                {canManage && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => startEdit(item)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                    >
-                      <Edit2 size={13} />
-                      Sửa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(item)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-950/30"
-                    >
-                      <Trash2 size={13} />
-                      Xoá
-                    </button>
-                  </div>
-                )}
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleRead(item)}
+                    className={`inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-medium ${
+                      item.isRead
+                        ? "border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-950/20"
+                        : "border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-950/20"
+                    }`}
+                  >
+                    <CheckCircle2 size={13} />
+                    {item.isRead ? "Bỏ đã đọc" : "Đánh dấu đã đọc"}
+                  </button>
+
+                  {canManage && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(item)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                      >
+                        <Edit2 size={13} />
+                        Sửa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-950/30"
+                      >
+                        <Trash2 size={13} />
+                        Xoá
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </article>
           ))

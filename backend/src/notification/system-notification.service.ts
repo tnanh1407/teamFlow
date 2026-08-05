@@ -12,6 +12,7 @@ interface SystemNotificationRow {
   priority: string;
   targetAudience: string;
   isPinned: boolean;
+  isRead?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +29,7 @@ export interface CreateSystemNotificationDataInput {
 export type UpdateSystemNotificationDataInput = Partial<CreateSystemNotificationDataInput>;
 
 const systemNotificationColumns = SystemNotificationSchema.columns;
+const systemNotificationSelectColumns = `s.id, s.created_by, s.source, s.title, s.content, s.type, s.priority, s.target_audience, s.is_pinned, s.created_at, s.updated_at, COALESCE(r.read_at IS NOT NULL, false) AS is_read`;
 
 const normalizeRequiredText = (value: string) => value.trim();
 
@@ -71,19 +73,36 @@ class SystemNotificationService {
     const viewer = await getViewer(userId);
     if (!viewer) throw new AppError("User not found", 404);
 
-    if (viewer.role === "admin") {
-      return this.findAll();
-    }
+    const { rows } = await pool.query<SystemNotificationRow>(
+      `SELECT ${systemNotificationSelectColumns}
+       FROM system_notifications s
+       LEFT JOIN system_notification_reads r
+         ON r.notification_id = s.id
+        AND r.user_id = $1
+       WHERE $2 = true
+          OR s.target_audience = ANY($3::text[])
+       ORDER BY s.is_pinned DESC, s.created_at DESC`,
+      [
+        userId,
+        viewer.role === "admin",
+        ["all", "user", viewer.position].filter(Boolean),
+      ]
+    );
+    return rows;
+  }
 
-    const audiences = ["all", "user"];
-    if (viewer.position) audiences.push(viewer.position);
+  async findAllForUser(userId: string) {
+    const viewer = await getViewer(userId);
+    if (!viewer) throw new AppError("User not found", 404);
 
     const { rows } = await pool.query<SystemNotificationRow>(
-      `SELECT ${systemNotificationColumns}
-       FROM system_notifications
-       WHERE target_audience = ANY($1::text[])
+      `SELECT ${systemNotificationSelectColumns}
+       FROM system_notifications s
+       LEFT JOIN system_notification_reads r
+         ON r.notification_id = s.id
+        AND r.user_id = $1
        ORDER BY is_pinned DESC, created_at DESC`,
-      [audiences]
+      [userId]
     );
     return rows;
   }
@@ -112,6 +131,35 @@ class SystemNotificationService {
     }
 
     return null;
+  }
+
+  async markAsRead(notificationId: string, userId: string) {
+    const notification = await this.findByIdForUser(notificationId, userId);
+    if (!notification) throw new AppError("Notification not found", 404);
+
+    const { rows } = await pool.query<SystemNotificationRow>(
+      `INSERT INTO system_notification_reads (notification_id, user_id, read_at)
+       VALUES ($1, $2, now())
+       ON CONFLICT (notification_id, user_id)
+       DO UPDATE SET read_at = EXCLUDED.read_at
+       RETURNING notification_id`,
+      [notificationId, userId]
+    );
+
+    return Boolean(rows[0]);
+  }
+
+  async markAsUnread(notificationId: string, userId: string) {
+    const notification = await this.findByIdForUser(notificationId, userId);
+    if (!notification) throw new AppError("Notification not found", 404);
+
+    await pool.query(
+      `DELETE FROM system_notification_reads
+       WHERE notification_id = $1 AND user_id = $2`,
+      [notificationId, userId]
+    );
+
+    return true;
   }
 
   private async assertCanManage(userId: string) {

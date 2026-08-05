@@ -48,6 +48,7 @@ const seed = async () => {
     await client.query("DELETE FROM project_employees");
     await client.query("DELETE FROM project_notifications");
     await client.query("DELETE FROM system_notifications");
+    await client.query("DELETE FROM system_notification_reads");
     await client.query("DELETE FROM projects");
     await client.query("UPDATE departments SET manager_id = NULL");
     await client.query("DELETE FROM users");

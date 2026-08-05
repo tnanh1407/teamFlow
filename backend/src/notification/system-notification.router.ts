@@ -11,9 +11,10 @@ const router = Router();
 router.get("/", authenticate, asyncHandler(systemNotificationController.getVisible));
 router.get("/manage", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(systemNotificationController.getAll));
 router.get("/:id", authenticate, asyncHandler(systemNotificationController.getById));
+router.post("/:id/read", authenticate, asyncHandler(systemNotificationController.markRead));
+router.delete("/:id/read", authenticate, asyncHandler(systemNotificationController.markUnread));
 router.post("/", authenticate, authorize(EAccountRole.ADMIN), validate(createSystemNotificationSchema), asyncHandler(systemNotificationController.create));
 router.patch("/:id", authenticate, authorize(EAccountRole.ADMIN), validate(updateSystemNotificationSchema), asyncHandler(systemNotificationController.update));
 router.delete("/:id", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(systemNotificationController.delete));
 
 export default router;
-

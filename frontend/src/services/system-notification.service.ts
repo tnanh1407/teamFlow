@@ -10,6 +10,7 @@ export interface SystemNotification {
   priority: "low" | "medium" | "high" | "critical"
   targetAudience: "all" | "user" | "manager" | "staff" | "intern" | "admin"
   isPinned: boolean
+  isRead?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -24,6 +25,7 @@ type BackendNotification = {
   priority: "low" | "medium" | "high" | "critical"
   targetAudience: "all" | "user" | "manager" | "staff" | "intern" | "admin"
   isPinned: boolean
+  isRead?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -38,6 +40,7 @@ const mapNotification = (notification: BackendNotification): SystemNotification 
   priority: notification.priority,
   targetAudience: notification.targetAudience,
   isPinned: notification.isPinned,
+  isRead: notification.isRead,
   createdAt: notification.createdAt,
   updatedAt: notification.updatedAt,
 })
@@ -73,7 +76,10 @@ const systemNotificationService = {
   ) => api.patch<{ data: BackendNotification }>(`/system-notifications/${id}`, data),
 
   delete: (id: string) => api.delete(`/system-notifications/${id}`),
+
+  markRead: (id: string) => api.post(`/system-notifications/${id}/read`),
+
+  markUnread: (id: string) => api.delete(`/system-notifications/${id}/read`),
 }
 
 export default systemNotificationService
-

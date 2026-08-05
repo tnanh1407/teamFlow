@@ -10,7 +10,7 @@ class SystemNotificationController {
   }
 
   async getAll(req: AuthRequest, res: Response) {
-    const notifications = await systemNotificationService.findAll();
+    const notifications = await systemNotificationService.findAllForUser(req.user!.id);
     res.json({ data: notifications });
   }
 
@@ -37,7 +37,18 @@ class SystemNotificationController {
     await systemNotificationService.delete(id, req.user!.id);
     res.json({ message: "Notification deleted successfully" });
   }
+
+  async markRead(req: AuthRequest, res: Response) {
+    const id = req.params.id as string;
+    await systemNotificationService.markAsRead(id, req.user!.id);
+    res.json({ message: "Notification marked as read" });
+  }
+
+  async markUnread(req: AuthRequest, res: Response) {
+    const id = req.params.id as string;
+    await systemNotificationService.markAsUnread(id, req.user!.id);
+    res.json({ message: "Notification marked as unread" });
+  }
 }
 
 export default new SystemNotificationController();
-

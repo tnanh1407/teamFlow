@@ -177,6 +177,13 @@ CREATE TABLE IF NOT EXISTS system_notifications (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS system_notification_reads (
+  notification_id UUID NOT NULL,
+  user_id UUID NOT NULL,
+  read_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (notification_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
@@ -227,6 +234,8 @@ CREATE INDEX IF NOT EXISTS idx_system_notifications_target_audience ON system_no
 CREATE INDEX IF NOT EXISTS idx_system_notifications_source ON system_notifications(source);
 CREATE INDEX IF NOT EXISTS idx_system_notifications_created_by ON system_notifications(created_by);
 CREATE INDEX IF NOT EXISTS idx_system_notifications_created_at ON system_notifications(created_at);
+CREATE INDEX IF NOT EXISTS idx_system_notification_reads_user ON system_notification_reads(user_id);
+CREATE INDEX IF NOT EXISTS idx_system_notification_reads_notification ON system_notification_reads(notification_id);
 
 -- ══════════════════════════════════════════════════════════
 -- FOREIGN KEYS
@@ -255,6 +264,8 @@ ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_created_by FOREIGN KEY
 ALTER TABLE project_notifications ADD CONSTRAINT fk_project_notifications_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 ALTER TABLE project_notifications ADD CONSTRAINT fk_project_notifications_created_by FOREIGN KEY (created_by) REFERENCES users(id);
 ALTER TABLE system_notifications ADD CONSTRAINT fk_system_notifications_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE system_notification_reads ADD CONSTRAINT fk_system_notification_reads_notification FOREIGN KEY (notification_id) REFERENCES system_notifications(id) ON DELETE CASCADE;
+ALTER TABLE system_notification_reads ADD CONSTRAINT fk_system_notification_reads_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 -- ══════════════════════════════════════════════════════════
 -- TRIGGERS (auto-update updated_at)

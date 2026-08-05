@@ -17,6 +17,7 @@ const dropAll = async () => {
     DROP TABLE IF EXISTS project_employees CASCADE;
     DROP TABLE IF EXISTS project_notifications CASCADE;
     DROP TABLE IF EXISTS system_notifications CASCADE;
+    DROP TABLE IF EXISTS system_notification_reads CASCADE;
     DROP TABLE IF EXISTS projects CASCADE;
     DROP TABLE IF EXISTS users CASCADE;
     DROP TABLE IF EXISTS departments CASCADE;

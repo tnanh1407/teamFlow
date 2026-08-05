@@ -21,6 +21,7 @@ export const systemNotificationSchemas = {
       priority: "high",
       targetAudience: "all",
       isPinned: true,
+      isRead: false,
       createdAt: "2026-08-05T08:00:00.000Z",
       updatedAt: "2026-08-05T08:00:00.000Z",
     },
@@ -34,6 +35,7 @@ export const systemNotificationSchemas = {
       priority: { type: "string", enum: ["low", "medium", "high", "critical"] },
       targetAudience: { type: "string", enum: ["all", "user", "manager", "staff", "intern", "admin"] },
       isPinned: { type: "boolean" },
+      isRead: { type: "boolean", description: "Trạng thái đã đọc của người dùng hiện tại", nullable: true },
       createdAt: { type: "string", format: "date-time" },
       updatedAt: { type: "string", format: "date-time" },
     },
@@ -106,6 +108,34 @@ export const systemNotificationPaths = {
       responses: {
         200: {
           description: "Danh sách toàn bộ thông báo",
+        },
+      },
+    },
+  },
+  "/api/system-notifications/{id}/read": {
+    post: {
+      tags: ["System Notifications"],
+      summary: "Đánh dấu đã đọc",
+      description: "Người dùng hiện tại đánh dấu một thông báo là đã đọc.",
+      ...notificationAuth,
+      parameters: [notificationIdParam],
+      responses: {
+        200: {
+          description: "Đánh dấu đã đọc thành công",
+          content: { "application/json": { example: { message: "Notification marked as read" } } },
+        },
+      },
+    },
+    delete: {
+      tags: ["System Notifications"],
+      summary: "Bỏ trạng thái đã đọc",
+      description: "Người dùng hiện tại chuyển một thông báo về trạng thái chưa đọc.",
+      ...notificationAuth,
+      parameters: [notificationIdParam],
+      responses: {
+        200: {
+          description: "Bỏ trạng thái đã đọc thành công",
+          content: { "application/json": { example: { message: "Notification marked as unread" } } },
         },
       },
     },
