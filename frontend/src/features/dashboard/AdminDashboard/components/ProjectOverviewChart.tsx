@@ -11,17 +11,7 @@ import {
 } from "recharts"
 import ChartLegend from "./ChartLegend"
 import ChartCard from "@/shared/ui/ChartCard"
-
-const chartPalette = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-  "var(--chart-6)",
-  "var(--chart-7)",
-  "var(--chart-8)",
-]
+import { chartPalette } from "@/shared/ui/chartColors"
 
 interface ProjectOverviewPoint {
   month: string
@@ -37,6 +27,13 @@ interface ProjectOverviewChartProps {
   incompleteTotal: number
 }
 
+interface ProjectOverviewTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: ProjectOverviewPoint
+  }>
+}
+
 type TimeRangeKey = "all" | "12m" | "6m" | "3m"
 
 const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number }> = [
@@ -46,7 +43,7 @@ const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number
   { key: "3m", label: "3 tháng", months: 3 },
 ]
 
-function ProjectOverviewTooltip({ active, payload }: any) {
+function ProjectOverviewTooltip({ active, payload }: ProjectOverviewTooltipProps) {
   if (!active || !payload?.length) return null
 
   const point = payload[0].payload as ProjectOverviewPoint
@@ -109,11 +106,10 @@ export default function ProjectOverviewChart({
                 key={option.key}
                 type="button"
                 onClick={() => setRange(option.key)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  range === option.key
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${range === option.key
                     ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
                     : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-                }`}
+                  }`}
               >
                 {option.label}
               </button>
@@ -132,11 +128,12 @@ export default function ProjectOverviewChart({
             <XAxis
               dataKey="month"
               tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
-              tickLine={false}
-              axisLine={false}
+              tickLine={true}
+              axisLine={true}
+              allowDecimals={false}
               height={36}
               label={{
-                value: "Tháng",
+                value: "Thời gian (Tháng / Năm )",
                 position: "bottom",
                 offset: 8,
                 style: { fill: "var(--chart-label-color)" },
@@ -145,8 +142,8 @@ export default function ProjectOverviewChart({
             <YAxis
               width={72}
               tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
-              tickLine={false}
-              axisLine={false}
+              tickLine={true}
+              axisLine={true}
               allowDecimals={false}
               label={{
                 value: "Dự án",

@@ -11,17 +11,7 @@ import {
 } from "recharts"
 import ChartLegend from "./ChartLegend"
 import ChartCard from "@/shared/ui/ChartCard"
-
-const chartPalette = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-  "var(--chart-6)",
-  "var(--chart-7)",
-  "var(--chart-8)",
-]
+import { chartPalette } from "@/shared/ui/chartColors"
 
 
 
@@ -144,8 +134,8 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
             <XAxis
               dataKey="month"
               tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
-              tickLine={false}
-              axisLine={false}
+              tickLine={true}
+              axisLine={true}
               height={36}
               label={{
                 value: "Thời gian (Tháng / Năm)",

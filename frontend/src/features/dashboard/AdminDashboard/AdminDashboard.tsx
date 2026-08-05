@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
+import { Building2, Briefcase, CheckSquare, UserCheck, UserX, Users, type LucideIcon } from "lucide-react"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
+import { chartPalette } from "@/shared/ui/chartColors"
 import StatsGrid from "./components/StatsGrid"
 import EmployeeTrendChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
@@ -15,14 +17,7 @@ import projectMemberService, { type ProjectMember } from "@/services/project-mem
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 
-interface DashboardGrowthPoint {
-  month: string
-  active: number
-  departed: number
-  totalHires: number
-  hires: number
-  leaves: number
-}
+
 
 interface DashboardChartPoint {
   name: string
@@ -62,43 +57,16 @@ interface DepartmentTooltipProps {
   }>
 }
 
-interface ProjectOverviewPoint {
-  month: string
-  total: number
-  completed: number
-  incomplete: number
-}
 
-interface DashboardStat {
-  label: string
-  value: number
-  color: string
-}
 
-const departmentPalette = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-  "var(--chart-6)",
-  "var(--chart-7)",
-  "var(--chart-8)",
-]
+
+const departmentPalette = chartPalette
 
 const projectPalette = {
   low: "var(--chart-7)",
   medium: "var(--chart-3)",
   high: "var(--chart-2)",
   critical: "var(--chart-5)",
-}
-
-const colors = {
-  blue: "var(--chart-1)",
-  emerald: "var(--chart-2)",
-  amber: "var(--chart-3)",
-  purple: "var(--chart-4)",
-  red: "var(--chart-5)",
 }
 
 function buildActiveDepartmentData(users: User[], departments: Department[]): DashboardChartPoint[] {
@@ -233,7 +201,7 @@ function ProjectPriorityTooltip({ active, payload, total }: ProjectPriorityToolt
   const percent = total > 0 ? Math.round((point.value / total) * 100) : 0
 
   return (
-    <div className="min-w-[180px] rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="min-w-45 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
       <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Mức độ ưu tiên</p>
       <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{point.name}</p>
       <div className="mt-3 space-y-2 text-sm">
@@ -265,13 +233,21 @@ function DepartmentTooltip({ active, payload }: DepartmentTooltipProps) {
   )
 }
 
+// data cho biểu đồ project lineChart
+interface ProjectOverviewPoint {
+  month: string
+  total: number
+  completed: number
+  incomplete: number
+}
+
 function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
   const monthEvents: Record<string, { created: number; completed: number }> = {}
   const monthKeys = new Set<string>()
 
   projects.forEach((project) => {
     if (project.createdAt) {
-      const createdKey = project.createdAt.slice(0, 7)
+      const createdKey = project.createdAt.slice(0, 7) // lấy từ vị trí 0 -> 7
       monthEvents[createdKey] = monthEvents[createdKey] || { created: 0, completed: 0 }
       monthEvents[createdKey].created += 1
       monthKeys.add(createdKey)
@@ -308,7 +284,7 @@ function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
     const incomplete = Math.max(total - completed, 0)
     const [year, month] = key.split("-")
     result.push({
-      month: `Th${Number.parseInt(month, 10)}/${year}`,
+      month: `${Number.parseInt(month, 10)}/${year}`,
       total,
       completed,
       incomplete,
@@ -319,6 +295,16 @@ function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
 }
 
 // dữ liệu cho biểu đồ nhân sự
+
+interface DashboardGrowthPoint {
+  month: string
+  active: number
+  departed: number
+  totalHires: number
+  hires: number
+  leaves: number
+}
+
 function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
   const events: Record<string, { hires: number; leaves: number }> = {}
   const monthKeys = new Set<string>()
@@ -379,6 +365,14 @@ function countDepartedUsers(users: User[], todayKey: string) {
   return users.filter((user) => !!user.leaveDate && user.leaveDate <= todayKey).length
 }
 
+
+interface DashboardStat {
+  label: string
+  value: number
+  color: string
+  icon: LucideIcon
+}
+
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [projects, setProjects] = useState<Project[]>([])
@@ -391,6 +385,8 @@ export default function AdminDashboard() {
   const [positionsCount, setPositionsCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
+
+  // UseEffect dữ liệu
   useEffect(() => {
     let alive = true
 
@@ -440,14 +436,14 @@ export default function AdminDashboard() {
   const incompleteProjectsCount = projects.length - completedProjectsCount
 
   const stats: DashboardStat[] = [
-    { label: "Tổng tài khoản", value: users.length, color: colors.blue },
-    { label: "Đang làm", value: activeUsersCount, color: colors.emerald },
-    { label: "Đã nghỉ", value: departedUsersCount, color: colors.red },
-    { label: "Phòng ban", value: departments.length, color: colors.emerald },
-    { label: "Chức vụ", value: positionsCount, color: colors.purple },
-    { label: "Dự án hoàn thành", value: completedProjectsCount, color: colors.blue },
-    { label: "Tổng dự án", value: projects.length, color: colors.amber },
-    { label: "Dự án chưa hoàn thành", value: incompleteProjectsCount, color: colors.red },
+    { label: "Tổng tài khoản", value: users.length, color: chartPalette[0], icon: Users },
+    { label: "Đang làm", value: activeUsersCount, color: chartPalette[1], icon: UserCheck },
+    { label: "Đã nghỉ", value: departedUsersCount, color: chartPalette[2], icon: UserX },
+    { label: "Phòng ban", value: departments.length, color: chartPalette[3], icon: Building2 },
+    { label: "Chức vụ", value: positionsCount, color: chartPalette[4], icon: Briefcase },
+    { label: "Dự án hoàn thành", value: completedProjectsCount, color: chartPalette[5], icon: CheckSquare },
+    { label: "Tổng dự án", value: projects.length, color: chartPalette[6], icon: CheckSquare },
+    { label: "Dự án chưa hoàn thành", value: incompleteProjectsCount, color: chartPalette[7], icon: CheckSquare },
   ]
 
   const growthData = buildGrowthData(users)

@@ -106,7 +106,7 @@ export default function ContributionBarChart({
                   dataKey="label"
                   width={180}
                   tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
-                  tickLine={false}
+                  tickLine={true}
                   axisLine={false}
                 />
                 <Tooltip content={<ContributionTooltip />} />
