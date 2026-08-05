@@ -2,52 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { ChevronRight, PanelLeft, PanelLeftClose, Search } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
-
-const routes = [
-  {
-    path: "/dashboard",
-    breadcrumbs: [{ label: "Tổng quan" }],
-  },
-  {
-      path: "/users",
-      breadcrumbs: [
-        { label: "Quản trị" },
-        { label: "Quản lí người dùng" },
-      ],
-  },
-  {
-    path: "/departments",
-    breadcrumbs: [
-      { label: "Quản trị" },
-      { label: "Quản lí phòng ban" },
-    ],
-  },
-  {
-    path: "/positions",
-    breadcrumbs: [
-      { label: "Quản trị" },
-      { label: "Quản lí chức vụ" },
-    ],
-  },
-  {
-      path: "/users",
-      breadcrumbs: [
-        { label: "Quản trị" },
-        { label: "Quản lí người dùng" },
-      ],
-  },
-  {
-    path: "/projects",
-    breadcrumbs: [
-      { label: "Quản trị" },
-      { label: "Dự án" },
-    ],
-  },
-  {
-    path: "/settings",
-    breadcrumbs: [{ label: "Cài đặt" }],
-  },
-]
+import { breadcrumbRoutes } from "@/config/navigation"
 
 interface HeaderProps {
   collapsed: boolean
@@ -70,7 +25,7 @@ export default function Header({ collapsed, onToggle, onQuickSearchClick }: Head
     return () => document.removeEventListener("mousedown", handleClick)
   }, [menuOpen])
 
-  const route = routes.find((r) => location.pathname.startsWith(r.path))
+  const route = breadcrumbRoutes.find((r) => location.pathname.startsWith(r.path))
   let crumbs = route?.breadcrumbs ?? [{ label: "Quản Lý Phòng Ban & Dự Án" }]
 
   if (route && location.pathname !== route.path) {

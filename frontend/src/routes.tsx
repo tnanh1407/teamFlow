@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 const DepartmentList = lazy(() => import("./features/department/DepartmentList/DepartmentList"));
 const DepartmentDetail = lazy(() => import("./features/department/DepartmentDetail/DepartmentDetail"));
 const AdminDashboard = lazy(() => import("./features/dashboard/AdminDashboard/AdminDashboard"));
+const SystemNotificationsPage = lazy(() => import("./features/notifications/NotificationsPage"));
 const UserDashboard = lazy(() => import("./features/dashboard/UserDashboard/UserDashboard"));
 
 const positionHome: Record<string, string> = {
@@ -60,6 +61,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserDashboard /></Suspense></RoleRedirect> },
       { path: "dashboard", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><AdminDashboard /></Suspense></RoleRedirect> },
+      { path: "notifications", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><SystemNotificationsPage /></Suspense></RoleRedirect> },
       { path: "users", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserList /></Suspense></RoleRedirect> },
       { path: "users/:id", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserDetail /></Suspense></RoleRedirect> },
       { path: "departments", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><DepartmentList /></Suspense></RoleRedirect> },

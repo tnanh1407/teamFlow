@@ -3,77 +3,15 @@ import { AnimatePresence, motion } from "framer-motion"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
   LogOut,
-  LayoutDashboard,
-  Shield,
-  Users,
-  Building2,
-  Briefcase,
-  Medal,
-  CheckSquare,
-  Settings,
   ChevronDown,
   ChevronRight,
 } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { showConfirm } from "@/lib/swal"
 import dashboardImg from "@/assets/speedometer.png"
-
-interface ISidebarItem {
-  label: string;
-  icon: LucideIcon;
-  to?: string;
-  children?: ISidebarItem[];
-  roles?: Array<"admin" | "user">;
-}
-
-const sidebarItems: ISidebarItem[] = [
-  {
-    label: "Tổng quan",
-    to: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Quản trị",
-    icon: Shield,
-    children: [
-      {
-        label: "Nhân viên",
-        to: "/users",
-        icon: Briefcase,
-      },
-      {
-        label: "Phòng ban",
-        to: "/departments",
-        icon: Building2,
-      },
-      {
-        label: "Chức vụ",
-        to: "/positions",
-        icon: Medal,
-      },
-      {
-        label: "Dự án",
-        to: "/projects",
-        icon: CheckSquare,
-        roles: ["user"],
-      },
-    ],
-  },
-  {
-    label: "Cài đặt",
-    icon: Settings,
-    children: [
-      {
-        label: "Thông tin cá nhân",
-        to: "/settings",
-        icon: Users,
-      },
-    ],
-  },
-];
+import { sidebarItems, type SidebarItem } from "@/config/navigation"
 interface SidebarItemProps {
-  item: ISidebarItem;
+  item: SidebarItem;
   collapsed: boolean;
 }
 interface SidebarProps {
@@ -166,7 +104,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
 
       return { ...item, children }
     })
-    .filter((item): item is ISidebarItem => item !== null)
+    .filter((item): item is SidebarItem => item !== null)
 
   const handleLogout = async () => {
     const confirmed = await showConfirm({

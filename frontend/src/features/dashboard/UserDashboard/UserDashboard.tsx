@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import userService, { type User } from "@/services/user.service"
 import projectService, { type Project } from "@/services/project.service"
 import departmentService, { type Department } from "@/services/department.service"
-import SystemNotificationsSection from "../components/SystemNotificationsSection"
+import SystemNotificationsSection from "@/features/notifications/components/SystemNotificationsSection"
 
 export default function UserDashboard() {
   const { user } = useAuth()
