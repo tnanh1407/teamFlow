@@ -6,6 +6,7 @@ import { motion } from "motion/react"
 import departmentService, { type Department } from "@/services/department.service"
 import { toast } from "sonner"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import TableStateRow from "@/shared/ui/TableStateRow"
 
 export default function Departments() {
   const navigate = useNavigate()
@@ -317,17 +318,9 @@ export default function Departments() {
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Đang tải...
-                  </td>
-                </tr>
+                <TableStateRow colSpan={5} loading title="Đang tải..." />
               ) : sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Không tìm thấy phòng ban nào
-                  </td>
-                </tr>
+                <TableStateRow colSpan={5} title="Không tìm thấy phòng ban nào" />
               ) : (
                 sorted.map((department) => (
                   <tr

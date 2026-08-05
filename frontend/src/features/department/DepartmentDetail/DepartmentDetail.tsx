@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Briefcase, Building2, Mail, Phone, Users } from "lucide-react"
 import { motion } from "motion/react"
+import LoadingState from "@/shared/ui/LoadingState"
+import EmptyState from "@/shared/ui/EmptyState"
 import departmentService, { type Department } from "@/services/department.service"
 import userService, { type User } from "@/services/user.service"
 import positionService, { type Position } from "@/services/position.service"
@@ -39,27 +41,22 @@ export default function DepartmentDetail() {
   const activeMembers = members.filter((m) => m.status).length
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-500" />
-          <p className="text-sm text-zinc-400">Đang tải...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState />
   }
 
   if (!department) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-4">
-        <p className="text-sm text-zinc-500">Không tìm thấy phòng ban</p>
-        <button
-          onClick={() => navigate("/departments")}
-          className="cursor-pointer rounded-lg border-none bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
-        >
-          Quay lại
-        </button>
-      </div>
+      <EmptyState
+        title="Không tìm thấy phòng ban"
+        action={
+          <button
+            onClick={() => navigate("/departments")}
+            className="cursor-pointer rounded-lg border-none bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+          >
+            Quay lại
+          </button>
+        }
+      />
     )
   }
 
@@ -124,7 +121,10 @@ export default function DepartmentDetail() {
             </div>
             <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {members.length === 0 ? (
-                <p className="px-5 py-12 text-center text-sm text-zinc-400">Chưa có thành viên nào trong phòng ban này</p>
+                <EmptyState
+                  title="Chưa có thành viên nào trong phòng ban này"
+                  className="min-h-48 px-5 py-12"
+                />
               ) : (
                 members.map((m, index) => (
                   <motion.div

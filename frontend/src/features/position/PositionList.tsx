@@ -4,6 +4,7 @@ import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
 import { toast } from "sonner"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import TableStateRow from "@/shared/ui/TableStateRow"
 
 
 interface FormData {
@@ -376,13 +377,9 @@ export default function Positions() {
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">Đang tải...</td>
-                </tr>
+                <TableStateRow colSpan={5} loading title="Đang tải..." />
               ) : sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-zinc-400">Không tìm thấy chức vụ nào</td>
-                </tr>
+                <TableStateRow colSpan={5} title="Không tìm thấy chức vụ nào" />
               ) : (
                 sorted.map((pos) => (
                   <tr key={pos.id} onClick={() => openDetail(pos)} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer">

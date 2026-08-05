@@ -3,6 +3,8 @@ import { CheckCircle2, Edit2, Pin, Plus, Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import systemNotificationService, { type SystemNotification } from "@/services/system-notification.service"
 import { showDeleteConfirm, showSuccessToast } from "@/lib/swal"
+import LoadingState from "@/shared/ui/LoadingState"
+import EmptyState from "@/shared/ui/EmptyState"
 
 type Mode = "view" | "manage"
 
@@ -282,9 +284,12 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
 
       <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
         {loading ? (
-          <p className="px-5 py-8 text-center text-sm text-zinc-400">Đang tải...</p>
+          <LoadingState className="min-h-24" />
         ) : items.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-zinc-400">Chưa có thông báo nào</p>
+          <EmptyState
+            title="Chưa có thông báo nào"
+            className="min-h-24 px-5 py-8"
+          />
         ) : (
           items.map((item) => (
             <article key={item.id} className="px-5 py-4">

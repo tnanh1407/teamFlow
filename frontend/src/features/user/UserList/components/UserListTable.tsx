@@ -1,6 +1,7 @@
 import { type MouseEvent } from "react"
 import { Copy, Fingerprint, Pencil, Trash2 } from "lucide-react"
 import { type User } from "@/services/user.service"
+import TableStateRow from "@/shared/ui/TableStateRow"
 
 interface UserListTableProps {
   loading: boolean
@@ -46,17 +47,9 @@ export default function UserListTable({
 
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {loading ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
-                  Đang tải...
-                </td>
-              </tr>
+              <TableStateRow colSpan={8} loading title="Đang tải..." />
             ) : users.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-zinc-400">
-                  Không tìm thấy người dùng nào
-                </td>
-              </tr>
+              <TableStateRow colSpan={8} title="Không tìm thấy người dùng nào" />
             ) : (
               users.map((item) => {
                 const deptName = deptNameMap.get(item.departmentId || "") || "—"

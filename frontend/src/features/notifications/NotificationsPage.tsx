@@ -1,4 +1,4 @@
-import PageHeader from "@/components/PageHeader"
+import PageHeader from "@/shared/ui/PageHeader"
 import SystemNotificationsSection from "./components/SystemNotificationsSection"
 
 export default function SystemNotificationsPage() {

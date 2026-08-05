@@ -1,0 +1,15 @@
+interface LoadingStateProps {
+  label?: string
+  className?: string
+}
+
+export default function LoadingState({ label = "Đang tải...", className = "min-h-64" }: LoadingStateProps) {
+  return (
+    <div className={`flex items-center justify-center ${className}`}>
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500/30 border-t-blue-500" />
+        <p className="text-sm text-zinc-400">{label}</p>
+      </div>
+    </div>
+  )
+}

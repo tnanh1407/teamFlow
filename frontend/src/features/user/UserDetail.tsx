@@ -7,6 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import LoadingState from "@/shared/ui/LoadingState"
+import EmptyState from "@/shared/ui/EmptyState"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
@@ -377,21 +379,19 @@ export default function UserDetail() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-sm text-zinc-400">Đang tải...</p>
-      </div>
-    )
+    return <LoadingState />
   }
 
   if (!user) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-4">
-        <p className="text-sm text-zinc-500">Không tìm thấy người dùng</p>
-        <button onClick={() => navigate("/users")} className="cursor-pointer rounded-lg border-none bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90">
-          Quay lại
-        </button>
-      </div>
+      <EmptyState
+        title="Không tìm thấy người dùng"
+        action={
+          <button onClick={() => navigate("/users")} className="cursor-pointer rounded-lg border-none bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90">
+            Quay lại
+          </button>
+        }
+      />
     )
   }
 

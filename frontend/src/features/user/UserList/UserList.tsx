@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
-import PageHeader from "@/components/PageHeader"
+import PageHeader from "@/shared/ui/PageHeader"
+import LoadingState from "@/shared/ui/LoadingState"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
@@ -164,11 +165,7 @@ export default function UserList() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-sm text-zinc-400">Đang tải...</p>
-      </div>
-    )
+    return <LoadingState />
   }
 
   return (

@@ -7,6 +7,7 @@ import uploadService from "@/services/upload.service"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
+import TableStateRow from "@/shared/ui/TableStateRow"
 
 interface FormData {
   title: string
@@ -594,17 +595,9 @@ export default function Projects() {
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Đang tải...
-                  </td>
-                </tr>
+                <TableStateRow colSpan={9} loading title="Đang tải..." />
               ) : sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-zinc-400">
-                    Không tìm thấy project nào
-                  </td>
-                </tr>
+                <TableStateRow colSpan={9} title="Không tìm thấy project nào" />
               ) : (
                 sorted.map((project) => {
                   let fileCount = 0

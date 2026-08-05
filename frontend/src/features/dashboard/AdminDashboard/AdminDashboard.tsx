@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import PageHeader from "@/components/PageHeader"
+import PageHeader from "@/shared/ui/PageHeader"
+import LoadingState from "@/shared/ui/LoadingState"
 import StatsGrid from "./components/StatsGrid"
 import GrowthChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
@@ -465,14 +466,7 @@ export default function AdminDashboard() {
   )
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
-          <p className="text-sm text-zinc-400">Đang tải...</p>
-        </div>
-      </div>
-    )
+    return <LoadingState className="h-96" />
   }
 
   return (
