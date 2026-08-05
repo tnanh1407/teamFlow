@@ -47,6 +47,13 @@ const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim();
   return normalized ? normalized : null;
 };
+const isAdminUser = async (userId: string) => {
+  const { rows } = await pool.query<{ role: string }>(
+    `SELECT role FROM users WHERE id = $1`,
+    [userId]
+  );
+  return rows[0]?.role === "admin";
+};
 const toNumberOrNull = (v: unknown): number | null => {
   if (v === undefined || v === null || v === "") return null;
   const n = Number(v);
@@ -206,6 +213,8 @@ class ProjectService {
 
   async create(data: CreateProjectDataInput) {
     if (!data.createdBy) throw new AppError("CreatedBy is required", 400);
+    if (await isAdminUser(data.createdBy)) throw new AppError("Admin cannot be used as a project actor", 400);
+    if (data.assignedBy && await isAdminUser(data.assignedBy)) throw new AppError("Admin cannot be used as a project actor", 400);
 
     // chuẩn hóa lại dữ liệu trước khi đẩy vào db
     const payload = {
@@ -246,7 +255,11 @@ class ProjectService {
     if (data.progress !== undefined) payload.progress = data.progress;
     if (data.startDate !== undefined) payload.startDate = normalizeOptionalText(data.startDate) ?? undefined;
     if (data.dueDate !== undefined) payload.dueDate = normalizeOptionalText(data.dueDate) ?? undefined;
-    if (data.assignedBy !== undefined) payload.assignedBy = normalizeOptionalText(data.assignedBy) ?? undefined;
+    if (data.assignedBy !== undefined) {
+      const nextAssignedBy = normalizeOptionalText(data.assignedBy) ?? undefined;
+      if (nextAssignedBy && await isAdminUser(nextAssignedBy)) throw new AppError("Admin cannot be used as a project actor", 400);
+      payload.assignedBy = nextAssignedBy;
+    }
     if (data.estimatedHours !== undefined) payload.estimatedHours = toNumberOrNull(data.estimatedHours) ?? undefined;
     if (data.actualHours !== undefined) payload.actualHours = toNumberOrNull(data.actualHours) ?? undefined;
     if (data.completedAt !== undefined) payload.completedAt = data.completedAt;

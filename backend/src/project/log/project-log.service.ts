@@ -1,5 +1,6 @@
 import pool from "../../config/database.js";
 import { ProjectLogSchema } from "../../schemas/index.js";
+import { AppError } from "../../utils/errors/app-error.js";
 
 // dữ liệu database
 interface ProjectLogRow {
@@ -24,6 +25,13 @@ const projectLogColumns = ProjectLogSchema.columns;
 const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim();
   return normalized ? normalized : null;
+};
+const isAdminUser = async (userId: string) => {
+  const { rows } = await pool.query<{ role: string }>(
+    `SELECT role FROM users WHERE id = $1`,
+    [userId]
+  );
+  return rows[0]?.role === "admin";
 };
 
 class ProjectLogService {
@@ -64,6 +72,9 @@ class ProjectLogService {
 
   async create(data: CreateProjectLogDataInput) {
     // chuẩn hóa lại dữ liệu trước khi đẩy vào db
+    if (await isAdminUser(data.employeeId)) {
+      throw new AppError("Admin cannot be used as a project actor", 400);
+    }
     const payload = {
       projectId: data.projectId,
       employeeId: data.employeeId,

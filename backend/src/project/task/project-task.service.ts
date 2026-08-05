@@ -44,6 +44,13 @@ const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim();
   return normalized ? normalized : null;
 };
+const isAdminUser = async (userId: string) => {
+  const { rows } = await pool.query<{ role: string }>(
+    `SELECT role FROM users WHERE id = $1`,
+    [userId]
+  );
+  return rows[0]?.role === "admin";
+};
 
 class ProjectTaskService {
   async findAll() {
@@ -98,10 +105,11 @@ class ProjectTaskService {
 
   private async checkAssignable(projectId: string, assignedTo: string) {
     const user = await pool.query(
-      `SELECT department_id FROM users WHERE id = $1`,
+      `SELECT department_id, role FROM users WHERE id = $1`,
       [assignedTo]
     );
     if (!user.rows[0]) throw new AppError("Employee not found", 404);
+    if (user.rows[0].role === "admin") throw new AppError("Admin cannot be assigned to projects", 400);
 
     const projectDept = await pool.query(
       `SELECT 1 FROM project_departments WHERE project_id = $1 AND department_id = $2`,
@@ -115,6 +123,8 @@ class ProjectTaskService {
   async create(data: CreateProjectTaskDataInput) {
     const project = await pool.query(`SELECT id FROM projects WHERE id = $1`, [data.projectId]);
     if (!project.rows[0]) throw new AppError("Project not found", 404);
+    if (await isAdminUser(data.createdBy)) throw new AppError("Admin cannot be used as a project actor", 400);
+    if (await isAdminUser(data.assignedBy)) throw new AppError("Admin cannot be used as a project actor", 400);
 
     const assignedTo = normalizeOptionalText(data.assignedTo);
     if (assignedTo) {
@@ -159,6 +169,9 @@ class ProjectTaskService {
   async update(id: string, data: UpdateProjectTaskDataInput) {
     const task = await this.findById(id);
     if (!task) throw new AppError("Task not found", 404);
+    if (await isAdminUser(task.createdBy) || (task.assignedBy && await isAdminUser(task.assignedBy))) {
+      throw new AppError("Admin cannot be used as a project actor", 400);
+    }
 
     // chuẩn hóa lại dữ liệu trước khi đẩy vào db
     const payload: UpdateProjectTaskDataInput = {};
@@ -181,6 +194,7 @@ class ProjectTaskService {
 
     if (payload.assignedTo !== undefined) {
       if (payload.assignedTo) {
+        if (await isAdminUser(payload.assignedTo)) throw new AppError("Admin cannot be assigned to projects", 400);
         await this.checkAssignable(task.projectId, payload.assignedTo);
         setClauses.push(`assigned_to = $${idx++}, assigned_by = $${idx++}, assigned_at = $${idx++}`);
         values.push(payload.assignedTo, task.assignedBy ?? null, new Date());

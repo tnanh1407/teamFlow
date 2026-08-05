@@ -24,6 +24,13 @@ export type UpdateProjectEmployeeDataInput = Partial<
 const projectEmployeeColumns = ProjectEmployeeSchema.columns;
 
 const normalizeRequiredText = (value: string) => value.trim();
+const isAdminUser = async (userId: string) => {
+  const { rows } = await pool.query<{ role: string }>(
+    `SELECT role FROM users WHERE id = $1`,
+    [userId]
+  );
+  return rows[0]?.role === "admin";
+};
 
 class ProjectEmployeeService {
   async findAll() {
@@ -59,10 +66,11 @@ class ProjectEmployeeService {
 
   private async checkAssignable(projectId: string, employeeId: string) {
     const user = await pool.query(
-      `SELECT department_id FROM users WHERE id = $1`,
+      `SELECT department_id, role FROM users WHERE id = $1`,
       [employeeId]
     );
     if (!user.rows[0]) throw new AppError("Employee not found", 404);
+    if (user.rows[0].role === "admin") throw new AppError("Admin cannot be assigned to projects", 400);
 
     const projectDept = await pool.query(
       `SELECT 1 FROM project_departments WHERE project_id = $1 AND department_id = $2`,
@@ -80,6 +88,10 @@ class ProjectEmployeeService {
       employeeId: data.employeeId,
       role: data.role || "member",
     };
+
+    if (await isAdminUser(payload.employeeId)) {
+      throw new AppError("Admin cannot be assigned to projects", 400);
+    }
 
     await this.checkAssignable(payload.projectId, payload.employeeId);
 

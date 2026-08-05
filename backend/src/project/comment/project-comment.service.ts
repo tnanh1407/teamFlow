@@ -29,6 +29,13 @@ const normalizeOptionalText = (value: string | undefined) => {
   const normalized = value?.trim();
   return normalized ? normalized : null;
 };
+const isAdminUser = async (userId: string) => {
+  const { rows } = await pool.query<{ role: string }>(
+    `SELECT role FROM users WHERE id = $1`,
+    [userId]
+  );
+  return rows[0]?.role === "admin";
+};
 
 class ProjectCommentService {
   async findAll() {
@@ -76,6 +83,10 @@ class ProjectCommentService {
   }
 
   async create(data: CreateProjectCommentDataInput) {
+    if (await isAdminUser(data.employeeId)) {
+      throw new AppError("Admin cannot be used as a project actor", 400);
+    }
+
     const content = normalizeOptionalText(data.content);
     const attachments = normalizeOptionalText(data.attachments);
 

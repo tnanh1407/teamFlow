@@ -51,12 +51,20 @@ const seed = async () => {
     await client.query("DELETE FROM users");
     await client.query(`
       ALTER TABLE users
+      DROP CONSTRAINT IF EXISTS ck_users_admin_assignment
+    `);
+    await client.query(`
+      ALTER TABLE users
       ADD CONSTRAINT ck_users_admin_assignment
       CHECK (
         (role = 'admin' AND department_id IS NULL AND position_id IS NULL)
         OR
         (role <> 'admin' AND department_id IS NOT NULL AND position_id IS NOT NULL)
       )
+    `);
+    await client.query(`
+      ALTER TABLE users
+      DROP CONSTRAINT IF EXISTS ck_users_employee_code_role
     `);
     await client.query(`
       ALTER TABLE users
@@ -74,12 +82,19 @@ const seed = async () => {
       .filter(f => f.endsWith(".json"))
       .map(f => f.replace(".json", ""));
     const has = (name: string) => dataFiles.includes(name);
+    const userSeedData = has("users") ? loadJSON<any>("users") : [];
+    const adminIds = new Set<string>(
+      userSeedData
+        .filter((u) => u.role === "admin")
+        .map((u) => u.id)
+    );
 
     const counts: Record<string, number> = {};
 
     if (has("departments")) {
       const data = loadJSON<any>("departments");
       for (const d of data) {
+        if (d.managerId && adminIds.has(d.managerId)) continue;
         await client.query(
           `INSERT INTO departments (id, name, code, description, is_active, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           [d.id, d.name, d.code, d.description, d.isActive, d.createdAt, d.updatedAt]
@@ -102,16 +117,15 @@ const seed = async () => {
     }
 
     if (has("users")) {
-      const data = loadJSON<any>("users");
-      for (const u of data) {
+      for (const u of userSeedData) {
         const hashed = bcrypt.hashSync(pwdFor(u.username), 10);
         await client.query(
           `INSERT INTO users (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url, last_login, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
           [u.id, u.role === "admin" ? null : u.departmentId, u.role === "admin" ? null : u.positionId, u.role === "admin" ? null : u.employeeCode, u.name, u.email, u.phone, u.birthDate, u.hireDate, u.leaveDate ?? null, u.gender, u.username, hashed, u.role, u.status, u.avatarURL, u.lastLogin, u.createdAt, u.updatedAt]
         );
       }
-      counts.users = data.length;
-      console.log(`Inserted ${data.length} users`);
+      counts.users = userSeedData.length;
+      console.log(`Inserted ${userSeedData.length} users`);
     }
 
     if (has("departments")) {
@@ -129,19 +143,26 @@ const seed = async () => {
 
     if (has("projects")) {
       const data = loadJSON<any>("projects");
+      const validProjectIds = new Set<string>();
       for (const t of data) {
+        if ((t.assignedBy && adminIds.has(t.assignedBy)) || (t.createdBy && adminIds.has(t.createdBy))) {
+          continue;
+        }
         await client.query(
           `INSERT INTO projects (id, title, description, priority, status, progress, start_date, due_date, assigned_by, created_by, estimated_hours, actual_hours, completed_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
           [t.id, t.title, t.description, t.priority, t.status, t.progress, t.startDate, t.dueDate, t.assignedBy, t.createdBy, t.estimatedHours, t.actualHours, t.completedAt || null, t.createdAt, t.updatedAt]
         );
+        validProjectIds.add(t.id);
       }
-      counts.projects = data.length;
-      console.log(`Inserted ${data.length} projects`);
+      counts.projects = validProjectIds.size;
+      console.log(`Inserted ${validProjectIds.size} projects`);
     }
 
     if (has("project_employees")) {
       const data = loadJSON<any>("project_employees");
+      const validProjectIds = new Set((await client.query(`SELECT id FROM projects`)).rows.map((r: any) => r.id));
       for (const te of data) {
+        if (!validProjectIds.has(te.projectId) || adminIds.has(te.employeeId)) continue;
         await client.query(
           `INSERT INTO project_employees (id, project_id, employee_id, role, assigned_at) VALUES ($1,$2,$3,$4,$5)`,
           [te.id, te.projectId, te.employeeId, te.role, te.assignedAt]
@@ -153,7 +174,9 @@ const seed = async () => {
 
     if (has("project_departments")) {
       const data = loadJSON<any>("project_departments");
+      const validProjectIds = new Set((await client.query(`SELECT id FROM projects`)).rows.map((r: any) => r.id));
       for (const td of data) {
+        if (!validProjectIds.has(td.projectId)) continue;
         await client.query(
           `INSERT INTO project_departments (project_id, department_id, assigned_at) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING`,
           [td.projectId, td.departmentId, td.assignedAt]
@@ -165,7 +188,9 @@ const seed = async () => {
 
     if (has("project_comments")) {
       const data = loadJSON<any>("project_comments");
+      const validProjectIds = new Set((await client.query(`SELECT id FROM projects`)).rows.map((r: any) => r.id));
       for (const c of data) {
+        if (!validProjectIds.has(c.projectId) || adminIds.has(c.employeeId)) continue;
         await client.query(
           `INSERT INTO project_comments (id, project_id, employee_id, content, attachments, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           [c.id, c.projectId, c.employeeId, c.content, c.attachments, c.createdAt, c.updatedAt]
@@ -177,7 +202,9 @@ const seed = async () => {
 
     if (has("project_logs")) {
       const data = loadJSON<any>("project_logs");
+      const validProjectIds = new Set((await client.query(`SELECT id FROM projects`)).rows.map((r: any) => r.id));
       for (const l of data) {
+        if (!validProjectIds.has(l.projectId) || adminIds.has(l.employeeId)) continue;
         await client.query(
           `INSERT INTO project_logs (id, project_id, employee_id, action, description, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
           [l.id, l.projectId, l.employeeId, l.action, l.description, l.createdAt]
@@ -189,7 +216,10 @@ const seed = async () => {
 
     if (has("project_tasks")) {
       const data = loadJSON<any>("project_tasks");
+      const validProjectIds = new Set((await client.query(`SELECT id FROM projects`)).rows.map((r: any) => r.id));
       for (const t of data) {
+        if (!validProjectIds.has(t.projectId)) continue;
+        if ((t.assignedTo && adminIds.has(t.assignedTo)) || (t.assignedBy && adminIds.has(t.assignedBy)) || (t.createdBy && adminIds.has(t.createdBy))) continue;
         await client.query(
           `INSERT INTO project_tasks (id, project_id, title, description, status, priority, assigned_to, assigned_by, assigned_at, due_date, created_by, completed_at, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
           [t.id, t.projectId, t.title, t.description, t.status, t.priority, t.assignedTo, t.assignedBy, t.assignedAt, t.dueDate, t.createdBy, t.completedAt || null, t.createdAt, t.updatedAt]
