@@ -221,6 +221,68 @@ ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_created_by FOREIGN KEY
 -- TRIGGERS (auto-update updated_at)
 -- ══════════════════════════════════════════════════════════
 
+-- Project tables cannot reference admin users
+CREATE OR REPLACE FUNCTION ensure_user_is_not_admin(p_user_id UUID, p_error_message TEXT)
+RETURNS VOID AS $$
+BEGIN
+  IF p_user_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM users
+    WHERE id = p_user_id
+      AND role = 'admin'
+  ) THEN
+    RAISE EXCEPTION '%', p_error_message USING ERRCODE = '23514';
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_projects_reject_admin_refs()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM ensure_user_is_not_admin(NEW.created_by, 'Projects cannot reference admin users');
+  PERFORM ensure_user_is_not_admin(NEW.assigned_by, 'Projects cannot reference admin users');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_project_employees_reject_admin_refs()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM ensure_user_is_not_admin(NEW.employee_id, 'Project employees cannot reference admin users');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_project_comments_reject_admin_refs()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM ensure_user_is_not_admin(NEW.employee_id, 'Project comments cannot reference admin users');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_project_logs_reject_admin_refs()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM ensure_user_is_not_admin(NEW.employee_id, 'Project logs cannot reference admin users');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION trg_project_tasks_reject_admin_refs()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM ensure_user_is_not_admin(NEW.assigned_to, 'Project tasks cannot reference admin users');
+  PERFORM ensure_user_is_not_admin(NEW.assigned_by, 'Project tasks cannot reference admin users');
+  PERFORM ensure_user_is_not_admin(NEW.created_by, 'Project tasks cannot reference admin users');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -241,3 +303,13 @@ CREATE OR REPLACE TRIGGER trg_project_comments_updated_at
   BEFORE UPDATE ON project_comments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE OR REPLACE TRIGGER trg_project_tasks_updated_at
   BEFORE UPDATE ON project_tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE OR REPLACE TRIGGER trg_projects_reject_admin_refs
+  BEFORE INSERT OR UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION trg_projects_reject_admin_refs();
+CREATE OR REPLACE TRIGGER trg_project_employees_reject_admin_refs
+  BEFORE INSERT OR UPDATE ON project_employees FOR EACH ROW EXECUTE FUNCTION trg_project_employees_reject_admin_refs();
+CREATE OR REPLACE TRIGGER trg_project_comments_reject_admin_refs
+  BEFORE INSERT OR UPDATE ON project_comments FOR EACH ROW EXECUTE FUNCTION trg_project_comments_reject_admin_refs();
+CREATE OR REPLACE TRIGGER trg_project_logs_reject_admin_refs
+  BEFORE INSERT OR UPDATE ON project_logs FOR EACH ROW EXECUTE FUNCTION trg_project_logs_reject_admin_refs();
+CREATE OR REPLACE TRIGGER trg_project_tasks_reject_admin_refs
+  BEFORE INSERT OR UPDATE ON project_tasks FOR EACH ROW EXECUTE FUNCTION trg_project_tasks_reject_admin_refs();
