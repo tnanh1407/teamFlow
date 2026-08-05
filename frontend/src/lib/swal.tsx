@@ -2,9 +2,36 @@ import Swal from "sweetalert2"
 import withReactContent from "sweetalert2-react-content"
 import type { ReactElement } from "react"
 
-const BaseSwal = Swal.mixin({ theme: "material-ui" })
+const BaseSwal = Swal.mixin({
+  theme: "material-ui",
+  buttonsStyling: false,
+  customClass: {
+    popup: "swal-theme-popup",
+    title: "swal-theme-title",
+    htmlContainer: "swal-theme-html",
+    confirmButton: "swal-theme-confirm",
+    cancelButton: "swal-theme-cancel",
+  },
+})
 
 export const MySwal = withReactContent(BaseSwal)
+
+type AlertVariant = "success" | "error" | "warning" | "info"
+
+async function showAlert(options: {
+  variant: AlertVariant
+  title: string
+  text: string
+  confirmText?: string
+}) {
+  await MySwal.fire({
+    icon: options.variant,
+    title: options.title,
+    text: options.text,
+    confirmButtonText: options.confirmText || "Đóng",
+    confirmButtonColor: "var(--primary)",
+  })
+}
 
 export async function showConfirm(options: {
   title: string
@@ -44,27 +71,10 @@ export async function showDeleteConfirm(options: {
   return result.isConfirmed
 }
 
-export async function showSuccessToast(message: string) {
-  await MySwal.fire({
-    icon: "success",
-    title: message,
-    confirmButtonColor: "#2563eb",
-  })
-}
-
 export async function showErrorAlert(message: string) {
-  await MySwal.fire({
-    icon: "error",
-    title: "Lỗi",
-    text: message,
-    confirmButtonColor: "#2563eb",
-  })
+  await showAlert({ variant: "error", title: "Lỗi", text: message })
 }
 
 export async function showSuccessAlert(message: string) {
-  await MySwal.fire({
-    icon: "success",
-    title: message,
-    confirmButtonColor: "#2563eb",
-  })
+  await showAlert({ variant: "success", title: "Thành công", text: message })
 }

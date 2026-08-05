@@ -131,3 +131,41 @@ body,
   overflow: hidden;
   font-family: "Be Vietnam Pro", sans-serif;
 }
+
+.swal-theme-popup {
+  border: 1px solid var(--border) !important;
+  border-radius: 1.5rem !important;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18) !important;
+}
+
+.swal-theme-title {
+  color: var(--foreground) !important;
+  font-weight: 700 !important;
+}
+
+.swal-theme-html {
+  color: var(--muted-foreground) !important;
+}
+
+.swal-theme-confirm,
+.swal-theme-cancel {
+  border-radius: 0.875rem !important;
+  padding: 0.625rem 1rem !important;
+  font-weight: 600 !important;
+}
+
+.swal2-actions {
+  gap: 0.75rem !important;
+}
+
+.swal-theme-confirm {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+.swal-theme-cancel {
+  background: var(--muted) !important;
+  color: var(--foreground) !important;
+}
