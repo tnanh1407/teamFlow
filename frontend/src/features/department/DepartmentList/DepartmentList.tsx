@@ -4,8 +4,7 @@ import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, FileText, Copy } 
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import { motion } from "motion/react"
 import departmentService, { type Department } from "@/services/department.service"
-import { toast } from "sonner"
-import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
 
 export default function Departments() {
@@ -117,14 +116,14 @@ export default function Departments() {
       try {
         if (isEdit) {
           await departmentService.update(editingDept!.id, result.value)
-          toast.success("Cập nhật thành công")
+          void showSuccessAlert("Cập nhật thành công")
         } else {
           await departmentService.create(result.value)
-          toast.success("Tạo mới thành công")
+          void showSuccessAlert("Tạo mới thành công")
         }
         fetchDepartments()
       } catch {
-        toast.error("Lưu thất bại")
+        void showErrorAlert("Lưu thất bại")
       }
     }
   }
@@ -138,10 +137,10 @@ export default function Departments() {
     if (confirmed) {
       try {
         await departmentService.delete(department.id)
-        toast.success("Xoá thành công")
+        void showSuccessAlert("Xoá thành công")
         fetchDepartments()
       } catch {
-        toast.error("Xoá thất bại")
+        void showErrorAlert("Xoá thất bại")
       }
     }
   }
@@ -335,7 +334,7 @@ export default function Departments() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(department.id)
-                            toast.success("Đã sao chép UUID")
+                            void showSuccessAlert("Đã sao chép UUID")
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy UUID"
@@ -351,7 +350,7 @@ export default function Departments() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(department.code)
-                            toast.success("Đã sao chép mã")
+                            void showSuccessAlert("Đã sao chép mã")
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy"

@@ -3,7 +3,7 @@ import { Bell, Pin, Pencil, Trash2, Send } from "lucide-react";
 import type { User } from "@/services/user.service";
 import type { ProjectMember } from "@/services/project-member.service";
 import projectNotificationService, { type ProjectNotification } from "@/services/project-notification.service";
-import { MySwal, showDeleteConfirm, showSuccessToast } from "@/lib/swal";
+import { MySwal, showDeleteConfirm, showSuccessAlert } from "@/lib/swal";
 
 interface ProjectNotificationsSectionProps {
   projectId: string;
@@ -94,7 +94,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await showSuccessToast("Cap nhat thong bao thanh cong");
+        await showSuccessAlert("Cap nhat thong bao thanh cong");
       } else {
         await projectNotificationService.create({
           projectId,
@@ -104,7 +104,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await showSuccessToast("Tao thong bao thanh cong");
+        await showSuccessAlert("Tao thong bao thanh cong");
       }
       resetForm();
       await loadNotifications();
@@ -136,7 +136,7 @@ export default function ProjectNotificationsSection({
     if (!confirmed) return;
     try {
       await projectNotificationService.delete(notification.id);
-      await showSuccessToast("Xoa thong bao thanh cong");
+      await showSuccessAlert("Xoa thong bao thanh cong");
       await loadNotifications();
     } catch (error: any) {
       await MySwal.fire({

@@ -4,9 +4,8 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
 import { useAuth } from "@/stores/auth"
-import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import LoadingState from "@/shared/ui/LoadingState"
 import EmptyState from "@/shared/ui/EmptyState"
 import userService, { type User } from "@/services/user.service"
@@ -175,7 +174,7 @@ export default function UserDetail() {
       setDepartments(deptRes.data.data)
       setPositions(posRes.data.data)
     } catch {
-      toast.error("Không thể tải thông tin người dùng")
+      void showErrorAlert("Không thể tải thông tin người dùng")
     } finally {
       setLoading(false)
     }
@@ -356,10 +355,10 @@ export default function UserDetail() {
       if (result.value.password?.trim()) payload.password = result.value.password
 
       await userService.update(editingUser.id, payload)
-      toast.success("Cập nhật thành công")
+      void showSuccessAlert("Cập nhật thành công")
       fetchDetail()
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Cập nhật thất bại")
+      void showErrorAlert(err?.response?.data?.message || "Cập nhật thất bại")
     }
   }
 
@@ -374,7 +373,7 @@ export default function UserDetail() {
       await userService.delete(user.id)
       navigate("/users")
     } catch {
-      toast.error("Xoá thất bại")
+      void showErrorAlert("Xoá thất bại")
     }
   }
 

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
 import { Eye, EyeOff } from "lucide-react"
 import Swal from "sweetalert2"
-import { toast } from "sonner"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -12,6 +11,7 @@ import userService from "@/services/user.service"
 import { useAuth } from "@/stores/auth"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
+import { showSuccessAlert } from "@/lib/swal"
 import SystemLogo from "@/shared/ui/SystemLogo"
 
 const loginSchema = z.object({
@@ -61,7 +61,7 @@ export default function Login() {
       const { data } = await userService.login(values)
       const user = data.data.user
       setUser(user)
-      toast.success(`Xin chào ${user.username}!`)
+      void showSuccessAlert(`Xin chào ${user.username}!`)
       navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
     } catch (error) {
       const status = error && typeof error === "object" && "response" in error ? (error as { response?: { status?: number } }).response?.status : undefined

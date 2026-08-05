@@ -48,9 +48,23 @@ export async function showSuccessToast(message: string) {
   await MySwal.fire({
     icon: "success",
     title: message,
-    timer: 1500,
-    showConfirmButton: false,
-    toast: true,
-    position: "top-end",
+    confirmButtonColor: "#2563eb",
+  })
+}
+
+export async function showErrorAlert(message: string) {
+  await MySwal.fire({
+    icon: "error",
+    title: "Lỗi",
+    text: message,
+    confirmButtonColor: "#2563eb",
+  })
+}
+
+export async function showSuccessAlert(message: string) {
+  await MySwal.fire({
+    icon: "success",
+    title: message,
+    confirmButtonColor: "#2563eb",
   })
 }

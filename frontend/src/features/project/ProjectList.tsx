@@ -6,7 +6,7 @@ import projectService, { type Project, type FileAttachment } from "@/services/pr
 import uploadService from "@/services/upload.service"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
 import { useAuth } from "@/stores/auth"
-import { toast } from "sonner"
+import { showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
 import PageSeo from "@/shared/ui/PageSeo"
 
@@ -125,9 +125,9 @@ export default function Projects() {
     try {
       await projectService.delete(project.id)
       fetchProjects()
-      toast.success("Đã xoá project")
+      void showSuccessAlert("Đã xoá project")
     } catch {
-      toast.error("Xoá thất bại")
+      void showErrorAlert("Xoá thất bại")
     }
   }
 
@@ -623,7 +623,7 @@ export default function Projects() {
                             onClick={(e) => {
                               e.stopPropagation()
                               navigator.clipboard.writeText(project.id)
-                              toast.success("Đã sao chép UUID")
+                              void showSuccessAlert("Đã sao chép UUID")
                             }}
                             className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                             title="Copy UUID"

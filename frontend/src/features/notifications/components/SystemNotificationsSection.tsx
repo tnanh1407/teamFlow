@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react"
 import { CheckCircle2, Edit2, Pin, Plus, Trash2 } from "lucide-react"
 import { useAuth } from "@/stores/auth"
 import systemNotificationService, { type SystemNotification } from "@/services/system-notification.service"
-import { showDeleteConfirm, showSuccessToast } from "@/lib/swal"
+import { showDeleteConfirm, showSuccessAlert } from "@/lib/swal"
 import LoadingState from "@/shared/ui/LoadingState"
 import EmptyState from "@/shared/ui/EmptyState"
 
@@ -118,16 +118,16 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
         : true
 
       if (!hasContentChanged) {
-        await showSuccessToast("Không có thay đổi nào")
+        await showSuccessAlert("Không có thay đổi nào")
         return
       }
 
       if (editingId) {
         await systemNotificationService.update(editingId, payload)
-        await showSuccessToast("Đã cập nhật thông báo")
+        await showSuccessAlert("Đã cập nhật thông báo")
       } else {
         await systemNotificationService.create(payload)
-        await showSuccessToast("Đã tạo thông báo")
+        await showSuccessAlert("Đã tạo thông báo")
       }
 
       resetForm()
@@ -146,7 +146,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
 
     try {
       await systemNotificationService.delete(notification.id)
-      await showSuccessToast("Đã xoá thông báo")
+      await showSuccessAlert("Đã xoá thông báo")
       if (editingId === notification.id) resetForm()
       await fetchNotifications()
     } catch {
@@ -158,10 +158,10 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
     try {
       if (notification.isRead) {
         await systemNotificationService.markUnread(notification.id)
-        await showSuccessToast("Đã chuyển sang chưa đọc")
+        await showSuccessAlert("Đã chuyển sang chưa đọc")
       } else {
         await systemNotificationService.markRead(notification.id)
-        await showSuccessToast("Đã đánh dấu đã đọc")
+        await showSuccessAlert("Đã đánh dấu đã đọc")
       }
       await fetchNotifications()
     } catch {

@@ -1,65 +1,58 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
-import { toast } from "sonner"
 import { useAuth } from "@/stores/auth"
-import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
-import userService, { type User } from "@/services/user.service"
-import departmentService, { type Department } from "@/services/department.service"
-import positionService, { type Position } from "@/services/position.service"
+import type { User } from "@/services/user.service"
 import openUserFormDialog from "./components/UserFormDialog"
 import UserListToolbar from "./components/UserListToolbar"
 import UserListTable from "./components/UserListTable"
+import {
+  useUsersQuery,
+  useDepartmentsQuery,
+  usePositionsQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} from "../user.queries"
 
 export default function UserList() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState<User[]>([])
-  const [departments, setDepartments] = useState<Department[]>([])
-  const [positions, setPositions] = useState<Position[]>([])
-  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
 
-  const fetchUsers = async () => {
-    try {
-      const [userRes, deptRes, posRes] = await Promise.all([
-        userService.getAll(),
-        departmentService.getAll(),
-        positionService.getAll(),
-      ])
-
-      setUsers(userRes.data.data)
-      setDepartments(deptRes.data.data)
-      setPositions(posRes.data.data)
-    } catch {
-      toast.error("Không thể tải danh sách người dùng")
-    } finally {
-      setLoading(false)
-    }
-  }
+  const usersQuery = useUsersQuery()
+  const departmentsQuery = useDepartmentsQuery()
+  const positionsQuery = usePositionsQuery()
+  const createUserMutation = useCreateUserMutation()
+  const updateUserMutation = useUpdateUserMutation()
+  const deleteUserMutation = useDeleteUserMutation()
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    if (usersQuery.isError || departmentsQuery.isError || positionsQuery.isError) {
+      void showErrorAlert("Không thể tải dữ liệu người dùng")
+    }
+  }, [usersQuery.isError, departmentsQuery.isError, positionsQuery.isError])
 
   const deptNameMap = useMemo(
-    () => new Map(departments.map((d) => [d.id, d.name] as const)),
-    [departments]
+    () => new Map((departmentsQuery.data ?? []).map((d) => [d.id, d.name] as const)),
+    [departmentsQuery.data]
   )
   const posNameMap = useMemo(
-    () => new Map(positions.map((p) => [p.id, p.name] as const)),
-    [positions]
+    () => new Map((positionsQuery.data ?? []).map((p) => [p.id, p.name] as const)),
+    [positionsQuery.data]
   )
 
   const visibleUsers = useMemo(() => {
+    const users = usersQuery.data ?? []
     if (currentUser?.role === "admin") return users
     if (currentUser?.position === "manager" && currentUser.departmentId) {
       return users.filter((u) => u.departmentId === currentUser.departmentId)
     }
     return users
-  }, [currentUser, users])
+  }, [currentUser, usersQuery.data])
 
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -98,21 +91,20 @@ export default function UserList() {
     try {
       const result = await openUserFormDialog({
         editingUser,
-        departments,
-        positions,
+        departments: departmentsQuery.data ?? [],
+        positions: positionsQuery.data ?? [],
         onSubmit: async (payload) => {
           if (editingUser) {
-            await userService.update(editingUser.id, payload)
+            await updateUserMutation.mutateAsync({ id: editingUser.id, payload })
           } else {
-            await userService.create(payload)
+            await createUserMutation.mutateAsync(payload)
           }
         },
       })
       if (!result || !result.changed) return
-      toast.success(editingUser ? "Cập nhật thành công" : "Tạo mới thành công")
-      fetchUsers()
+      void showSuccessAlert(editingUser ? "Cập nhật thành công" : "Tạo mới thành công")
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Lưu thất bại")
+      void showErrorAlert(err?.response?.data?.message || "Lưu thất bại")
     }
   }
 
@@ -125,11 +117,10 @@ export default function UserList() {
     if (!confirmed) return
 
     try {
-      await userService.delete(user.id)
-      toast.success("Xoá thành công")
-      fetchUsers()
+      await deleteUserMutation.mutateAsync(user.id)
+      void showSuccessAlert("Xoá thành công")
     } catch {
-      toast.error("Xoá thất bại")
+      void showErrorAlert("Xoá thất bại")
     }
   }
 
@@ -153,16 +144,20 @@ export default function UserList() {
 
     try {
       const todayKey = new Date().toISOString().slice(0, 10)
-      await userService.update(user.id, {
-        status: nextStatus,
-        leaveDate: nextStatus ? undefined : todayKey,
+      await updateUserMutation.mutateAsync({
+        id: user.id,
+        payload: {
+          status: nextStatus,
+          leaveDate: nextStatus ? undefined : todayKey,
+        },
       })
-      toast.success(nextStatus ? "Kích hoạt thành công" : "Đã vô hiệu người dùng")
-      fetchUsers()
+      void showSuccessAlert(nextStatus ? "Kích hoạt thành công" : "Đã vô hiệu người dùng")
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Cập nhật trạng thái thất bại")
+      void showErrorAlert(err?.response?.data?.message || "Cập nhật trạng thái thất bại")
     }
   }
+
+  const loading = usersQuery.isPending || departmentsQuery.isPending || positionsQuery.isPending
 
   if (loading) {
     return <LoadingState />

@@ -3,9 +3,9 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Camera } from "lucide-react"
-import { toast } from "sonner"
 import { useAuth } from "@/stores/auth"
 import userService, { type User } from "@/services/user.service"
+import { showErrorAlert, showSuccessAlert } from "@/lib/swal"
 
 const profileSchema = z.object({
   firstName: z.string().trim().min(1, "Vui lòng nhập tên"),
@@ -86,7 +86,7 @@ export default function Settings() {
           gender: detail.gender || "other",
         })
       } catch {
-        toast.error("Không thể tải thông tin hồ sơ")
+        void showErrorAlert("Không thể tải thông tin hồ sơ")
       }
     }
 
@@ -102,7 +102,7 @@ export default function Settings() {
     if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Ảnh không được vượt quá 5MB")
+      void showErrorAlert("Ảnh không được vượt quá 5MB")
       return
     }
 
@@ -112,7 +112,7 @@ export default function Settings() {
       setAvatarPreview(preview)
       setAvatarFile(file)
     } catch {
-      toast.error("Cập nhật ảnh thất bại")
+      void showErrorAlert("Cập nhật ảnh thất bại")
       setAvatarPreview(null)
       setAvatarFile(null)
     } finally {
@@ -140,7 +140,7 @@ export default function Settings() {
       if (avatarFile) fd.append("avatar", avatarFile)
 
       await userService.update(profileUser.id, fd)
-      toast.success("Cập nhật hồ sơ thành công")
+      void showSuccessAlert("Cập nhật hồ sơ thành công")
 
       const empRes = await userService.getById(profileUser.id)
       const updated = empRes.data.data
@@ -160,7 +160,7 @@ export default function Settings() {
         gender: updated.gender || "other",
       })
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Cập nhật hồ sơ thất bại")
+      void showErrorAlert(err?.response?.data?.message || "Cập nhật hồ sơ thất bại")
     } finally {
       setSaving(false)
     }

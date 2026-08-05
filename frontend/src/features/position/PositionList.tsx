@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Fingerprint, Copy } from "lucide-react"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
-import { toast } from "sonner"
-import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import { MySwal, showDeleteConfirm, showSuccessAlert } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
 
 
@@ -228,7 +227,7 @@ export default function Positions() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(pos.id)
-                    toast.success("Đã sao chép UUID")
+                    void showSuccessAlert("Đã sao chép UUID")
                   }}
                   className="p-1 rounded text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent shrink-0"
                   title="Copy UUID"
@@ -391,7 +390,7 @@ export default function Positions() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(pos.id)
-                            toast.success("Đã sao chép UUID")
+                            void showSuccessAlert("Đã sao chép UUID")
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy UUID"
