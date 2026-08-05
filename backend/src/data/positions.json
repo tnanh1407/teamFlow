@@ -26,4 +26,14 @@
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
   }
+  ,
+  {
+    "id": "20000000-0000-4000-a000-000000000010",
+    "name": "Leader",
+    "description": "Nguoi phu trach dieu phoi nhom va theo doi tien do cong viec",
+    "level": "Senior",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
 ]

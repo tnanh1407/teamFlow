@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 
 export type AccountRole = "admin" | "user";
-export type AccountPosition = "manager" | "staff" | "intern";
+export type AccountPosition = "manager" | "leader" | "staff" | "intern";
 export type UserGender = "male" | "female" | "other";
 
 export interface User {
@@ -84,6 +84,8 @@ const normalizeUser = (user: BackendUser): User => ({
     (user.position ??
     (user.positionId === "20000000-0000-4000-a000-000000000001"
       ? "manager"
+      : user.positionId === "20000000-0000-4000-a000-000000000010"
+        ? "leader"
       : user.positionId === "20000000-0000-4000-a000-000000000005"
         ? "staff"
         : user.positionId === "20000000-0000-4000-a000-000000000006"

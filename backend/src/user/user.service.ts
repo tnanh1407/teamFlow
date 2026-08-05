@@ -75,6 +75,7 @@ const normalizePositionFromName = (value: string | undefined) => {
   if (!value) return undefined;
   const normalized = value.trim().toLowerCase();
   if (normalized.includes("quản")) return EAccountPosition.MANAGER;
+  if (normalized.includes("leader")) return EAccountPosition.LEADER;
   if (normalized.includes("nhân viên")) return EAccountPosition.STAFF;
   if (normalized.includes("thực tập")) return EAccountPosition.INTERN;
   return undefined;

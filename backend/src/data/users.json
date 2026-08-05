@@ -1049,4 +1049,26 @@
     "updatedAt": "2026-06-15T14:30:00.000Z",
     "leaveDate": null
   }
+  ,
+  {
+    "id": "30000000-0000-4000-a000-000000000051",
+    "departmentId": null,
+    "positionId": "20000000-0000-4000-a000-000000000010",
+    "employeeCode": "IT000008",
+    "name": "Nguyen Van Hieu",
+    "email": "nguyenvanhieu@qlpbda.com",
+    "phone": "0901234051",
+    "birthDate": "1993-05-19",
+    "hireDate": "2024-02-01",
+    "gender": "male",
+    "username": "it.leader",
+    "password": "$2b$10$YGdNkacekZ9ORhRAfQ385u5toWe1oPQhbtkAoHwfdeexxJUSbhG.K",
+    "role": "user",
+    "status": true,
+    "avatarURL": null,
+    "lastLogin": null,
+    "createdAt": "2026-08-05T00:00:00.000Z",
+    "updatedAt": "2026-08-05T00:00:00.000Z",
+    "leaveDate": null
+  }
 ]
