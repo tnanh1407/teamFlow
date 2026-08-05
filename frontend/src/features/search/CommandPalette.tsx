@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import searchService, { type SearchResults } from "@/services/search.service";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/stores/auth";
 
 const EMPTY_RESULTS: SearchResults = { users: [], projects: [], tasks: [], departments: [], positions: [] };
 

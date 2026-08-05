@@ -1,8 +1,8 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
-const Login = lazy(() => import("@/features/auth/Login"));
-const ForgotPassword = lazy(() => import("@/features/auth/ForgotPassword"));
+import Login from "@/features/auth/Login";
+import ForgotPassword from "@/features/auth/ForgotPassword";
 const UserList = lazy(() => import("@/features/user/UserList/UserList"));
 const UserDetail = lazy(() => import("@/features/user/UserDetail"));
 const PositionList = lazy(() => import("@/features/position/PositionList"));
@@ -10,7 +10,7 @@ const ProjectList = lazy(() => import("@/features/project/ProjectList"));
 const Settings = lazy(() => import("@/features/user/Settings"));
 import NotFound from "@/features/user/NotFound";
 const ProjectDetail = lazy(() => import("@/features/project/ProjectDetail"));
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/stores/auth";
 import type { ReactNode } from "react";
 const DepartmentList = lazy(() => import("./features/department/DepartmentList/DepartmentList"));
 const DepartmentDetail = lazy(() => import("./features/department/DepartmentDetail/DepartmentDetail"));
@@ -50,11 +50,11 @@ function RoleRedirect({ children, roles }: { children: ReactNode; roles: string[
 const router = createBrowserRouter([
   {
     path: "login",
-    element: <Suspense fallback={<RouteFallback />}><Login /></Suspense>,
+    element: <Login />,
   },
   {
     path: "forgot-password",
-    element: <Suspense fallback={<RouteFallback />}><ForgotPassword /></Suspense>,
+    element: <ForgotPassword />,
   },
   {
     element: <DashboardLayout />,

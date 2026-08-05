@@ -6,7 +6,8 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
-import { useAuth } from "@/contexts/AuthContext"
+import speedometerImg from "@/assets/speedometer.png"
+import { useAuth } from "@/stores/auth"
 import userService from "@/services/user.service"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
@@ -99,9 +100,11 @@ export default function ForgotPassword() {
         <div className="w-full max-w-[440px]">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground shadow-lg shadow-primary/20 lg:hidden">
-              TF
-            </div>
+            <img
+              src={speedometerImg}
+              alt="Hệ thống quản lý phòng ban và dự án"
+              className="mb-4 h-14 w-14 object-contain drop-shadow-sm lg:hidden"
+            />
             <h1 className="mb-1 mt-2 text-2xl font-bold text-foreground">
               Quên mật khẩu
             </h1>

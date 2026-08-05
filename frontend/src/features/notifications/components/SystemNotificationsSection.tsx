@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { CheckCircle2, Edit2, Pin, Plus, Trash2 } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/stores/auth"
 import systemNotificationService, { type SystemNotification } from "@/services/system-notification.service"
 import { showDeleteConfirm, showSuccessToast } from "@/lib/swal"
 import LoadingState from "@/shared/ui/LoadingState"

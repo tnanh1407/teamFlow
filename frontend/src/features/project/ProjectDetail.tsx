@@ -9,7 +9,7 @@ import projectCommentService, { type ProjectComment } from "@/services/project-c
 import departmentService, { type Department } from "@/services/department.service"
 import userService, { type User } from "@/services/user.service"
 import uploadService from "@/services/upload.service"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/stores/auth"
 import ProjectLogsSection from "./components/ProjectLogsSection"
 import ProjectCommentsSection from "./components/ProjectCommentsSection"
 import ProjectNotificationsSection from "./components/ProjectNotificationsSection"

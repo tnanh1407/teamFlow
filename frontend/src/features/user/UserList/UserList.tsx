@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/stores/auth"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"

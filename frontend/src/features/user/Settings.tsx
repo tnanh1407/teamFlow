@@ -4,7 +4,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Camera } from "lucide-react"
 import { toast } from "sonner"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/stores/auth"
 import userService, { type User } from "@/services/user.service"
 
 const profileSchema = z.object({
