@@ -30,6 +30,8 @@ const normalizePosition = (value: string | undefined) => {
 const seed = async () => {
   const client = await pool.connect();
   try {
+    const leaderPositionId = "20000000-0000-4000-a000-000000000010";
+
     await client.query(`ALTER TYPE Eposition ADD VALUE IF NOT EXISTS 'staff'`);
     await client.query(`ALTER TYPE Eposition ADD VALUE IF NOT EXISTS 'intern'`);
     await client.query("BEGIN");
@@ -60,9 +62,11 @@ const seed = async () => {
       ALTER TABLE users
       ADD CONSTRAINT ck_users_admin_assignment
       CHECK (
-        (role = 'admin' AND department_id IS NULL AND position_id IS NULL)
+        (role = 'admin' AND department_id IS NULL AND position_id IS NULL AND employee_code IS NULL)
         OR
-        (role <> 'admin' AND department_id IS NOT NULL AND position_id IS NOT NULL)
+        (position_id = '${leaderPositionId}' AND department_id IS NULL AND employee_code IS NULL)
+        OR
+        (role <> 'admin' AND position_id <> '${leaderPositionId}' AND department_id IS NOT NULL AND position_id IS NOT NULL)
       )
     `);
     await client.query(`
@@ -75,7 +79,9 @@ const seed = async () => {
       CHECK (
         (role = 'admin' AND employee_code IS NULL)
         OR
-        (role <> 'admin' AND employee_code IS NOT NULL AND length(trim(employee_code)) > 0)
+        (position_id = '${leaderPositionId}' AND employee_code IS NULL)
+        OR
+        (role <> 'admin' AND position_id <> '${leaderPositionId}' AND employee_code IS NOT NULL AND length(trim(employee_code)) > 0)
       )
     `);
     await client.query("DELETE FROM departments");
@@ -124,7 +130,27 @@ const seed = async () => {
         const hashed = bcrypt.hashSync(pwdFor(u.username), 10);
         await client.query(
           `INSERT INTO users (id, department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url, last_login, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
-          [u.id, u.role === "admin" ? null : u.departmentId, u.role === "admin" ? null : u.positionId, u.role === "admin" ? null : u.employeeCode, u.name, u.email, u.phone, u.birthDate, u.hireDate, u.leaveDate ?? null, u.gender, u.username, hashed, u.role, u.status, u.avatarURL, u.lastLogin, u.createdAt, u.updatedAt]
+          [
+            u.id,
+            u.role === "admin" || u.positionId === leaderPositionId ? null : u.departmentId,
+            u.role === "admin" ? null : u.positionId,
+            u.role === "admin" || u.positionId === leaderPositionId ? null : u.employeeCode,
+            u.name,
+            u.email,
+            u.phone,
+            u.birthDate,
+            u.hireDate,
+            u.leaveDate ?? null,
+            u.gender,
+            u.username,
+            hashed,
+            u.role,
+            u.status,
+            u.avatarURL,
+            u.lastLogin,
+            u.createdAt,
+            u.updatedAt,
+          ]
         );
       }
       counts.users = userSeedData.length;

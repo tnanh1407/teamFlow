@@ -115,15 +115,25 @@ async function resolvePositionById(positionId: string): Promise<EAccountPosition
   return normalizePositionFromName(position.name) ?? null;
 }
 
+async function isLeaderPosition(positionId: string | null | undefined) {
+  if (!positionId) return false;
+  return (await resolvePositionById(positionId)) === EAccountPosition.LEADER;
+}
+
 async function resolveEmployeeCodePrefix(departmentId: string) {
   const department = await departmentService.findById(departmentId);
   if (!department) throw new AppError("Department not found", 404);
   return normalizeRequiredText(department.code).toUpperCase();
 }
 
-async function normalizeAndValidateEmployeeCode(role: EAccountRole, departmentId: string | null, employeeCode: string | null | undefined) {
+async function normalizeAndValidateEmployeeCode(
+  role: EAccountRole,
+  departmentId: string | null,
+  employeeCode: string | null | undefined,
+  positionId?: string | null
+) {
   const normalizedCode = normalizeEmployeeCode(employeeCode);
-  if (role === EAccountRole.ADMIN) {
+  if (role === EAccountRole.ADMIN || (await isLeaderPosition(positionId))) {
     return null;
   }
 
@@ -150,16 +160,24 @@ async function resolveUserAssignments(role: EAccountRole, departmentId: string |
     return { departmentId: null, positionId: null };
   }
 
-  if (!departmentId || !positionId) {
+  if (!positionId) {
+    throw new AppError("Department and position are required for non-admin users", 400);
+  }
+
+  const positionRecord = await findPositionById(positionId);
+  if (!positionRecord) throw new AppError("Position not found", 404);
+  if (!positionRecord.isActive) throw new AppError("Position is inactive", 400);
+
+  if (normalizePositionFromName(positionRecord.name) === EAccountPosition.LEADER) {
+    return { departmentId: null, positionId };
+  }
+
+  if (!departmentId) {
     throw new AppError("Department and position are required for non-admin users", 400);
   }
 
   const department = await departmentService.findById(departmentId);
   if (!department) throw new AppError("Department not found", 404);
-
-  const positionRecord = await findPositionById(positionId);
-  if (!positionRecord) throw new AppError("Position not found", 404);
-  if (!positionRecord.isActive) throw new AppError("Position is inactive", 400);
 
   return { departmentId, positionId };
 }
@@ -309,7 +327,7 @@ class UserService {
   async create(data: CreateUserDataInput) {
     const employment = resolveEmploymentState(data.status, data.leaveDate);
     const assignments = await resolveUserAssignments(data.role, data.departmentId, data.positionId);
-    const employeeCode = await normalizeAndValidateEmployeeCode(data.role, assignments.departmentId, data.employeeCode);
+    const employeeCode = await normalizeAndValidateEmployeeCode(data.role, assignments.departmentId, data.employeeCode, assignments.positionId);
 
     const payload = {
       departmentId: assignments.departmentId,
@@ -398,7 +416,12 @@ class UserService {
     const nextRole = data.role ?? previous.role;
     const assignments = await resolveUserAssignments(nextRole, data.departmentId ?? previous.departmentId, data.positionId ?? previous.positionId);
     const nextEmployeeCode = data.employeeCode ?? previous.employeeCode;
-    const normalizedEmployeeCode = await normalizeAndValidateEmployeeCode(nextRole, assignments.departmentId, nextEmployeeCode);
+    const normalizedEmployeeCode = await normalizeAndValidateEmployeeCode(
+      nextRole,
+      assignments.departmentId,
+      nextEmployeeCode,
+      assignments.positionId
+    );
 
     if (data.departmentId !== undefined || nextRole === EAccountRole.ADMIN) payload.departmentId = assignments.departmentId;
     if (data.positionId !== undefined || nextRole === EAccountRole.ADMIN) payload.positionId = assignments.positionId;

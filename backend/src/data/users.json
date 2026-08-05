@@ -1054,7 +1054,7 @@
     "id": "30000000-0000-4000-a000-000000000051",
     "departmentId": null,
     "positionId": "20000000-0000-4000-a000-000000000010",
-    "employeeCode": "IT000008",
+    "employeeCode": null,
     "name": "Nguyen Van Hieu",
     "email": "nguyenvanhieu@qlpbda.com",
     "phone": "0901234051",

@@ -54,8 +54,9 @@ const inputClass =
   "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
-function buildUserSchema(departments: Department[], allowAdminEmptyFields: boolean) {
+function buildUserSchema(departments: Department[], positions: Position[], allowAdminEmptyFields: boolean) {
   const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
+  const positionNameMap = new Map(positions.map((position) => [position.id, position.name.trim().toLowerCase()] as const))
 
   return z
     .object({
@@ -76,7 +77,24 @@ function buildUserSchema(departments: Department[], allowAdminEmptyFields: boole
     .superRefine((data, ctx) => {
       const employeeCode = (data.employeeCode ?? "").trim().toUpperCase()
       const departmentId = data.departmentId?.trim() || ""
+      const positionId = data.positionId?.trim() || ""
+      const positionName = positionNameMap.get(positionId) ?? ""
+      const isLeader = positionName.includes("leader")
+
       if (allowAdminEmptyFields && !employeeCode && !departmentId) return
+
+      if (isLeader && departmentId) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["departmentId"],
+          message: "Leader không được gắn phòng ban",
+        })
+        return
+      }
+
+      if (isLeader) {
+        return
+      }
 
       const departmentCode = departmentCodeMap.get(departmentId)
       if (!departmentCode) {
@@ -177,7 +195,7 @@ export default async function openUserFormDialog({
   const dataRef: { current: UserFormValues | null } = { current: null }
   const validRef: { current: boolean } = { current: false }
 
-  const formSchema = buildUserSchema(departments, editingUser?.role === "admin")
+  const formSchema = buildUserSchema(departments, positions, editingUser?.role === "admin")
 
   function FormComponent() {
     const {
