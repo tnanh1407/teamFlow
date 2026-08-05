@@ -8,7 +8,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/stores/auth"
 import { showConfirm } from "@/lib/swal"
-import speedometerImg from "@/assets/speedometer.png"
+import SystemLogo from "@/shared/ui/SystemLogo"
 import { sidebarItems, type SidebarItem } from "@/config/navigation"
 interface SidebarItemProps {
   item: SidebarItem;
@@ -128,7 +128,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         }`}
     >
       <div className={`h-16 flex items-center ${collapsed ? "justify-center" : "gap-3"} h-14 px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0`}>
-      <img src={speedometerImg} alt="Hệ thống quản lý phòng ban và dự án" className={`object-contain shrink-0 transition-all duration-300 ease-in-out h-7 w-7`}></img>
+      <SystemLogo className="h-7 w-7 shrink-0 transition-all duration-300 ease-in-out" />
         <AnimatePresence>
           {!collapsed && (
             <motion.span

@@ -6,11 +6,11 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
-import speedometerImg from "@/assets/speedometer.png"
 import { useAuth } from "@/stores/auth"
 import userService from "@/services/user.service"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
+import SystemLogo from "@/shared/ui/SystemLogo"
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
@@ -100,11 +100,7 @@ export default function ForgotPassword() {
         <div className="w-full max-w-[440px]">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
-            <img
-              src={speedometerImg}
-              alt="Hệ thống quản lý phòng ban và dự án"
-              className="mb-4 h-14 w-14 object-contain drop-shadow-sm lg:hidden"
-            />
+            <SystemLogo className="mb-4 h-14 w-14 drop-shadow-sm lg:hidden" />
             <h1 className="mb-1 mt-2 text-2xl font-bold text-foreground">
               Quên mật khẩu
             </h1>
