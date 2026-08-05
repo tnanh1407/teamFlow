@@ -7,10 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
 import { useAuth } from "@/stores/auth"
-import userService from "@/services/user.service"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
 import SystemLogo from "@/shared/ui/SystemLogo"
+import { useForgotPasswordMutation } from "../mutations/user.mutations"
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
@@ -22,6 +22,28 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 export default function ForgotPassword() {
   const navigate = useNavigate()
   const { user, ready } = useAuth()
+  const forgotPasswordMutation = useForgotPasswordMutation({
+    onSuccess: async ({ data: payload }) => {
+      await Swal.fire({
+        icon: "success",
+        title: "Đã gửi yêu cầu",
+        text: payload?.devCode
+          ? `Mã đặt lại mật khẩu trong môi trường dev: ${payload.devCode}`
+          : "Vui lòng kiểm tra email để đặt lại mật khẩu",
+        confirmButtonColor: "var(--primary)",
+      })
+
+      navigate("/login", { replace: true })
+    },
+    onError: () => {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể gửi yêu cầu đặt lại mật khẩu",
+        confirmButtonColor: "var(--primary)",
+      })
+    },
+  })
   const pageSeo: PageSeoProps = {
     title: "Quên mật khẩu",
     description: "Khôi phục mật khẩu cho hệ thống quản lý phòng ban và dự án",
@@ -29,7 +51,7 @@ export default function ForgotPassword() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -45,38 +67,13 @@ export default function ForgotPassword() {
 
   if (!ready) return <AuthPageSkeleton />
 
-  const onSubmit = async (values: ForgotPasswordFormValues) => {
-    try {
-      const { data } = await userService.forgotPassword(values)
-      const devCode = data.data?.devCode
-
-      await Swal.fire({
-        icon: "success",
-        title: "Đã gửi yêu cầu",
-        text: devCode
-          ? `Mã đặt lại mật khẩu trong môi trường dev: ${devCode}`
-          : "Vui lòng kiểm tra email để đặt lại mật khẩu",
-        confirmButtonColor: "#2563eb",
-      })
-
-      navigate("/login", { replace: true })
-    } catch {
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi",
-        text: "Không thể gửi yêu cầu đặt lại mật khẩu",
-        confirmButtonColor: "#2563eb",
-      })
-    }
-  }
-
   const onInvalid = (formErrors: typeof errors) => {
     const firstError = Object.values(formErrors)[0]?.message
     Swal.fire({
       icon: "error",
       title: "Lỗi",
       text: firstError || "Vui lòng kiểm tra lại thông tin",
-      confirmButtonColor: "#2563eb",
+      confirmButtonColor: "var(--primary)",
     })
   }
 
@@ -111,7 +108,11 @@ export default function ForgotPassword() {
 
           {/* Card */}
           <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
-            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-5" noValidate>
+            <form
+              onSubmit={handleSubmit((values) => forgotPasswordMutation.mutate(values), onInvalid)}
+              className="space-y-5"
+              noValidate
+            >
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
                   Email
@@ -154,10 +155,10 @@ export default function ForgotPassword() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={forgotPasswordMutation.isPending}
                 className="h-11 w-full cursor-pointer rounded-lg border-none bg-primary text-base font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Đang xử lý..." : "Gửi yêu cầu"}
+                {forgotPasswordMutation.isPending ? "Đang xử lý..." : "Gửi yêu cầu"}
               </button>
 
               <div className="flex justify-center">

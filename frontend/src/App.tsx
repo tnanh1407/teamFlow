@@ -8,8 +8,8 @@ import { useAuthStore } from "@/stores/auth"
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
+      refetchOnWindowFocus: false, // quay lại tab thì giữ data cũ, chỉ fetch khi bạn chủ động
+      retry: 1, // nếu data lỗi thì  gọi lại 1 lần
     },
   },
 })

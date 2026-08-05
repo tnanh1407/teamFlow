@@ -9,13 +9,13 @@ import openUserFormDialog from "./components/UserFormDialog"
 import UserListToolbar from "./components/UserListToolbar"
 import UserListTable from "./components/UserListTable"
 import {
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
   useUsersQuery,
   useDepartmentsQuery,
   usePositionsQuery,
-  useCreateUserMutation,
-  useUpdateUserMutation,
-  useDeleteUserMutation,
-} from "../user.queries"
+} from "../../mutations/user.mutations"
 
 export default function UserList() {
   const navigate = useNavigate()

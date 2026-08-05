@@ -1,12 +1,33 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import userService, { type User } from "@/services/user.service"
+import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query"
+import userService, {
+  type ForgotPasswordPayload,
+  type LoginPayload,
+  type User,
+} from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
+
+type MutationError = unknown
+type UserPayload = Record<string, unknown> | FormData
 
 export const userQueryKeys = {
   all: ["users"] as const,
   departments: ["users", "departments"] as const,
   positions: ["users", "positions"] as const,
+}
+
+
+
+export function useForgotPasswordMutation(
+  options?: UseMutationOptions<{ message: string; data?: { devCode?: string } }, MutationError, ForgotPasswordPayload>
+) {
+  return useMutation({
+    ...options,
+    mutationFn: async (values: ForgotPasswordPayload) => {
+      const { data } = await userService.forgotPassword(values)
+      return data
+    },
+  })
 }
 
 export function useUsersQuery() {
@@ -46,7 +67,7 @@ export function useCreateUserMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (payload: Record<string, unknown>) => {
+    mutationFn: async (payload: UserPayload) => {
       const { data } = await userService.create(payload)
       return data.data
     },
@@ -60,7 +81,7 @@ export function useUpdateUserMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: Record<string, unknown> }) => {
+    mutationFn: async ({ id, payload }: { id: string; payload: UserPayload }) => {
       const { data } = await userService.update(id, payload)
       return data.data
     },
@@ -79,6 +100,16 @@ export function useDeleteUserMutation() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
+    },
+  })
+}
+
+export function useLoginMutation(options?: UseMutationOptions<User, MutationError, LoginPayload>) {
+  return useMutation({
+    ...options,
+    mutationFn: async (values: LoginPayload) => {
+      const { data } = await userService.login(values)
+      return data.data.user
     },
   })
 }

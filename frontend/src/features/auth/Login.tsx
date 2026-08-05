@@ -7,12 +7,12 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
-import userService from "@/services/user.service"
 import { useAuth } from "@/stores/auth"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
 import { showSuccessAlert } from "@/lib/swal"
 import SystemLogo from "@/shared/ui/SystemLogo"
+import { useLoginMutation } from "../mutations/user.mutations"
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, "Vui lòng nhập tài khoản"),
@@ -34,7 +34,7 @@ export default function Login() {
   const {
     register,
     handleSubmit: handleFormSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -48,23 +48,24 @@ export default function Login() {
     navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
   }, [navigate, ready, user])
 
-  if (!ready) return <AuthPageSkeleton />
-
-  const onSubmit = async (values: LoginFormValues) => {
-    try {
+  const loginMutation = useLoginMutation({
+    onSuccess: async (loggedInUser, values) => {
       if (rememberInfo) {
         localStorage.setItem("rememberedUsername", values.username.trim())
       } else {
         localStorage.removeItem("rememberedUsername")
       }
 
-      const { data } = await userService.login(values)
-      const user = data.data.user
-      setUser(user)
-      void showSuccessAlert(`Xin chào ${user.username}!`)
-      navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
-    } catch (error) {
-      const status = error && typeof error === "object" && "response" in error ? (error as { response?: { status?: number } }).response?.status : undefined
+      setUser(loggedInUser)
+      void showSuccessAlert(`Xin chào ${loggedInUser.username}!`)
+      navigate(loggedInUser.role === "admin" ? "/dashboard" : "/", { replace: true })
+    },
+    onError: (error) => {
+      const status =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { status?: number } }).response?.status
+          : undefined
+
       const message =
         status === 403
           ? "Tài khoản đã nghỉ việc hoặc bị khóa"
@@ -76,10 +77,12 @@ export default function Login() {
         icon: "error",
         title: "Lỗi",
         text: message,
-        confirmButtonColor: "#2563eb",
+        confirmButtonColor: "var(--primary)",
       })
-    }
-  }
+    },
+  })
+
+  if (!ready) return <AuthPageSkeleton />
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -112,7 +115,7 @@ export default function Login() {
 
           {/* Card */}
           <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
-            <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-5" noValidate>
+            <form onSubmit={handleFormSubmit((values) => loginMutation.mutate(values))} className="space-y-5" noValidate>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
                   Tên đăng nhập
@@ -184,10 +187,10 @@ export default function Login() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={loginMutation.isPending}
                 className="h-11 w-full cursor-pointer rounded-lg border-none bg-primary text-base font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
+                {loginMutation.isPending ? "Đang xử lý..." : "Đăng nhập"}
               </button>
             </form>
           </div>
