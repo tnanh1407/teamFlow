@@ -54,14 +54,14 @@ export const projectDepartmentPaths = {
           },
         },
         403: {
-          description: "Không đủ quyền (chỉ Admin)",
-          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+          description: "Không đủ quyền (chỉ Manager)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Manager)" } } },
         },
       },
     },
     post: {
       tags: ["Project Departments"],
-      description: "Gắn một phòng ban vào dự án. Endpoint này thường dùng khi mở rộng phạm vi phối hợp của dự án sang các phòng ban khác trong công ty.",
+      description: "Gắn một phòng ban vào dự án. Endpoint này dùng cho thao tác quản lý dự án, không dành cho admin thao tác trực tiếp như một thành viên dự án.",
       summary: "Gắn phòng ban",
       ...pdAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectDepartmentInput" } } } },
@@ -86,15 +86,15 @@ export const projectDepartmentPaths = {
           content: { "application/json": { example: { message: "Dữ liệu không hợp lệ" } } },
         },
         403: {
-          description: "Không đủ quyền (chỉ Admin)",
-          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+          description: "Không đủ quyền (chỉ Manager)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Manager)" } } },
         },
       },
     },
     delete: {
       tags: ["Project Departments"],
       summary: "Gỡ phòng ban",
-      description: "Gỡ một phòng ban ra khỏi dự án bằng cặp projectId và departmentId. Thích hợp khi phòng ban không còn tham gia hoặc được chuyển sang dự án khác.",
+      description: "Gỡ một phòng ban ra khỏi dự án bằng cặp projectId và departmentId. Thích hợp khi phòng ban không còn tham gia hoặc được chuyển sang dự án khác; admin chỉ xem thông tin, không xoá gắn kết.",
       ...pdAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectDepartmentInput" } } } },
       responses: {
@@ -113,8 +113,8 @@ export const projectDepartmentPaths = {
           content: { "application/json": { example: { message: "Dữ liệu không hợp lệ" } } },
         },
         403: {
-          description: "Không đủ quyền (chỉ Admin)",
-          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin)" } } },
+          description: "Không đủ quyền (chỉ Manager)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Manager)" } } },
         },
       },
     },
@@ -122,7 +122,7 @@ export const projectDepartmentPaths = {
   "/api/project-departments/project/{projectId}": {
     get: {
       tags: ["Project Departments"],
-      description: "Lấy toàn bộ phòng ban đang tham gia một dự án cụ thể để phục vụ phần chi tiết dự án, bảng phân công liên phòng ban và các báo cáo phối hợp công việc.",
+      description: "Lấy toàn bộ phòng ban đang tham gia một dự án cụ thể để phục vụ phần chi tiết dự án, bảng phân công liên phòng ban và các báo cáo phối hợp công việc. Admin vẫn xem được nhưng không được thay đổi dữ liệu.",
       summary: "Phòng ban của dự án",
       ...pdAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],

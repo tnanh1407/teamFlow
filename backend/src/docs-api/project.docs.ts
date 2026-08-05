@@ -114,7 +114,7 @@ export const projectPaths = {
       tags: ["Projects"],
       summary: "Danh sách dự án",
       description:
-        "Admin xem được toàn bộ dự án; nhân viên thường chỉ thấy dự án của mình (phân công, người tạo hoặc cùng phòng ban). " +
+        "Admin xem được toàn bộ dự án và thống kê liên quan; nhân viên thường chỉ thấy dự án của mình (phân công, người tạo hoặc cùng phòng ban). " +
         "Hỗ trợ tìm kiếm theo tiêu đề/mô tả (?q) và lọc theo trạng thái/độ ưu tiên; admin có thể tự giới hạn về dự án của mình với ?mine=true.",
       security: [{ cookieAuth: [] }],
       parameters: [
@@ -161,7 +161,7 @@ export const projectPaths = {
     post: {
       tags: ["Projects"],
       summary: "Tạo dự án",
-      description: "Chỉ Admin được tạo dự án. Người tạo được ghi nhận tự động từ token.",
+      description: "Chỉ Manager được tạo dự án. Người tạo được ghi nhận tự động từ token và admin chỉ có quyền xem, không tham gia thao tác tạo mới.",
       ...projectAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectInput" } } } },
       responses: {
@@ -198,8 +198,8 @@ export const projectPaths = {
           content: { "application/json": { example: { message: "Dữ liệu dự án không hợp lệ hoặc thiếu trường bắt buộc." } } },
         },
         403: {
-          description: "Không đủ quyền vì chỉ Admin được tạo dự án.",
-          content: { "application/json": { example: { message: "Không đủ quyền vì chỉ Admin được tạo dự án." } } },
+          description: "Không đủ quyền vì chỉ Manager được tạo dự án.",
+          content: { "application/json": { example: { message: "Không đủ quyền vì chỉ Manager được tạo dự án." } } },
         },
       },
     },
@@ -248,7 +248,7 @@ export const projectPaths = {
     get: {
       tags: ["Projects"],
       summary: "Lọc theo trạng thái",
-      description: "Admin xem được toàn bộ; nhân viên thường chỉ thấy dự án của mình.",
+      description: "Admin xem được toàn bộ; nhân viên thường chỉ thấy dự án của mình. Endpoint này chỉ phục vụ tra cứu, không cho admin tham gia ghi dữ liệu.",
       ...projectAuth,
       parameters: [{ name: "status", in: "path", required: true, schema: { type: "string", enum: ["todo", "in_progress", "review", "completed", "cancelled"] } }],
       responses: {
@@ -416,7 +416,7 @@ export const projectPaths = {
     patch: {
       tags: ["Projects"],
       summary: "Cập nhật dự án",
-      description: "Chỉ Manager mới được cập nhật dự án (Admin bị chặn bởi thiết kế).",
+      description: "Chỉ Manager mới được cập nhật dự án. Admin vẫn xem được chi tiết nhưng không được sửa nội dung hay tiến độ.",
       ...projectAuth,
       parameters: [{ ...projectIdParam, schema: { ...projectIdParam.schema, example: "50000000-0000-4000-a000-000000000001" } }],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectInput" } } } },
@@ -478,8 +478,8 @@ export const projectPaths = {
           },
         },
         403: {
-          description: "Không đủ quyền vì chỉ Admin được xoá dự án.",
-          content: { "application/json": { example: { message: "Không đủ quyền vì chỉ Admin được xoá dự án." } } },
+          description: "Không đủ quyền vì chỉ Manager được xoá dự án.",
+          content: { "application/json": { example: { message: "Không đủ quyền vì chỉ Manager được xoá dự án." } } },
         },
       },
     },

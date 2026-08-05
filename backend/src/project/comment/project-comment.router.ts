@@ -1,9 +1,10 @@
 import { Router } from "express";
 import projectCommentController from "./project-comment.controller.js";
-import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { asyncHandler } from "../../middlewares/async.middleware.js";
 import { uploadAttachment } from "../../middlewares/upload.middleware.js";
+import { denyAdmin } from "../../middlewares/deny-admin.middleware.js";
 import {
   createProjectCommentSchema,
   updateProjectCommentSchema,
@@ -18,24 +19,28 @@ router.get("/:id", authenticate, asyncHandler(projectCommentController.getById))
 router.post(
   "/upload",
   authenticate,
+  denyAdmin,
   uploadAttachment.array("files", 10),
   asyncHandler(projectCommentController.uploadFiles)
 );
 router.post(
   "/",
   authenticate,
+  denyAdmin,
   validate(createProjectCommentSchema),
   asyncHandler(projectCommentController.create)
 );
 router.patch(
   "/:id",
   authenticate,
+  denyAdmin,
   validate(updateProjectCommentSchema),
   asyncHandler(projectCommentController.update)
 );
 router.delete(
   "/:id",
   authenticate,
+  denyAdmin,
   asyncHandler(projectCommentController.delete)
 );
 

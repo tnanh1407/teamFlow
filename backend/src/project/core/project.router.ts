@@ -1,6 +1,6 @@
 import { Router } from "express";
 import projectController from "./project.controller.js";
-import { authenticate, authorize, authorizeManager } from "../../middlewares/auth.middleware.js";
+import { authenticate, authorizeManager } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { asyncHandler } from "../../middlewares/async.middleware.js";
 import { uploadProjectAvatar } from "../../middlewares/upload.middleware.js";
@@ -8,7 +8,6 @@ import {
   createProjectSchema,
   updateProjectSchema,
 } from "./project.validation.js";
-import { EAccountRole } from "../../enums/account-role.enum.js";
 
 const router = Router();
 
@@ -33,11 +32,11 @@ router.get("/:id", authenticate, asyncHandler(projectController.getById));
 // lấy danh sách nhân viên được gán cho project
 router.get("/:id/employees", authenticate, asyncHandler(projectController.getEmployeesByProject));
 
-// Tạo dự án 
+// Tạo dự án
 router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN),
+  authorizeManager,
   validate(createProjectSchema),
   asyncHandler(projectController.create)
 );
@@ -72,7 +71,7 @@ router.delete(
 router.delete(
   "/:id",
   authenticate,
-  authorize(EAccountRole.ADMIN),
+  authorizeManager,
   asyncHandler(projectController.delete)
 );
 

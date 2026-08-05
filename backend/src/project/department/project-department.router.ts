@@ -1,6 +1,6 @@
 import { Router } from "express";
 import projectDepartmentController from "./project-department.controller.js";
-import { authenticate, authorize } from "../../middlewares/auth.middleware.js";
+import { authenticate, authorize, authorizeManager } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import { asyncHandler } from "../../middlewares/async.middleware.js";
 import {
@@ -19,7 +19,7 @@ router.get("/project/:projectId", authenticate, asyncHandler(projectDepartmentCo
 router.post(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN),
+  authorizeManager,
   validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.create)
 );
@@ -28,7 +28,7 @@ router.post(
 router.delete(
   "/",
   authenticate,
-  authorize(EAccountRole.ADMIN),
+  authorizeManager,
   validate(createProjectDepartmentSchema),
   asyncHandler(projectDepartmentController.delete)
 );

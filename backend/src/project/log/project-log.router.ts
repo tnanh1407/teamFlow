@@ -7,6 +7,7 @@ import {
   createProjectLogSchema,
 } from "./project-log.validation.js";
 import { EAccountRole } from "../../enums/account-role.enum.js";
+import { denyAdmin } from "../../middlewares/deny-admin.middleware.js";
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.get("/:id", authenticate,authorize(EAccountRole.ADMIN), asyncHandler(proj
 router.post(
   "/",
   authenticate,
+  denyAdmin,
   validate(createProjectLogSchema),
   asyncHandler(projectLogController.create)
 );

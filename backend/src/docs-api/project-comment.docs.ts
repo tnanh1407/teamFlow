@@ -66,7 +66,7 @@ export const projectCommentPaths = {
   "/api/project-comments": {
     get: {
       tags: ["Project Comments"],
-      description: "Lấy danh sách tất cả bình luận mà người dùng có quyền xem. Endpoint này phù hợp cho màn hình kiểm duyệt, thống kê tương tác hoặc các view tổng hợp hoạt động trao đổi trong hệ thống.",
+      description: "Lấy danh sách tất cả bình luận mà người dùng có quyền xem. Admin chỉ xem được để theo dõi và thống kê, còn các thao tác bình luận thực tế thuộc về người dùng tham gia dự án.",
       summary: "Danh sách bình luận",
       ...cmtAuth,
       responses: {
@@ -96,7 +96,7 @@ export const projectCommentPaths = {
     post: {
       tags: ["Project Comments"],
       summary: "Tạo bình luận",
-      description: "Bình luận phải có ít nhất content hoặc attachments.",
+      description: "Bình luận phải có ít nhất content hoặc attachments. Admin không được tạo bình luận để tránh tham gia như một thành viên thực thi.",
       ...cmtAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectCommentInput" } } } },
       responses: {
@@ -129,7 +129,7 @@ export const projectCommentPaths = {
   "/api/project-comments/project/{projectId}": {
     get: {
       tags: ["Project Comments"],
-      description: "Lấy các bình luận thuộc về một dự án cụ thể để hiển thị ở màn hình trao đổi của dự án hoặc luồng thảo luận theo công việc.",
+      description: "Lấy các bình luận thuộc về một dự án cụ thể để hiển thị ở màn hình trao đổi của dự án hoặc luồng thảo luận theo công việc. Admin chỉ đọc, không được ghi comment.",
       summary: "Bình luận theo dự án",
       ...cmtAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],
@@ -161,7 +161,7 @@ export const projectCommentPaths = {
   "/api/project-comments/employee/{employeeId}": {
     get: {
       tags: ["Project Comments"],
-      description: "Lấy toàn bộ bình luận do một nhân viên đăng để xem lịch sử trao đổi, dấu vết tham gia và mức độ đóng góp trong các dự án/task.",
+      description: "Lấy toàn bộ bình luận do một nhân viên đăng để xem lịch sử trao đổi, dấu vết tham gia và mức độ đóng góp trong các dự án/task. Admin có thể xem nhưng không được tự ghi bình luận.",
       summary: "Bình luận theo nhân viên",
       ...cmtAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000002" } }],
@@ -196,7 +196,7 @@ export const projectCommentPaths = {
       summary: "Upload file",
       description:
         "Gửi tối đa 10 file (field name: files). Hỗ trợ ảnh, PDF, tài liệu Office, txt, zip... tối đa 50MB/file. " +
-        "Trả về danh sách file với URL Cloudinary — dùng URL này đưa vào attachments khi tạo bình luận.",
+        "Trả về danh sách file với URL Cloudinary — dùng URL này đưa vào attachments khi tạo bình luận. Endpoint này chỉ phục vụ người dùng tham gia dự án, không dành cho admin thao tác ghi comment.",
       ...cmtAuth,
       requestBody: {
         content: {
@@ -240,7 +240,7 @@ export const projectCommentPaths = {
   "/api/project-comments/{id}": {
     get: {
       tags: ["Project Comments"],
-      description: "Lấy chi tiết một bình luận theo ID, bao gồm nội dung, file đính kèm, người tạo và thời điểm tạo/cập nhật.",
+      description: "Lấy chi tiết một bình luận theo ID, bao gồm nội dung, file đính kèm, người tạo và thời điểm tạo/cập nhật. Admin chỉ xem được dữ liệu này.",
       summary: "Chi tiết bình luận",
       ...cmtAuth,
       parameters: [{ ...cmtIdParam, schema: { ...cmtIdParam.schema, example: "70000000-0000-4000-a000-000000000001" } }],
@@ -272,7 +272,7 @@ export const projectCommentPaths = {
     },
     patch: {
       tags: ["Project Comments"],
-      description: "Cập nhật nội dung hoặc danh sách file đính kèm của một bình luận hiện có. Dùng khi người dùng cần sửa lại nội dung trao đổi hoặc cập nhật tài liệu liên quan.",
+      description: "Cập nhật nội dung hoặc danh sách file đính kèm của một bình luận hiện có. Dùng khi người dùng cần sửa lại nội dung trao đổi hoặc cập nhật tài liệu liên quan; admin chỉ xem, không sửa comment.",
       summary: "Cập nhật bình luận",
       ...cmtAuth,
       parameters: [cmtIdParam],
@@ -304,7 +304,7 @@ export const projectCommentPaths = {
     },
     delete: {
       tags: ["Project Comments"],
-      description: "Xoá một bình luận khỏi hệ thống theo ID. Thường dùng khi bình luận bị gửi nhầm, sai nội dung hoặc cần dọn dữ liệu không còn hợp lệ.",
+      description: "Xoá một bình luận khỏi hệ thống theo ID. Thường dùng khi bình luận bị gửi nhầm, sai nội dung hoặc cần dọn dữ liệu không còn hợp lệ; admin không được xoá vì không tham gia comment.",
       summary: "Xoá bình luận",
       ...cmtAuth,
       parameters: [cmtIdParam],

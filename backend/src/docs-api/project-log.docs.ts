@@ -50,7 +50,7 @@ export const projectLogPaths = {
     get: {
       tags: ["Project Logs"],
       summary: "Danh sách nhật ký",
-      description: "Chỉ Admin mới xem được nhật ký hoạt động của hệ thống.",
+      description: "Chỉ Admin mới xem được nhật ký hoạt động của hệ thống. Đây là quyền đọc phục vụ thống kê và kiểm tra, không phải quyền tham gia ghi log.",
       ...logAuth,
       responses: {
         200: {
@@ -82,7 +82,7 @@ export const projectLogPaths = {
     post: {
       tags: ["Project Logs"],
       summary: "Ghi nhật ký",
-      description: "Nhật ký thường được ghi tự động khi có thay đổi dự án/task.",
+      description: "Nhật ký thường được ghi tự động khi có thay đổi dự án/task. Admin không được ghi log thủ công để tránh tham gia vào luồng vận hành của project.",
       ...logAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectLogInput" } } } },
       responses: {
@@ -114,7 +114,7 @@ export const projectLogPaths = {
   "/api/project-logs/project/{projectId}": {
     get: {
       tags: ["Project Logs"],
-      description: "Lấy toàn bộ nhật ký liên quan đến một dự án theo ID. Dùng để audit lịch sử thay đổi, xem ai đã tạo/cập nhật/hoàn thành/cancel dự án và phục vụ màn hình lịch sử hoạt động của dự án.",
+      description: "Lấy toàn bộ nhật ký liên quan đến một dự án theo ID. Dùng để audit lịch sử thay đổi, xem ai đã tạo/cập nhật/hoàn thành/cancel dự án và phục vụ màn hình lịch sử hoạt động của dự án. Admin chỉ xem, không ghi mới.",
       summary: "Nhật ký dự án",
       ...logAuth,
       parameters: [{ name: "projectId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "50000000-0000-4000-a000-000000000001" } }],
@@ -149,7 +149,7 @@ export const projectLogPaths = {
   "/api/project-logs/employee/{employeeId}": {
     get: {
       tags: ["Project Logs"],
-      description: "Lấy nhật ký hoạt động gắn với một nhân viên cụ thể để xem người đó đã tạo, cập nhật, được giao hay tương tác với dự án/task nào trong hệ thống.",
+      description: "Lấy nhật ký hoạt động gắn với một nhân viên cụ thể để xem người đó đã tạo, cập nhật, được giao hay tương tác với dự án/task nào trong hệ thống. Admin chỉ xem dữ liệu này.",
       summary: "Nhật ký nhân viên",
       ...logAuth,
       parameters: [{ name: "employeeId", in: "path", required: true, schema: { type: "string", format: "uuid", example: "30000000-0000-4000-a000-000000000001" } }],
@@ -184,7 +184,7 @@ export const projectLogPaths = {
   "/api/project-logs/{id}": {
     get: {
       tags: ["Project Logs"],
-      description: "Xem chi tiết một bản ghi nhật ký theo ID, bao gồm hành động, mô tả, dự án liên quan, nhân viên thực hiện và thời điểm phát sinh.",
+      description: "Xem chi tiết một bản ghi nhật ký theo ID, bao gồm hành động, mô tả, dự án liên quan, nhân viên thực hiện và thời điểm phát sinh. Admin chỉ xem, không chỉnh sửa log.",
       summary: "Chi tiết nhật ký",
       ...logAuth,
       parameters: [logIdParam],

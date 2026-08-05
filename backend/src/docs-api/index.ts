@@ -58,7 +58,7 @@ API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục v
 
 #### 9. Nhật Ký Hoạt Động (Project Logs)
 - Danh sách log (\`GET /api/project-logs\`), theo dự án (\`GET /api/project-logs/project/{projectId}\`), theo nhân viên (\`GET /api/project-logs/employee/{employeeId}\`), chi tiết (\`GET /api/project-logs/{id}\`).
-- Ghi log tự động khi có thay đổi dự án/task; chỉ Admin mới xem được danh sách log.
+- Ghi log tự động khi có thay đổi dự án/task; chỉ Admin mới xem được danh sách log, còn các thao tác ghi log thủ công không dành cho admin.
 
 #### 10. Tìm Kiếm Nhanh Toàn Hệ Thống (Search - Ctrl+K)
 - Tìm kiếm gộp nhân viên, dự án, task, phòng ban, chức vụ trong một lần gọi (\`GET /api/search?q=...\`) — mỗi nhóm tối đa 5 kết quả; nhân viên thường chỉ nhận kết quả trong phạm vi của mình.
@@ -71,8 +71,8 @@ Hệ thống hỗ trợ 2 phương thức xác thực bảo mật song song:
 2. **BearerAuth:** Gửi HTTP Header \`Authorization: Bearer <JWT_TOKEN>\` phù hợp cho Mobile App hoặc các tích hợp bên ngoài.
 
 Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position\` (manager / member):
-- **Admin:** Toàn quyền quản trị nhân sự, phòng ban, chức vụ, dự án và nhật ký hoạt động.
-- **Manager:** Quản lý dự án, tạo/giao task, đánh giá tiến độ và theo dõi nhân viên trong phòng ban của mình.
+- **Admin:** Xem project, log và thống kê tổng quan; không tham gia như người thực thi, không tạo/sửa/xoá dữ liệu dự án.
+- **Manager:** Quản lý dự án, tạo/giao task, phân công phòng ban, đánh giá tiến độ và theo dõi nhân viên trong phòng ban của mình.
 - **User/Member:** Xem dự án được phân công, cập nhật task của mình, bình luận và đăng tải file đính kèm.
 
 ---

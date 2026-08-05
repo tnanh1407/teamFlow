@@ -56,7 +56,7 @@ export const projectEmployeePaths = {
     get: {
       tags: ["Project Employees"],
       summary: "Danh sách phân công",
-      description: "Chỉ Admin hoặc Manager xem được toàn bộ danh sách.",
+      description: "Admin và Manager đều có thể xem danh sách để theo dõi phân công, nhưng chỉ Manager mới được thao tác ghi dữ liệu.",
       ...peAuth,
       responses: {
         200: {
@@ -79,15 +79,15 @@ export const projectEmployeePaths = {
           },
         },
         403: {
-          description: "Không đủ quyền (chỉ Admin/Manager)",
-          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin/Manager)" } } },
+          description: "Không đủ quyền (chỉ Manager)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Manager)" } } },
         },
       },
     },
     post: {
       tags: ["Project Employees"],
       summary: "Thêm nhân viên",
-      description: "Chỉ Admin hoặc Manager được thêm nhân viên.",
+      description: "Chỉ Manager được thêm nhân viên vào dự án. Admin có thể xem danh sách phân công nhưng không được trở thành người tham gia trực tiếp.",
       ...peAuth,
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectEmployeeInput" } } } },
       responses: {
@@ -113,8 +113,8 @@ export const projectEmployeePaths = {
           content: { "application/json": { example: { message: "Dữ liệu không hợp lệ" } } },
         },
         403: {
-          description: "Không đủ quyền (chỉ Admin/Manager)",
-          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin/Manager)" } } },
+          description: "Không đủ quyền (chỉ Manager)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Manager)" } } },
         },
       },
     },
@@ -183,7 +183,7 @@ export const projectEmployeePaths = {
     patch: {
       tags: ["Project Employees"],
       summary: "Cập nhật vai trò",
-      description: "Chỉ Admin hoặc Manager được đổi vai trò.",
+      description: "Chỉ Manager được đổi vai trò phân công. Admin chỉ xem được dữ liệu, không can thiệp vai trò tham gia dự án.",
       ...peAuth,
       parameters: [peIdParam],
       requestBody: { content: { "application/json": { schema: { $ref: "#/components/schemas/ProjectRoleInput" } } } },
@@ -205,15 +205,15 @@ export const projectEmployeePaths = {
           },
         },
         403: {
-          description: "Không đủ quyền (chỉ Admin/Manager)",
-          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Admin/Manager)" } } },
+          description: "Không đủ quyền (chỉ Manager)",
+          content: { "application/json": { example: { message: "Không đủ quyền (chỉ Manager)" } } },
         },
       },
     },
     delete: {
       tags: ["Project Employees"],
       summary: "Xoá phân công",
-      description: "Admin hoặc User (chính người đó) được xoá khỏi dự án.",
+      description: "Chỉ Manager hoặc chính người được gán mới được xoá khỏi dự án. Admin không tham gia trực tiếp nên không có quyền xoá phân công.",
       ...peAuth,
       parameters: [peIdParam],
       responses: {
