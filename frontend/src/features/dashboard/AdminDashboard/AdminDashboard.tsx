@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
 import StatsGrid from "./components/StatsGrid"
-import GrowthChart from "./components/GrowthChart"
+import EmployeeTrendChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
 import ProjectOverviewChart from "./components/ProjectOverviewChart"
 import ContributionBarChart from "./components/ContributionBarChart"
@@ -473,7 +473,7 @@ export default function AdminDashboard() {
       <div className="space-y-8">
       <PageHeader title="Dashboard" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
       <StatsGrid stats={stats} />
-      <GrowthChart data={growthData} currentTotal={activeUsersCount} />
+      <EmployeeTrendChart data={growthData} currentTotal={activeUsersCount} />
       <ProjectOverviewChart
         data={projectOverviewData}
         currentTotal={projects.length}

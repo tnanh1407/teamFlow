@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react"
-import { motion } from "motion/react"
+import { useState } from "react"
 import {
   ResponsiveContainer,
   LineChart,
@@ -11,6 +10,7 @@ import {
   Legend,
 } from "recharts"
 import ChartLegend from "./ChartLegend"
+import ChartCard from "@/shared/ui/ChartCard"
 
 const chartPalette = [
   "var(--chart-1)",
@@ -23,12 +23,10 @@ const chartPalette = [
   "var(--chart-8)",
 ]
 
-interface GrowthChartProps {
-  data: { month: string; active: number; departed: number; totalHires: number; hires: number; leaves: number }[]
-  currentTotal: number
-}
 
-type TimeRangeKey = "all" | "12m" | "6m" | "3m"
+
+
+type TimeRangeKey = "all" | "12m" | "6m" | "3m" 
 
 const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number }> = [
   { key: "all", label: "Tất cả", months: Number.POSITIVE_INFINITY },
@@ -37,15 +35,25 @@ const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number
   { key: "3m", label: "3 tháng", months: 3 },
 ]
 
-function GrowthTooltip({ active, payload }: any) {
+
+// type cho GrowthTooltip 
+interface GrowthPoint {
+  active : number // nhân sự đang làm
+  departed : number // nhân sự đã nghỉ
+  hires : number // nhân sự mới
+  leaves : number // nhân sự đã nghỉ
+}
+
+interface GrowthTooltipProps {
+  active? : boolean
+  payload? : Array<{payload:GrowthPoint }>
+} 
+
+
+function GrowthTooltip({ active, payload }: GrowthTooltipProps) {
   if (!active || !payload?.length) return null
 
-  const point = payload[0].payload as {
-    active: number 
-    departed: number
-    hires: number 
-    leaves: number // nghỉ
-  }
+  const point = payload[0].payload as GrowthPoint
 
   return (
     <div className="min-w-55 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
@@ -87,30 +95,26 @@ function GrowthTooltip({ active, payload }: any) {
   )
 }
 
-export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
-  const [range, setRange] = useState<TimeRangeKey>("12m")
+interface EmployeeTrendChartProps {
+  data: { month: string; active: number; departed: number; totalHires: number; hires: number; leaves: number }[]
+  currentTotal: number
+}
 
-  const visibleData = useMemo(() => {
-    const selectedMonths = timeRangeOptions.find((option) => option.key === range)?.months ?? 12
-    return Number.isFinite(selectedMonths) ? data.slice(-selectedMonths) : data
-  }, [data, range])
+export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrendChartProps) {
+  const [range, setRange] = useState<TimeRangeKey>("12m") // phạm vi thời gian
 
-  const visibleCurrentTotal = visibleData.at(-1)?.active ?? currentTotal
+  const selectedMonths = timeRangeOptions.find((option) => option.key === range)?.months ?? 12
+  const visibleData = Number.isFinite(selectedMonths) ? data.slice(-selectedMonths) : data
 
   if (visibleData.length === 0) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5, duration: 0.4 }}
-      className="rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 shadow-sm"
-    >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 uppercase">BIỀU ĐỒ NHÂN SỰ</h2>
-        </div>
-        <div className="flex items-center gap-3">
+    <ChartCard
+      title="Biểu đồ nhân sự"
+      subtitle="Theo dõi tuyển mới, nghỉ việc và số lượng đang làm theo thời gian"
+      delay={0.5}
+      rightContent={
+        <>
           <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
             {timeRangeOptions.map((option) => (
               <button
@@ -128,11 +132,12 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
             ))}
           </div>
           <span className="text-sm font-medium text-zinc-400">
-            {visibleCurrentTotal} nhân sự hiện tại đang làm việc
+            {currentTotal} nhân sự hiện tại đang làm việc
           </span>
-        </div>
-      </div>
-      <div className="p-5">
+        </>
+      }
+    >
+      <div>
         <ResponsiveContainer width="100%" height={360}>
           <LineChart data={visibleData} margin={{ top: 8, right: 16, left: 24, bottom: 24 }} >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
@@ -143,7 +148,7 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
               axisLine={false}
               height={36}
               label={{
-                value: "Tháng",
+                value: "Thời gian (Tháng / Năm)",
                 position: "bottom",
                 offset: 8,
                 style: { fill: "var(--chart-label-color)" },
@@ -155,7 +160,7 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
               tickLine={true}
               axisLine={true}
               label={{
-                value: "Thành viên",
+                value: "Nhân sự (Người)",
                 angle: -90,
                 position: "insideLeft",
                 offset: 0,
@@ -204,6 +209,6 @@ export default function GrowthChart({ data, currentTotal }: GrowthChartProps) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </motion.div>
+    </ChartCard>
   )
 }

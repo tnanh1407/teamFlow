@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react"
-import { motion } from "motion/react"
 import {
   CartesianGrid,
   Line,
@@ -11,6 +10,7 @@ import {
   YAxis,
 } from "recharts"
 import ChartLegend from "./ChartLegend"
+import ChartCard from "@/shared/ui/ChartCard"
 
 const chartPalette = [
   "var(--chart-1)",
@@ -84,6 +84,8 @@ function ProjectOverviewTooltip({ active, payload }: any) {
 export default function ProjectOverviewChart({
   data,
   currentTotal,
+  completedTotal,
+  incompleteTotal,
 }: ProjectOverviewChartProps) {
   const [range, setRange] = useState<TimeRangeKey>("12m")
 
@@ -95,17 +97,12 @@ export default function ProjectOverviewChart({
   if (visibleData.length === 0) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.6, duration: 0.4 }}
-      className="rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 shadow-sm"
-    >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 uppercase">BIỂU ĐỒ Tổng quan dự án</h2>
-        </div>
-        <div className="flex items-center gap-3">
+    <ChartCard
+      title="Tổng quan dự án"
+      subtitle="Tình trạng và tiến độ dự án theo thời gian"
+      delay={0.6}
+      rightContent={
+        <>
           <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
             {timeRangeOptions.map((option) => (
               <button
@@ -122,11 +119,13 @@ export default function ProjectOverviewChart({
               </button>
             ))}
           </div>
-          <span className="text-sm font-medium text-zinc-400">{currentTotal} dự án hiện tại</span>
-        </div>
-      </div>
-
-      <div className="p-5">
+          <span className="text-sm font-medium text-zinc-400">
+            {currentTotal} dự án, {completedTotal} hoàn thành, {incompleteTotal} chưa hoàn thành
+          </span>
+        </>
+      }
+    >
+      <div>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={visibleData} margin={{ top: 8, right: 16, left: 24, bottom: 24 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
@@ -188,8 +187,7 @@ export default function ProjectOverviewChart({
             />
           </LineChart>
         </ResponsiveContainer>
-
       </div>
-    </motion.div>
+    </ChartCard>
   )
 }
