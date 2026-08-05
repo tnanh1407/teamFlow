@@ -11,6 +11,7 @@ import projectEmployeeRouter from "./project/employee/project-employee.router.js
 import projectCommentRouter from "./project/comment/project-comment.router.js";
 import projectDepartmentRouter from "./project/department/project-department.router.js";
 import projectLogRouter from "./project/log/project-log.router.js";
+import projectNotificationRouter from "./project/notification/project-notification.router.js";
 import projectTaskRouter from "./project/task/project-task.router.js";
 import sessionRouter from "./session/session.router.js";
 import searchRouter from "./search/search.router.js";
@@ -41,6 +42,7 @@ app.use("/api/project-employees", projectEmployeeRouter);
 app.use("/api/project-comments", projectCommentRouter);
 app.use("/api/project-departments", projectDepartmentRouter);
 app.use("/api/project-logs", projectLogRouter);
+app.use("/api/project-notifications", projectNotificationRouter);
 app.use("/api/project-tasks", projectTaskRouter);
 app.use("/api/sessions", sessionRouter);
 app.use("/api/search", searchRouter);

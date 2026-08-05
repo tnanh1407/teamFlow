@@ -8,6 +8,7 @@ import { projectEmployeeSchemas, projectEmployeePaths } from "./project-employee
 import { projectDepartmentSchemas, projectDepartmentPaths } from "./project-department.docs.js";
 import { projectCommentSchemas, projectCommentPaths } from "./project-comment.docs.js";
 import { projectLogSchemas, projectLogPaths } from "./project-log.docs.js";
+import { projectNotificationSchemas, projectNotificationPaths } from "./project-notification.docs.js";
 import { searchSchemas, searchPaths } from "./search.docs.js";
 
 export const apiSpec = {
@@ -109,6 +110,7 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
       ...projectEmployeeSchemas,
       ...projectDepartmentSchemas,
       ...projectCommentSchemas,
+      ...projectNotificationSchemas,
       ...projectLogSchemas,
       ...searchSchemas,
     },
@@ -123,6 +125,7 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
     ...projectEmployeePaths,
     ...projectDepartmentPaths,
     ...projectCommentPaths,
+    ...projectNotificationPaths,
     ...projectLogPaths,
     ...searchPaths,
   },

@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE EUserRole AS ENUM ('user', 'admin');
 CREATE TYPE Eposition AS ENUM ('member', 'manager', 'staff', 'intern');
 CREATE TYPE EProjectStatus AS ENUM ('todo', 'in_progress', 'review', 'completed', 'cancelled');
-CREATE TYPE ENotificationType AS ENUM ('project', 'comment', 'system');
+CREATE TYPE ENotificationType AS ENUM ('announcement', 'reminder', 'update');
 CREATE TYPE EPriority AS ENUM ('low', 'medium', 'high', 'critical');
 CREATE TYPE EGender AS ENUM ('male', 'female', 'other');
 CREATE TYPE EProjectRole AS ENUM ('leader', 'member', 'reviewer');
@@ -148,6 +148,19 @@ CREATE TABLE IF NOT EXISTS project_tasks (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS project_notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL,
+  created_by UUID NOT NULL,
+  title VARCHAR NOT NULL,
+  content TEXT NOT NULL,
+  type ENotificationType DEFAULT 'announcement',
+  priority EPriority DEFAULT 'medium',
+  is_pinned BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
@@ -191,6 +204,9 @@ CREATE INDEX IF NOT EXISTS idx_project_logs_project ON project_logs(project_id);
 CREATE INDEX IF NOT EXISTS idx_project_tasks_project ON project_tasks(project_id);
 CREATE INDEX IF NOT EXISTS idx_project_tasks_assigned_to ON project_tasks(assigned_to);
 CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_project_notifications_project ON project_notifications(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_notifications_created_by ON project_notifications(created_by);
+CREATE INDEX IF NOT EXISTS idx_project_notifications_created_at ON project_notifications(created_at);
 
 -- ══════════════════════════════════════════════════════════
 -- FOREIGN KEYS
@@ -216,6 +232,8 @@ ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_project FOREIGN KEY (p
 ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_assigned_to FOREIGN KEY (assigned_to) REFERENCES users(id);
 ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_assigned_by FOREIGN KEY (assigned_by) REFERENCES users(id);
 ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id);
+ALTER TABLE project_notifications ADD CONSTRAINT fk_project_notifications_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+ALTER TABLE project_notifications ADD CONSTRAINT fk_project_notifications_created_by FOREIGN KEY (created_by) REFERENCES users(id);
 
 -- ══════════════════════════════════════════════════════════
 -- TRIGGERS (auto-update updated_at)
@@ -283,6 +301,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION trg_project_notifications_reject_admin_refs()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM ensure_user_is_not_admin(NEW.created_by, 'Project notifications cannot reference admin users');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -303,6 +329,8 @@ CREATE OR REPLACE TRIGGER trg_project_comments_updated_at
   BEFORE UPDATE ON project_comments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE OR REPLACE TRIGGER trg_project_tasks_updated_at
   BEFORE UPDATE ON project_tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE OR REPLACE TRIGGER trg_project_notifications_updated_at
+  BEFORE UPDATE ON project_notifications FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE OR REPLACE TRIGGER trg_projects_reject_admin_refs
   BEFORE INSERT OR UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION trg_projects_reject_admin_refs();
 CREATE OR REPLACE TRIGGER trg_project_employees_reject_admin_refs
@@ -313,3 +341,5 @@ CREATE OR REPLACE TRIGGER trg_project_logs_reject_admin_refs
   BEFORE INSERT OR UPDATE ON project_logs FOR EACH ROW EXECUTE FUNCTION trg_project_logs_reject_admin_refs();
 CREATE OR REPLACE TRIGGER trg_project_tasks_reject_admin_refs
   BEFORE INSERT OR UPDATE ON project_tasks FOR EACH ROW EXECUTE FUNCTION trg_project_tasks_reject_admin_refs();
+CREATE OR REPLACE TRIGGER trg_project_notifications_reject_admin_refs
+  BEFORE INSERT OR UPDATE ON project_notifications FOR EACH ROW EXECUTE FUNCTION trg_project_notifications_reject_admin_refs();

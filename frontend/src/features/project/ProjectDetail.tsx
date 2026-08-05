@@ -12,6 +12,7 @@ import uploadService from "@/services/upload.service"
 import { useAuth } from "@/contexts/AuthContext"
 import ProjectLogsSection from "./components/ProjectLogsSection"
 import ProjectCommentsSection from "./components/ProjectCommentsSection"
+import ProjectNotificationsSection from "./components/ProjectNotificationsSection"
 import ProjectDepartmentsSection from "./components/ProjectDepartmentsSection"
 import ProjectMembersSection from "./components/ProjectMembersSection"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
@@ -1109,6 +1110,12 @@ export default function ProjectDetail() {
             userDeptId={userDeptId}
             onOpenAddModal={handleOpenAddMember}
             onRemoveMember={removeMember}
+          />
+
+          <ProjectNotificationsSection
+            projectId={id || ""}
+            projectMembers={projectMembers}
+            currentUserId={user?.id}
           />
 
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">

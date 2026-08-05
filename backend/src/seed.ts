@@ -46,6 +46,7 @@ const seed = async () => {
     await client.query("DELETE FROM project_comments");
     await client.query("DELETE FROM project_departments");
     await client.query("DELETE FROM project_employees");
+    await client.query("DELETE FROM project_notifications");
     await client.query("DELETE FROM projects");
     await client.query("UPDATE departments SET manager_id = NULL");
     await client.query("DELETE FROM users");
@@ -227,6 +228,21 @@ const seed = async () => {
       }
       counts.project_tasks = data.length;
       console.log(`Inserted ${data.length} project_tasks`);
+    }
+
+    if (has("project_notifications")) {
+      const data = loadJSON<any>("project_notifications");
+      const validProjectIds = new Set((await client.query(`SELECT id FROM projects`)).rows.map((r: any) => r.id));
+      for (const n of data) {
+        if (!validProjectIds.has(n.projectId)) continue;
+        if (!n.createdBy || adminIds.has(n.createdBy)) continue;
+        await client.query(
+          `INSERT INTO project_notifications (id, project_id, created_by, title, content, type, priority, is_pinned, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+          [n.id, n.projectId, n.createdBy, n.title, n.content, n.type, n.priority, n.isPinned, n.createdAt, n.updatedAt]
+        );
+      }
+      counts.project_notifications = data.length;
+      console.log(`Inserted ${data.length} project_notifications`);
     }
 
     await client.query("COMMIT");
