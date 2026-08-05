@@ -9,6 +9,7 @@ import { projectDepartmentSchemas, projectDepartmentPaths } from "./project-depa
 import { projectCommentSchemas, projectCommentPaths } from "./project-comment.docs.js";
 import { projectLogSchemas, projectLogPaths } from "./project-log.docs.js";
 import { projectNotificationSchemas, projectNotificationPaths } from "./project-notification.docs.js";
+import { systemNotificationSchemas, systemNotificationPaths } from "./system-notification.docs.js";
 import { searchSchemas, searchPaths } from "./search.docs.js";
 
 export const apiSpec = {
@@ -25,9 +26,9 @@ API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục v
 #### 1. Quản Lý Tài Khoản & Phân Quyền (Users & Authentication)
 - **Xác thực:** Đăng nhập (\`POST /api/users/login\`), Đăng xuất (\`POST /api/users/logout\`), Đổi mật khẩu (\`PATCH /api/users/updatePs\`), Quên mật khẩu – gửi mã 6 số qua email (\`POST /api/users/forgot-password\`, \`POST /api/users/reset-password\`).
 - **Hồ sơ cá nhân:** Cập nhật ảnh đại diện (\`POST /api/users/me/avatar\`).
-- **Quản trị Nhân viên:** Danh sách phân trang (\`GET /api/users\`), Toàn bộ nhân viên (\`GET /api/users/all\`), Tìm kiếm (\`GET /api/users/search\`), Xem chi tiết (\`GET /api/users/{id}\`), Tạo mới (\`POST /api/users\`), Cập nhật (\`PATCH /api/users/{id}\`), Vô hiệu hoá tài khoản (\`DELETE /api/users/{id}\`).
-- **Trạng thái tài khoản:** Hệ thống lưu đồng thời \`status\` và \`leaveDate\`; nếu nhân viên đã nghỉ việc hoặc bị khoá thì API đăng nhập và middleware xác thực sẽ từ chối truy cập với mã \`403 Forbidden\`.
-- **Lọc theo tiêu chí:** Nhân viên theo phòng ban (\`GET /api/users/department/{departmentId}\`), theo chức vụ (\`GET /api/users/position/{positionId}\`).
+        - **Quản trị Nhân viên:** Danh sách phân trang (\`GET /api/users\`), Toàn bộ nhân viên (\`GET /api/users/all\`), Tìm kiếm (\`GET /api/users/search\`), Xem chi tiết (\`GET /api/users/{id}\`), Tạo mới (\`POST /api/users\`), Cập nhật (\`PATCH /api/users/{id}\`), Vô hiệu hoá tài khoản (\`DELETE /api/users/{id}\`).
+        - **Trạng thái tài khoản:** Hệ thống lưu đồng thời \`status\` và \`leaveDate\`; nếu nhân viên đã nghỉ việc hoặc bị khoá thì API đăng nhập và middleware xác thực sẽ từ chối truy cập với mã \`403 Forbidden\`.
+        - **Lọc theo tiêu chí:** Nhân viên theo phòng ban (\`GET /api/users/department/{departmentId}\`), theo chức vụ (\`GET /api/users/position/{positionId}\`).
 
 #### 2. Quản Lý Phòng Ban (Departments)
 - Quản lý cơ cấu tổ chức doanh nghiệp (\`GET / POST / PATCH / DELETE /api/departments\`).
@@ -61,8 +62,12 @@ API được thiết kế chuẩn hoá theo kiến trúc RESTful nhằm phục v
 - Danh sách log (\`GET /api/project-logs\`), theo dự án (\`GET /api/project-logs/project/{projectId}\`), theo nhân viên (\`GET /api/project-logs/employee/{employeeId}\`), chi tiết (\`GET /api/project-logs/{id}\`).
 - Ghi log tự động khi có thay đổi dự án/task; chỉ Admin mới xem được danh sách log, còn các thao tác ghi log thủ công không dành cho admin.
 
-#### 10. Tìm Kiếm Nhanh Toàn Hệ Thống (Search - Ctrl+K)
-- Tìm kiếm gộp nhân viên, dự án, task, phòng ban, chức vụ trong một lần gọi (\`GET /api/search?q=...\`) — mỗi nhóm tối đa 5 kết quả; nhân viên thường chỉ nhận kết quả trong phạm vi của mình.
+        #### 10. Tìm Kiếm Nhanh Toàn Hệ Thống (Search - Ctrl+K)
+        - Tìm kiếm gộp nhân viên, dự án, task, phòng ban, chức vụ trong một lần gọi (\`GET /api/search?q=...\`) — mỗi nhóm tối đa 5 kết quả; nhân viên thường chỉ nhận kết quả trong phạm vi của mình.
+
+        #### 11. Thông Báo Toàn Hệ Thống (System Notifications)
+        - Admin tạo, cập nhật, ghim hoặc xoá thông báo chung (\`GET /api/system-notifications/manage\`, \`POST /api/system-notifications\`, \`PATCH /api/system-notifications/{id}\`, \`DELETE /api/system-notifications/{id}\`).
+        - Người dùng đăng nhập chỉ xem được thông báo phù hợp với đối tượng áp dụng (\`GET /api/system-notifications\`, \`GET /api/system-notifications/{id}\`).
 
 ---
 
@@ -111,6 +116,7 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
       ...projectDepartmentSchemas,
       ...projectCommentSchemas,
       ...projectNotificationSchemas,
+      ...systemNotificationSchemas,
       ...projectLogSchemas,
       ...searchSchemas,
     },
@@ -126,6 +132,7 @@ Phân quyền (Authorization) dựa trên \`role\` (admin / user) và \`position
     ...projectDepartmentPaths,
     ...projectCommentPaths,
     ...projectNotificationPaths,
+    ...systemNotificationPaths,
     ...projectLogPaths,
     ...searchPaths,
   },

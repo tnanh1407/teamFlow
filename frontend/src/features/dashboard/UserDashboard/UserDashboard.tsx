@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import userService, { type User } from "@/services/user.service"
 import projectService, { type Project } from "@/services/project.service"
 import departmentService, { type Department } from "@/services/department.service"
+import SystemNotificationsSection from "../components/SystemNotificationsSection"
 
 export default function UserDashboard() {
   const { user } = useAuth()
@@ -186,6 +187,8 @@ export default function UserDashboard() {
           </div>
         </div>
       )}
+
+      <SystemNotificationsSection />
 
       {/* Chart Visualizations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

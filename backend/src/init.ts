@@ -16,6 +16,7 @@ const dropAll = async () => {
     DROP TABLE IF EXISTS project_departments CASCADE;
     DROP TABLE IF EXISTS project_employees CASCADE;
     DROP TABLE IF EXISTS project_notifications CASCADE;
+    DROP TABLE IF EXISTS system_notifications CASCADE;
     DROP TABLE IF EXISTS projects CASCADE;
     DROP TABLE IF EXISTS users CASCADE;
     DROP TABLE IF EXISTS departments CASCADE;
@@ -24,6 +25,8 @@ const dropAll = async () => {
     DROP TYPE IF EXISTS Eposition;
     DROP TYPE IF EXISTS EProjectStatus;
     DROP TYPE IF EXISTS ENotificationType;
+    DROP TYPE IF EXISTS ESystemNotificationSource;
+    DROP TYPE IF EXISTS ESystemNotificationAudience;
     DROP TYPE IF EXISTS EPriority;
     DROP TYPE IF EXISTS EGender;
     DROP TYPE IF EXISTS EProjectRole;

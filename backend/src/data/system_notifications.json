@@ -1,0 +1,54 @@
+[
+  {
+    "id": "91000000-0000-4000-a000-000000000001",
+    "createdBy": "30000000-0000-4000-a000-000000000001",
+    "source": "admin",
+    "title": "Bảo trì hệ thống tối nay",
+    "content": "Hệ thống sẽ tạm ngưng truy cập từ 22:00 đến 23:00 để nâng cấp bảo mật và tối ưu hiệu năng.",
+    "type": "announcement",
+    "priority": "high",
+    "targetAudience": "all",
+    "isPinned": true,
+    "createdAt": "2026-08-05T02:00:00.000Z",
+    "updatedAt": "2026-08-05T02:00:00.000Z"
+  },
+  {
+    "id": "91000000-0000-4000-a000-000000000002",
+    "createdBy": "30000000-0000-4000-a000-000000000001",
+    "source": "admin",
+    "title": "Nhắc cập nhật hồ sơ cá nhân",
+    "content": "Toàn bộ nhân sự vui lòng kiểm tra lại email, số điện thoại và ảnh đại diện trước cuối tuần.",
+    "type": "reminder",
+    "priority": "medium",
+    "targetAudience": "user",
+    "isPinned": false,
+    "createdAt": "2026-08-04T03:00:00.000Z",
+    "updatedAt": "2026-08-04T03:00:00.000Z"
+  },
+  {
+    "id": "91000000-0000-4000-a000-000000000003",
+    "createdBy": null,
+    "source": "system",
+    "title": "Cập nhật quy trình đăng nhập",
+    "content": "Hệ thống vừa ghi nhận thay đổi cấu hình đăng nhập để tăng mức độ an toàn cho tài khoản.",
+    "type": "update",
+    "priority": "low",
+    "targetAudience": "all",
+    "isPinned": false,
+    "createdAt": "2026-08-03T06:00:00.000Z",
+    "updatedAt": "2026-08-03T06:00:00.000Z"
+  },
+  {
+    "id": "91000000-0000-4000-a000-000000000004",
+    "createdBy": "30000000-0000-4000-a000-000000000001",
+    "source": "admin",
+    "title": "Thông báo cho quản lí phòng ban",
+    "content": "Các quản lí vui lòng rà soát lại danh sách nhân sự trong tuần này để chuẩn hoá dữ liệu nhân sự.",
+    "type": "announcement",
+    "priority": "high",
+    "targetAudience": "manager",
+    "isPinned": true,
+    "createdAt": "2026-08-02T01:00:00.000Z",
+    "updatedAt": "2026-08-02T01:00:00.000Z"
+  }
+]

@@ -75,6 +75,11 @@ export const ProjectNotificationSchema = {
   columns: `id, project_id, created_by, title, content, type, priority, is_pinned, created_at, updated_at`,
 } as const;
 
+export const SystemNotificationSchema = {
+  table: "system_notifications",
+  columns: `id, created_by, source, title, content, type, priority, target_audience, is_pinned, created_at, updated_at`,
+} as const;
+
 export const ProjectTaskSchema = {
   table: "project_tasks",
   columns: `id, project_id, title, description, status, priority, assigned_to, assigned_by, assigned_at, due_date, created_by, completed_at, created_at, updated_at`,

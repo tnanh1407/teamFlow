@@ -8,6 +8,8 @@ CREATE TYPE EUserRole AS ENUM ('user', 'admin');
 CREATE TYPE Eposition AS ENUM ('member', 'manager', 'staff', 'intern');
 CREATE TYPE EProjectStatus AS ENUM ('todo', 'in_progress', 'review', 'completed', 'cancelled');
 CREATE TYPE ENotificationType AS ENUM ('announcement', 'reminder', 'update');
+CREATE TYPE ESystemNotificationSource AS ENUM ('admin', 'system');
+CREATE TYPE ESystemNotificationAudience AS ENUM ('all', 'user', 'manager', 'staff', 'intern', 'admin');
 CREATE TYPE EPriority AS ENUM ('low', 'medium', 'high', 'critical');
 CREATE TYPE EGender AS ENUM ('male', 'female', 'other');
 CREATE TYPE EProjectRole AS ENUM ('leader', 'member', 'reviewer');
@@ -161,6 +163,20 @@ CREATE TABLE IF NOT EXISTS project_notifications (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS system_notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_by UUID,
+  source ESystemNotificationSource DEFAULT 'admin',
+  title VARCHAR NOT NULL,
+  content TEXT NOT NULL,
+  type ENotificationType DEFAULT 'announcement',
+  priority EPriority DEFAULT 'medium',
+  target_audience ESystemNotificationAudience DEFAULT 'all',
+  is_pinned BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL,
@@ -207,6 +223,10 @@ CREATE INDEX IF NOT EXISTS idx_project_tasks_status ON project_tasks(status);
 CREATE INDEX IF NOT EXISTS idx_project_notifications_project ON project_notifications(project_id);
 CREATE INDEX IF NOT EXISTS idx_project_notifications_created_by ON project_notifications(created_by);
 CREATE INDEX IF NOT EXISTS idx_project_notifications_created_at ON project_notifications(created_at);
+CREATE INDEX IF NOT EXISTS idx_system_notifications_target_audience ON system_notifications(target_audience);
+CREATE INDEX IF NOT EXISTS idx_system_notifications_source ON system_notifications(source);
+CREATE INDEX IF NOT EXISTS idx_system_notifications_created_by ON system_notifications(created_by);
+CREATE INDEX IF NOT EXISTS idx_system_notifications_created_at ON system_notifications(created_at);
 
 -- ══════════════════════════════════════════════════════════
 -- FOREIGN KEYS
@@ -234,6 +254,7 @@ ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_assigned_by FOREIGN KE
 ALTER TABLE project_tasks ADD CONSTRAINT fk_project_tasks_created_by FOREIGN KEY (created_by) REFERENCES users(id);
 ALTER TABLE project_notifications ADD CONSTRAINT fk_project_notifications_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 ALTER TABLE project_notifications ADD CONSTRAINT fk_project_notifications_created_by FOREIGN KEY (created_by) REFERENCES users(id);
+ALTER TABLE system_notifications ADD CONSTRAINT fk_system_notifications_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL;
 
 -- ══════════════════════════════════════════════════════════
 -- TRIGGERS (auto-update updated_at)

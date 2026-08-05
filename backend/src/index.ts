@@ -13,6 +13,7 @@ import projectDepartmentRouter from "./project/department/project-department.rou
 import projectLogRouter from "./project/log/project-log.router.js";
 import projectNotificationRouter from "./project/notification/project-notification.router.js";
 import projectTaskRouter from "./project/task/project-task.router.js";
+import systemNotificationRouter from "./notification/system-notification.router.js";
 import sessionRouter from "./session/session.router.js";
 import searchRouter from "./search/search.router.js";
 import { apiReference } from "@scalar/express-api-reference";
@@ -44,6 +45,7 @@ app.use("/api/project-departments", projectDepartmentRouter);
 app.use("/api/project-logs", projectLogRouter);
 app.use("/api/project-notifications", projectNotificationRouter);
 app.use("/api/project-tasks", projectTaskRouter);
+app.use("/api/system-notifications", systemNotificationRouter);
 app.use("/api/sessions", sessionRouter);
 app.use("/api/search", searchRouter);
 

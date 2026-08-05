@@ -5,6 +5,7 @@ import GrowthChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
 import ProjectOverviewChart from "./components/ProjectOverviewChart"
 import ContributionBarChart from "./components/ContributionBarChart"
+import SystemNotificationsSection from "../components/SystemNotificationsSection"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
@@ -479,6 +480,7 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       <PageHeader title="Dashboard" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
       <StatsGrid stats={stats} />
+      <SystemNotificationsSection mode="manage" />
       <GrowthChart data={growthData} currentTotal={activeUsersCount} />
       <ProjectOverviewChart
         data={projectOverviewData}
