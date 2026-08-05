@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Building2, Briefcase, CheckCircle2, ClipboardList, CircleDashed, UserCheck, UserX, Users, type LucideIcon } from "lucide-react"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
@@ -75,6 +76,24 @@ function getRangeStart(range: TimeRangeKey) {
   return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (selectedMonths - 1), 1))
 }
 
+function getRangeMonths(range: TimeRangeKey) {
+  return timeRangeOptions.find((option) => option.key === range)?.months ?? 12
+}
+
+function getPreviousRangeWindow(range: TimeRangeKey) {
+  const selectedMonths = getRangeMonths(range)
+  if (!Number.isFinite(selectedMonths)) return null
+
+  const today = new Date()
+  const currentStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (selectedMonths - 1), 1))
+  const currentEnd = new Date()
+  const previousEnd = new Date(currentStart)
+  previousEnd.setUTCMilliseconds(previousEnd.getUTCMilliseconds() - 1)
+  const previousStart = new Date(Date.UTC(previousEnd.getUTCFullYear(), previousEnd.getUTCMonth() - (selectedMonths - 1), 1))
+
+  return { currentStart, currentEnd, previousStart, previousEnd }
+}
+
 function isWithinRange(value: string | null | undefined, start: Date | null, end: Date) {
   if (!value) return false
 
@@ -91,6 +110,97 @@ function isBeforeOrAt(value: string | null | undefined, end: Date) {
   if (Number.isNaN(timestamp)) return false
 
   return timestamp <= end.getTime()
+}
+
+function getProjectCompletedAt(project: Project) {
+  return project.completedAt || (project.status === "completed" ? project.updatedAt : null)
+}
+
+function countUsersCreatedInRange(users: User[], start: Date, end: Date) {
+  return users.filter((user) => isWithinRange(user.createdAt, start, end)).length
+}
+
+function countUsersActiveAt(users: User[], end: Date) {
+  return users.filter((user) => isBeforeOrAt(user.hireDate, end) && (!user.leaveDate || new Date(user.leaveDate).getTime() > end.getTime())).length
+}
+
+function countUsersDepartedInRange(users: User[], start: Date, end: Date) {
+  return users.filter((user) => isWithinRange(user.leaveDate, start, end)).length
+}
+
+function countDepartmentsCreatedInRange(departments: Department[], start: Date, end: Date) {
+  return departments.filter((department) => isWithinRange(department.createdAt, start, end)).length
+}
+
+function countPositionsCreatedInRange(positions: Position[], start: Date, end: Date) {
+  return positions.filter((position) => isWithinRange(position.createdAt, start, end)).length
+}
+
+function countProjectsCreatedInRange(projects: Project[], start: Date, end: Date) {
+  return projects.filter((project) => isWithinRange(project.createdAt, start, end)).length
+}
+
+function countCompletedProjectsInRange(projects: Project[], start: Date, end: Date) {
+  return projects.filter((project) => isWithinRange(getProjectCompletedAt(project), start, end)).length
+}
+
+function countIncompleteProjectsInRange(projects: Project[], start: Date, end: Date) {
+  return projects.filter((project) => {
+    const createdInRange = isWithinRange(project.createdAt, start, end)
+    const completedInRange = isWithinRange(getProjectCompletedAt(project), start, end)
+    return createdInRange && !completedInRange
+  }).length
+}
+
+function formatComparisonLabel(range: TimeRangeKey) {
+  if (range === "12m") return "1 năm trước"
+  if (range === "6m") return "6 tháng trước"
+  if (range === "3m") return "3 tháng trước"
+  return ""
+}
+
+function formatComparisonText(currentValue: number, previousValue: number | null, range: TimeRangeKey) {
+  if (range === "all" || previousValue === null) {
+    return {
+      trendText: "Số liệu hệ thống hiện tại",
+      trendDeltaText: "",
+      trendDirection: "flat" as const,
+    }
+  }
+
+  const delta = currentValue - previousValue 
+  const label = formatComparisonLabel(range)
+
+  if (previousValue === 0) {
+    if (currentValue === 0) {
+      return {
+        trendText: `Không đổi so với ${label}`,
+        trendDeltaText: "",
+        trendDirection: "flat" as const,
+      }
+    }
+
+    return {
+      trendText: `Mới so với ${label}`,
+      trendDeltaText: `${delta > 0 ? "+" : ""}${delta.toLocaleString("en-US")}`,
+      trendDirection: delta > 0 ? ("up" as const) : ("down" as const),
+    }
+  }
+
+  const percent = Math.round((delta / previousValue) * 100)
+  if (percent === 0) {
+    return {
+      trendText: `Không đổi so với ${label}`,
+      trendDeltaText: "",
+      trendDirection: "flat" as const,
+    }
+  }
+
+  return {
+    trendText: `${delta > 0 ? "Tăng" : "Giảm"} ${Math.abs(percent)}% so với ${label}`,
+    trendDeltaText: `${delta > 0 ? "+" : ""}${delta.toLocaleString("en-US")}`,
+    trendDirection: delta > 0 ? ("up" as const) : ("down" as const),
+  }
 }
 
 
@@ -406,9 +516,14 @@ interface DashboardStat {
   value: number
   color: string
   icon: LucideIcon
+  trendText: string
+  trendDeltaText: string
+  trendDirection: "up" | "down" | "flat"
+  href: string
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
@@ -472,70 +587,131 @@ export default function AdminDashboard() {
   const incompleteProjectsCount = projects.length - completedProjectsCount
 
   const stats = useMemo(() => {
+    const window = getPreviousRangeWindow(range)
     const rangeStart = getRangeStart(range)
-    const rangeEnd = new Date()
+    const currentRangeStart = rangeStart ?? new Date(0)
+    const rangeEnd = window?.currentEnd ?? new Date()
+    const previousStart = window?.previousStart ?? null
+    const previousEnd = window?.previousEnd ?? null
+
+    const currentPrevious = range === "all" || !previousStart || !previousEnd
+      ? null
+      : {
+          totalAccounts: countUsersCreatedInRange(users, previousStart, previousEnd),
+          activeUsers: countUsersActiveAt(users, previousEnd),
+          departedUsers: countUsersDepartedInRange(users, previousStart, previousEnd),
+          departments: countDepartmentsCreatedInRange(departments, previousStart, previousEnd),
+          positions: countPositionsCreatedInRange(positions, previousStart, previousEnd),
+          completedProjects: countCompletedProjectsInRange(projects, previousStart, previousEnd),
+          totalProjects: countProjectsCreatedInRange(projects, previousStart, previousEnd),
+          incompleteProjects: countIncompleteProjectsInRange(projects, previousStart, previousEnd),
+        }
 
     const filteredStats: DashboardStat[] = [
       {
         label: "Tổng tài khoản",
-        value: range === "all" ? users.length : users.filter((user) => isWithinRange(user.createdAt, rangeStart, rangeEnd)).length,
+        value: range === "all" ? users.length : countUsersCreatedInRange(users, currentRangeStart, rangeEnd),
         color: chartPalette[0],
         icon: Users,
+        href: "/users",
+        ...formatComparisonText(
+          range === "all" ? users.length : countUsersCreatedInRange(users, currentRangeStart, rangeEnd),
+          currentPrevious?.totalAccounts ?? null,
+          range
+        ),
       },
       {
         label: "Đang làm",
         value:
           range === "all"
             ? activeUsersCount
-            : users.filter((user) => isBeforeOrAt(user.hireDate, rangeEnd) && (!user.leaveDate || new Date(user.leaveDate).getTime() > rangeEnd.getTime())).length,
+            : countUsersActiveAt(users, rangeEnd),
         color: chartPalette[1],
         icon: UserCheck,
+        href: "/users",
+        ...formatComparisonText(
+          range === "all" ? activeUsersCount : countUsersActiveAt(users, rangeEnd),
+          currentPrevious?.activeUsers ?? null,
+          range
+        ),
       },
       {
         label: "Đã nghỉ",
-        value: range === "all" ? departedUsersCount : users.filter((user) => isWithinRange(user.leaveDate, rangeStart, rangeEnd)).length,
+        value: range === "all" ? departedUsersCount : countUsersDepartedInRange(users, currentRangeStart, rangeEnd),
         color: chartPalette[2],
         icon: UserX,
+        href: "/users",
+        ...formatComparisonText(
+          range === "all" ? departedUsersCount : countUsersDepartedInRange(users, currentRangeStart, rangeEnd),
+          currentPrevious?.departedUsers ?? null,
+          range
+        ),
       },
       {
         label: "Phòng ban",
-        value: range === "all" ? departments.length : departments.filter((department) => isWithinRange(department.createdAt, rangeStart, rangeEnd)).length,
+        value: range === "all" ? departments.length : countDepartmentsCreatedInRange(departments, currentRangeStart, rangeEnd),
         color: chartPalette[3],
         icon: Building2,
+        href: "/departments",
+        ...formatComparisonText(
+          range === "all" ? departments.length : countDepartmentsCreatedInRange(departments, currentRangeStart, rangeEnd),
+          currentPrevious?.departments ?? null,
+          range
+        ),
       },
       {
         label: "Chức vụ",
-        value: range === "all" ? positionsCount : positions.filter((position) => isWithinRange(position.createdAt, rangeStart, rangeEnd)).length,
+        value: range === "all" ? positionsCount : countPositionsCreatedInRange(positions, currentRangeStart, rangeEnd),
         color: chartPalette[4],
         icon: Briefcase,
+        href: "/positions",
+        ...formatComparisonText(
+          range === "all" ? positionsCount : countPositionsCreatedInRange(positions, currentRangeStart, rangeEnd),
+          currentPrevious?.positions ?? null,
+          range
+        ),
       },
       {
         label: "Dự án hoàn thành",
         value:
           range === "all"
             ? completedProjectsCount
-            : projects.filter((project) => isWithinRange(project.completedAt || (project.status === "completed" ? project.updatedAt : null), rangeStart, rangeEnd)).length,
+            : countCompletedProjectsInRange(projects, currentRangeStart, rangeEnd),
         color: chartPalette[5],
         icon: CheckCircle2,
+        href: "/projects",
+        ...formatComparisonText(
+          range === "all" ? completedProjectsCount : countCompletedProjectsInRange(projects, currentRangeStart, rangeEnd),
+          currentPrevious?.completedProjects ?? null,
+          range
+        ),
       },
       {
         label: "Tổng dự án",
-        value: range === "all" ? projects.length : projects.filter((project) => isWithinRange(project.createdAt, rangeStart, rangeEnd)).length,
+        value: range === "all" ? projects.length : countProjectsCreatedInRange(projects, currentRangeStart, rangeEnd),
         color: chartPalette[6],
         icon: ClipboardList,
+        href: "/projects",
+        ...formatComparisonText(
+          range === "all" ? projects.length : countProjectsCreatedInRange(projects, currentRangeStart, rangeEnd),
+          currentPrevious?.totalProjects ?? null,
+          range
+        ),
       },
       {
         label: "Dự án chưa hoàn thành",
         value:
           range === "all"
             ? incompleteProjectsCount
-            : projects.filter((project) => {
-                const createdInRange = isWithinRange(project.createdAt, rangeStart, rangeEnd)
-                const completedInRange = isWithinRange(project.completedAt || (project.status === "completed" ? project.updatedAt : null), rangeStart, rangeEnd)
-                return createdInRange && !completedInRange
-              }).length,
+            : countIncompleteProjectsInRange(projects, currentRangeStart, rangeEnd),
         color: chartPalette[7],
         icon: CircleDashed,
+        href: "/projects",
+        ...formatComparisonText(
+          range === "all" ? incompleteProjectsCount : countIncompleteProjectsInRange(projects, currentRangeStart, rangeEnd),
+          currentPrevious?.incompleteProjects ?? null,
+          range
+        ),
       },
     ]
 
@@ -568,7 +744,12 @@ export default function AdminDashboard() {
         description="Thống kê tổng quan toàn bộ thông số trong hệ thống TeamFlow"
       />
       <PageHeader title="Dashboard" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
-      <StatsGrid stats={stats} range={range} onRangeChange={setRange} />
+      <StatsGrid
+        stats={stats}
+        range={range}
+        onRangeChange={setRange}
+        onCardClick={(href) => navigate(href)}
+      />
       <EmployeeTrendChart data={growthData} currentTotal={activeUsersCount} />
       <ProjectOverviewChart
         data={projectOverviewData}
