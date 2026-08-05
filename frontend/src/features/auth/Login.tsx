@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form"
 import heroImg from "@/assets/hero.png"
 import userService from "@/services/user.service"
 import { useAuth } from "@/contexts/AuthContext"
+import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
+import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
 
 const loginSchema = z.object({
   username: z.string().trim().min(1, "Vui lòng nhập tài khoản"),
@@ -24,6 +26,10 @@ export default function Login() {
   const savedUsername = localStorage.getItem("rememberedUsername") ?? ""
   const [showPassword, setShowPassword] = useState(false)
   const [rememberInfo, setRememberInfo] = useState(Boolean(savedUsername))
+  const pageSeo: PageSeoProps = {
+    title: "Đăng nhập",
+    description: "Đăng nhập vào hệ thống quản lý phòng ban và dự án",
+  }
   const {
     register,
     handleSubmit: handleFormSubmit,
@@ -40,6 +46,8 @@ export default function Login() {
     if (!ready || !user) return
     navigate(user.role === "admin" ? "/dashboard" : "/", { replace: true })
   }, [navigate, ready, user])
+
+  if (!ready) return <AuthPageSkeleton />
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
@@ -73,11 +81,10 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background text-foreground">
+      <PageSeo {...pageSeo} />
       {/* Left: Hero image (desktop only) */}
-      <div
-        className="hidden lg:flex flex-1 bg-white overflow-hidden"
-      >
+      <div className="hidden flex-1 overflow-hidden border-r border-border bg-muted/30 lg:flex">
         <motion.img
           src={heroImg}
           alt="Hệ Thống Quản Lý Phòng Ban & Dự Án"
@@ -89,34 +96,36 @@ export default function Login() {
       </div>
 
       {/* Right: Login form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-white dark:bg-zinc-900">
-        <div className="w-full max-w-110">
+      <div className="flex flex-1 items-center justify-center bg-background p-6">
+        <div className="w-full max-w-[440px]">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
-
-            <h1 className="text-2xl font-bold mt-6 mb-1 text-zinc-900 dark:text-zinc-100">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground shadow-lg shadow-primary/20 lg:hidden">
+              TF
+            </div>
+            <h1 className="mb-1 mt-2 text-2xl font-bold text-foreground">
               Đăng nhập
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Đăng nhập để tiếp tục quản lý
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm p-6">
+          <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
             <form onSubmit={handleFormSubmit(onSubmit)} className="space-y-5" noValidate>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
                   Tên đăng nhập
                 </label>
                 <input
                   type="text"
                   placeholder="Nhập tên đăng nhập"
                   aria-invalid={Boolean(errors.username)}
-                  className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                  className={`block w-full rounded-lg border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
                     errors.username
                       ? "border-red-400 focus:ring-red-500"
-                      : "border-zinc-300 dark:border-zinc-700 focus:ring-blue-500"
+                      : "border-border"
                   }`}
                   {...register("username")}
                 />
@@ -126,7 +135,7 @@ export default function Login() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
                   Mật khẩu
                 </label>
                 <div className="relative">
@@ -134,17 +143,17 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Nhập mật khẩu"
                     aria-invalid={Boolean(errors.password)}
-                    className={`block w-full rounded-lg border bg-white dark:bg-zinc-800 px-3 py-2.5 pr-10 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:border-transparent transition ${
+                    className={`block w-full rounded-lg border bg-background px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
                       errors.password
                         ? "border-red-400 focus:ring-red-500"
-                        : "border-zinc-300 dark:border-zinc-700 focus:ring-blue-500"
+                        : "border-border"
                     }`}
                     {...register("password")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer bg-transparent border-none p-0"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 cursor-pointer border-none bg-transparent p-0 text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -155,12 +164,12 @@ export default function Login() {
               </div>
 
               <div className="flex items-center justify-between gap-4 -mt-1">
-                <label className="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300 cursor-pointer select-none">
+                <label className="inline-flex cursor-pointer select-none items-center gap-2 text-sm text-muted-foreground">
                   <input
                     type="checkbox"
                     checked={rememberInfo}
                     onChange={(e) => setRememberInfo(e.target.checked)}
-                    className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                   />
                   <span>Lưu thông tin</span>
                 </label>
@@ -168,7 +177,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
-                  className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer bg-transparent border-none"
+                  className="cursor-pointer border-none bg-transparent text-xs text-primary hover:text-primary/80"
                 >
                   Quên mật khẩu?
                 </button>
@@ -177,10 +186,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-11 rounded-lg text-white font-medium text-base border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed transition"
-                style={{
-                  background: "#2563eb",
-                }}
+                className="h-11 w-full cursor-pointer rounded-lg border-none bg-primary text-base font-medium text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
               </button>

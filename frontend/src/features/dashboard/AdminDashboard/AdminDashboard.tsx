@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Building2, Briefcase, CheckCircle2, ClipboardList, CircleDashed, UserCheck, UserX, Users, type LucideIcon } from "lucide-react"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
+import PageSeo from "@/shared/ui/PageSeo"
 import { chartPalette } from "@/shared/ui/chartColors"
 import StatsGrid from "./components/StatsGrid"
 import EmployeeTrendChart from "./components/GrowthChart"
@@ -562,6 +563,10 @@ export default function AdminDashboard() {
 
   return (
       <div className="space-y-8">
+      <PageSeo
+        title="Dashboard Admin"
+        description="Thống kê tổng quan toàn bộ thông số trong hệ thống TeamFlow"
+      />
       <PageHeader title="Dashboard" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
       <StatsGrid stats={stats} range={range} onRangeChange={setRange} />
       <EmployeeTrendChart data={growthData} currentTotal={activeUsersCount} />

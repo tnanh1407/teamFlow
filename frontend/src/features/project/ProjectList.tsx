@@ -8,6 +8,7 @@ import { MySwal, showDeleteConfirm } from "@/lib/swal"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
 import TableStateRow from "@/shared/ui/TableStateRow"
+import PageSeo from "@/shared/ui/PageSeo"
 
 interface FormData {
   title: string
@@ -425,6 +426,10 @@ export default function Projects() {
 
   return (
     <div className="space-y-6">
+      <PageSeo
+        title="Danh sách dự án"
+        description="Quản lý và theo dõi các dự án đang hoạt động trong TeamFlow"
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
