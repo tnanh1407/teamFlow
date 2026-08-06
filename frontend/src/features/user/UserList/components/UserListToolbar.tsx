@@ -31,11 +31,11 @@ export default function UserListToolbar({
             onChange={(e) => onSortChange(e.target.value as UserListToolbarProps["sortBy"])}
             className="h-10 appearance-none rounded-lg border border-border bg-background px-3 pr-9 text-sm font-medium text-foreground outline-none transition-colors hover:bg-muted focus:ring-2 focus:ring-primary/30"
           >
-            <option value="name-asc">Tên: A - Z</option>
-            <option value="name-desc">Tên: Z - A</option>
-            <option value="hire-newest">Tuyển dụng: mới - cũ</option>
-            <option value="hire-oldest">Tuyển dụng: cũ - mới</option>
-            <option value="role">Vai trò</option>
+            <option value="name-asc">Sắp xếp theo tên từ A - Z</option>
+            <option value="name-desc">Sắp xếp theo tên từ Z - A</option>
+            <option value="hire-newest">Sắp xếp Tuyển dụng: mới - cũ</option>
+            <option value="hire-oldest">Sắp xếp Tuyển dụng: cũ - mới</option>
+            <option value="role">Sắp xếp Vai trò</option>
           </select>
           <ChevronDown size={16} className="pointer-events-none absolute right-3 text-muted-foreground" />
         </label>

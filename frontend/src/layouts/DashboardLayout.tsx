@@ -4,10 +4,12 @@ import Sidebar from "@/layout/Sidebar"
 import { useHotkeys } from "react-hotkeys-hook"
 import Header from "@/layout/Header"
 import CommandPalette from "@/features/search/CommandPalette"
+import { useAuthStore } from "@/stores/auth"
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const ready = useAuthStore((state) => state.ready)
   useHotkeys("ctrl+b", (e) => {
     e.preventDefault()
     setCollapsed(c => !c)
@@ -18,11 +20,16 @@ export default function DashboardLayout() {
   })
 
   return (
-    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950">
-      <Sidebar collapsed={collapsed} />
-      <div className="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
-        <Header collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} onQuickSearchClick={() => setPaletteOpen(true)} />
-        <main className="flex-1 overflow-auto p-6">
+    <div className="flex h-screen bg-background text-foreground">
+      <Sidebar collapsed={collapsed} loading={!ready} />
+      <div className="flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+        <Header
+          collapsed={collapsed}
+          loading={!ready}
+          onToggle={() => setCollapsed(!collapsed)}
+          onQuickSearchClick={() => setPaletteOpen(true)}
+        />
+        <main className="flex-1 overflow-auto p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

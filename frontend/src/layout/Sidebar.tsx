@@ -16,8 +16,51 @@ interface SidebarItemProps {
 }
 interface SidebarProps {
   collapsed: boolean;
+  loading?: boolean;
 }
 
+function SkeletonBlock({ className }: { className?: string }) {
+  return <div className={`animate-pulse rounded-lg bg-muted ${className ?? ""}`} />
+}
+
+function SidebarSkeleton({ collapsed }: { collapsed: boolean }) {
+  return (
+    <aside
+      className={`flex min-h-0 shrink-0 flex-col overflow-hidden border-r border-border bg-background transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-[min(85vw,280px)] md:w-[20%] md:min-w-[200px] md:max-w-[280px]"}`}
+    >
+      <div className={`flex h-14 shrink-0 items-center border-b border-border px-4 ${collapsed ? "justify-center" : "gap-3"}`}>
+        <SkeletonBlock className="h-7 w-7 rounded-full" />
+        {!collapsed && <SkeletonBlock className="h-5 w-28" />}
+      </div>
+
+      <div className="flex-1 space-y-2 overflow-y-auto p-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 ${collapsed ? "justify-center" : ""}`}>
+            <SkeletonBlock className="h-4 w-4 shrink-0 rounded-full" />
+            {!collapsed && <SkeletonBlock className="h-4 flex-1" />}
+          </div>
+        ))}
+      </div>
+
+      <div className="shrink-0 border-t border-border p-3">
+        {!collapsed ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 px-1 pb-2">
+              <SkeletonBlock className="h-8 w-8 rounded-full" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <SkeletonBlock className="h-4 w-24" />
+                <SkeletonBlock className="h-3 w-20" />
+              </div>
+            </div>
+            <SkeletonBlock className="h-10 w-full rounded-lg" />
+          </div>
+        ) : (
+          <SkeletonBlock className="h-10 w-full rounded-lg" />
+        )}
+      </div>
+    </aside>
+  )
+}
 
 function SidebarItem({ item, collapsed }: SidebarItemProps) {
   const [open, setOpen] = useState(true);
@@ -91,9 +134,14 @@ function SidebarItem({ item, collapsed }: SidebarItemProps) {
 }
 
 
-export default function Sidebar({ collapsed }: SidebarProps) {
+export default function Sidebar({ collapsed, loading = false }: SidebarProps) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+
+  if (loading) {
+    return <SidebarSkeleton collapsed={collapsed} />
+  }
+
   const visibleItems = sidebarItems
     .map((item) => {
       if (item.roles && user?.role && !item.roles.includes(user.role)) return null
@@ -124,7 +172,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
 
   return (
     <aside
-      className={`flex min-h-0 shrink-0 flex-col overflow-hidden border-r border-border bg-background transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-[20%] min-w-[200px] max-w-[280px]"
+      className={`flex min-h-0 shrink-0 flex-col overflow-hidden border-r border-border bg-background transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-[min(85vw,280px)] md:w-[20%] md:min-w-[200px] md:max-w-[280px]"
         }`}
     >
       <div className={`flex h-14 shrink-0 items-center border-b border-border px-4 ${collapsed ? "justify-center" : "gap-3"}`}>
@@ -144,7 +192,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         </AnimatePresence>
       </div>
 
-      <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto">
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
         {visibleItems.map((item) => (
           <SidebarItem
             key={item.label}

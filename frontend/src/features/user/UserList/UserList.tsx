@@ -32,21 +32,25 @@ export default function UserList() {
   const updateUserMutation = useUpdateUserMutation()
   const deleteUserMutation = useDeleteUserMutation()
 
+  // Nếu bất kỳ nguồn dữ liệu nào lỗi, hiển thị thông báo lỗi chung cho màn hình danh sách.
   useEffect(() => {
     if (usersQuery.isError || departmentsQuery.isError || positionsQuery.isError) {
       void showErrorAlert("Không thể tải dữ liệu người dùng")
     }
   }, [usersQuery.isError, departmentsQuery.isError, positionsQuery.isError])
 
+  // Tạo map tra cứu nhanh tên phòng ban theo ID để dùng trong bảng.
   const deptNameMap = useMemo(
     () => new Map((departmentsQuery.data ?? []).map((d) => [d.id, d.name] as const)),
     [departmentsQuery.data]
   )
+  // Tạo map tra cứu nhanh tên chức vụ theo ID để dùng trong bảng.
   const posNameMap = useMemo(
     () => new Map((positionsQuery.data ?? []).map((p) => [p.id, p.name] as const)),
     [positionsQuery.data]
   )
 
+  // Giới hạn dữ liệu người dùng theo quyền hiện tại của tài khoản đăng nhập.
   const visibleUsers = useMemo(() => {
     const users = usersQuery.data ?? []
     if (currentUser?.role === "admin") return users
@@ -56,6 +60,7 @@ export default function UserList() {
     return users
   }, [currentUser, usersQuery.data])
 
+  // Lọc danh sách theo từ khóa tìm kiếm ở toolbar.
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase()
     if (!query) return visibleUsers
@@ -64,6 +69,7 @@ export default function UserList() {
     )
   }, [search, visibleUsers])
 
+  // Sắp xếp danh sách theo tiêu chí đang chọn ở select.
   const sortedUsers = useMemo(() => {
     const arr = [...filteredUsers]
     arr.sort((a, b) => {
@@ -84,22 +90,27 @@ export default function UserList() {
     return arr
   }, [filteredUsers, sortBy])
 
+  // Tính tổng số trang dựa trên số bản ghi sau lọc và sắp xếp.
   const totalPages = Math.max(1, Math.ceil(sortedUsers.length / pageSize))
+  // Cắt dữ liệu sang đúng trang hiện tại trước khi đổ vào bảng.
   const paginatedUsers = useMemo(() => {
     const start = (currentPage - 1) * pageSize
     return sortedUsers.slice(start, start + pageSize)
   }, [currentPage, sortedUsers])
 
+  // Khi đổi tìm kiếm hoặc kiểu sắp xếp, quay về trang đầu để tránh ở lại trang không còn dữ liệu.
   useEffect(() => {
     setCurrentPage(1)
   }, [search, sortBy])
 
+  // Nếu số trang giảm xuống dưới trang hiện tại, tự kéo về trang cuối hợp lệ.
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages)
     }
   }, [currentPage, totalPages])
 
+  // Quyết định ai có thể sửa người dùng nào dựa trên vai trò và phòng ban.
   const canEdit = (target: User) => {
     if (!currentUser) return false
     if (currentUser.role === "admin") return target.id !== currentUser.id
@@ -111,6 +122,7 @@ export default function UserList() {
 
   const canDelete = (target: User) => canEdit(target)
 
+  // Mở hộp thoại tạo mới hoặc chỉnh sửa thông tin người dùng.
   const openFormDialog = async (editingUser?: User) => {
     try {
       const result = await openUserFormDialog({
@@ -132,6 +144,7 @@ export default function UserList() {
     }
   }
 
+  // Xác nhận rồi xoá người dùng khỏi hệ thống.
   const confirmDelete = async (e: MouseEvent, user: User) => {
     e.stopPropagation()
     const confirmed = await showDeleteConfirm({
@@ -148,8 +161,11 @@ export default function UserList() {
     }
   }
 
+  // Điều hướng sang trang chi tiết người dùng.
   const handleView = (user: User) => navigate(`/users/${user.id}`)
+  // Mở form ở chế độ chỉnh sửa.
   const handleEdit = (user: User) => openFormDialog(user)
+  // Bật/tắt trạng thái hoạt động của người dùng sau khi xác nhận.
   const handleToggleStatus = async (user: User) => {
     const nextStatus = !user.status
     const result = await MySwal.fire({

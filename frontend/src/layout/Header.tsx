@@ -8,9 +8,31 @@ interface HeaderProps {
   collapsed: boolean
   onToggle: () => void
   onQuickSearchClick: () => void
+  loading?: boolean
 }
 
-export default function Header({ collapsed, onToggle, onQuickSearchClick }: HeaderProps) {
+function SkeletonBlock({ className }: { className?: string }) {
+  return <div className={`animate-pulse rounded-lg bg-muted ${className ?? ""}`} />
+}
+
+function HeaderSkeleton() {
+  return (
+    <header className="flex items-center justify-between gap-4 border-b border-border bg-background/90 px-4 py-3 backdrop-blur sm:h-16 sm:px-6">
+      <div className="flex min-w-0 items-center gap-3">
+        <SkeletonBlock className="h-9 w-9 rounded-lg" />
+        <div className="min-w-0 space-y-2">
+          <SkeletonBlock className="h-4 w-40" />
+          <SkeletonBlock className="h-3 w-24" />
+        </div>
+      </div>
+      <SkeletonBlock className="h-10 w-40 rounded-xl sm:w-72" />
+    </header>
+  )
+}
+
+export default function Header({ collapsed, onToggle, onQuickSearchClick, loading = false }: HeaderProps) {
+  if (loading) return <HeaderSkeleton />
+
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -33,15 +55,15 @@ export default function Header({ collapsed, onToggle, onQuickSearchClick }: Head
   }
 
   return (
-    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 backdrop-blur px-6 flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <header className="flex flex-col gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex min-w-0 items-center gap-3">
         <motion.button
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
           animate={{ rotate: collapsed ? 0 : 180 }}
           transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           onClick={onToggle}
-          className="flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:shadow-sm"
+          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -56,7 +78,7 @@ export default function Header({ collapsed, onToggle, onQuickSearchClick }: Head
           </AnimatePresence>
         </motion.button>
 
-        <nav className="flex items-center gap-2 overflow-hidden">
+        <nav className="hidden min-w-0 items-center gap-2 overflow-hidden sm:flex">
           <AnimatePresence mode="wait">
             {crumbs.map((crumb, index) => (
               <motion.span
@@ -68,13 +90,13 @@ export default function Header({ collapsed, onToggle, onQuickSearchClick }: Head
                 transition={{ duration: 0.25, delay: index * 0.05 }}
               >
                 {index > 0 && (
-                  <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600" />
+                  <ChevronRight size={14} className="text-muted-foreground/60" />
                 )}
                 <span
                   className={
                     index === crumbs.length - 1
-                      ? "font-sm text-zinc-900 dark:text-zinc-100"
-                      : "text-zinc-500 dark:text-zinc-400 text-sm"
+                      ? "text-sm font-semibold text-foreground"
+                      : "text-sm text-muted-foreground"
                   }
                 >
                   {crumb.label}
@@ -83,13 +105,21 @@ export default function Header({ collapsed, onToggle, onQuickSearchClick }: Head
             ))}
           </AnimatePresence>
         </nav>
+
+        <div className="min-w-0 sm:hidden">
+          <p className="truncate text-sm font-semibold text-foreground">{crumbs[crumbs.length - 1]?.label}</p>
+        </div>
       </div>
 
-      <button className="flex items-center gap-2 h-10 w-72 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-3 text-sm text-zinc-500 hover:bg-white dark:hover:bg-zinc-700 transition"
-      onClick={onQuickSearchClick}>
-        <Search size={16} className="text-zinc-400" />
-        <span className="flex-1 text-left">Tìm kiếm...</span>
-        <span className="rounded-md border border-zinc-300 dark:border-zinc-600 px-1.5 py-0.5 text-sm text-zinc-400">Ctrl K</span>
+      <button
+        className="flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-muted px-3 text-sm text-muted-foreground transition hover:bg-background hover:text-foreground sm:w-72"
+        onClick={onQuickSearchClick}
+      >
+        <Search size={16} className="text-muted-foreground" />
+        <span className="flex-1 truncate text-left">Tìm kiếm...</span>
+        <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+          Ctrl K
+        </span>
       </button>
     </header>
   )

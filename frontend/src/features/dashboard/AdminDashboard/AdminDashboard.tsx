@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Building2, Briefcase, CheckCircle2, ClipboardList, CircleDashed, UserCheck, UserX, Users, type LucideIcon } from "lucide-react"
 import PageHeader from "@/shared/ui/PageHeader"
-import LoadingState from "@/shared/ui/LoadingState"
 import PageSeo from "@/shared/ui/PageSeo"
 import { chartPalette } from "@/shared/ui/chartColors"
 import StatsGrid from "./components/StatsGrid"
@@ -151,6 +150,104 @@ function formatComparisonText(currentValue: number, previousValue: number | null
     trendDeltaText: `${delta > 0 ? "+" : ""}${delta.toLocaleString("en-US")}`,
     trendDirection: delta > 0 ? ("up" as const) : ("down" as const),
   }
+}
+// ================================
+// SKELETON CHO DASHBOAR
+// ==============================
+function SkeletonBlock({ className }: { className?: string }) {
+  return <div className={`animate-pulse rounded-lg bg-muted ${className ?? ""}`} />
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8" aria-busy="true" aria-live="polite">
+      <div className="space-y-3">
+        <SkeletonBlock className="h-9 w-56" />
+        <SkeletonBlock className="h-5 w-80" />
+      </div>
+
+      <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <SkeletonBlock className="h-6 w-72" />
+          <SkeletonBlock className="h-10 w-full rounded-full sm:w-64" />
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="rounded-3xl border border-border bg-background p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-3">
+                  <SkeletonBlock className="h-4 w-24" />
+                  <SkeletonBlock className="h-10 w-20" />
+                </div>
+                <SkeletonBlock className="h-20 w-20 rounded-[28px]" />
+              </div>
+              <div className="mt-6 flex items-center justify-between gap-3">
+                <div className="space-y-2">
+                  <SkeletonBlock className="h-4 w-28" />
+                  <SkeletonBlock className="h-4 w-20" />
+                </div>
+                <SkeletonBlock className="h-8 w-16 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-background p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <SkeletonBlock className="h-5 w-40" />
+            <SkeletonBlock className="h-4 w-72" />
+          </div>
+          <SkeletonBlock className="h-10 w-full rounded-full sm:w-72" />
+        </div>
+        <SkeletonBlock className="mt-6 h-80 w-full" />
+      </div>
+
+      <div className="rounded-xl border border-border bg-background p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <SkeletonBlock className="h-5 w-36" />
+            <SkeletonBlock className="h-4 w-64" />
+          </div>
+          <SkeletonBlock className="h-10 w-full rounded-full sm:w-72" />
+        </div>
+        <SkeletonBlock className="mt-6 h-72 w-full" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="rounded-xl border border-border bg-background p-5 shadow-sm">
+          <div className="space-y-2">
+            <SkeletonBlock className="h-5 w-48" />
+            <SkeletonBlock className="h-4 w-72" />
+          </div>
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr]">
+            <SkeletonBlock className="h-56 w-full rounded-full" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <SkeletonBlock key={index} className="h-5 w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-background p-5 shadow-sm">
+          <div className="space-y-2">
+            <SkeletonBlock className="h-5 w-48" />
+            <SkeletonBlock className="h-4 w-72" />
+          </div>
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr]">
+            <SkeletonBlock className="h-56 w-full rounded-full" />
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <SkeletonBlock key={index} className="h-5 w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 
@@ -698,7 +795,7 @@ export default function AdminDashboard() {
   )
 
   if (loading) {
-    return <LoadingState className="h-96" />
+    return <DashboardSkeleton />
   }
 
   return (
@@ -721,7 +818,7 @@ export default function AdminDashboard() {
         completedTotal={completedProjectsCount}
         incompleteTotal={incompleteProjectsCount}
       />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <ContributionBarChart
           title="Đóng góp dự án theo phòng ban"
           description="Xếp hạng phòng ban theo điểm đóng góp tổng hợp."
@@ -738,7 +835,7 @@ export default function AdminDashboard() {
           tooltipContent={<EmployeeContributionTooltip />}
         />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <DonutChartCard
           title="Phân bố nhân sự đang hoạt động theo phòng ban"
           data={deptData}
