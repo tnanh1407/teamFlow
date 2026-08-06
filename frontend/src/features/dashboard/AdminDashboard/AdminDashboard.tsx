@@ -8,6 +8,8 @@ import { chartPalette } from "@/shared/ui/chartColors"
 import StatsGrid from "./components/StatsGrid"
 import EmployeeTrendChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
+import DepartmentTooltip from "./components/DepartmentTooltip"
+import ProjectPriorityTooltip from "./components/ProjectPriorityTooltip"
 import ProjectOverviewChart from "./components/ProjectOverviewChart"
 import ContributionBarChart from "./components/ContributionBarChart"
 import userService, { type User } from "@/services/user.service"
@@ -227,7 +229,9 @@ function buildDepartmentContributionData(
 }
 
 
-// đóng góp nhân viên
+//=========================================== 
+// BIỂU ĐỒ NHÂN VIÊN ĐÓNG GÓP
+// ==========================================
 interface DashboardContributionPoint {
   label: string
   name: string
@@ -244,7 +248,7 @@ function buildEmployeeContributionData(
   positions: Position[],
   assignments: ProjectMember[],
   comments: ProjectComment[],
-  logs: ProjectLog[]
+
 ): DashboardContributionPoint[] {
   const projectById = new Map(projects.map((project) => [project.id, project]))
   const departmentById = new Map(departments.map((department) => [department.id, department.name]))
@@ -258,11 +262,6 @@ function buildEmployeeContributionData(
   comments.forEach((comment) => {
     if (!activeUserIds.has(comment.userId)) return
     commentCounts.set(comment.userId, (commentCounts.get(comment.userId) ?? 0) + 1)
-  })
-
-  logs.forEach((log) => {
-    if (!activeUserIds.has(log.userId)) return
-    processCounts.set(log.userId, (processCounts.get(log.userId) ?? 0) + 1)
   })
 
   assignments.forEach((assignment) => {
@@ -308,68 +307,6 @@ function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
     { name: "Cao", value: incompleteProjects.filter((project) => project.priority === "high").length, color: projectPalette.high },
     { name: "Khẩn cấp", value: incompleteProjects.filter((project) => project.priority === "critical").length, color: projectPalette.critical },
   ].filter((project) => project.value > 0)
-}
-
-interface ProjectPriorityTooltipProps {
-  active?: boolean
-  payload?: Array<{
-    payload: {
-      name: string
-      value: number
-      color?: string
-    }
-  }>
-  total: number
-}
-
-interface DepartmentTooltipProps {
-  active?: boolean
-  payload?: Array<{
-    payload: {
-      name: string
-      value: number
-      color?: string
-    }
-  }>
-}
-
-function ProjectPriorityTooltip({ active, payload, total }: ProjectPriorityTooltipProps) {
-  if (!active || !payload?.length) return null
-
-  const point = payload[0].payload
-  const percent = total > 0 ? Math.round((point.value / total) * 100) : 0
-
-  return (
-    <div className="min-w-45 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Mức độ ưu tiên</p>
-      <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{point.name}</p>
-      <div className="mt-3 space-y-2 text-sm">
-        <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Số lượng</span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.value}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Tỷ lệ</span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{percent}%</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function DepartmentTooltip({ active, payload }: DepartmentTooltipProps) {
-  if (!active || !payload?.length) return null
-
-  const point = payload[0].payload
-
-  return (
-    <div className="min-w-45 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Phòng ban</p>
-      <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-        {point.name} : {point.value} thành viên
-      </p>
-    </div>
-  )
 }
 
 // data cho biểu đồ project lineChart
@@ -692,8 +629,8 @@ export default function AdminDashboard() {
   const deptData = buildActiveDepartmentData(users, departments)
   const projPriorityData = buildProjectPriorityData(projects)
   const projectOverviewData = buildProjectOverviewData(projects)
-  const departmentContributionData = buildDepartmentContributionData(projects, departments, projectDepartments)
-  const employeeContributionData = buildEmployeeContributionData(
+  const departmentContributionData = buildDepartmentContributionData(projects, departments, projectDepartments) // biều đồ phòng ban đóng góp
+  const employeeContributionData = buildEmployeeContributionData( // biểu đồ nhân viên đóng góp
     projects,
     users,
     departments,
