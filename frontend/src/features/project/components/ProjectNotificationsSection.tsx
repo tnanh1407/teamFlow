@@ -3,7 +3,7 @@ import { Bell, Pin, Pencil, Trash2, Send } from "lucide-react";
 import type { User } from "@/services/user.service";
 import type { ProjectEmployee } from "@/services/project-employee.service";
 import projectNotificationService, { type ProjectNotification } from "@/services/project-notification.service";
-import { MySwal, showDeleteConfirm, showSuccessAlert } from "@/lib/swal";
+import { MySwal } from "@/lib/swal";
 
 interface ProjectNotificationsSectionProps {
   projectId: string;
@@ -94,7 +94,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await showSuccessAlert("Cap nhat thong bao thanh cong");
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Cap nhat thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
       } else {
         await projectNotificationService.create({
           projectId,
@@ -104,7 +104,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await showSuccessAlert("Tao thong bao thanh cong");
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Tao thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
       }
       resetForm();
       await loadNotifications();
@@ -129,14 +129,20 @@ export default function ProjectNotificationsSection({
   };
 
   const handleDelete = async (notification: ProjectNotification) => {
-    const confirmed = await showDeleteConfirm({
-      name: notification.title,
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
       html: `Bạn có chắc muốn xoá thông báo <strong>${notification.title}</strong>?`,
-    });
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed;
     if (!confirmed) return;
     try {
       await projectNotificationService.delete(notification.id);
-      await showSuccessAlert("Xoa thong bao thanh cong");
+      await MySwal.fire({ icon: "success", title: "Thành công", text: "Xoa thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
       await loadNotifications();
     } catch (error: any) {
       await MySwal.fire({

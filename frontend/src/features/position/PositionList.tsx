@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Fingerprint, Copy } from "lucide-react"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
-import { MySwal, showDeleteConfirm, showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
 
 
@@ -227,7 +227,7 @@ export default function Positions() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(pos.id)
-                    void showSuccessAlert("Đã sao chép UUID")
+                    void MySwal.fire({ icon: "success", title: "Thành công", text: "Đã sao chép UUID", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
                   }}
                   className="p-1 rounded text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent shrink-0"
                   title="Copy UUID"
@@ -262,9 +262,16 @@ export default function Positions() {
 
   const confirmDelete = async (e: React.MouseEvent, pos: Position) => {
     e.stopPropagation()
-    const confirmed = await showDeleteConfirm({
-      name: pos.name,
-    })
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
+      html: `Bạn có chắc muốn xoá chức vụ <strong>${pos.name}</strong>? Hành động này không thể hoàn tác.`,
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (!confirmed) return
     try {
       await positionService.delete(pos.id)
@@ -390,7 +397,7 @@ export default function Positions() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(pos.id)
-                            void showSuccessAlert("Đã sao chép UUID")
+                            void MySwal.fire({ icon: "success", title: "Thành công", text: "Đã sao chép UUID", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy UUID"

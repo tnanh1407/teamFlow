@@ -62,7 +62,7 @@ export default function StatsGrid({ stats, range, onRangeChange, onCardClick }: 
   }
 
   return (
-    <section className="rounded-xl border border-border bg-background p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-base font-semibold uppercase text-foreground">
@@ -105,7 +105,7 @@ export default function StatsGrid({ stats, range, onRangeChange, onCardClick }: 
                   onCardClick(stat.href)
                 }
               }}
-              className="group cursor-pointer rounded-3xl border border-border bg-background p-4 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="group cursor-pointer rounded-3xl border border-border bg-card p-4 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               {/* Phần trên */}
               <div className="flex items-start justify-between gap-3">

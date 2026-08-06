@@ -4,9 +4,8 @@ import { Search, Plus, Trash2, ArrowUpDown, CheckSquare, Calendar, Paperclip, X,
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import uploadService from "@/services/upload.service"
-import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import { useAuth } from "@/stores/auth"
-import { showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
 import PageSeo from "@/shared/ui/PageSeo"
 
@@ -118,16 +117,35 @@ export default function Projects() {
   }
 
   const confirmDelete = async (project: Project) => {
-    const confirmed = await showDeleteConfirm({
-      name: project.title,
-    })
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
+      html: `Bạn có chắc muốn xoá project <strong>${project.title}</strong>? Hành động này không thể hoàn tác.`,
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (!confirmed) return
     try {
       await projectService.delete(project.id)
       fetchProjects()
-      void showSuccessAlert("Đã xoá project")
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: "Đã xoá project",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     } catch {
-      void showErrorAlert("Xoá thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Xoá thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }
 
@@ -623,7 +641,13 @@ export default function Projects() {
                             onClick={(e) => {
                               e.stopPropagation()
                               navigator.clipboard.writeText(project.id)
-                              void showSuccessAlert("Đã sao chép UUID")
+                              void MySwal.fire({
+                                icon: "success",
+                                title: "Thành công",
+                                text: "Đã sao chép UUID",
+                                confirmButtonText: "Đóng",
+                                confirmButtonColor: "var(--primary)",
+                              })
                             }}
                             className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                             title="Copy UUID"

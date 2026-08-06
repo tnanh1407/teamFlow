@@ -15,7 +15,7 @@ import ProjectCommentsSection from "./components/ProjectCommentsSection"
 import ProjectNotificationsSection from "./components/ProjectNotificationsSection"
 import ProjectDepartmentsSection from "./components/ProjectDepartmentsSection"
 import ProjectEmployeesSection from "./components/ProjectEmployeesSection"
-import { MySwal, showDeleteConfirm } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 
 interface FormData {
   title: string
@@ -822,9 +822,16 @@ export default function ProjectDetail() {
 
   const handleDelete = async () => {
     if (!project) return
-    const confirmed = await showDeleteConfirm({
-      name: project.title,
-    })
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
+      html: `Bạn có chắc muốn xoá project <strong>${project.title}</strong>? Hành động này không thể hoàn tác.`,
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (!confirmed) return
     try {
       await projectService.delete(project.id)

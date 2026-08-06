@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react"
 import { CheckCircle2, Edit2, Pin, Plus, Trash2 } from "lucide-react"
 import { useAuth } from "@/stores/auth"
 import systemNotificationService, { type SystemNotification } from "@/services/system-notification.service"
-import { showDeleteConfirm, showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import LoadingState from "@/shared/ui/LoadingState"
 import EmptyState from "@/shared/ui/EmptyState"
 
@@ -118,16 +118,16 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
         : true
 
       if (!hasContentChanged) {
-        await showSuccessAlert("Không có thay đổi nào")
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Không có thay đổi nào", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
         return
       }
 
       if (editingId) {
         await systemNotificationService.update(editingId, payload)
-        await showSuccessAlert("Đã cập nhật thông báo")
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã cập nhật thông báo", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       } else {
         await systemNotificationService.create(payload)
-        await showSuccessAlert("Đã tạo thông báo")
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã tạo thông báo", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       }
 
       resetForm()
@@ -141,12 +141,21 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
 
   const handleDelete = async (notification: SystemNotification) => {
     if (!canManage) return
-    const confirmed = await showDeleteConfirm({ name: notification.title })
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
+      html: `Bạn có chắc muốn xoá thông báo <strong>${notification.title}</strong>?`,
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (!confirmed) return
 
     try {
       await systemNotificationService.delete(notification.id)
-      await showSuccessAlert("Đã xoá thông báo")
+      await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã xoá thông báo", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       if (editingId === notification.id) resetForm()
       await fetchNotifications()
     } catch {
@@ -158,10 +167,10 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
     try {
       if (notification.isRead) {
         await systemNotificationService.markUnread(notification.id)
-        await showSuccessAlert("Đã chuyển sang chưa đọc")
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã chuyển sang chưa đọc", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       } else {
         await systemNotificationService.markRead(notification.id)
-        await showSuccessAlert("Đã đánh dấu đã đọc")
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã đánh dấu đã đọc", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       }
       await fetchNotifications()
     } catch {

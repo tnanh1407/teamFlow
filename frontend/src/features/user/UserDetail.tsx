@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/stores/auth"
-import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import LoadingState from "@/shared/ui/LoadingState"
 import EmptyState from "@/shared/ui/EmptyState"
 import userService, { type User } from "@/services/user.service"
@@ -174,7 +174,13 @@ export default function UserDetail() {
       setDepartments(deptRes.data.data)
       setPositions(posRes.data.data)
     } catch {
-      void showErrorAlert("Không thể tải thông tin người dùng")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể tải thông tin người dùng",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     } finally {
       setLoading(false)
     }
@@ -355,25 +361,49 @@ export default function UserDetail() {
       if (result.value.password?.trim()) payload.password = result.value.password
 
       await userService.update(editingUser.id, payload)
-      void showSuccessAlert("Cập nhật thành công")
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: "Cập nhật thành công",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
       fetchDetail()
     } catch (err: any) {
-      void showErrorAlert(err?.response?.data?.message || "Cập nhật thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Cập nhật thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }
 
   const confirmDelete = async () => {
     if (!user) return
-    const confirmed = await showDeleteConfirm({
-      name: user.username,
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
       html: `Bạn có chắc muốn xoá người dùng <strong>${user.username}</strong>? Hành động này không thể hoàn tác.`,
-    })
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (!confirmed) return
     try {
       await userService.delete(user.id)
       navigate("/users")
     } catch {
-      void showErrorAlert("Xoá thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Xoá thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }
 

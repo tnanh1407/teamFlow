@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, FileText, Copy } from "lucide-react"
 import departmentService, { type Department } from "@/services/department.service"
-import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
 import PageSeo from "@/shared/ui/PageSeo"
 import PageHeader from "@/shared/ui/PageHeader"
@@ -113,31 +113,37 @@ export default function Departments() {
       try {
         if (isEdit) {
           await departmentService.update(editingDept!.id, result.value)
-          void showSuccessAlert("Cập nhật thành công")
+          void MySwal.fire({ icon: "success", title: "Thành công", text: "Cập nhật thành công", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
         } else {
           await departmentService.create(result.value)
-          void showSuccessAlert("Tạo mới thành công")
+          void MySwal.fire({ icon: "success", title: "Thành công", text: "Tạo mới thành công", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
         }
         fetchDepartments()
       } catch {
-        void showErrorAlert("Lưu thất bại")
+        void MySwal.fire({ icon: "error", title: "Lỗi", text: "Lưu thất bại", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       }
     }
   }
 
   const confirmDelete = async (e: React.MouseEvent, department: Department) => {
     e.stopPropagation()
-    const confirmed = await showDeleteConfirm({
-      name: department.name,
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
       html: `Bạn có chắc muốn xoá phòng ban <strong>${department.name}</strong>? Hành động này không thể hoàn tác.`,
-    })
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (confirmed) {
       try {
         await departmentService.delete(department.id)
-        void showSuccessAlert("Xoá thành công")
+        void MySwal.fire({ icon: "success", title: "Thành công", text: "Xoá thành công", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
         fetchDepartments()
       } catch {
-        void showErrorAlert("Xoá thất bại")
+        void MySwal.fire({ icon: "error", title: "Lỗi", text: "Xoá thất bại", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       }
     }
   }
@@ -237,7 +243,7 @@ export default function Departments() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(department.id)
-                            void showSuccessAlert("Đã sao chép UUID")
+                            void MySwal.fire({ icon: "success", title: "Thành công", text: "Đã sao chép UUID", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy UUID"
@@ -253,7 +259,7 @@ export default function Departments() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(department.code)
-                            void showSuccessAlert("Đã sao chép mã")
+                            void MySwal.fire({ icon: "success", title: "Thành công", text: "Đã sao chép mã", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy"

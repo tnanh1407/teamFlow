@@ -7,7 +7,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { useAuth } from "@/stores/auth"
-import { showConfirm } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import SystemLogo from "@/shared/ui/SystemLogo"
 import { sidebarItems, type SidebarItem } from "@/config/navigation"
 interface SidebarItemProps {
@@ -155,14 +155,16 @@ export default function Sidebar({ collapsed, loading = false }: SidebarProps) {
     .filter((item): item is SidebarItem => item !== null)
 
   const handleLogout = async () => {
-    const confirmed = await showConfirm({
+    const confirmed = (await MySwal.fire({
       title: "Xác nhận đăng xuất",
       html: "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?",
-      confirmText: "Đăng xuất",
-      cancelText: "Huỷ",
+      confirmButtonText: "Đăng xuất",
+      cancelButtonText: "Huỷ",
       icon: "warning",
+      showCancelButton: true,
       confirmButtonColor: "#dc2626",
-    })
+      reverseButtons: true,
+    })).isConfirmed
 
     if (!confirmed) return
 
@@ -172,10 +174,10 @@ export default function Sidebar({ collapsed, loading = false }: SidebarProps) {
 
   return (
     <aside
-      className={`flex min-h-0 shrink-0 flex-col overflow-hidden border-r border-border bg-background transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-[min(85vw,280px)] md:w-[20%] md:min-w-[200px] md:max-w-[280px]"
+      className={`flex min-h-0 shrink-0 flex-col overflow-hidden border-r border-border bg-card transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-[min(85vw,280px)] md:w-[20%] md:min-w-[200px] md:max-w-[280px]"
         }`}
     >
-      <div className={`flex h-14 shrink-0 items-center border-b border-border px-4 ${collapsed ? "justify-center" : "gap-3"}`}>
+      <div className={`flex h-16 shrink-0 items-center border-b border-border px-4 ${collapsed ? "justify-center" : "gap-3"}`}>
       <SystemLogo className="h-7 w-7 shrink-0 transition-all duration-300 ease-in-out" />
         <AnimatePresence>
           {!collapsed && (

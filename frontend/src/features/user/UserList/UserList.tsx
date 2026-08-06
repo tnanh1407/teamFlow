@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/stores/auth"
-import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
 import type { User } from "@/services/user.service"
@@ -36,7 +36,13 @@ export default function UserList() {
   // Nếu bất kỳ nguồn dữ liệu nào lỗi, hiển thị thông báo lỗi chung cho màn hình danh sách.
   useEffect(() => {
     if (usersQuery.isError || departmentsQuery.isError || positionsQuery.isError) {
-      void showErrorAlert("Không thể tải dữ liệu người dùng")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Không thể tải dữ liệu người dùng",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }, [usersQuery.isError, departmentsQuery.isError, positionsQuery.isError])
 
@@ -141,28 +147,58 @@ export default function UserList() {
             onSubmit: async (payload) => {
               await createUserMutation.mutateAsync(payload)
             },
-          })
+      })
       if (!result || !result.changed) return
-      void showSuccessAlert(editingUser ? "Cập nhật thành công" : "Tạo mới thành công")
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: editingUser ? "Cập nhật thành công" : "Tạo mới thành công",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     } catch (err: any) {
-      void showErrorAlert(err?.response?.data?.message || "Lưu thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Lưu thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }
 
   // Xác nhận rồi xoá người dùng khỏi hệ thống.
   const confirmDelete = async (e: MouseEvent, user: User) => {
     e.stopPropagation()
-    const confirmed = await showDeleteConfirm({
-      name: user.username,
+    const confirmed = (await MySwal.fire({
+      title: "Xác nhận xoá",
+      icon: "warning",
       html: `Bạn có chắc muốn xoá người dùng <strong>${user.username}</strong>? Hành động này không thể hoàn tác.`,
-    })
+      showCancelButton: true,
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
+      confirmButtonColor: "#dc2626",
+      reverseButtons: true,
+    })).isConfirmed
     if (!confirmed) return
 
     try {
       await deleteUserMutation.mutateAsync(user.id)
-      void showSuccessAlert("Xoá thành công")
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: "Xoá thành công",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     } catch {
-      void showErrorAlert("Xoá thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Xoá thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }
 
@@ -196,9 +232,21 @@ export default function UserList() {
           leaveDate: nextStatus ? undefined : todayKey,
         },
       })
-      void showSuccessAlert(nextStatus ? "Kích hoạt thành công" : "Đã vô hiệu người dùng")
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: nextStatus ? "Kích hoạt thành công" : "Đã vô hiệu người dùng",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     } catch (err: any) {
-      void showErrorAlert(err?.response?.data?.message || "Cập nhật trạng thái thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Cập nhật trạng thái thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     }
   }
 

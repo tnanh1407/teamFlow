@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Camera } from "lucide-react"
 import { useAuth } from "@/stores/auth"
 import userService, { type User } from "@/services/user.service"
-import { showErrorAlert, showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 
 const profileSchema = z.object({
   firstName: z.string().trim().min(1, "Vui lòng nhập tên"),
@@ -86,7 +86,13 @@ export default function Settings() {
           gender: detail.gender || "other",
         })
       } catch {
-        void showErrorAlert("Không thể tải thông tin hồ sơ")
+        void MySwal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: "Không thể tải thông tin hồ sơ",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "var(--primary)",
+        })
       }
     }
 
@@ -102,7 +108,13 @@ export default function Settings() {
     if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
-      void showErrorAlert("Ảnh không được vượt quá 5MB")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Ảnh không được vượt quá 5MB",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
       return
     }
 
@@ -112,7 +124,13 @@ export default function Settings() {
       setAvatarPreview(preview)
       setAvatarFile(file)
     } catch {
-      void showErrorAlert("Cập nhật ảnh thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Cập nhật ảnh thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
       setAvatarPreview(null)
       setAvatarFile(null)
     } finally {
@@ -140,7 +158,13 @@ export default function Settings() {
       if (avatarFile) fd.append("avatar", avatarFile)
 
       await userService.update(profileUser.id, fd)
-      void showSuccessAlert("Cập nhật hồ sơ thành công")
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: "Cập nhật hồ sơ thành công",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
 
       const empRes = await userService.getById(profileUser.id)
       const updated = empRes.data.data
@@ -160,7 +184,13 @@ export default function Settings() {
         gender: updated.gender || "other",
       })
     } catch (err: any) {
-      void showErrorAlert(err?.response?.data?.message || "Cập nhật hồ sơ thất bại")
+      void MySwal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Cập nhật hồ sơ thất bại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
     } finally {
       setSaving(false)
     }

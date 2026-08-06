@@ -10,7 +10,7 @@ import heroImg from "@/assets/hero.png"
 import { useAuth } from "@/stores/auth"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
-import { showSuccessAlert } from "@/lib/swal"
+import { MySwal } from "@/lib/swal"
 import SystemLogo from "@/shared/ui/SystemLogo"
 import { useLoginMutation } from "../mutations/user.mutations"
 
@@ -57,7 +57,13 @@ export default function Login() {
       }
 
       setUser(loggedInUser)
-      void showSuccessAlert(`Xin chào ${loggedInUser.username}!`)
+      void MySwal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: `Xin chào ${loggedInUser.username}!`,
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "var(--primary)",
+      })
       navigate(loggedInUser.role === "admin" ? "/dashboard" : "/", { replace: true })
     },
     onError: (error) => {
@@ -101,11 +107,11 @@ export default function Login() {
 
       {/* Right: Login form */}
       <div className="flex flex-1 items-center justify-center bg-background p-6">
-        <div className="w-full max-w-[440px]">
+        <div className="w-full max-w-110">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
             <SystemLogo className="mb-4 h-14 w-14 drop-shadow-sm lg:hidden" />
-            <h1 className="mb-1 mt-2 text-2xl font-bold text-foreground">
+            <h1 className="mb-1 mt-2 text-3xl font-bold text-foreground">
               Đăng nhập
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -114,7 +120,7 @@ export default function Login() {
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <form onSubmit={handleFormSubmit((values) => loginMutation.mutate(values))} className="space-y-5" noValidate>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
