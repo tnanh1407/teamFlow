@@ -204,7 +204,7 @@ export default function UserList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Quản lý người dùng"
         desc="Quản lý tài khoản người dùng trong hệ thống"

@@ -9,14 +9,18 @@ import { useAuthStore } from "@/stores/auth"
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const user = useAuthStore((state) => state.user)
   const ready = useAuthStore((state) => state.ready)
+  const canUseQuickSearch = ready && (user?.role === "admin" || user?.position === "leader")
   useHotkeys("ctrl+b", (e) => {
     e.preventDefault()
     setCollapsed(c => !c)
   })
   useHotkeys("ctrl+k", (e) => {
     e.preventDefault()
-    setPaletteOpen(true)
+    if (canUseQuickSearch) {
+      setPaletteOpen(true)
+    }
   })
 
   return (
@@ -26,6 +30,7 @@ export default function DashboardLayout() {
         <Header
           collapsed={collapsed}
           loading={!ready}
+          quickSearchEnabled={canUseQuickSearch}
           onToggle={() => setCollapsed(!collapsed)}
           onQuickSearchClick={() => setPaletteOpen(true)}
         />
@@ -33,7 +38,11 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <CommandPalette
+        open={paletteOpen}
+        enabled={canUseQuickSearch}
+        onClose={() => setPaletteOpen(false)}
+      />
     </div>
   )
 }

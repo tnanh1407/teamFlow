@@ -18,6 +18,27 @@ import { useAuth } from "@/stores/auth";
 
 const EMPTY_RESULTS: SearchResults = { users: [], projects: [], tasks: [], departments: [], positions: [] };
 
+function SkeletonBlock({ className }: { className?: string }) {
+  return <div className={`animate-pulse rounded-lg bg-muted ${className ?? ""}`} />
+}
+
+function PaletteLoadingState() {
+  return (
+    <div className="space-y-3 px-3 py-2">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3 rounded-xl px-3 py-2">
+          <SkeletonBlock className="size-8 shrink-0 rounded-lg" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <SkeletonBlock className="h-4 w-3/4" />
+            <SkeletonBlock className="h-3 w-1/2" />
+          </div>
+          <SkeletonBlock className="h-4 w-4 shrink-0 rounded-full" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 interface PaletteItem {
   id: string;
   group: string;
@@ -30,6 +51,7 @@ interface PaletteItem {
 interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
+  enabled?: boolean;
 }
 
 const roleScopedRoutes = (role: string) => [
@@ -46,7 +68,7 @@ const roleScopedRoutes = (role: string) => [
   { label: "Cài đặt", path: "/settings", icon: <Settings size={18} /> },
 ];
 
-export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
+export default function CommandPalette({ open, onClose, enabled = true }: CommandPaletteProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
@@ -55,6 +77,12 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open && !enabled) {
+      onClose();
+    }
+  }, [enabled, onClose, open]);
 
   useEffect(() => {
     if (open) {
@@ -66,7 +94,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
   }, [open]);
 
   useEffect(() => {
-    if (!open || !query.trim()) {
+    if (!open || !enabled || !query.trim()) {
       setResults(EMPTY_RESULTS);
       setLoading(false);
       return;
@@ -85,7 +113,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [query, open]);
+  }, [enabled, query, open]);
 
   const close = useCallback(() => {
     setQuery("");
@@ -217,6 +245,8 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
     }));
   }, [items]);
 
+  if (!enabled) return null;
+
   return (
     <AnimatePresence>
       {open && (
@@ -225,7 +255,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/45 px-3 pt-4 backdrop-blur-sm sm:px-4 sm:pt-[12vh]"
           onMouseDown={close}
         >
           <motion.div
@@ -233,33 +263,31 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-            className="w-full max-w-xl overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+            className="flex h-[calc(100vh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl sm:h-auto sm:max-h-[76vh]"
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 border-b border-zinc-200 px-4 dark:border-zinc-800">
-              <Search size={18} className="shrink-0 text-zinc-400" />
+            <div className="flex items-center gap-3 border-b border-border px-4 py-3 sm:px-5">
+              <Search size={18} className="shrink-0 text-muted-foreground" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
                 placeholder="Tìm người dùng, dự án, công việc, phòng ban..."
-                className="h-14 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-zinc-100"
+                className="h-12 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground sm:h-14"
               />
-              <kbd className="shrink-0 rounded-md border border-zinc-300 px-1.5 py-0.5 text-[11px] text-zinc-400 dark:border-zinc-600">
+              <kbd className="hidden shrink-0 rounded-md border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground sm:inline-flex">
                 Esc
               </kbd>
             </div>
 
-            <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-2">
+            <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto py-2">
               {loading && (
-                <div className="flex justify-center px-4 py-8">
-                  <div className="size-6 animate-spin rounded-full border-2 border-zinc-300 border-t-indigo-500 dark:border-zinc-600" />
-                </div>
+                <PaletteLoadingState />
               )}
 
               {!loading && items.length === 0 && (
-                <div className="px-4 py-8 text-center text-sm text-zinc-400">
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                   {query.trim() ? "Không tìm thấy kết quả phù hợp" : "Gõ để tìm kiếm hoặc chọn trang nhanh bên dưới"}
                 </div>
               )}
@@ -267,7 +295,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
               {!loading &&
                 grouped.map(({ group, items: groupItems }) => (
                   <div key={group} className="px-2 py-1">
-                    <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                    <div className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                       {group}
                     </div>
                     {groupItems.map((item, idx) => (
@@ -276,21 +304,21 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         data-index={idx}
                         onClick={item.onSelect}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition ${
-                          activeIndex === idx ? "bg-blue-50 dark:bg-blue-950" : "hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                          activeIndex === idx ? "bg-primary/10 text-primary" : "hover:bg-muted"
                         }`}
                       >
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                           {item.icon}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                          <span className="block truncate text-sm font-medium text-foreground">
                             {item.label}
                           </span>
                           {item.sublabel && (
-                            <span className="block truncate text-xs text-zinc-400">{item.sublabel}</span>
+                            <span className="block truncate text-xs text-muted-foreground">{item.sublabel}</span>
                           )}
                         </span>
-                        <ArrowRight size={16} className="shrink-0 text-zinc-300" />
+                        <ArrowRight size={16} className="shrink-0 text-muted-foreground/60" />
                       </button>
                     ))}
                   </div>

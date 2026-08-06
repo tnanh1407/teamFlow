@@ -8,6 +8,7 @@ interface HeaderProps {
   collapsed: boolean
   onToggle: () => void
   onQuickSearchClick: () => void
+  quickSearchEnabled?: boolean
   loading?: boolean
 }
 
@@ -30,7 +31,13 @@ function HeaderSkeleton() {
   )
 }
 
-export default function Header({ collapsed, onToggle, onQuickSearchClick, loading = false }: HeaderProps) {
+export default function Header({
+  collapsed,
+  onToggle,
+  onQuickSearchClick,
+  quickSearchEnabled = true,
+  loading = false,
+}: HeaderProps) {
   if (loading) return <HeaderSkeleton />
 
   const location = useLocation()
@@ -111,16 +118,20 @@ export default function Header({ collapsed, onToggle, onQuickSearchClick, loadin
         </div>
       </div>
 
-      <button
-        className="flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-muted px-3 text-sm text-muted-foreground transition hover:bg-background hover:text-foreground sm:w-72"
-        onClick={onQuickSearchClick}
-      >
-        <Search size={16} className="text-muted-foreground" />
-        <span className="flex-1 truncate text-left">Tìm kiếm...</span>
-        <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
-          Ctrl K
-        </span>
-      </button>
+      {quickSearchEnabled ? (
+        <button
+          className="flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-muted px-3 text-sm text-muted-foreground transition hover:bg-background hover:text-foreground sm:w-72"
+          onClick={onQuickSearchClick}
+        >
+          <Search size={16} className="text-muted-foreground" />
+          <span className="flex-1 truncate text-left">Tìm kiếm...</span>
+          <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+            Ctrl K
+          </span>
+        </button>
+      ) : (
+        <div className="hidden sm:block sm:w-72" />
+      )}
     </header>
   )
 }

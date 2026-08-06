@@ -6,6 +6,8 @@ import { motion } from "motion/react"
 import departmentService, { type Department } from "@/services/department.service"
 import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
+import PageSeo from "@/shared/ui/PageSeo"
+import PageHeader from "@/shared/ui/PageHeader"
 
 export default function Departments() {
   const navigate = useNavigate()
@@ -146,107 +148,13 @@ export default function Departments() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 text-foreground">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 capitalize   ">
-            Quản lí Phòng Ban
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Quản lý phòng ban trong hệ thống
-          </p>
-        </div>
-      </div>
-
-      {/* Stats + PieChart */}
-      {(() => {
-        const statusData = [
-          { name: "Hoạt động", value: activeCount, color: "#10b981" },
-          { name: "Vô hiệu", value: inactiveCount, color: "#ef4444" },
-        ].filter(d => d.value > 0)
-        const total = departments.length || 1
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden"
-          >
-            <div className="h-1.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-red-400" />
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                    <Building2 size={18} className="text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                      Trạng thái phòng ban
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 leading-none">{departments.length}</p>
-                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium mt-0.5">Tổng số</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-6">
-                <div className="relative shrink-0">
-                  <ResponsiveContainer width={190} height={190}>
-                    <PieChart>
-                      <Pie data={statusData} cx="50%" cy="50%" innerRadius={58} outerRadius={88} paddingAngle={4} dataKey="value" stroke="none">
-                        {statusData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: "8px",
-                          border: "1px solid #e4e4e7",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                          fontSize: "13px",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-none">{departments.length}</p>
-                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mt-0.5">Tổng</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-4 pt-1">
-                  {statusData.map((entry) => (
-                    <div key={entry.name}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: entry.color }} />
-                          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{entry.name}</span>
-                        </div>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
-                          <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                            {Math.round((entry.value / total) * 100)}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(entry.value / total) * 100}%` }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )
-      })()}
+      <PageSeo
+        title="Quản lí phòng ban"
+        description="Thống kê tổng quan toàn bộ thông số trong hệ thống TeamFlow"
+      />
+      <PageHeader title="Quản lí phòng ban" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
 
       {/* Search & Actions */}
       <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
