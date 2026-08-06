@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom"
 import { ChevronRight, PanelLeft, PanelLeftClose, Search } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 import { breadcrumbRoutes } from "@/config/navigation"
+import ThemeToggle from "@/shared/ui/ThemeToggle"
 
 interface HeaderProps {
   collapsed: boolean
@@ -38,8 +39,6 @@ export default function Header({
   quickSearchEnabled = true,
   loading = false,
 }: HeaderProps) {
-  if (loading) return <HeaderSkeleton />
-
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -61,29 +60,37 @@ export default function Header({
     crumbs = [...crumbs, { label: "Chi tiết" }]
   }
 
+  if (loading) return <HeaderSkeleton />
+
   return (
     <header className="flex flex-col gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          animate={{ rotate: collapsed ? 0 : 180 }}
-          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          onClick={onToggle}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={collapsed ? "open" : "close"}
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.6 }}
-              transition={{ duration: 0.15 }}
-            >
-              {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
-            </motion.div>
-          </AnimatePresence>
-        </motion.button>
+        <div className="flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            animate={{ rotate: collapsed ? 0 : 180 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            onClick={onToggle}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground hover:shadow-sm"
+            aria-label={collapsed ? "Mở sidebar" : "Thu gọn sidebar"}
+            title={collapsed ? "Mở sidebar" : "Thu gọn sidebar"}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={collapsed ? "open" : "close"}
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.15 }}
+              >
+                {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+              </motion.div>
+            </AnimatePresence>
+          </motion.button>
+
+
+        </div>
 
         <nav className="hidden min-w-0 items-center gap-2 overflow-hidden sm:flex">
           <AnimatePresence mode="wait">
@@ -117,21 +124,24 @@ export default function Header({
           <p className="truncate text-sm font-semibold text-foreground">{crumbs[crumbs.length - 1]?.label}</p>
         </div>
       </div>
-
-      {quickSearchEnabled ? (
-        <button
-          className="flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-muted px-3 text-sm text-muted-foreground transition hover:bg-background hover:text-foreground sm:w-72"
-          onClick={onQuickSearchClick}
-        >
-          <Search size={16} className="text-muted-foreground" />
-          <span className="flex-1 truncate text-left">Tìm kiếm...</span>
-          <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
-            Ctrl K
-          </span>
-        </button>
-      ) : (
-        <div className="hidden sm:block sm:w-72" />
-      )}
+      <div className="flex gap-4">
+        <ThemeToggle />
+        {/* tìm kiêm nhanh */}
+        {quickSearchEnabled ? (
+          <button
+            className="flex h-10 w-full items-center gap-2 rounded-xl border border-border bg-muted px-3 text-sm text-muted-foreground transition hover:bg-background hover:text-foreground sm:w-72"
+            onClick={onQuickSearchClick}
+          >
+            <Search size={16} className="text-muted-foreground" />
+            <span className="flex-1 truncate text-left">Tìm kiếm...</span>
+            <span className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+              Ctrl K
+            </span>
+          </button>
+        ) : (
+          <div className="hidden sm:block sm:w-72" />
+        )}
+      </div>
     </header>
   )
 }

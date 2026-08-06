@@ -111,16 +111,16 @@ export default function Login() {
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
             <SystemLogo className="mb-4 h-14 w-14 drop-shadow-sm lg:hidden" />
-            <h1 className="mb-1 mt-2 text-3xl font-bold text-foreground">
+            <h1 className="mb-1 mt-2 text-3xl font-bold text-foreground capitalize">
               Đăng nhập
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-foreground">
               Đăng nhập để tiếp tục quản lý
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <form onSubmit={handleFormSubmit((values) => loginMutation.mutate(values))} className="space-y-5" noValidate>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
@@ -130,7 +130,7 @@ export default function Login() {
                   type="text"
                   placeholder="Nhập tên đăng nhập"
                   aria-invalid={Boolean(errors.username)}
-                  className={`block w-full rounded-lg border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
+                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
                     errors.username
                       ? "border-red-400 focus:ring-red-500"
                       : "border-border"
@@ -151,7 +151,7 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Nhập mật khẩu"
                     aria-invalid={Boolean(errors.password)}
-                    className={`block w-full rounded-lg border bg-background px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
+                    className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
                       errors.password
                         ? "border-red-400 focus:ring-red-500"
                         : "border-border"

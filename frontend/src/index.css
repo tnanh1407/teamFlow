@@ -18,57 +18,59 @@
 
 
 :root {
-  --background: #f5f6fa;
-  --foreground: oklch(0.145 0 0);  /* màu chữ chính */
-  --border: oklch(0.922 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0); /* màu chữ phụ */
-  --card: oklch(1 0 0); /* màu card */
-  --primary: #5a8dff;
+  color-scheme: light;
+  --background: #f1f5f9;
+  --foreground: #0f172a;  /* màu chữ chính */
+  --border: #cbd5e1;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b; /* màu chữ phụ */
+  --card: #ffffff; /* màu card */
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --secondary: #ff8743;
+  --secondary: #ea580c;
   --secondary-foreground: #ffffff;
   --danger: #dc2626;
   --success: #16a34a;
   --chart-1: var(--primary);
   --chart-2: var(--secondary);
-  --chart-3: #00bcd4;
-  --chart-4: #8b5cf6;
-  --chart-5: #22c55e;
-  --chart-6: #ef4444;
-  --chart-7: #f59e0b;
-  --chart-8: #ec4899;
-  --chart-grid-color: #e4e4e7;
-  --chart-label-color: #a1a1aa;
+  --chart-3: #0891b2;
+  --chart-4: #7c3aed;
+  --chart-5: #16a34a;
+  --chart-6: #dc2626;
+  --chart-7: #d97706;
+  --chart-8: #db2777;
+  --chart-grid-color: #e2e8f0;
+  --chart-label-color: #64748b;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 0.1);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --card: oklch(0.205 0 0);
-  --primary: #5a8dff;
+  color-scheme: dark;
+  --background: #020617;
+  --foreground: #f1f5f9;
+  --border: #334155;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --card: #0f172a;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --primary-600: #4c79e8;
-  --primary-700: #3f67ce;
-  --secondary: #ff8743;
+  --primary-600: #1d4ed8;
+  --primary-700: #1e40af;
+  --secondary: #ea580c;
   --secondary-foreground: #ffffff;
-  --secondary-600: #e6783d;
-  --secondary-700: #cc6936;
+  --secondary-600: #c2410c;
+  --secondary-700: #9a3412;
   --danger: #dc2626;
   --success: #16a34a;
-  --chart-1: #7fb0ff;
-  --chart-2: #ffa36b;
+  --chart-1: #60a5fa;
+  --chart-2: #fb923c;
   --chart-3: #22d3ee;
-  --chart-4: #c084fc;
+  --chart-4: #a78bfa;
   --chart-5: #4ade80;
   --chart-6: #f87171;
   --chart-7: #fbbf24;
   --chart-8: #f472b6;
-  --chart-grid-color: #3f3f46;
-  --chart-label-color: #a1a1aa;
+  --chart-grid-color: #334155;
+  --chart-label-color: #94a3b8;
 }
 
 html,
@@ -78,6 +80,8 @@ body,
   margin: 0;
   overflow: hidden;
   font-family: "Be Vietnam Pro", sans-serif;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 .swal-theme-popup {

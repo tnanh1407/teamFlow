@@ -94,20 +94,20 @@ export default function ForgotPassword() {
 
       {/* Right: Form */}
       <div className="flex flex-1 items-center justify-center bg-background p-6">
-        <div className="w-full max-w-[440px]">
+        <div className="w-full max-w-110">
           {/* Logo + Title */}
           <div className="flex flex-col items-center mb-8">
             <SystemLogo className="mb-4 h-14 w-14 drop-shadow-sm lg:hidden" />
-            <h1 className="mb-1 mt-2 text-2xl font-bold text-foreground">
+            <h1 className="mb-1 mt-2 text-3xl font-bold text-foreground capitalize">
               Quên mật khẩu
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-foreground">
               Nhập email và mã người dùng để nhận link đặt lại mật khẩu
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-md">
             <form
               onSubmit={handleSubmit((values) => forgotPasswordMutation.mutate(values), onInvalid)}
               className="space-y-5"
@@ -121,7 +121,7 @@ export default function ForgotPassword() {
                   type="email"
                   placeholder="Nhập email của bạn"
                   aria-invalid={Boolean(errors.email)}
-                  className={`block w-full rounded-lg border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
+                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
                     errors.email
                       ? "border-red-400 focus:ring-red-500"
                       : "border-border"
@@ -141,7 +141,7 @@ export default function ForgotPassword() {
                   type="text"
                   placeholder="Nhập mã người dùng"
                   aria-invalid={Boolean(errors.employeeCode)}
-                  className={`block w-full rounded-lg border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
+                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
                     errors.employeeCode
                       ? "border-red-400 focus:ring-red-500"
                       : "border-border"
