@@ -49,29 +49,29 @@ function ProjectOverviewTooltip({ active, payload }: ProjectOverviewTooltipProps
   const point = payload[0].payload as ProjectOverviewPoint
 
   return (
-    <div className="min-w-55 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="min-w-55 rounded-xl border border-border bg-background px-4 py-3 shadow-sm">
 
       <div className="mt-3 space-y-2.5 text-sm">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[0] }} />
             Tổng dự án
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.total}</span>
+          <span className="font-semibold text-foreground">{point.total}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[2] }} />
             Đã hoàn thành
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.completed}</span>
+          <span className="font-semibold text-foreground">{point.completed}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[4] }} />
             Chưa hoàn thành
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.incomplete}</span>
+          <span className="font-semibold text-foreground">{point.incomplete}</span>
         </div>
       </div>
     </div>
@@ -100,22 +100,22 @@ export default function ProjectOverviewChart({
       delay={0.6}
       rightContent={
         <>
-          <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-muted p-1">
             {timeRangeOptions.map((option) => (
               <button
                 key={option.key}
                 type="button"
                 onClick={() => setRange(option.key)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${range === option.key
-                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                   }`}
               >
                 {option.label}
               </button>
             ))}
           </div>
-          <span className="text-sm font-medium text-zinc-400">
+          <span className="text-sm font-medium text-muted-foreground">
             {currentTotal} dự án, {completedTotal} hoàn thành, {incompleteTotal} chưa hoàn thành
           </span>
         </>

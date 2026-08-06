@@ -120,7 +120,7 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
                 {option.label}
               </button>
             ))}
-          </div>
+            </div>
           <span className="text-sm font-medium text-muted-foreground">
             {currentTotal} nhân sự hiện tại đang làm việc
           </span>

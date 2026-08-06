@@ -19,17 +19,17 @@ export default function ProjectPriorityTooltip({ active, payload, total }: Toolt
   const percent = total > 0 ? Math.round((point.value / total) * 100) : 0
 
   return (
-    <div className="min-w-45 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
-      <p className="text-xs font-medium text-zinc-400 dark:text-zinc-500">Mức độ ưu tiên</p>
-      <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{point.name}</p>
+    <div className="min-w-45 rounded-xl border border-border bg-background px-4 py-3 shadow-sm">
+      <p className="text-xs font-medium text-muted-foreground">Mức độ ưu tiên</p>
+      <p className="mt-0.5 text-sm font-semibold text-foreground">{point.name}</p>
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Số lượng</span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.value}</span>
+          <span className="text-muted-foreground">Số lượng</span>
+          <span className="font-semibold text-foreground">{point.value}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-zinc-600 dark:text-zinc-300">Tỷ lệ</span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{percent}%</span>
+          <span className="text-muted-foreground">Tỷ lệ</span>
+          <span className="font-semibold text-foreground">{percent}%</span>
         </div>
       </div>
     </div>

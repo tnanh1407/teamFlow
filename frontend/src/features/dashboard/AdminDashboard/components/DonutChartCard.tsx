@@ -7,26 +7,24 @@ interface DonutChartCardProps {
   title: string
   data: { name: string; value: number; color?: string }[]
   total: number
-  index: number
-  palette?: string[]
   tooltipContent?: ReactElement
 }
 
-export default function DonutChartCard({ title, data, total, index, palette, tooltipContent }: DonutChartCardProps) {
-  const colors = palette?.length ? palette : chartPalette
+export default function DonutChartCard({ title, data, total, tooltipContent }: DonutChartCardProps) {
+  const colors = chartPalette
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
-      className="rounded-xl border border-zinc-200/70 dark:border-zinc-700/50 bg-white dark:bg-zinc-900 shadow-sm"
+      transition={{ delay: 0.3, duration: 0.4 }}
+      className="rounded-xl border border-border bg-background shadow-sm"
     >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div className="flex items-center gap-2.5">
-          <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 uppercase">{title}</h2>
+          <h2 className="text-base font-semibold uppercase text-foreground">{title}</h2>
         </div>
-        <span className="text-sm font-medium text-zinc-400">{total} tổng</span>
+        <span className="text-sm font-medium text-muted-foreground">{total} tổng</span>
       </div>
       <div className="p-5">
         <div className="flex items-start gap-4">
@@ -41,7 +39,8 @@ export default function DonutChartCard({ title, data, total, index, palette, too
                 content={tooltipContent}
                 contentStyle={{
                   borderRadius: "10px",
-                  border: "1px solid #e4e4e7",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--background)",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                   fontSize: "13px",
                   padding: "8px 12px",
@@ -58,20 +57,20 @@ export default function DonutChartCard({ title, data, total, index, palette, too
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                      <span className="text-xs text-zinc-600 dark:text-zinc-400">{entry.name}</span>
+                      <span className="text-xs text-muted-foreground">{entry.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.value}</span>
-                      <span className="text-[10px] text-zinc-400 font-medium">{pct}%</span>
+                      <span className="text-xs font-semibold text-foreground">{entry.value}</span>
+                      <span className="text-[10px] font-medium text-muted-foreground">{pct}%</span>
                     </div>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
                       transition={{
                         duration: 0.8,
-                        delay: 0.5 + index * 0.15,
+                        delay: 0.5,
                         ease: "easeOut",
                       }}
                       className="h-full rounded-full"

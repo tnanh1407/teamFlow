@@ -21,7 +21,9 @@ export default function UserList() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
   const [search, setSearch] = useState("")
-  const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "hire-newest" | "hire-oldest" | "role">("name-asc")
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 10
 
   const usersQuery = useUsersQuery()
   const departmentsQuery = useDepartmentsQuery()
@@ -64,17 +66,39 @@ export default function UserList() {
 
   const sortedUsers = useMemo(() => {
     const arr = [...filteredUsers]
-    if (!sortDir) return arr
     arr.sort((a, b) => {
-      const cmp = a.username.localeCompare(b.username)
-      return sortDir === "asc" ? cmp : -cmp
+      if (sortBy === "name-asc") return a.name.localeCompare(b.name)
+      if (sortBy === "name-desc") return b.name.localeCompare(a.name)
+      if (sortBy === "hire-newest") {
+        return new Date(b.hireDate || 0).getTime() - new Date(a.hireDate || 0).getTime()
+      }
+      if (sortBy === "hire-oldest") {
+        return new Date(a.hireDate || 0).getTime() - new Date(b.hireDate || 0).getTime()
+      }
+
+      const roleOrder = { admin: 0, user: 1 } as const
+      const roleDelta = roleOrder[a.role] - roleOrder[b.role]
+      if (roleDelta !== 0) return roleDelta
+      return a.name.localeCompare(b.name)
     })
     return arr
-  }, [filteredUsers, sortDir])
+  }, [filteredUsers, sortBy])
 
-  const toggleSort = () => {
-    setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
-  }
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / pageSize))
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize
+    return sortedUsers.slice(start, start + pageSize)
+  }, [currentPage, sortedUsers])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, sortBy])
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
 
   const canEdit = (target: User) => {
     if (!currentUser) return false
@@ -172,15 +196,15 @@ export default function UserList() {
 
       <UserListToolbar
         search={search}
-        sortDir={sortDir}
+        sortBy={sortBy}
         onAdd={() => openFormDialog()}
         onSearchChange={setSearch}
-        onToggleSort={toggleSort}
+        onSortChange={setSortBy}
       />
 
       <UserListTable
         loading={loading}
-        users={sortedUsers}
+        users={paginatedUsers}
         deptNameMap={deptNameMap}
         posNameMap={posNameMap}
         canEdit={canEdit}
@@ -190,6 +214,68 @@ export default function UserList() {
         onToggleStatus={handleToggleStatus}
         onDelete={confirmDelete}
       />
+
+      {!loading && sortedUsers.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Đang hiển thị {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, sortedUsers.length)} trên {sortedUsers.length} người dùng
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Trang trước
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => {
+                const isActive = page === currentPage
+                const isCompact = totalPages > 7
+                const shouldShow =
+                  !isCompact ||
+                  page === 1 ||
+                  page === totalPages ||
+                  Math.abs(page - currentPage) <= 1
+
+                if (!shouldShow) {
+                  if (page === 2 || page === totalPages - 1) {
+                    return <span key={page} className="px-1 text-muted-foreground">…</span>
+                  }
+                  return null
+                }
+
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`min-w-9 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-lg border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Trang sau
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

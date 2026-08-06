@@ -11,7 +11,8 @@ import DonutChartCard from "./components/DonutChartCard"
 import DepartmentTooltip from "./components/DepartmentTooltip"
 import ProjectPriorityTooltip from "./components/ProjectPriorityTooltip"
 import ProjectOverviewChart from "./components/ProjectOverviewChart"
-import ContributionBarChart from "./components/ContributionBarChart"
+import ContributionBarChart, { EmployeeContributionTooltip } from "./components/ContributionBarChart"
+import { TOP_EMPLOYEE_CONTRIBUTION_LIMIT } from "./constants"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
@@ -19,18 +20,7 @@ import projectService, { type Project } from "@/services/project.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
 import projectEmployeeService, { type ProjectEmployee } from "@/services/project-employee.service"
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
-import projectLogService, { type ProjectLog } from "@/services/project-log.service"
-
-
-
-interface DashboardChartPoint {
-  name: string
-  value: number
-  color?: string
-}
-
-
-
+import projectTaskService, { type ProjectTask } from "@/services/project-task.service"
 
 
 type TimeRangeKey = "all" | "12m" | "6m" | "3m"
@@ -165,8 +155,6 @@ function formatComparisonText(currentValue: number, previousValue: number | null
 
 
 
-const departmentPalette = chartPalette
-
 const projectPalette = {
   low: "var(--chart-7)",
   medium: "var(--chart-3)",
@@ -174,14 +162,37 @@ const projectPalette = {
   critical: "var(--chart-5)",
 }
 
-function buildActiveDepartmentData(users: User[], departments: Department[]): DashboardChartPoint[] {
+interface DepartmentChartPoint {
+  name: string
+  value: number
+  members: number
+  staff: number
+  interns: number
+  managerName: string
+  managerCode: string
+}
+
+function buildActiveDepartmentData(users: User[], departments: Department[]): DepartmentChartPoint[] {
   const activeUsers = users.filter((user) => user.status === true)
+  const userById = new Map(users.map((user) => [user.id, user]))
 
   return departments
-    .map((department) => ({
-      name: department.name,
-      value: activeUsers.filter((user) => user.departmentId === department.id).length,
-    }))
+    .map((department) => {
+      const departmentUsers = activeUsers.filter((user) => user.departmentId === department.id)
+      const interns = departmentUsers.filter((user) => user.position === "intern").length
+      const staff = departmentUsers.length - interns
+      const manager = department.managerId ? userById.get(department.managerId) : undefined
+
+      return {
+        name: department.name,
+        value: departmentUsers.length,
+        members: departmentUsers.length,
+        staff,
+        interns,
+        managerName: manager?.name ?? "Chưa phân công",
+        managerCode: manager?.employeeCode ?? "",
+      }
+    })
     .filter((department) => department.value > 0)
 }
 
@@ -189,7 +200,7 @@ function buildDepartmentContributionData(
   projects: Project[],
   departments: Department[],
   assignments: ProjectDepartment[]
-): DashboardContributionPoint[] {
+): DepartmentContributionPoint[] {
   const projectById = new Map(projects.map((project) => [project.id, project]))
   const counts = new Map<string, { total: Set<string>; completed: Set<string> }>()
 
@@ -206,13 +217,20 @@ function buildDepartmentContributionData(
   return departments
     .map((department) => {
       const count = counts.get(department.id)
+      const projectCount = count?.total.size ?? 0
+      const completedCount = count?.completed.size ?? 0
+      // Quy tắc tính điểm:
+      // - Dự án hoàn thành: trọng số cao hơn để phản ánh hiệu quả đầu ra
+      // - Số dự án tham gia: đóng góp nền
+      // Trọng số được giữ nhỏ để điểm dễ đọc và vẫn tôn trọng thứ tự ưu tiên.
+      const score = completedCount * 4 + projectCount * 2
+
       return {
         label: department.name,
         name: department.name,
-        value: count?.total.size ?? 0,
-        completed: count?.completed.size ?? 0,
-        comments: 0,
-        processes: 0,
+        value: score,
+        completed: completedCount,
+        projects: projectCount,
       }
     })
     .sort((a, b) => {
@@ -229,16 +247,26 @@ function buildDepartmentContributionData(
 }
 
 
-//=========================================== 
-// BIỂU ĐỒ NHÂN VIÊN ĐÓNG GÓP
-// ==========================================
+  //===========================================
+  // BIỂU ĐỒ NHÂN VIÊN ĐÓNG GÓP
+  // ==========================================
+
+interface DepartmentContributionPoint {
+  label: string
+  name: string
+  value: number
+  completed: number
+  projects: number
+}
+
 interface DashboardContributionPoint {
   label: string
   name: string
   value: number
   completed: number
+  projects: number
   comments: number
-  processes: number
+  tasks: number
 }
 
 function buildEmployeeContributionData(
@@ -248,6 +276,7 @@ function buildEmployeeContributionData(
   positions: Position[],
   assignments: ProjectEmployee[],
   comments: ProjectComment[], // bình luận
+  tasks: ProjectTask[],
 ): DashboardContributionPoint[] {
   const projectById = new Map(projects.map((project) => [project.id, project])) // tra cứ nhanh project id
   const departmentById = new Map(departments.map((department) => [department.id, department.name]))
@@ -255,12 +284,17 @@ function buildEmployeeContributionData(
   const activeUsers = users.filter((user) => user.status === true)  // lọc nhân viên
   const activeUserIds = new Set(activeUsers.map((user) => user.id)) // kiểm tra nhanh nhân viên có active hay không
   const commentCounts = new Map<string, number>() // lưu số bình luận của từng user
-  const processCounts = new Map<string, number>() 
+  const taskCounts = new Map<string, number>()
   const counts = new Map<string, { total: Set<string>; completed: Set<string> }>() // lưu số dự án  user tham gia và số dự án hoàn thành trong đó
 
   comments.forEach((comment) => {
     if (!activeUserIds.has(comment.userId)) return
     commentCounts.set(comment.userId, (commentCounts.get(comment.userId) ?? 0) + 1)
+  })
+
+  tasks.forEach((task) => {
+    if (!activeUserIds.has(task.assignedTo ?? "")) return
+    taskCounts.set(task.assignedTo ?? "", (taskCounts.get(task.assignedTo ?? "") ?? 0) + 1)
   })
 
   //  dếm dự án tham gia
@@ -280,25 +314,47 @@ function buildEmployeeContributionData(
   return activeUsers
     .map((user) => {
       const count = counts.get(user.id)
+      const projectCount = count?.total.size ?? 0
+      const completedCount = count?.completed.size ?? 0
+      const commentCount = commentCounts.get(user.id) ?? 0
+      const taskCount = taskCounts.get(user.id) ?? 0
+      // Quy tắc tính điểm:
+      // - Dự án hoàn thành: trọng số cao nhất
+      // - Công việc được giao: ưu tiên tiếp theo
+      // - Bình luận: đóng góp tương tác
+      // - Số dự án tham gia: nền tảng xếp hạng
+      // Trọng số được chọn để giữ đúng thứ tự ưu tiên mà không đẩy điểm lên quá lớn.
+      const score = completedCount * 4 + taskCount * 3 + commentCount * 2 + projectCount
+
       return {
         label: `${user.employeeCode || "—"} - ${user.name}`,
         name: user.name,
-        value: count?.total.size ?? 0,
-        completed: count?.completed.size ?? 0,
-        comments: commentCounts.get(user.id) ?? 0,
-        processes: processCounts.get(user.id) ?? 0,
+        value: score,
+        completed: completedCount,
+        projects: projectCount,
+        comments: commentCount,
+        tasks: taskCount,
         code: user.employeeCode || "",
         department: departmentById.get(user.departmentId ?? "") ?? "",
         position: positionById.get(user.positionId ?? "") ?? "",
       }
     })
-    .filter((user) => user.value > 0 || user.comments > 0 || user.processes > 0)
+    .filter((user) => user.value > 0 || user.comments > 0 || user.tasks > 0)
     .sort((a, b) => b.value - a.value)
-    .slice(0, 6)
+    .slice(0, TOP_EMPLOYEE_CONTRIBUTION_LIMIT)
 }
 
 
-// 
+//=======================
+// BIỂU ĐỒ Phân bố độ ưu tiên dự án chưa hoàn thành
+// ======================
+
+
+interface DashboardChartPoint {
+  name: string
+  value: number
+  color?: string
+}
 function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
   const incompleteProjects = projects.filter((project) => project.status !== "completed")
 
@@ -455,7 +511,7 @@ export default function AdminDashboard() {
   const [projectDepartments, setProjectDepartments] = useState<ProjectDepartment[]>([])
   const [projectEmployees, setProjectEmployees] = useState<ProjectEmployee[]>([])
   const [projectComments, setProjectComments] = useState<ProjectComment[]>([])
-  const [projectLogs, setProjectLogs] = useState<ProjectLog[]>([])
+  const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([])
   const [range, setRange] = useState<TimeRangeKey>("12m")
   const [loading, setLoading] = useState(true)
 
@@ -466,7 +522,7 @@ export default function AdminDashboard() {
 
     const fetchDashboard = async () => {
       try {
-        const [usersRes, deptRes, posRes, projRes, projectDepartmentsRes, projectEmployeesRes, projectCommentsRes, projectLogsRes] = await Promise.all([
+        const [usersRes, deptRes, posRes, projRes, projectDepartmentsRes, projectEmployeesRes, projectCommentsRes, projectTasksRes] = await Promise.all([
           userService.getAll(),
           departmentService.getAll(),
           positionService.getAll(),
@@ -474,7 +530,7 @@ export default function AdminDashboard() {
           projectDepartmentService.getAll(),
           projectEmployeeService.getAll(),
           projectCommentService.getAll(),
-          projectLogService.getAll(),
+          projectTaskService.getAll(),
         ])
 
         if (!alive) return
@@ -486,7 +542,7 @@ export default function AdminDashboard() {
         setProjectDepartments(projectDepartmentsRes.data.data)
         setProjectEmployees(projectEmployeesRes.data.data)
         setProjectComments(projectCommentsRes.data.data)
-        setProjectLogs(projectLogsRes.data.data)
+        setProjectTasks(projectTasksRes.data.data)
       } catch {
         if (!alive) return
         console.error("Failed to fetch dashboard stats")
@@ -638,7 +694,7 @@ export default function AdminDashboard() {
     positions,
     projectEmployees,
     projectComments,
-    projectLogs
+    projectTasks
   )
 
   if (loading) {
@@ -646,7 +702,7 @@ export default function AdminDashboard() {
   }
 
   return (
-      <div className="space-y-8">
+      <div className="space-y-8 text-foreground">
       <PageSeo
         title="Dashboard Admin"
         description="Thống kê tổng quan toàn bộ thông số trong hệ thống TeamFlow"
@@ -668,17 +724,18 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ContributionBarChart
           title="Đóng góp dự án theo phòng ban"
-          description="Xếp hạng phòng ban theo số dự án được phân công."
+          description="Xếp hạng phòng ban theo điểm đóng góp tổng hợp."
           data={departmentContributionData}
           accent="var(--chart-2)"
           emptyText="Chưa có dữ liệu phân công cho phòng ban"
         />
         <ContributionBarChart
           title="Đóng góp dự án theo nhân sự"
-          description="Xếp hạng nhân sự đang hoạt động theo số dự án tham gia."
+          description="Xếp hạng nhân sự đang hoạt động theo điểm đóng góp tổng hợp."
           data={employeeContributionData}
           accent="var(--chart-1)"
           emptyText="Chưa có dữ liệu phân công cho nhân sự"
+          tooltipContent={<EmployeeContributionTooltip />}
         />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -686,15 +743,12 @@ export default function AdminDashboard() {
           title="Phân bố nhân sự đang hoạt động theo phòng ban"
           data={deptData}
           total={activeUsersCount || 1}
-          index={0}
-          palette={departmentPalette}
           tooltipContent={<DepartmentTooltip />}
         />
         <DonutChartCard
           title="Phân bố độ ưu tiên dự án chưa hoàn thành"
           data={projPriorityData}
           total={incompleteProjectsCount || 1}
-          index={1}
           tooltipContent={<ProjectPriorityTooltip total={incompleteProjectsCount || 1} />}
         />
       </div>

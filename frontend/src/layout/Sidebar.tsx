@@ -31,8 +31,8 @@ function SidebarItem({ item, collapsed }: SidebarItemProps) {
         className={({ isActive }) =>
           `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${collapsed ? "justify-center px-0" : ""
           } ${isActive
-            ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
           }`
         }
       >
@@ -46,7 +46,7 @@ function SidebarItem({ item, collapsed }: SidebarItemProps) {
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
         <Icon size={18} />
 
@@ -74,8 +74,8 @@ function SidebarItem({ item, collapsed }: SidebarItemProps) {
                 to={child.to!}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${isActive
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                    : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`
                 }
               >
@@ -124,10 +124,10 @@ export default function Sidebar({ collapsed }: SidebarProps) {
 
   return (
     <aside
-      className={`flex flex-col bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 shrink-0 transition-all duration-300 ease-in-out min-h-0 overflow-hidden ${collapsed ? "w-14" : "w-[20%] min-w-[200px] max-w-[280px]"
+      className={`flex min-h-0 shrink-0 flex-col overflow-hidden border-r border-border bg-background transition-all duration-300 ease-in-out ${collapsed ? "w-14" : "w-[20%] min-w-[200px] max-w-[280px]"
         }`}
     >
-      <div className={`h-16 flex items-center ${collapsed ? "justify-center" : "gap-3"} h-14 px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0`}>
+      <div className={`flex h-14 shrink-0 items-center border-b border-border px-4 ${collapsed ? "justify-center" : "gap-3"}`}>
       <SystemLogo className="h-7 w-7 shrink-0 transition-all duration-300 ease-in-out" />
         <AnimatePresence>
           {!collapsed && (
@@ -136,7 +136,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate capitalize"
+              className="truncate text-lg font-bold capitalize text-foreground"
             >
               Trang Quản Lý
             </motion.span>
@@ -154,7 +154,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t border-zinc-200 dark:border-zinc-800 p-3 shrink-0">
+      <div className="shrink-0 border-t border-border p-3">
         <AnimatePresence>
           {!collapsed && user && (
             <motion.div
@@ -165,7 +165,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
               className="overflow-hidden"
             >
               <div className="flex items-center gap-3 px-1 pb-2">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
                   {user.avatarURL ? (
                     <img src={user.avatarURL} alt="" className="w-full h-full rounded-full object-cover" />
                   ) : (
@@ -173,10 +173,10 @@ export default function Sidebar({ collapsed }: SidebarProps) {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                  <p className="truncate text-sm font-semibold text-foreground">
                     {user.role}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-muted-foreground">
                     {user.name}
                   </p>
                 </div>
@@ -186,7 +186,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         </AnimatePresence>
         <button
           onClick={handleLogout}
-          className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 dark:hover:text-red-400 w-full transition-colors cursor-pointer border-none ${collapsed ? "justify-center px-0" : ""
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg border-none px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-[color-mix(in_srgb,var(--danger)_10%,var(--background))] hover:text-[var(--danger)] ${collapsed ? "justify-center px-0" : ""
             }`}
         >
           <LogOut size={18} className="shrink-0" />
