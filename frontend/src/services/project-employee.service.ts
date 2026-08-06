@@ -1,6 +1,6 @@
 import api from "@/lib/axios"
 
-export interface ProjectMember {
+export interface ProjectEmployee {
   id: string
   projectId: string
   userId: string
@@ -8,18 +8,18 @@ export interface ProjectMember {
   assignedAt: string
 }
 
-const mapMember = (member: { id: string; projectId: string; employeeId: string; role: string; assignedAt: string }): ProjectMember => ({
-  id: member.id,
-  projectId: member.projectId,
-  userId: member.employeeId,
-  role: member.role,
-  assignedAt: member.assignedAt,
+const mapEmployee = (employee: { id: string; projectId: string; employeeId: string; role: string; assignedAt: string }): ProjectEmployee => ({
+  id: employee.id,
+  projectId: employee.projectId,
+  userId: employee.employeeId,
+  role: employee.role,
+  assignedAt: employee.assignedAt,
 })
 
-const projectMemberService = {
+const projectEmployeeService = {
   getAll: async () => {
     const { data } = await api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; role: string; assignedAt: string }> }>("/project-employees")
-    return { data: { data: data.data.map(mapMember) } }
+    return { data: { data: data.data.map(mapEmployee) } }
   },
 
   getByUser: (userId: string) =>
@@ -27,12 +27,12 @@ const projectMemberService = {
 
   getByProject: async (projectId: string) => {
     const { data } = await api.get<{ data: Array<{ id: string; projectId: string; employeeId: string; role: string; assignedAt: string }> }>(`/project-employees/project/${projectId}`)
-    return { data: { data: data.data.map(mapMember) } }
+    return { data: { data: data.data.map(mapEmployee) } }
   },
 
   getById: async (id: string) => {
     const { data } = await api.get<{ data: { id: string; projectId: string; employeeId: string; role: string; assignedAt: string } }>(`/project-employees/${id}`)
-    return { data: { data: mapMember(data.data) } }
+    return { data: { data: mapEmployee(data.data) } }
   },
 
   create: (data: { projectId: string; userId: string; role?: string }) =>
@@ -42,4 +42,4 @@ const projectMemberService = {
     api.delete(`/project-employees/${id}`),
 }
 
-export default projectMemberService
+export default projectEmployeeService

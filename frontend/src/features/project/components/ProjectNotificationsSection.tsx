@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Bell, Pin, Pencil, Trash2, Send } from "lucide-react";
 import type { User } from "@/services/user.service";
-import type { ProjectMember } from "@/services/project-member.service";
+import type { ProjectEmployee } from "@/services/project-employee.service";
 import projectNotificationService, { type ProjectNotification } from "@/services/project-notification.service";
 import { MySwal, showDeleteConfirm, showSuccessAlert } from "@/lib/swal";
 
 interface ProjectNotificationsSectionProps {
   projectId: string;
-  projectMembers: Array<ProjectMember & { user?: User }>;
+  projectEmployees: Array<ProjectEmployee & { user?: User }>;
   currentUserId?: string;
 }
 
@@ -28,7 +28,7 @@ const formatDate = (value: string) => new Date(value).toLocaleString("vi-VN", { 
 
 export default function ProjectNotificationsSection({
   projectId,
-  projectMembers,
+  projectEmployees,
   currentUserId,
 }: ProjectNotificationsSectionProps) {
   const [notifications, setNotifications] = useState<ProjectNotification[]>([]);
@@ -43,12 +43,12 @@ export default function ProjectNotificationsSection({
 
   const canManage = useMemo(() => {
     if (!currentUserId) return false;
-    return projectMembers.some((member) => member.userId === currentUserId && member.role === "leader");
-  }, [currentUserId, projectMembers]);
+    return projectEmployees.some((member) => member.userId === currentUserId && member.role === "leader");
+  }, [currentUserId, projectEmployees]);
 
   const memberById = useMemo(() => {
-    return new Map(projectMembers.map((member) => [member.userId, member.user]));
-  }, [projectMembers]);
+    return new Map(projectEmployees.map((member) => [member.userId, member.user]));
+  }, [projectEmployees]);
 
   const loadNotifications = async () => {
     if (!projectId) return;

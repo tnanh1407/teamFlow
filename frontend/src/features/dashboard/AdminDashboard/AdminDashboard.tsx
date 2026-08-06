@@ -17,7 +17,7 @@ import departmentService, { type Department } from "@/services/department.servic
 import positionService, { type Position } from "@/services/position.service"
 import projectService, { type Project } from "@/services/project.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
-import projectMemberService, { type ProjectMember } from "@/services/project-member.service"
+import projectEmployeeService, { type ProjectEmployee } from "@/services/project-employee.service"
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 
@@ -246,26 +246,27 @@ function buildEmployeeContributionData(
   users: User[],
   departments: Department[],
   positions: Position[],
-  assignments: ProjectMember[],
-  comments: ProjectComment[],
-
+  assignments: ProjectEmployee[],
+  comments: ProjectComment[], // bình luận
 ): DashboardContributionPoint[] {
-  const projectById = new Map(projects.map((project) => [project.id, project]))
+  const projectById = new Map(projects.map((project) => [project.id, project])) // tra cứ nhanh project id
   const departmentById = new Map(departments.map((department) => [department.id, department.name]))
   const positionById = new Map(positions.map((position) => [position.id, position.name]))
-  const activeUsers = users.filter((user) => user.status === true)
-  const activeUserIds = new Set(activeUsers.map((user) => user.id))
-  const commentCounts = new Map<string, number>()
-  const processCounts = new Map<string, number>()
-  const counts = new Map<string, { total: Set<string>; completed: Set<string> }>()
+  const activeUsers = users.filter((user) => user.status === true)  // lọc nhân viên
+  const activeUserIds = new Set(activeUsers.map((user) => user.id)) // kiểm tra nhanh nhân viên có active hay không
+  const commentCounts = new Map<string, number>() // lưu số bình luận của từng user
+  const processCounts = new Map<string, number>() 
+  const counts = new Map<string, { total: Set<string>; completed: Set<string> }>() // lưu số dự án  user tham gia và số dự án hoàn thành trong đó
 
   comments.forEach((comment) => {
     if (!activeUserIds.has(comment.userId)) return
     commentCounts.set(comment.userId, (commentCounts.get(comment.userId) ?? 0) + 1)
   })
 
+  //  dếm dự án tham gia
   assignments.forEach((assignment) => {
-    if (!activeUserIds.has(assignment.userId)) return
+    // user không active thì bỏ qiua
+    if (!activeUserIds.has(assignment.userId)) return 
 
     const project = projectById.get(assignment.projectId)
     if (!project) return
@@ -452,7 +453,7 @@ export default function AdminDashboard() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [positions, setPositions] = useState<Position[]>([])
   const [projectDepartments, setProjectDepartments] = useState<ProjectDepartment[]>([])
-  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([])
+  const [projectEmployees, setProjectEmployees] = useState<ProjectEmployee[]>([])
   const [projectComments, setProjectComments] = useState<ProjectComment[]>([])
   const [projectLogs, setProjectLogs] = useState<ProjectLog[]>([])
   const [range, setRange] = useState<TimeRangeKey>("12m")
@@ -465,13 +466,13 @@ export default function AdminDashboard() {
 
     const fetchDashboard = async () => {
       try {
-        const [usersRes, deptRes, posRes, projRes, projectDepartmentsRes, projectMembersRes, projectCommentsRes, projectLogsRes] = await Promise.all([
+        const [usersRes, deptRes, posRes, projRes, projectDepartmentsRes, projectEmployeesRes, projectCommentsRes, projectLogsRes] = await Promise.all([
           userService.getAll(),
           departmentService.getAll(),
           positionService.getAll(),
           projectService.getAll({ limit: 100 }),
           projectDepartmentService.getAll(),
-          projectMemberService.getAll(),
+          projectEmployeeService.getAll(),
           projectCommentService.getAll(),
           projectLogService.getAll(),
         ])
@@ -483,7 +484,7 @@ export default function AdminDashboard() {
         setDepartments(deptRes.data.data)
         setPositions(posRes.data.data)
         setProjectDepartments(projectDepartmentsRes.data.data)
-        setProjectMembers(projectMembersRes.data.data)
+        setProjectEmployees(projectEmployeesRes.data.data)
         setProjectComments(projectCommentsRes.data.data)
         setProjectLogs(projectLogsRes.data.data)
       } catch {
@@ -635,7 +636,7 @@ export default function AdminDashboard() {
     users,
     departments,
     positions,
-    projectMembers,
+    projectEmployees,
     projectComments,
     projectLogs
   )

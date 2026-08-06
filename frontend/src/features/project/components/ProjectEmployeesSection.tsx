@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { Users, Plus, Building2, X } from "lucide-react"
-import type { ProjectMember } from "@/services/project-member.service"
+import type { ProjectEmployee } from "@/services/project-employee.service"
 import type { Department } from "@/services/department.service"
 import type { User } from "@/services/user.service"
 
-interface ProjectMembersSectionProps {
-  projectMembers: (ProjectMember & { user?: User })[]
+interface ProjectEmployeesSectionProps {
+  projectEmployees: (ProjectEmployee & { user?: User })[]
   departments: Department[]
   canManageMembers: boolean
   isManager: boolean
@@ -15,8 +15,8 @@ interface ProjectMembersSectionProps {
   onRemoveMember: (id: string) => void
 }
 
-export default function ProjectMembersSection({
-  projectMembers,
+export default function ProjectEmployeesSection({
+  projectEmployees,
   departments,
   canManageMembers,
   isManager,
@@ -24,30 +24,30 @@ export default function ProjectMembersSection({
   userDeptId,
   onOpenAddModal,
   onRemoveMember,
-}: ProjectMembersSectionProps) {
+}: ProjectEmployeesSectionProps) {
   const [expandedDepts, setExpandedDepts] = useState<Record<string, boolean>>({})
 
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
       <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
         <Users size={16} className="text-zinc-500" />
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thành viên</h2>
-        <span className="ml-auto text-xs text-zinc-400">{projectMembers.length} người</span>
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Nhân sự dự án</h2>
+        <span className="ml-auto text-xs text-zinc-400">{projectEmployees.length} nhân sự</span>
         {canManageMembers && (
           <button
             onClick={onOpenAddModal}
             className="w-6 h-6 rounded flex items-center justify-center text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer border-none"
-            title="Thêm thành viên"
+            title="Thêm nhân sự"
           >
             <Plus size={14} />
           </button>
         )}
       </div>
-      {projectMembers.length === 0 ? (
-        <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có thành viên</p>
+      {projectEmployees.length === 0 ? (
+        <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có nhân sự</p>
       ) : (
         departments.map((dept) => {
-          const deptMems = projectMembers.filter((pm) => pm.user?.departmentId === dept.id)
+          const deptMems = projectEmployees.filter((pm) => pm.user?.departmentId === dept.id)
           if (deptMems.length === 0) return null
           const open = expandedDepts[dept.id] ?? true
           return (

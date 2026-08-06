@@ -4,7 +4,7 @@ import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Che
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
 import projectLogService, { type ProjectLog } from "@/services/project-log.service"
 import projectDepartmentService, { type ProjectDepartment } from "@/services/project-department.service"
-import projectMemberService, { type ProjectMember } from "@/services/project-member.service"
+import projectEmployeeService, { type ProjectEmployee } from "@/services/project-employee.service"
 import projectCommentService, { type ProjectComment } from "@/services/project-comment.service"
 import departmentService, { type Department } from "@/services/department.service"
 import userService, { type User } from "@/services/user.service"
@@ -14,7 +14,7 @@ import ProjectLogsSection from "./components/ProjectLogsSection"
 import ProjectCommentsSection from "./components/ProjectCommentsSection"
 import ProjectNotificationsSection from "./components/ProjectNotificationsSection"
 import ProjectDepartmentsSection from "./components/ProjectDepartmentsSection"
-import ProjectMembersSection from "./components/ProjectMembersSection"
+import ProjectEmployeesSection from "./components/ProjectEmployeesSection"
 import { MySwal, showDeleteConfirm } from "@/lib/swal"
 
 interface FormData {
@@ -106,7 +106,7 @@ export default function ProjectDetail() {
 
   const [allDepartments, setAllDepartments] = useState<Department[]>([])
   const [projectDeptIds, setProjectDeptIds] = useState<string[]>([])
-  const [projectMembers, setProjectMembers] = useState<(ProjectMember & { user?: User })[]>([])
+  const [projectEmployees, setProjectEmployees] = useState<(ProjectEmployee & { user?: User })[]>([])
   const [logUserMap, setLogUserMap] = useState<Record<string, User>>({})
   const [comments, setComments] = useState<(ProjectComment & { user?: User })[]>([])
   const [commentText, setCommentText] = useState("")
@@ -130,7 +130,7 @@ export default function ProjectDetail() {
       projectService.getById(id),
       projectLogService.getByProject(id),
       projectDepartmentService.getByProject(id),
-      projectMemberService.getByProject(id),
+      projectEmployeeService.getByProject(id),
       projectCommentService.getByProject(id),
     ])
       .then(([projRes, logsRes, deptRes, memberRes, commentRes]) => {
@@ -180,15 +180,15 @@ export default function ProjectDetail() {
           setDeptUserCount({})
         }
 
-        const pemps = memberRes.data.data as ProjectMember[]
+        const pemps = memberRes.data.data as ProjectEmployee[]
         if (pemps.length > 0) {
           Promise.all(
-            pemps.map((pm: ProjectMember) =>
+            pemps.map((pm: ProjectEmployee) =>
               userService.getById(pm.userId).then((r) => ({ ...pm, user: r.data.data }))
             )
-          ).then((enriched) => setProjectMembers(enriched))
+          ).then((enriched) => setProjectEmployees(enriched))
         } else {
-          setProjectMembers([])
+          setProjectEmployees([])
         }
 
         const rawComments = commentRes.data.data as ProjectComment[]
@@ -256,7 +256,7 @@ export default function ProjectDetail() {
           userService.getByDepartment(selectedDeptId).then((r) => {
             const emps = r.data.data
             setDeptEmps(emps)
-            const existingUserIds = projectMembers.map((m) => m.userId)
+            const existingUserIds = projectEmployees.map((m) => m.userId)
             const preSelected = emps.filter((e) => existingUserIds.includes(e.id)).map((e) => e.id)
             setSelectedEmpIds(preSelected)
           })
@@ -264,7 +264,7 @@ export default function ProjectDetail() {
           setDeptEmps([])
           setSelectedEmpIds([])
         }
-      }, [selectedDeptId, projectMembers])
+      }, [selectedDeptId, projectEmployees])
 
       const availableDepts = isAdmin
         ? allDepartments.filter((d) => !projectDeptIds.includes(d.id))
@@ -321,7 +321,7 @@ export default function ProjectDetail() {
           </div>
 
           {selectedDeptId && (() => {
-            const existingUserIds = projectMembers.map((m) => m.userId)
+            const existingUserIds = projectEmployees.map((m) => m.userId)
             const availableEmps = deptEmps.filter((e) => !existingUserIds.includes(e.id))
             return (
               <div>
@@ -401,14 +401,14 @@ export default function ProjectDetail() {
         await projectDepartmentService.create({ projectId: project.id, departmentId })
       }
 
-      const existingUserIds = projectMembers.map((m) => m.userId)
+          const existingUserIds = projectEmployees.map((m) => m.userId)
       const userIdsToAdd = userIds.filter((id: string) => !existingUserIds.includes(id))
       const newMembers = currentDeptEmps.filter((e) => userIdsToAdd.includes(e.id))
 
       if (userIdsToAdd.length > 0) {
         await Promise.all(
           userIdsToAdd.map((userId: string) =>
-            projectMemberService.create({ projectId: project.id, userId })
+            projectEmployeeService.create({ projectId: project.id, userId })
           )
         )
         if (user?.id) {
@@ -856,8 +856,8 @@ export default function ProjectDetail() {
   const removeMember = async (id: string) => {
     if (!project) return
     try {
-      const pm = projectMembers.find((m) => m.id === id)
-      await projectMemberService.delete(id)
+      const pm = projectEmployees.find((m) => m.id === id)
+      await projectEmployeeService.delete(id)
       if (user?.id && pm?.user?.name) {
         await projectLogService.create({
           projectId: project.id,
@@ -1101,8 +1101,8 @@ export default function ProjectDetail() {
             onRemoveDepartment={removeDepartment}
           />
 
-          <ProjectMembersSection
-            projectMembers={projectMembers}
+          <ProjectEmployeesSection
+            projectEmployees={projectEmployees}
             departments={departments}
             canManageMembers={canManageMembers}
             isManager={isManager}
@@ -1114,7 +1114,7 @@ export default function ProjectDetail() {
 
           <ProjectNotificationsSection
             projectId={id || ""}
-            projectMembers={projectMembers}
+            projectEmployees={projectEmployees}
             currentUserId={user?.id}
           />
 
