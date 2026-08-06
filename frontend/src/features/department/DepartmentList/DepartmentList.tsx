@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, FileText, Copy } from "lucide-react"
-import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
-import { motion } from "motion/react"
 import departmentService, { type Department } from "@/services/department.service"
 import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
@@ -60,9 +58,6 @@ export default function Departments() {
     "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 
   const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
-
-  const activeCount = departments.filter((d) => d.isActive).length
-  const inactiveCount = departments.length - activeCount
 
   const openFormDialog = async (editingDept?: Department) => {
     const isEdit = !!editingDept

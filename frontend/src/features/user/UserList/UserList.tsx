@@ -6,6 +6,7 @@ import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
 import type { User } from "@/services/user.service"
 import openUserFormDialog from "./components/UserFormDialog"
+import UserListCard from "./components/UserListCard"
 import UserListToolbar from "./components/UserListToolbar"
 import UserListTable from "./components/UserListTable"
 import {
@@ -22,6 +23,7 @@ export default function UserList() {
   const { user: currentUser } = useAuth()
   const [search, setSearch] = useState("")
   const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "hire-newest" | "hire-oldest" | "role">("name-asc")
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list")
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
 
@@ -213,23 +215,55 @@ export default function UserList() {
       <UserListToolbar
         search={search}
         sortBy={sortBy}
+        viewMode={viewMode}
         onAdd={() => openFormDialog()}
         onSearchChange={setSearch}
         onSortChange={setSortBy}
+        onToggleView={() => setViewMode((mode) => (mode === "list" ? "grid" : "list"))}
       />
 
-      <UserListTable
-        loading={loading}
-        users={paginatedUsers}
-        deptNameMap={deptNameMap}
-        posNameMap={posNameMap}
-        canEdit={canEdit}
-        canDelete={canDelete}
-        onView={handleView}
-        onEdit={handleEdit}
-        onToggleStatus={handleToggleStatus}
-        onDelete={confirmDelete}
-      />
+      {viewMode === "list" ? (
+        <UserListTable
+          loading={loading}
+          users={paginatedUsers}
+          deptNameMap={deptNameMap}
+          posNameMap={posNameMap}
+          canEdit={canEdit}
+          canDelete={canDelete}
+          onView={handleView}
+          onEdit={handleEdit}
+          onToggleStatus={handleToggleStatus}
+          onDelete={confirmDelete}
+        />
+      ) : loading ? (
+        <LoadingState />
+      ) : paginatedUsers.length === 0 ? (
+        <div className="rounded-xl border border-border bg-background p-6 text-center text-sm text-muted-foreground">
+          Không tìm thấy người dùng nào
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {paginatedUsers.map((item) => {
+            const deptName = deptNameMap.get(item.departmentId || "") || "—"
+            const posName = posNameMap.get(item.positionId || "") || "—"
+
+            return (
+              <UserListCard
+                key={item.id}
+                user={item}
+                departmentName={deptName}
+                positionName={posName}
+                canEdit={canEdit(item)}
+                canDelete={canDelete(item)}
+                onView={handleView}
+                onEdit={handleEdit}
+                onToggleStatus={handleToggleStatus}
+                onDelete={confirmDelete}
+              />
+            )
+          })}
+        </div>
+      )}
 
       {!loading && sortedUsers.length > 0 && (
         <div className="flex flex-col gap-3 rounded-xl border border-border bg-background px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
