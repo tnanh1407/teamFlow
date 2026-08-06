@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import type { TooltipContentProps } from "recharts"
 import {
   Bar,
   BarChart,
@@ -29,7 +30,9 @@ interface ContributionBarChartProps {
   emptyText: string
 }
 
-function ContributionTooltip({ active, payload }: any) {
+type ContributionTooltipProps = Partial<Pick<TooltipContentProps<number, string>, "active" | "payload">>
+
+function ContributionTooltip({ active, payload }: ContributionTooltipProps) {
   if (!active || !payload?.length) return null
 
   const point = payload[0].payload as ContributionPoint
@@ -97,8 +100,8 @@ export default function ContributionBarChart({
                 <XAxis
                   type="number"
                   tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
-                  tickLine={false}
-                  axisLine={false}
+                  tickLine={true}
+                  axisLine={true}
                   allowDecimals={false}
                 />
                 <YAxis
@@ -107,10 +110,10 @@ export default function ContributionBarChart({
                   width={180}
                   tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
                   tickLine={true}
-                  axisLine={false}
+                  axisLine={true }
                 />
                 <Tooltip content={<ContributionTooltip />} />
-                <Bar dataKey="value" fill={accent} radius={[0, 10, 10, 0]} barSize={16} />
+                <Bar dataKey="value" fill={accent}  barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </div>

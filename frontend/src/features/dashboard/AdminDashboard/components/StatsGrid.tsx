@@ -17,6 +17,7 @@ interface Stat {
   color: string
   icon: LucideIcon
   trendText: string
+  trendPercentText: string
   trendDeltaText: string
   trendDirection: "up" | "down" | "flat"
   href: string
@@ -164,13 +165,22 @@ export default function StatsGrid({ stats, range, onRangeChange, onCardClick }: 
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span
                       className="text-sm"
-                      key={`${stat.label}-${range}-${stat.trendText}`}
+                      key={`${stat.label}-${range}-${stat.trendText}-${stat.trendPercentText}`}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.18, ease: "easeOut" }}
                     >
-                      {stat.trendText}
+                      {stat.trendPercentText ? (
+                        <>
+                          <span className={`text-base font-semibold ${trendToneClass(stat.trendDirection)}`}>
+                            {stat.trendPercentText}
+                          </span>{" "}
+                          {stat.trendText}
+                        </>
+                      ) : (
+                        stat.trendText
+                      )}
                     </motion.span>
                   </AnimatePresence>
                 </div>

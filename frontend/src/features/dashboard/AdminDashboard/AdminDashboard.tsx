@@ -27,37 +27,9 @@ interface DashboardChartPoint {
   color?: string
 }
 
-interface DashboardContributionPoint {
-  label: string
-  name: string
-  value: number
-  completed: number
-  comments: number
-  processes: number
-}
 
-interface ProjectPriorityTooltipProps {
-  active?: boolean
-  payload?: Array<{
-    payload: {
-      name: string
-      value: number
-      color?: string
-    }
-  }>
-  total: number
-}
 
-interface DepartmentTooltipProps {
-  active?: boolean
-  payload?: Array<{
-    payload: {
-      name: string
-      value: number
-      color?: string
-    }
-  }>
-}
+
 
 type TimeRangeKey = "all" | "12m" | "6m" | "3m"
 
@@ -67,14 +39,6 @@ const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number
   { key: "6m", label: "6 tháng", months: 6 },
   { key: "3m", label: "3 tháng", months: 3 },
 ]
-
-function getRangeStart(range: TimeRangeKey) {
-  const selectedMonths = timeRangeOptions.find((option) => option.key === range)?.months ?? 12
-  if (!Number.isFinite(selectedMonths)) return null
-
-  const today = new Date()
-  return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (selectedMonths - 1), 1))
-}
 
 function getRangeMonths(range: TimeRangeKey) {
   return timeRangeOptions.find((option) => option.key === range)?.months ?? 12
@@ -94,13 +58,8 @@ function getPreviousRangeWindow(range: TimeRangeKey) {
   return { currentStart, currentEnd, previousStart, previousEnd }
 }
 
-function isWithinRange(value: string | null | undefined, start: Date | null, end: Date) {
-  if (!value) return false
-
-  const timestamp = new Date(value).getTime()
-  if (Number.isNaN(timestamp)) return false
-
-  return (!start || timestamp >= start.getTime()) && timestamp <= end.getTime()
+function countCreatedUpTo<T>(items: T[], end: Date, getDate: (item: T) => string | null | undefined) {
+  return items.filter((item) => isBeforeOrAt(getDate(item), end)).length
 }
 
 function isBeforeOrAt(value: string | null | undefined, end: Date) {
@@ -116,40 +75,34 @@ function getProjectCompletedAt(project: Project) {
   return project.completedAt || (project.status === "completed" ? project.updatedAt : null)
 }
 
-function countUsersCreatedInRange(users: User[], start: Date, end: Date) {
-  return users.filter((user) => isWithinRange(user.createdAt, start, end)).length
-}
-
 function countUsersActiveAt(users: User[], end: Date) {
   return users.filter((user) => isBeforeOrAt(user.hireDate, end) && (!user.leaveDate || new Date(user.leaveDate).getTime() > end.getTime())).length
 }
 
-function countUsersDepartedInRange(users: User[], start: Date, end: Date) {
-  return users.filter((user) => isWithinRange(user.leaveDate, start, end)).length
+function countUsersDepartedAt(users: User[], end: Date) {
+  return users.filter((user) => isBeforeOrAt(user.leaveDate, end)).length
 }
 
-function countDepartmentsCreatedInRange(departments: Department[], start: Date, end: Date) {
-  return departments.filter((department) => isWithinRange(department.createdAt, start, end)).length
+function countDepartmentsAt(departments: Department[], end: Date) {
+  return countCreatedUpTo(departments, end, (department) => department.createdAt)
 }
 
-function countPositionsCreatedInRange(positions: Position[], start: Date, end: Date) {
-  return positions.filter((position) => isWithinRange(position.createdAt, start, end)).length
+function countPositionsAt(positions: Position[], end: Date) {
+  return countCreatedUpTo(positions, end, (position) => position.createdAt)
 }
 
-function countProjectsCreatedInRange(projects: Project[], start: Date, end: Date) {
-  return projects.filter((project) => isWithinRange(project.createdAt, start, end)).length
+function countProjectsAt(projects: Project[], end: Date) {
+  return countCreatedUpTo(projects, end, (project) => project.createdAt)
 }
 
-function countCompletedProjectsInRange(projects: Project[], start: Date, end: Date) {
-  return projects.filter((project) => isWithinRange(getProjectCompletedAt(project), start, end)).length
+function countCompletedProjectsAt(projects: Project[], end: Date) {
+  return projects.filter((project) => isBeforeOrAt(getProjectCompletedAt(project), end)).length
 }
 
-function countIncompleteProjectsInRange(projects: Project[], start: Date, end: Date) {
-  return projects.filter((project) => {
-    const createdInRange = isWithinRange(project.createdAt, start, end)
-    const completedInRange = isWithinRange(getProjectCompletedAt(project), start, end)
-    return createdInRange && !completedInRange
-  }).length
+function countIncompleteProjectsAt(projects: Project[], end: Date) {
+  const created = countProjectsAt(projects, end)
+  const completed = countCompletedProjectsAt(projects, end)
+  return Math.max(created - completed, 0)
 }
 
 function formatComparisonLabel(range: TimeRangeKey) {
@@ -163,6 +116,7 @@ function formatComparisonText(currentValue: number, previousValue: number | null
   if (range === "all" || previousValue === null) {
     return {
       trendText: "Số liệu hệ thống hiện tại",
+      trendPercentText: "",
       trendDeltaText: "",
       trendDirection: "flat" as const,
     }
@@ -175,6 +129,7 @@ function formatComparisonText(currentValue: number, previousValue: number | null
     if (currentValue === 0) {
       return {
         trendText: `Không đổi so với ${label}`,
+        trendPercentText: "",
         trendDeltaText: "",
         trendDirection: "flat" as const,
       }
@@ -182,6 +137,7 @@ function formatComparisonText(currentValue: number, previousValue: number | null
 
     return {
       trendText: `Mới so với ${label}`,
+      trendPercentText: "",
       trendDeltaText: `${delta > 0 ? "+" : ""}${delta.toLocaleString("en-US")}`,
       trendDirection: delta > 0 ? ("up" as const) : ("down" as const),
     }
@@ -191,13 +147,15 @@ function formatComparisonText(currentValue: number, previousValue: number | null
   if (percent === 0) {
     return {
       trendText: `Không đổi so với ${label}`,
+      trendPercentText: "",
       trendDeltaText: "",
       trendDirection: "flat" as const,
     }
   }
 
   return {
-    trendText: `${delta > 0 ? "Tăng" : "Giảm"} ${Math.abs(percent)}% so với ${label}`,
+    trendText: `so với ${label}`,
+    trendPercentText: `${Math.abs(percent)}%`,
     trendDeltaText: `${delta > 0 ? "+" : ""}${delta.toLocaleString("en-US")}`,
     trendDirection: delta > 0 ? ("up" as const) : ("down" as const),
   }
@@ -268,6 +226,17 @@ function buildDepartmentContributionData(
     })
 }
 
+
+// đóng góp nhân viên
+interface DashboardContributionPoint {
+  label: string
+  name: string
+  value: number
+  completed: number
+  comments: number
+  processes: number
+}
+
 function buildEmployeeContributionData(
   projects: Project[],
   users: User[],
@@ -328,6 +297,8 @@ function buildEmployeeContributionData(
     .slice(0, 6)
 }
 
+
+// 
 function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
   const incompleteProjects = projects.filter((project) => project.status !== "completed")
 
@@ -337,6 +308,29 @@ function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
     { name: "Cao", value: incompleteProjects.filter((project) => project.priority === "high").length, color: projectPalette.high },
     { name: "Khẩn cấp", value: incompleteProjects.filter((project) => project.priority === "critical").length, color: projectPalette.critical },
   ].filter((project) => project.value > 0)
+}
+
+interface ProjectPriorityTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: {
+      name: string
+      value: number
+      color?: string
+    }
+  }>
+  total: number
+}
+
+interface DepartmentTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    payload: {
+      name: string
+      value: number
+      color?: string
+    }
+  }>
 }
 
 function ProjectPriorityTooltip({ active, payload, total }: ProjectPriorityTooltipProps) {
@@ -502,21 +496,13 @@ function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
   return result
 }
 
-function countActiveUsers(users: User[], todayKey: string) {
-  return users.filter((user) => !user.leaveDate || user.leaveDate > todayKey).length
-}
-
-function countDepartedUsers(users: User[], todayKey: string) {
-  return users.filter((user) => !!user.leaveDate && user.leaveDate <= todayKey).length
-}
-
-
 interface DashboardStat {
   label: string
   value: number
   color: string
   icon: LucideIcon
   trendText: string
+  trendPercentText: string
   trendDeltaText: string
   trendDirection: "up" | "down" | "flat"
   href: string
@@ -532,7 +518,6 @@ export default function AdminDashboard() {
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([])
   const [projectComments, setProjectComments] = useState<ProjectComment[]>([])
   const [projectLogs, setProjectLogs] = useState<ProjectLog[]>([])
-  const [positionsCount, setPositionsCount] = useState(0)
   const [range, setRange] = useState<TimeRangeKey>("12m")
   const [loading, setLoading] = useState(true)
 
@@ -557,10 +542,9 @@ export default function AdminDashboard() {
         if (!alive) return
 
         setUsers(usersRes.data.data)
-        setProjects(projRes.data.data)
+        setProjects(projRes.data.data) // lấy dữ liệu dự án
         setDepartments(deptRes.data.data)
         setPositions(posRes.data.data)
-        setPositionsCount(posRes.data.data.length)
         setProjectDepartments(projectDepartmentsRes.data.data)
         setProjectMembers(projectMembersRes.data.data)
         setProjectComments(projectCommentsRes.data.data)
@@ -580,135 +564,121 @@ export default function AdminDashboard() {
     }
   }, [])
 
-  const todayKey = new Date().toISOString().slice(0, 10)
-  const activeUsersCount = countActiveUsers(users, todayKey)
-  const departedUsersCount = countDepartedUsers(users, todayKey)
   const completedProjectsCount = projects.filter((project) => project.status === "completed").length
   const incompleteProjectsCount = projects.length - completedProjectsCount
+  const activeUsersCount = countUsersActiveAt(users, new Date())
 
   const stats = useMemo(() => {
     const window = getPreviousRangeWindow(range)
-    const rangeStart = getRangeStart(range)
-    const currentRangeStart = rangeStart ?? new Date(0)
     const rangeEnd = window?.currentEnd ?? new Date()
-    const previousStart = window?.previousStart ?? null
     const previousEnd = window?.previousEnd ?? null
 
-    const currentPrevious = range === "all" || !previousStart || !previousEnd
+    const currentPrevious = range === "all" || !previousEnd
       ? null
       : {
-          totalAccounts: countUsersCreatedInRange(users, previousStart, previousEnd),
+          totalAccounts: countCreatedUpTo(users, previousEnd, (user) => user.createdAt),
           activeUsers: countUsersActiveAt(users, previousEnd),
-          departedUsers: countUsersDepartedInRange(users, previousStart, previousEnd),
-          departments: countDepartmentsCreatedInRange(departments, previousStart, previousEnd),
-          positions: countPositionsCreatedInRange(positions, previousStart, previousEnd),
-          completedProjects: countCompletedProjectsInRange(projects, previousStart, previousEnd),
-          totalProjects: countProjectsCreatedInRange(projects, previousStart, previousEnd),
-          incompleteProjects: countIncompleteProjectsInRange(projects, previousStart, previousEnd),
+          departedUsers: countUsersDepartedAt(users, previousEnd),
+          departments: countDepartmentsAt(departments, previousEnd),
+          positions: countPositionsAt(positions, previousEnd),
+          completedProjects: countCompletedProjectsAt(projects, previousEnd),
+          totalProjects: countProjectsAt(projects, previousEnd),
+          incompleteProjects: countIncompleteProjectsAt(projects, previousEnd),
         }
 
     const filteredStats: DashboardStat[] = [
       {
         label: "Tổng tài khoản",
-        value: range === "all" ? users.length : countUsersCreatedInRange(users, currentRangeStart, rangeEnd),
+        value: countCreatedUpTo(users, rangeEnd, (user) => user.createdAt),
         color: chartPalette[0],
         icon: Users,
         href: "/users",
         ...formatComparisonText(
-          range === "all" ? users.length : countUsersCreatedInRange(users, currentRangeStart, rangeEnd),
+          countCreatedUpTo(users, rangeEnd, (user) => user.createdAt),
           currentPrevious?.totalAccounts ?? null,
           range
         ),
       },
       {
         label: "Đang làm",
-        value:
-          range === "all"
-            ? activeUsersCount
-            : countUsersActiveAt(users, rangeEnd),
+        value: countUsersActiveAt(users, rangeEnd),
         color: chartPalette[1],
         icon: UserCheck,
         href: "/users",
         ...formatComparisonText(
-          range === "all" ? activeUsersCount : countUsersActiveAt(users, rangeEnd),
+          countUsersActiveAt(users, rangeEnd),
           currentPrevious?.activeUsers ?? null,
           range
         ),
       },
       {
         label: "Đã nghỉ",
-        value: range === "all" ? departedUsersCount : countUsersDepartedInRange(users, currentRangeStart, rangeEnd),
+        value: countUsersDepartedAt(users, rangeEnd),
         color: chartPalette[2],
         icon: UserX,
         href: "/users",
         ...formatComparisonText(
-          range === "all" ? departedUsersCount : countUsersDepartedInRange(users, currentRangeStart, rangeEnd),
+          countUsersDepartedAt(users, rangeEnd),
           currentPrevious?.departedUsers ?? null,
           range
         ),
       },
       {
         label: "Phòng ban",
-        value: range === "all" ? departments.length : countDepartmentsCreatedInRange(departments, currentRangeStart, rangeEnd),
+        value: countDepartmentsAt(departments, rangeEnd),
         color: chartPalette[3],
         icon: Building2,
         href: "/departments",
         ...formatComparisonText(
-          range === "all" ? departments.length : countDepartmentsCreatedInRange(departments, currentRangeStart, rangeEnd),
+          countDepartmentsAt(departments, rangeEnd),
           currentPrevious?.departments ?? null,
           range
         ),
       },
       {
         label: "Chức vụ",
-        value: range === "all" ? positionsCount : countPositionsCreatedInRange(positions, currentRangeStart, rangeEnd),
+        value: countPositionsAt(positions, rangeEnd),
         color: chartPalette[4],
         icon: Briefcase,
         href: "/positions",
         ...formatComparisonText(
-          range === "all" ? positionsCount : countPositionsCreatedInRange(positions, currentRangeStart, rangeEnd),
+          countPositionsAt(positions, rangeEnd),
           currentPrevious?.positions ?? null,
           range
         ),
       },
       {
         label: "Dự án hoàn thành",
-        value:
-          range === "all"
-            ? completedProjectsCount
-            : countCompletedProjectsInRange(projects, currentRangeStart, rangeEnd),
+        value: countCompletedProjectsAt(projects, rangeEnd),
         color: chartPalette[5],
         icon: CheckCircle2,
         href: "/projects",
         ...formatComparisonText(
-          range === "all" ? completedProjectsCount : countCompletedProjectsInRange(projects, currentRangeStart, rangeEnd),
+          countCompletedProjectsAt(projects, rangeEnd),
           currentPrevious?.completedProjects ?? null,
           range
         ),
       },
       {
         label: "Tổng dự án",
-        value: range === "all" ? projects.length : countProjectsCreatedInRange(projects, currentRangeStart, rangeEnd),
+        value: countProjectsAt(projects, rangeEnd),
         color: chartPalette[6],
         icon: ClipboardList,
         href: "/projects",
         ...formatComparisonText(
-          range === "all" ? projects.length : countProjectsCreatedInRange(projects, currentRangeStart, rangeEnd),
+          countProjectsAt(projects, rangeEnd),
           currentPrevious?.totalProjects ?? null,
           range
         ),
       },
       {
         label: "Dự án chưa hoàn thành",
-        value:
-          range === "all"
-            ? incompleteProjectsCount
-            : countIncompleteProjectsInRange(projects, currentRangeStart, rangeEnd),
+        value: countIncompleteProjectsAt(projects, rangeEnd),
         color: chartPalette[7],
         icon: CircleDashed,
         href: "/projects",
         ...formatComparisonText(
-          range === "all" ? incompleteProjectsCount : countIncompleteProjectsInRange(projects, currentRangeStart, rangeEnd),
+          countIncompleteProjectsAt(projects, rangeEnd),
           currentPrevious?.incompleteProjects ?? null,
           range
         ),
@@ -716,7 +686,7 @@ export default function AdminDashboard() {
     ]
 
     return filteredStats
-  }, [activeUsersCount, completedProjectsCount, departments, incompleteProjectsCount, positions, positionsCount, projects, range, departedUsersCount, users])
+  }, [departments, positions, projects, range, users])
 
   const growthData = buildGrowthData(users)
   const deptData = buildActiveDepartmentData(users, departments)
@@ -790,7 +760,6 @@ export default function AdminDashboard() {
           tooltipContent={<ProjectPriorityTooltip total={incompleteProjectsCount || 1} />}
         />
       </div>
-
     </div>
   )
 }

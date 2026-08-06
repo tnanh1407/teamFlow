@@ -46,39 +46,39 @@ function GrowthTooltip({ active, payload }: GrowthTooltipProps) {
   const point = payload[0].payload as GrowthPoint
 
   return (
-    <div className="min-w-55 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="min-w-55 rounded-xl border border-border bg-background px-4 py-3 shadow-sm">
       <div className="mt-3 space-y-2.5 text-sm">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[1] }} />
             Nhân sự đang làm
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.active}</span>
+          <span className="font-semibold text-foreground">{point.active}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[4] }} />
             Nhân sự đã nghỉ
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.departed}</span>
+          <span className="font-semibold text-foreground">{point.departed}</span>
         </div>
 
 
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[3] }} />
             Nhân sự tuyển mới
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.hires}</span>
+          <span className="font-semibold text-foreground">{point.hires}</span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+          <span className="flex items-center gap-2 text-muted-foreground">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartPalette[0] }} />
             Nhân sự nghỉ việc
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{point.leaves}</span>
+          <span className="font-semibold text-foreground">{point.leaves}</span>
         </div>
       </div>
     </div>
@@ -105,7 +105,7 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
       delay={0.5}
       rightContent={
         <>
-          <div className="flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-muted p-1">
             {timeRangeOptions.map((option) => (
               <button
                 key={option.key}
@@ -113,15 +113,15 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
                 onClick={() => setRange(option.key)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                   range === option.key
-                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
-                    : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {option.label}
               </button>
             ))}
           </div>
-          <span className="text-sm font-medium text-zinc-400">
+          <span className="text-sm font-medium text-muted-foreground">
             {currentTotal} nhân sự hiện tại đang làm việc
           </span>
         </>
@@ -130,10 +130,10 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
       <div>
         <ResponsiveContainer width="100%" height={360}>
           <LineChart data={visibleData} margin={{ top: 8, right: 16, left: 24, bottom: 24 }} >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
+              tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
               tickLine={true}
               axisLine={true}
               height={36}
@@ -141,12 +141,12 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
                 value: "Thời gian (Tháng / Năm)",
                 position: "bottom",
                 offset: 8,
-                style: { fill: "var(--chart-label-color)" },
+                style: { fill: "var(--muted-foreground)" },
               }}
             />
             <YAxis
               width={72}
-              tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
+              tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
               tickLine={true}
               axisLine={true}
               label={{
@@ -154,7 +154,7 @@ export default function EmployeeTrendChart({ data, currentTotal }: EmployeeTrend
                 angle: -90,
                 position: "insideLeft",
                 offset: 0,
-                style: { textAnchor: "middle", fill: "var(--chart-label-color)" },
+                style: { textAnchor: "middle", fill: "var(--muted-foreground)" },
               }}
             />
             <Tooltip content={<GrowthTooltip />} />
