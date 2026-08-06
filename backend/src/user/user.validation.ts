@@ -32,6 +32,7 @@ export const updateUserSchema = z.object({
   password: z.string().min(6).optional(),
   status: z.boolean().optional(),
   avatarURL: z.string().optional(),
+  avatarAction: z.enum(["remove"]).optional(),
 });
 
 export const updatePassword = z.object({

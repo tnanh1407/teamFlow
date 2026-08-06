@@ -5,7 +5,7 @@ import { MySwal, showDeleteConfirm, showErrorAlert, showSuccessAlert } from "@/l
 import PageHeader from "@/shared/ui/PageHeader"
 import LoadingState from "@/shared/ui/LoadingState"
 import type { User } from "@/services/user.service"
-import openUserFormDialog from "./components/UserFormDialog"
+import openUserFormEditDialog from "./components/UserFormEditDialog"
 import UserListToolbar from "./components/UserListToolbar"
 import UserListTable from "./components/UserListTable"
 import {
@@ -16,6 +16,7 @@ import {
   useDepartmentsQuery,
   usePositionsQuery,
 } from "../../mutations/user.mutations"
+import openUserFormAddDialog from "./components/UserFormAddDialog"
 
 export default function UserList() {
   const navigate = useNavigate()
@@ -125,18 +126,22 @@ export default function UserList() {
   // Mở hộp thoại tạo mới hoặc chỉnh sửa thông tin người dùng.
   const openFormDialog = async (editingUser?: User) => {
     try {
-      const result = await openUserFormDialog({
-        editingUser,
-        departments: departmentsQuery.data ?? [],
-        positions: positionsQuery.data ?? [],
-        onSubmit: async (payload) => {
-          if (editingUser) {
-            await updateUserMutation.mutateAsync({ id: editingUser.id, payload })
-          } else {
-            await createUserMutation.mutateAsync(payload)
-          }
-        },
-      })
+      const result = editingUser
+        ? await openUserFormEditDialog({
+            editingUser,
+            departments: departmentsQuery.data ?? [],
+            positions: positionsQuery.data ?? [],
+            onSubmit: async (payload) => {
+              await updateUserMutation.mutateAsync({ id: editingUser.id, payload })
+            },
+          })
+        : await openUserFormAddDialog({
+            departments: departmentsQuery.data ?? [],
+            positions: positionsQuery.data ?? [],
+            onSubmit: async (payload) => {
+              await createUserMutation.mutateAsync(payload)
+            },
+          })
       if (!result || !result.changed) return
       void showSuccessAlert(editingUser ? "Cập nhật thành công" : "Tạo mới thành công")
     } catch (err: any) {

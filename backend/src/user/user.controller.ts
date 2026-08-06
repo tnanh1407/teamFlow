@@ -105,6 +105,11 @@ class UserController {
         await deleteCloudinaryFile(target.avatarURL);
       }
       data.avatarURL = await uploadToCloudinary(req.file, "avatars");
+    } else if (data.avatarAction === "remove") {
+      if (target.avatarURL) {
+        await deleteCloudinaryFile(target.avatarURL);
+      }
+      data.avatarURL = null;
     }
 
     const user = await userService.update(id, data);

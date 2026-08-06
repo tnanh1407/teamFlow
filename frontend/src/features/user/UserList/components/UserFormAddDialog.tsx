@@ -4,13 +4,11 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Copy } from "lucide-react"
 import { toast } from "sonner"
-import { type User } from "@/services/user.service"
 import type { Department } from "@/services/department.service"
 import type { Position } from "@/services/position.service"
 import { MySwal } from "@/lib/swal"
 
 type OpenUserFormDialogParams = {
-  editingUser?: User
   departments: Department[]
   positions: Position[]
   onSubmit: (payload: Record<string, unknown>) => Promise<void>
@@ -21,13 +19,13 @@ type OpenUserFormDialogResult =
   | { submitted: true; changed: true }
 
 interface UserFormValues {
-  employeeCode: string | undefined
+  employeeCode: string
   name: string
   email: string
-  departmentId: string | undefined
-  positionId: string | undefined
+  departmentId: string
+  positionId: string
   username: string
-  password?: string
+  password: string
   status: boolean
 }
 
@@ -39,9 +37,10 @@ const emptyForm: UserFormValues = {
   positionId: "",
   username: "",
   password: "",
-  status: true,
+  status: false,
 }
 
+// khởi tạo mã nhân viên
 function generateEmployeeSuffix(length = 6) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
   let suffix = ""
@@ -51,23 +50,24 @@ function generateEmployeeSuffix(length = 6) {
   return suffix
 }
 
+// giá trị nhập vào mã nhân viên
 function buildEmployeeCode(departmentCode: string) {
   return `${departmentCode.trim().toUpperCase()}${generateEmployeeSuffix()}`
 }
 
-function buildUserSchema(departments: Department[], positions: Position[], allowAdminEmptyFields: boolean) {
+function buildUserSchema(departments: Department[], positions: Position[]) {
   const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
   const positionNameMap = new Map(positions.map((position) => [position.id, position.name.trim().toLowerCase()] as const))
 
   return z
     .object({
-      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng nhập mã nhân viên"),
+      employeeCode: z.string().trim().min(1, "Vui lòng nhập mã nhân viên"),
       name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
       email: z.string().trim().email("Email không hợp lệ"),
-      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn phòng ban"),
-      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn chức vụ"),
+      departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
+      positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
       username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
-      password: z.string().optional(),
+      password: z.string().trim().min(1, "Vui lòng nhập mật khẩu"),
       status: z.boolean(),
     })
     .superRefine((data, ctx) => {
@@ -76,8 +76,6 @@ function buildUserSchema(departments: Department[], positions: Position[], allow
       const positionId = data.positionId?.trim() || ""
       const positionName = positionNameMap.get(positionId) ?? ""
       const isLeader = positionName.includes("leader")
-
-      if (allowAdminEmptyFields && !employeeCode && !departmentId) return
 
       if (isLeader && departmentId) {
         ctx.addIssue({
@@ -92,7 +90,6 @@ function buildUserSchema(departments: Department[], positions: Position[], allow
 
       const departmentCode = departmentCodeMap.get(departmentId)
       if (!departmentCode) {
-        if (allowAdminEmptyFields && !departmentId) return
         ctx.addIssue({
           code: "custom",
           path: ["departmentId"],
@@ -102,7 +99,6 @@ function buildUserSchema(departments: Department[], positions: Position[], allow
       }
 
       if (!employeeCode) {
-        if (allowAdminEmptyFields) return
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
@@ -131,53 +127,15 @@ function buildUserSchema(departments: Department[], positions: Position[], allow
     })
 }
 
-function toFormValues(user?: User): UserFormValues {
-  if (!user) return emptyForm
-  return {
-    employeeCode: user.employeeCode || "",
-    name: user.name,
-    email: user.email,
-    departmentId: user.departmentId || "",
-    positionId: user.positionId || "",
-    username: user.username,
-    password: "",
-    status: user.status,
-  }
-}
-
-function normalizeComparable(value: string | null | undefined) {
-  const trimmed = value?.trim()
-  return trimmed ? trimmed : undefined
-}
-
-function normalizePayloadValue(value: unknown) {
-  if (typeof value !== "string") return undefined
-  return normalizeComparable(value)
-}
-
-function isSameEditPayload(editingUser: User, payload: Record<string, unknown>) {
-  return (
-    normalizePayloadValue(payload.employeeCode) === normalizeComparable(editingUser.employeeCode) &&
-    normalizePayloadValue(payload.name) === normalizeComparable(editingUser.name) &&
-    normalizePayloadValue(payload.email) === normalizeComparable(editingUser.email) &&
-    String(payload.departmentId ?? "") === editingUser.departmentId &&
-    String(payload.positionId ?? "") === editingUser.positionId &&
-    String(payload.username ?? "") === editingUser.username &&
-    Boolean(payload.status) === editingUser.status
-  )
-}
-
-export default async function openUserFormDialog({
-  editingUser,
+export default async function openUserFormAddDialog({
   departments,
   positions,
   onSubmit,
 }: OpenUserFormDialogParams): Promise<OpenUserFormDialogResult | undefined> {
-  const isEdit = !!editingUser
   const dataRef: { current: UserFormValues | null } = { current: null }
   const validRef: { current: boolean } = { current: false }
 
-  const formSchema = buildUserSchema(departments, positions, editingUser?.role === "admin")
+  const formSchema = buildUserSchema(departments, positions)
 
   function FormComponent() {
     const {
@@ -185,10 +143,10 @@ export default async function openUserFormDialog({
       watch,
       setValue,
       formState: { errors, isValid },
-    } = useForm<UserFormValues>({
+    } = useForm({
       resolver: zodResolver(formSchema),
       mode: "onChange",
-      defaultValues: toFormValues(editingUser),
+      defaultValues: emptyForm,
     })
 
     const values = watch()
@@ -284,9 +242,7 @@ export default async function openUserFormDialog({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  Mật khẩu {isEdit && <span className="font-normal text-muted-foreground">(để trống nếu không đổi)</span>}
-                </label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mật khẩu</label>
                 <input
                   type="password"
                   {...register("password")}
@@ -370,13 +326,13 @@ export default async function openUserFormDialog({
   }
 
   const result = await MySwal.fire({
-    title: isEdit ? "Sửa người dùng" : "Thêm người dùng",
+    title: "Thêm người dùng",
     width: "min(96vw, 640px)",
     html: <FormComponent />,
     showCloseButton: true,
     closeButtonAriaLabel: "Đóng",
     showCancelButton: true,
-    confirmButtonText: isEdit ? "Cập nhật" : "Tạo mới",
+    confirmButtonText: "Tạo mới",
     cancelButtonText: "Hủy",
     reverseButtons: true,
     preConfirm: () => {
@@ -389,7 +345,7 @@ export default async function openUserFormDialog({
         MySwal.showValidationMessage("Vui lòng kiểm tra lại các trường bắt buộc")
         return false
       }
-      if (!isEdit && !d.password?.trim()) {
+      if (!d.password?.trim()) {
         MySwal.showValidationMessage("Vui lòng nhập mật khẩu")
         return false
       }
@@ -410,10 +366,6 @@ export default async function openUserFormDialog({
   }
 
   if (result.value.password?.trim()) payload.password = result.value.password
-
-  if (isEdit && editingUser && isSameEditPayload(editingUser, payload)) {
-    return { submitted: false, changed: false }
-  }
 
   await onSubmit(payload)
   return { submitted: true, changed: true }

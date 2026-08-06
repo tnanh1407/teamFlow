@@ -49,7 +49,7 @@ export interface UserData {
   password: string;
   role: EAccountRole;
   status?: boolean;
-  avatarURL?: string;
+  avatarURL?: string | null;
 }
 export type CreateUserDataInput = UserData;
 export type UpdateUserDataInput = Partial<Omit<UserData, "password">>
@@ -86,8 +86,9 @@ const hydrateUser = async (user: UserRow) => {
 };
 
 
-const normalizeOptionalText = (value: string | undefined) => {
+const normalizeOptionalText = (value: string | null | undefined) => {
   //  tránh lưu chuỗi khoảng trắng vào database
+  if (value === null) return null;
   const normalized = value?.trim();
   // biến input rỗng thành null
   return normalized ? normalized : null;
@@ -98,6 +99,7 @@ const normalizeEmployeeCode = (value: string | null | undefined) => {
   return normalized ? normalized.toUpperCase() : null;
 };
 const EMPLOYEE_CODE_SUFFIX_REGEX = /^[A-Z0-9]{6}$/;
+const EMPLOYEE_CODE_RETRY_LIMIT = 5;
 
 const todayDate = () => new Date().toLocaleDateString("en-CA");
 
@@ -124,6 +126,40 @@ async function resolveEmployeeCodePrefix(departmentId: string) {
   const department = await departmentService.findById(departmentId);
   if (!department) throw new AppError("Department not found", 404);
   return normalizeRequiredText(department.code).toUpperCase();
+}
+
+function generateEmployeeSuffix(length = 6) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let suffix = "";
+
+  for (let index = 0; index < length; index += 1) {
+    suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+
+  return suffix;
+}
+
+function buildEmployeeCode(prefix: string) {
+  return `${normalizeRequiredText(prefix).toUpperCase()}${generateEmployeeSuffix()}`;
+}
+
+function isUniqueViolation(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  return (error as { code?: string }).code === "23505";
+}
+
+function getUniqueViolationMessage(error: unknown) {
+  if (!isUniqueViolation(error)) return null;
+
+  const { constraint, detail } = error as { constraint?: string; detail?: string };
+  const text = `${constraint ?? ""} ${detail ?? ""}`.toLowerCase();
+
+  if (text.includes("employee_code")) return "Employee code already exists";
+  if (text.includes("username")) return "Username already exists";
+  if (text.includes("email")) return "Email already exists";
+  if (text.includes("phone")) return "Phone already exists";
+
+  return "Duplicate value violates a unique constraint";
 }
 
 async function normalizeAndValidateEmployeeCode(
@@ -352,11 +388,6 @@ class UserService {
     const existingUser = await this.findByUsername(payload.username);
     if (existingUser) throw new AppError("Username already exists", 409);
 
-    if (payload.employeeCode) {
-      const existingCode = await this.findByEmployeeCode(payload.employeeCode);
-      if (existingCode) throw new AppError("Employee code already exists", 409);
-    }
-
     const existingEmail = await this.findByEmail(payload.email);
     if (existingEmail) throw new AppError("Email already exists", 409);
 
@@ -365,21 +396,40 @@ class UserService {
       if (existingPhone) throw new AppError("Phone already exists", 409);
     }
 
-    // chuẩn hóa lại dữ liệu
-
-
     const hashedPassword = await bcrypt.hash(payload.password, 10);
-    const { rows } = await pool.query<UserRow>(
-      `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING ${userColumns}`,
-      [
-        payload.departmentId, payload.positionId, payload.employeeCode, payload.name,
-        payload.email, payload.phone, payload.birthDate,
-        payload.hireDate, payload.leaveDate, payload.gender,
-        payload.username, hashedPassword, payload.role,
-        payload.status, payload.avatarURL,
-      ]
-    );
-    return this.findById(rows[0].id);
+    const employeeCodePrefix = assignments.departmentId ? await resolveEmployeeCodePrefix(assignments.departmentId) : null;
+
+    for (let attempt = 0; attempt < EMPLOYEE_CODE_RETRY_LIMIT; attempt += 1) {
+      const nextEmployeeCode =
+        employeeCodePrefix && attempt > 0 ? buildEmployeeCode(employeeCodePrefix) : payload.employeeCode;
+
+      try {
+        const { rows } = await pool.query<UserRow>(
+          `INSERT INTO users (department_id, position_id, employee_code, name, email, phone, birth_date, hire_date, leave_date, gender, username, password, role, status, avatar_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING ${userColumns}`,
+          [
+            payload.departmentId, payload.positionId, nextEmployeeCode, payload.name,
+            payload.email, payload.phone, payload.birthDate,
+            payload.hireDate, payload.leaveDate, payload.gender,
+            payload.username, hashedPassword, payload.role,
+            payload.status, payload.avatarURL,
+          ]
+        );
+        return this.findById(rows[0].id);
+      } catch (error) {
+        if (employeeCodePrefix && isUniqueViolation(error)) {
+          const message = getUniqueViolationMessage(error);
+          if (message === "Employee code already exists" && attempt < EMPLOYEE_CODE_RETRY_LIMIT - 1) {
+            continue;
+          }
+          if (message) {
+            throw new AppError(message, 409);
+          }
+        }
+        throw error;
+      }
+    }
+
+    throw new AppError("Unable to generate a unique employee code", 500);
   }
 
   async changePassword(id: string, data: ChangePasswordInput): Promise<void> {
@@ -435,7 +485,9 @@ class UserService {
     if (data.username !== undefined) payload.username = normalizeRequiredText(data.username).toLowerCase();
     if (data.role !== undefined) payload.role = data.role;
     if (employment.status !== undefined) payload.status = employment.status;
-    if (data.avatarURL !== undefined) payload.avatarURL = normalizeOptionalText(data.avatarURL) ?? undefined;
+    if (data.avatarURL !== undefined) {
+      payload.avatarURL = data.avatarURL === null ? null : normalizeOptionalText(data.avatarURL) ?? undefined;
+    }
 
     if (payload.username) {
       const existing = await this.findByUsername(payload.username);
@@ -478,10 +530,18 @@ class UserService {
     }
 
     values.push(id);
-    const { rows } = await pool.query<UserRow>(
-      `UPDATE users SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${userColumns}`,
-      values
-    );
+    let rows: UserRow[];
+    try {
+      const result = await pool.query<UserRow>(
+        `UPDATE users SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING ${userColumns}`,
+        values
+      );
+      rows = result.rows;
+    } catch (error) {
+      const message = getUniqueViolationMessage(error);
+      if (message) throw new AppError(message, 409);
+      throw error;
+    }
     if (!rows[0]) throw new AppError("User not found", 404);
 
     const roleChanged = payload.role !== undefined && payload.role !== previous.role;
