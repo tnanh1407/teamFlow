@@ -20,7 +20,7 @@ export const userQueryKeys = {
 }
 
 export function useForgotPasswordMutation(
-  options?: UseMutationOptions<{ message: string; data?: { devCode?: string } }, MutationError, ForgotPasswordPayload>
+  options?: UseMutationOptions<{ message: string }, MutationError, ForgotPasswordPayload>
 ) {
   return useMutation({
     ...options,

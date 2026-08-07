@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react"
-import { Bell, Briefcase, Building2, CheckSquare, LayoutDashboard, Medal, Settings, Shield, Trash2, Users } from "lucide-react"
+import { Bell, Briefcase, Building2, CheckSquare, KeyRound, LayoutDashboard, Medal, Settings, Shield, Trash2, Users } from "lucide-react"
 
 export interface SidebarItem {
   label: string
@@ -64,6 +64,12 @@ export const sidebarItems: SidebarItem[] = [
         icon: Trash2,
         roles: ["admin"],
       },
+      {
+        label: "Yêu cầu cấp lại mật khẩu",
+        to: "/users/password-reset-requests",
+        icon: KeyRound,
+        roles: ["admin"],
+      },
     ],
   },
   {
@@ -97,6 +103,14 @@ export const breadcrumbRoutes: BreadcrumbRoute[] = [
     breadcrumbs: [
       { label: "Quản trị" },
       { label: "Quản lý nhân viên" },
+    ],
+  },
+  {
+    path: "/users/password-reset-requests",
+    breadcrumbs: [
+      { label: "Quáº£n trá»‹" },
+      { label: "Quáº£n trá»‹ dá»¯ liá»‡u" },
+      { label: "Yêu cầu cấp lại mật khẩu" },
     ],
   },
   {

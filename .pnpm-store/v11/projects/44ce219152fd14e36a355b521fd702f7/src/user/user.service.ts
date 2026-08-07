@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
 import jwt from "jsonwebtoken";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { AppError } from "../utils/errors/app-error.js";
@@ -7,7 +8,7 @@ import { UserSchema } from "../schemas/index.js";
 import { EGender } from "@/enums/gender.enum.js";
 import env from "../config/env.js";
 import sessionService, { generateJti, TOKEN_EXPIRES_IN } from "../session/session.service.js";
-import { generateResetCode } from "../utils/mail/mailer.js";
+import { sendTemporaryPasswordEmail } from "../utils/mail/mailer.js";
 import departmentService from "../department/department.service.js";
 
 // dữ liệu database
@@ -62,7 +63,6 @@ export interface ChangePasswordInput {
 }
 export interface ForgotPasswordInput {
   departmentId: string;
-  email: string;
   employeeCode: string;
 }
 export interface ResetPasswordInput {
@@ -79,6 +79,19 @@ export interface SearchUsersOptions {
   positionId?: string;
   status?: "active" | "inactive" | "all";
   sortBy?: "name-asc" | "name-desc" | "hire-newest" | "hire-oldest" | "role";
+}
+
+export interface PasswordResetRequest {
+  id: string;
+  userId: string;
+  name: string;
+  username: string;
+  email: string;
+  employeeCode: string | null;
+  departmentName: string | null;
+  status: "pending" | "approved" | "rejected";
+  requestedAt: string;
+  processedAt: string | null;
 }
 
 const userColumns = UserSchema.columns;
@@ -260,8 +273,6 @@ function resolveEmploymentState(status: boolean | undefined, leaveDate: string |
 
   return { status: undefined as boolean | undefined, leaveDate: undefined as string | undefined };
 }
-
-const RESET_CODE_TTL_MS = 10 * 60 * 1000;
 
 class UserService {
   async login(username: string, password: string, userAgent?: string, ip?: string) {
@@ -659,31 +670,91 @@ class UserService {
     return rows[0];
   }
 
-  async requestPasswordReset({ departmentId, email, employeeCode }: ForgotPasswordInput) {
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await this.findByEmail(normalizedEmail);
-    if (
-      !user ||
-      user.departmentId !== departmentId ||
-      !user.employeeCode ||
-      user.employeeCode.toUpperCase() !== employeeCode.trim().toUpperCase()
-    ) {
-      throw new AppError("Email or employee code does not match any account", 400);
+  async requestPasswordReset({ departmentId, employeeCode }: ForgotPasswordInput) {
+    const normalizedEmployeeCode = employeeCode.trim().toUpperCase();
+    const user = await this.findByEmployeeCode(normalizedEmployeeCode);
+    if (!user || !user.employeeCode || user.employeeCode.toUpperCase() !== normalizedEmployeeCode) {
+      throw new AppError("Mã nhân viên không hợp lệ", 400);
+    }
+    if (user.departmentId !== departmentId) {
+      throw new AppError("Mã nhân viên không khớp với phòng ban đã chọn", 400);
+    }
+    if (!user.status || user.deletedAt) {
+      throw new AppError("Tài khoản không đủ điều kiện cấp lại mật khẩu", 400);
     }
 
     await pool.query(
-      `DELETE FROM password_resets WHERE user_id = $1 AND used_at IS NULL`,
-      [user.id]
+      `INSERT INTO password_reset_requests (user_id, status, requested_at)
+       VALUES ($1, 'pending', now())
+       ON CONFLICT (user_id) WHERE status = 'pending'
+       DO UPDATE SET requested_at = now()`,
+      [user.id],
     );
 
-    const code = generateResetCode();
-    await pool.query(
-      `INSERT INTO password_resets (user_id, email, code, expires_at)
-       VALUES ($1, $2, $3, now() + ($4 * interval '1 millisecond'))`,
-      [user.id, normalizedEmail, code, RESET_CODE_TTL_MS]
-    );
+    return { email: user.email };
+  }
 
-    return { email: normalizedEmail, code };
+  async findPasswordResetRequests(status: "pending" | "approved" | "rejected" | "all" = "pending") {
+    const values: string[] = [];
+    const statusClause = status === "all" ? "" : "WHERE pr.status = $1";
+    if (status !== "all") values.push(status);
+
+    const { rows } = await pool.query<PasswordResetRequest>(
+      `SELECT pr.id, pr.user_id AS "userId", u.name, u.username, u.email,
+              u.employee_code AS "employeeCode", d.name AS "departmentName",
+              pr.status, pr.requested_at AS "requestedAt", pr.processed_at AS "processedAt"
+       FROM password_reset_requests pr
+       JOIN users u ON u.id = pr.user_id
+       LEFT JOIN departments d ON d.id = u.department_id
+       ${statusClause}
+       ORDER BY pr.requested_at DESC`,
+      values,
+    );
+    return rows;
+  }
+
+  async approvePasswordResetRequest(requestId: string, adminId: string) {
+    const client = await pool.connect();
+    const temporaryPassword = randomBytes(9).toString("base64url");
+
+    try {
+      await client.query("BEGIN");
+      const requestResult = await client.query<{ userId: string; email: string; username: string }>(
+        `SELECT pr.user_id AS "userId", u.email, u.username
+         FROM password_reset_requests pr
+         JOIN users u ON u.id = pr.user_id
+         WHERE pr.id = $1 AND pr.status = 'pending'
+         FOR UPDATE`,
+        [requestId],
+      );
+      const request = requestResult.rows[0];
+      if (!request) throw new AppError("Password reset request is no longer pending", 409);
+
+      const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+      await client.query(`UPDATE users SET password = $1, updated_at = now() WHERE id = $2`, [hashedPassword, request.userId]);
+      await sendTemporaryPasswordEmail(request.email, request.username, temporaryPassword);
+      await client.query(
+        `UPDATE password_reset_requests SET status = 'approved', processed_at = now(), processed_by = $2 WHERE id = $1`,
+        [requestId, adminId],
+      );
+      await client.query("COMMIT");
+      await sessionService.revokeAllByUserId(request.userId);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async rejectPasswordResetRequest(requestId: string, adminId: string) {
+    const { rowCount } = await pool.query(
+      `UPDATE password_reset_requests
+       SET status = 'rejected', processed_at = now(), processed_by = $2
+       WHERE id = $1 AND status = 'pending'`,
+      [requestId, adminId],
+    );
+    if (!rowCount) throw new AppError("Password reset request is no longer pending", 409);
   }
 
   async resetPassword(email: string, code: string, newPassword: string) {

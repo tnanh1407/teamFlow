@@ -66,6 +66,18 @@ const start = async () => {
           ADD COLUMN IF NOT EXISTS deleted_by UUID,
           ADD COLUMN IF NOT EXISTS deletion_reason TEXT;
         CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users (deleted_at);
+        CREATE TABLE IF NOT EXISTS password_reset_requests (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          status VARCHAR(20) NOT NULL DEFAULT 'pending',
+          requested_at TIMESTAMPTZ DEFAULT now(),
+          processed_at TIMESTAMPTZ,
+          processed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+          CONSTRAINT ck_password_reset_requests_status CHECK (status IN ('pending', 'approved', 'rejected'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_password_reset_requests_status ON password_reset_requests(status, requested_at DESC);
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_requests_pending_user
+          ON password_reset_requests(user_id) WHERE status = 'pending';
       `);
     }
     await pool.query("SELECT 1");

@@ -10,6 +10,7 @@ const dropAll = async () => {
   await pool.query(`
     DROP TABLE IF EXISTS sessions CASCADE;
     DROP TABLE IF EXISTS password_resets CASCADE;
+    DROP TABLE IF EXISTS password_reset_requests CASCADE;
     DROP TABLE IF EXISTS project_tasks CASCADE;
     DROP TABLE IF EXISTS project_logs CASCADE;
     DROP TABLE IF EXISTS project_comments CASCADE;

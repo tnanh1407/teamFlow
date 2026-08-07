@@ -208,6 +208,16 @@ CREATE TABLE IF NOT EXISTS password_resets (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  requested_at TIMESTAMPTZ DEFAULT now(),
+  processed_at TIMESTAMPTZ,
+  processed_by UUID,
+  CONSTRAINT ck_password_reset_requests_status CHECK (status IN ('pending', 'approved', 'rejected'))
+);
+
 -- ══════════════════════════════════════════════════════════
 -- INDEXES
 -- ══════════════════════════════════════════════════════════
@@ -216,6 +226,9 @@ CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_jti ON sessions(jti);
 CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id);
 CREATE INDEX IF NOT EXISTS idx_password_resets_email ON password_resets(email);
+CREATE INDEX IF NOT EXISTS idx_password_reset_requests_status ON password_reset_requests(status, requested_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_requests_pending_user
+  ON password_reset_requests(user_id) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_department ON users(department_id);
 CREATE INDEX IF NOT EXISTS idx_users_position ON users(position_id);
@@ -250,6 +263,8 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS leave_date DATE;
 ALTER TABLE departments ADD CONSTRAINT fk_departments_manager FOREIGN KEY (manager_id) REFERENCES users(id);
 ALTER TABLE sessions ADD CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE password_resets ADD CONSTRAINT fk_password_resets_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE password_reset_requests ADD CONSTRAINT fk_password_reset_requests_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE password_reset_requests ADD CONSTRAINT fk_password_reset_requests_admin FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL;
 ALTER TABLE projects ADD CONSTRAINT fk_projects_created_by FOREIGN KEY (created_by) REFERENCES users(id);
 ALTER TABLE projects ADD CONSTRAINT fk_projects_assigned_by FOREIGN KEY (assigned_by) REFERENCES users(id);
 ALTER TABLE project_employees ADD CONSTRAINT fk_project_employees_project FOREIGN KEY (project_id) REFERENCES projects(id);

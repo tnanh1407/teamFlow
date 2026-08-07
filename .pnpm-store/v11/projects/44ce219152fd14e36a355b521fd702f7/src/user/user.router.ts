@@ -29,6 +29,9 @@ router.post("/reset-password", validate(resetPasswordSchema), asyncHandler(userC
 router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.getAll));
 router.get("/all", authenticate, asyncHandler(userController.getAllEmployees));
 router.get("/search", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.search));
+router.get("/password-reset-requests", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.getPasswordResetRequests));
+router.patch("/password-reset-requests/:id/approve", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.approvePasswordResetRequest));
+router.patch("/password-reset-requests/:id/reject", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.rejectPasswordResetRequest));
 router.get("/trash", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.trash));
 router.patch("/:id/restore", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.restore));
 router.delete("/:id/permanent", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.hardDelete));

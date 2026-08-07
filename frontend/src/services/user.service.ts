@@ -45,7 +45,6 @@ export interface UpdatePasswordPayload {
 
 export interface ForgotPasswordPayload {
   departmentId: string;
-  email: string;
   employeeCode: string;
 }
 
@@ -140,7 +139,7 @@ const userService = {
   logout: () => api.post("/users/logout"),
 
   forgotPassword: (data: ForgotPasswordPayload) =>
-    api.post<{ message: string; data?: { devCode?: string } }>("/users/forgot-password", data),
+    api.post<{ message: string }>("/users/forgot-password", data),
 
   resetPassword: (data: { email: string; code: string; newPassword: string }) =>
     api.post<{ message: string }>("/users/reset-password", data),

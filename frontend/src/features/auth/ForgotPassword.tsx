@@ -14,33 +14,40 @@ import { useActiveDepartmentsQuery, useForgotPasswordMutation } from "../mutatio
 
 const forgotPasswordSchema = z.object({
   departmentId: z.string().min(1, "Vui lòng chọn phòng ban"),
-  email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
   employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
 })
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 
+function getErrorMessage(error: unknown) {
+  if (typeof error !== "object" || error === null) return "Không thể gửi yêu cầu cấp lại mật khẩu"
+  const response = Reflect.get(error, "response")
+  const data = typeof response === "object" && response !== null ? Reflect.get(response, "data") : null
+  const message = typeof data === "object" && data !== null ? Reflect.get(data, "message") : null
+  return typeof message === "string" && message.trim()
+    ? message
+    : "Không thể gửi yêu cầu cấp lại mật khẩu"
+}
+
 export default function ForgotPassword() {
   const navigate = useNavigate()
   const { user, ready } = useAuth()
   const forgotPasswordMutation = useForgotPasswordMutation({
-    onSuccess: async ({ data: payload }) => {
+    onSuccess: async () => {
       await Swal.fire({
         icon: "success",
-        title: "Đã gửi yêu cầu",
-        text: payload?.devCode
-          ? `Mã đặt lại mật khẩu trong môi trường dev: ${payload.devCode}`
-          : "Vui lòng kiểm tra email để đặt lại mật khẩu",
+        title: "Cảm ơn bạn",
+        text: "Yêu cầu của bạn đã được tiếp nhận. Vui lòng chờ trong 24 giờ để Admin xử lý và kiểm tra hộp thư.",
         confirmButtonColor: "var(--primary)",
       })
 
       navigate("/login", { replace: true })
     },
-    onError: () => {
+    onError: (error: unknown) => {
       Swal.fire({
         icon: "error",
         title: "Lỗi",
-        text: "Không thể gửi yêu cầu đặt lại mật khẩu",
+        text: getErrorMessage(error),
         confirmButtonColor: "var(--primary)",
       })
     },
@@ -59,7 +66,6 @@ export default function ForgotPassword() {
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       departmentId: "",
-      email: "",
       employeeCode: "",
     },
   })
@@ -107,7 +113,7 @@ export default function ForgotPassword() {
               Quên mật khẩu
             </h1>
             <p className="text-sm text-foreground">
-              Nhập email và mã người dùng để nhận link đặt lại mật khẩu
+              Nhập thông tin để gửi yêu cầu cấp lại mật khẩu
             </p>
           </div>
 
@@ -132,7 +138,7 @@ export default function ForgotPassword() {
                   </option>
                   {departmentsQuery.data?.map((department) => (
                     <option key={department.id} value={department.id}>
-                      {department.name} ({department.code})
+                      {department.name}
                     </option>
                   ))}
                 </select>
@@ -142,28 +148,8 @@ export default function ForgotPassword() {
               </div>
 
               <p className="-mt-2 text-xs text-muted-foreground">
-                Chọn phòng ban trước khi nhập mã người dùng và email.
+                Chọn phòng ban trước khi nhập mã người dùng. Email sẽ được lấy từ hồ sơ nhân viên.
               </p>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  disabled={!departmentId}
-                  placeholder="Nhập email của bạn"
-                  aria-invalid={Boolean(errors.email)}
-                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.email
-                      ? "border-destructive focus:ring-destructive"
-                      : "border-border"
-                    }`}
-                  {...register("email")}
-                />
-                {errors.email?.message && (
-                  <p className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>
-                )}
-              </div>
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
@@ -175,8 +161,8 @@ export default function ForgotPassword() {
                   placeholder="Nhập mã người dùng"
                   aria-invalid={Boolean(errors.employeeCode)}
                   className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.employeeCode
-                      ? "border-destructive focus:ring-destructive"
-                      : "border-border"
+                    ? "border-destructive focus:ring-destructive"
+                    : "border-border"
                     }`}
                   {...register("employeeCode")}
                 />

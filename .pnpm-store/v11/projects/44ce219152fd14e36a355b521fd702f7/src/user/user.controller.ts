@@ -6,7 +6,7 @@ import { AuthRequest } from "../middlewares/auth.middleware.js";
 import { EAccountRole, EAccountPosition } from "../enums/account-role.enum.js";
 import { uploadToCloudinary, deleteCloudinaryFile } from "../utils/upload/cloudinary.js";
 import sessionService, { SESSION_TTL_MS } from "../session/session.service.js";
-import { sendResetCodeEmail } from "../utils/mail/mailer.js";
+import { sendPasswordResetRequestReceivedEmail } from "../utils/mail/mailer.js";
 
 const MANAGER_POSITION_ID = "20000000-0000-4000-a000-000000000001";
 
@@ -218,15 +218,29 @@ class UserController {
   }
 
   async forgotPassword(req: AuthRequest, res: Response) {
-    const { departmentId, email, employeeCode } = req.body;
-    const result = await userService.requestPasswordReset({ departmentId, email, employeeCode });
+    const { departmentId, employeeCode } = req.body;
+    const result = await userService.requestPasswordReset({ departmentId, employeeCode });
 
-    await sendResetCodeEmail(result.email, result.code);
+    await sendPasswordResetRequestReceivedEmail(result.email);
 
     res.json({
-      message: "If the email exists, a 6-digit reset code has been sent to your email",
-      data: env.NODE_ENV === "production" ? undefined : { devCode: result.code },
+      message: "Password reset request received",
     });
+  }
+
+  async getPasswordResetRequests(req: AuthRequest, res: Response) {
+    const status = (req.query.status as "pending" | "approved" | "rejected" | "all" | undefined) ?? "pending";
+    res.json({ data: await userService.findPasswordResetRequests(status) });
+  }
+
+  async approvePasswordResetRequest(req: AuthRequest, res: Response) {
+    await userService.approvePasswordResetRequest(req.params.id as string, req.user!.id);
+    res.json({ message: "Password reset request approved" });
+  }
+
+  async rejectPasswordResetRequest(req: AuthRequest, res: Response) {
+    await userService.rejectPasswordResetRequest(req.params.id as string, req.user!.id);
+    res.json({ message: "Password reset request rejected" });
   }
 
   async resetPassword(req: AuthRequest, res: Response) {

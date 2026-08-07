@@ -84,7 +84,6 @@ export const loginSchema = z.object({
 
 export const forgotPasswordSchema = z.object({
   departmentId: z.string().uuid("Department is required"),
-  email: z.string().email("Invalid email"),
   employeeCode: z.string().min(1, "Employee code is required"),
 });
 
