@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react"
+﻿import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Check, UserPlus } from "lucide-react"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"
@@ -29,18 +29,18 @@ interface FormData {
 }
 
 const priorityLabels: Record<string, string> = {
-  low: "Thấp",
-  medium: "Trung bình",
+  low: "Tháº¥p",
+  medium: "Trung bÃ¬nh",
   high: "Cao",
-  critical: "Khẩn cấp",
+  critical: "Kháº©n cáº¥p",
 }
 
 const statusLabels: Record<string, string> = {
-  todo: "Cần làm",
-  in_progress: "Đang làm",
-  review: "Đánh giá",
-  completed: "Hoàn thành",
-  cancelled: "Đã huỷ",
+  todo: "Cáº§n lÃ m",
+  in_progress: "Äang lÃ m",
+  review: "ÄÃ¡nh giÃ¡",
+  completed: "HoÃ n thÃ nh",
+  cancelled: "ÄÃ£ huá»·",
 }
 
 const priorityColors: Record<string, string> = {
@@ -59,11 +59,11 @@ const statusColors: Record<string, string> = {
 }
 
 const actionLabels: Record<string, string> = {
-  created: "Tạo mới",
-  updated: "Cập nhật",
-  assigned: "Phân công",
-  completed: "Hoàn thành",
-  commented: "Bình luận",
+  created: "Táº¡o má»›i",
+  updated: "Cáº­p nháº­t",
+  assigned: "PhÃ¢n cÃ´ng",
+  completed: "HoÃ n thÃ nh",
+  commented: "BÃ¬nh luáº­n",
 }
 
 function getFileIcon(mimetype: string) {
@@ -281,7 +281,7 @@ export default function ProjectDetail() {
       return (
         <div className="space-y-4">
           <div>
-            <label className={labelClass}>Chọn phòng ban</label>
+            <label className={labelClass}>Chá»n phÃ²ng ban</label>
             <div className="relative" ref={selectDeptRef}>
               <button
                 type="button"
@@ -291,14 +291,14 @@ export default function ProjectDetail() {
                 <span className={selectedDeptId ? "text-zinc-900" : "text-zinc-400"}>
                   {selectedDeptId
                     ? allDepartments.find((d) => d.id === selectedDeptId)?.name
-                    : "Chọn phòng ban..."}
+                    : "Chá»n phÃ²ng ban..."}
                 </span>
-                <span className="text-zinc-400">▾</span>
+                <span className="text-zinc-400">â–¾</span>
               </button>
               {selectedDeptOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-lg z-10 max-h-48 overflow-y-auto">
                   {availableDepts.length === 0 ? (
-                    <p className="px-3 py-2 text-sm text-zinc-400">Không còn phòng ban nào</p>
+                    <p className="px-3 py-2 text-sm text-zinc-400">KhÃ´ng cÃ²n phÃ²ng ban nÃ o</p>
                   ) : (
                     availableDepts.map((d) => (
                       <button
@@ -325,10 +325,10 @@ export default function ProjectDetail() {
             const availableEmps = deptEmps.filter((e) => !existingUserIds.includes(e.id))
             return (
               <div>
-                <label className={labelClass}>Chọn thành viên ({availableEmps.length} người)</label>
+                <label className={labelClass}>Chá»n thÃ nh viÃªn ({availableEmps.length} ngÆ°á»i)</label>
                 <div className="max-h-56 overflow-y-auto space-y-1 rounded-lg border border-zinc-200 dark:border-zinc-700 p-1">
                   {availableEmps.length === 0 ? (
-                    <p className="px-3 py-4 text-sm text-zinc-400 text-center">Tất cả người dùng phòng ban này đã ở trong dự án</p>
+                    <p className="px-3 py-4 text-sm text-zinc-400 text-center">Táº¥t cáº£ ngÆ°á»i dÃ¹ng phÃ²ng ban nÃ y Ä‘Ã£ á»Ÿ trong dá»± Ã¡n</p>
                   ) : (
                     availableEmps.map((emp) => {
                       const checked = selectedEmpIds.includes(emp.id)
@@ -374,19 +374,19 @@ export default function ProjectDetail() {
     }
 
     const result = await MySwal.fire({
-      title: "Thêm phòng ban và thành viên",
+      title: "ThÃªm phÃ²ng ban vÃ  thÃ nh viÃªn",
       html: <AddMemberContent />,
       showCancelButton: true,
-      confirmButtonText: "Thêm",
-      cancelButtonText: "Huỷ",
+      confirmButtonText: "ThÃªm",
+      cancelButtonText: "Huá»·",
       reverseButtons: true,
       preConfirm: () => {
         if (!currentDeptId) {
-          MySwal.showValidationMessage("Vui lòng chọn phòng ban")
+          MySwal.showValidationMessage("Vui lÃ²ng chá»n phÃ²ng ban")
           return false
         }
         if (currentUserIds.length === 0) {
-          MySwal.showValidationMessage("Vui lòng chọn thành viên")
+          MySwal.showValidationMessage("Vui lÃ²ng chá»n thÃ nh viÃªn")
           return false
         }
         return { departmentId: currentDeptId, userIds: currentUserIds }
@@ -485,28 +485,28 @@ export default function ProjectDetail() {
       return (
         <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
           <div>
-            <label className={labelClass}>Tiêu đề</label>
+            <label className={labelClass}>TiÃªu Ä‘á»</label>
             <input
               type="text"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="Nhập tiêu đề project"
+              placeholder="Nháº­p tiÃªu Ä‘á» project"
               className={inputClass}
             />
           </div>
           <div>
-            <label className={labelClass}>Mô tả</label>
+            <label className={labelClass}>MÃ´ táº£</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Mô tả project (không bắt buộc)"
+              placeholder="MÃ´ táº£ project (khÃ´ng báº¯t buá»™c)"
               rows={2}
               className={inputClass + " resize-none"}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Mức độ</label>
+              <label className={labelClass}>Má»©c Ä‘á»™</label>
               <div className="relative">
                 <button
                   type="button"
@@ -546,7 +546,7 @@ export default function ProjectDetail() {
               </div>
             </div>
             <div>
-              <label className={labelClass}>Trạng thái</label>
+              <label className={labelClass}>Tráº¡ng thÃ¡i</label>
               <div className="relative">
                 <button
                   type="button"
@@ -576,7 +576,7 @@ export default function ProjectDetail() {
           </div>
           <div>
             <label className={labelClass}>
-              Tiến độ: <span className="text-blue-600 font-bold">{form.progress}%</span>
+              Tiáº¿n Ä‘á»™: <span className="text-blue-600 font-bold">{form.progress}%</span>
             </label>
             <input
               type="range"
@@ -589,7 +589,7 @@ export default function ProjectDetail() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Ngày bắt đầu</label>
+              <label className={labelClass}>NgÃ y báº¯t Ä‘áº§u</label>
               <input
                 type="date"
                 value={form.startDate}
@@ -598,7 +598,7 @@ export default function ProjectDetail() {
               />
             </div>
             <div>
-              <label className={labelClass}>Ngày kết thúc</label>
+              <label className={labelClass}>NgÃ y káº¿t thÃºc</label>
               <input
                 type="date"
                 value={form.dueDate}
@@ -608,7 +608,7 @@ export default function ProjectDetail() {
             </div>
           </div>
           <div>
-            <label className={labelClass}>Thời gian dự kiến (giờ)</label>
+            <label className={labelClass}>Thá»i gian dá»± kiáº¿n (giá»)</label>
             <input
               type="number"
               min={0}
@@ -620,11 +620,11 @@ export default function ProjectDetail() {
           </div>
 
           <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
-            <label className={labelClass}>Tệp đính kèm</label>
+            <label className={labelClass}>Tá»‡p Ä‘Ã­nh kÃ¨m</label>
             <div className="flex items-center gap-2 mb-2">
               <label className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1.5 text-sm font-medium hover:bg-blue-100 dark:hover:bg-blue-900 transition cursor-pointer border border-blue-200 dark:border-blue-800">
                 <Paperclip size={14} />
-                {uploading ? "Đang tải..." : "Chọn tệp"}
+                {uploading ? "Äang táº£i..." : "Chá»n tá»‡p"}
                 <input
                   type="file"
                   multiple
@@ -633,7 +633,7 @@ export default function ProjectDetail() {
                   disabled={uploading}
                 />
               </label>
-              <span className="text-xs text-zinc-400">Hình ảnh, PDF, DOC, XLS, ZIP... Tối đa 50MB/tệp</span>
+              <span className="text-xs text-zinc-400">HÃ¬nh áº£nh, PDF, DOC, XLS, ZIP... Tá»‘i Ä‘a 50MB/tá»‡p</span>
             </div>
             {attachments.length > 0 && (
               <div className="space-y-1.5">
@@ -657,7 +657,7 @@ export default function ProjectDetail() {
                       <button
                         onClick={() => downloadFile(att.url, att.originalName)}
                         className="p-1 rounded text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 transition cursor-pointer border-none"
-                        title="Tải xuống"
+                        title="Táº£i xuá»‘ng"
                       >
                         <Download size={14} />
                       </button>
@@ -665,7 +665,7 @@ export default function ProjectDetail() {
                         type="button"
                         onClick={() => removeAttachment(index)}
                         className="p-1 rounded text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer border-none"
-                        title="Xoá"
+                        title="XoÃ¡"
                       >
                         <X size={14} />
                       </button>
@@ -680,15 +680,15 @@ export default function ProjectDetail() {
     }
 
     const result = await MySwal.fire({
-      title: "Sửa project",
+      title: "Sá»­a project",
       html: <EditFormContent />,
       showCancelButton: true,
-      confirmButtonText: "Cập nhật",
-      cancelButtonText: "Huỷ",
+      confirmButtonText: "Cáº­p nháº­t",
+      cancelButtonText: "Huá»·",
       reverseButtons: true,
       preConfirm: () => {
         if (!currentForm.title.trim()) {
-          MySwal.showValidationMessage("Vui lòng nhập tiêu đề")
+          MySwal.showValidationMessage("Vui lÃ²ng nháº­p tiÃªu Ä‘á»")
           return false
         }
         return { form: currentForm, attachments: currentAttachments }
@@ -714,18 +714,18 @@ export default function ProjectDetail() {
       await projectService.update(project.id, payload)
 
       const fieldLabels: Record<string, string> = {
-        title: "tiêu đề",
-        description: "mô tả",
-        priority: "mức độ",
-        status: "trạng thái",
-        progress: "tiến độ",
-        startDate: "ngày bắt đầu",
-        dueDate: "hạn chót",
-        estimatedHours: "giờ dự kiến",
+        title: "tiÃªu Ä‘á»",
+        description: "mÃ´ táº£",
+        priority: "má»©c Ä‘á»™",
+        status: "tráº¡ng thÃ¡i",
+        progress: "tiáº¿n Ä‘á»™",
+        startDate: "ngÃ y báº¯t Ä‘áº§u",
+        dueDate: "háº¡n chÃ³t",
+        estimatedHours: "giá» dá»± kiáº¿n",
       }
 
       const formatVal = (key: string, val: string): string => {
-        if (!val) return "trống"
+        if (!val) return "trá»‘ng"
         if (key === "priority") return priorityLabels[val] || val
         if (key === "status") return statusLabels[val] || val
         if (key === "startDate" || key === "dueDate") return new Date(val).toLocaleDateString("vi-VN")
@@ -734,9 +734,9 @@ export default function ProjectDetail() {
 
       const roleLabel: Record<string, string> = {
         admin: "Admin",
-        manager: "Quản lí",
-        staff: "Nhân viên",
-        intern: "Thực tập sinh",
+        manager: "Quản lý nhóm",
+        staff: "NhÃ¢n viÃªn",
+        intern: "Thá»±c táº­p sinh",
       }
 
       const changed: string[] = []
@@ -744,7 +744,7 @@ export default function ProjectDetail() {
         const oldVal = String((snap as any)[key] ?? "")
         const newVal = String((form as any)[key] ?? "")
         if (oldVal !== newVal) {
-          changed.push(`${label}: ${formatVal(key, oldVal)} → ${formatVal(key, newVal)}`)
+          changed.push(`${label}: ${formatVal(key, oldVal)} â†’ ${formatVal(key, newVal)}`)
         }
       }
 
@@ -756,7 +756,7 @@ export default function ProjectDetail() {
           action: "updated",
           description: changed.length > 0
             ? `[${roleStr}] ${changed.join("; ")}`
-            : `[${roleStr}] thông tin project`,
+            : `[${roleStr}] thÃ´ng tin project`,
         })
       }
 
@@ -771,7 +771,7 @@ export default function ProjectDetail() {
     const initials = emp?.name?.slice(0, 2).toUpperCase() || "??"
 
     MySwal.fire({
-      title: "Chi tiết hoạt động",
+      title: "Chi tiáº¿t hoáº¡t Ä‘á»™ng",
       html: (
         <div className="space-y-4">
           <div className="flex items-center gap-4 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
@@ -783,13 +783,13 @@ export default function ProjectDetail() {
               )}
             </div>
             <div>
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{emp?.name || "—"}</p>
-              <p className="text-xs text-zinc-400">{emp?.employeeCode ? `Mã người dùng: ${emp.employeeCode}` : ""}</p>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{emp?.name || "â€”"}</p>
+              <p className="text-xs text-zinc-400">{emp?.employeeCode ? `MÃ£ ngÆ°á»i dÃ¹ng: ${emp.employeeCode}` : ""}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hành động</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">HÃ nh Ä‘á»™ng</label>
               <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                   log.action === "assigned" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" :
@@ -802,33 +802,33 @@ export default function ProjectDetail() {
               </p>
             </div>
             <div>
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Thời gian</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Thá»i gian</label>
               <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">
                 {new Date(log.createdAt).toLocaleString("vi-VN")}
               </p>
             </div>
           </div>
           <div>
-            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Chi tiết</label>
+            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Chi tiáº¿t</label>
             <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-3">
-              {log.description || "—"}
+              {log.description || "â€”"}
             </p>
           </div>
         </div>
       ),
-      confirmButtonText: "Đóng",
+      confirmButtonText: "ÄÃ³ng",
     })
   }
 
   const handleDelete = async () => {
     if (!project) return
     const confirmed = (await MySwal.fire({
-      title: "Xác nhận xoá",
+      title: "XÃ¡c nháº­n xoÃ¡",
       icon: "warning",
-      html: `Bạn có chắc muốn xoá project <strong>${project.title}</strong>? Hành động này không thể hoàn tác.`,
+      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ project <strong>${project.title}</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`,
       showCancelButton: true,
-      confirmButtonText: "Xoá",
-      cancelButtonText: "Huỷ",
+      confirmButtonText: "XoÃ¡",
+      cancelButtonText: "Huá»·",
       confirmButtonColor: "#dc2626",
       reverseButtons: true,
     })).isConfirmed
@@ -851,7 +851,7 @@ export default function ProjectDetail() {
           projectId: project.id,
           userId: user.id,
           action: "updated",
-          description: `Phòng ban ${dept?.name || ""}`,
+          description: `PhÃ²ng ban ${dept?.name || ""}`,
         })
       }
       fetchProject()
@@ -914,7 +914,7 @@ export default function ProjectDetail() {
           projectId: project.id,
           userId: user.id,
           action: "commented",
-          description: commentText.trim() || "đã bình luận",
+          description: commentText.trim() || "Ä‘Ã£ bÃ¬nh luáº­n",
         })
       }
       setCommentText("")
@@ -934,7 +934,7 @@ export default function ProjectDetail() {
           projectId: project.id,
           userId: user.id,
           action: "updated",
-          description: "đã xoá một bình luận",
+          description: "Ä‘Ã£ xoÃ¡ má»™t bÃ¬nh luáº­n",
         })
       }
       fetchProject()
@@ -946,7 +946,7 @@ export default function ProjectDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-zinc-400">Đang tải...</p>
+        <p className="text-sm text-zinc-400">Äang táº£i...</p>
       </div>
     )
   }
@@ -954,8 +954,8 @@ export default function ProjectDetail() {
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-sm text-zinc-500">Không tìm thấy project</p>
-        <button onClick={() => navigate("/projects")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay lại</button>
+        <p className="text-sm text-zinc-500">KhÃ´ng tÃ¬m tháº¥y project</p>
+        <button onClick={() => navigate("/projects")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay láº¡i</button>
       </div>
     )
   }
@@ -975,7 +975,7 @@ export default function ProjectDetail() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{project.title}</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Chi tiết project</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Chi tiáº¿t project</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -985,19 +985,19 @@ export default function ProjectDetail() {
               className="flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition cursor-pointer border-none shadow-sm"
             >
               <UserPlus size={15} />
-              <span>Thêm thành viên</span>
+              <span>ThÃªm thÃ nh viÃªn</span>
             </button>
           )}
           {canEdit && (
             <button onClick={handleOpenEdit} className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-4 py-2 text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition cursor-pointer bg-transparent">
               <Pencil size={15} />
-              <span>Sửa</span>
+              <span>Sá»­a</span>
             </button>
           )}
           {canDelete && (
             <button onClick={handleDelete} className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-2 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950 transition cursor-pointer bg-transparent">
               <Trash2 size={15} />
-              <span>Xoá</span>
+              <span>XoÃ¡</span>
             </button>
           )}
         </div>
@@ -1007,18 +1007,18 @@ export default function ProjectDetail() {
         <div className="lg:col-span-2 space-y-6">
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
             <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thông tin project</h2>
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ThÃ´ng tin project</h2>
             </div>
             <div className="p-5 space-y-4">
               {project.description && (
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">MÃ´ táº£</label>
                   <p className="mt-1 text-sm text-zinc-900 dark:text-zinc-100">{project.description}</p>
                 </div>
               )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mức độ</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Má»©c Ä‘á»™</label>
                   <p className="mt-1">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${priorityColors[project.priority] || ""}`}>
                       {priorityLabels[project.priority] || project.priority}
@@ -1026,7 +1026,7 @@ export default function ProjectDetail() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Trạng thái</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tráº¡ng thÃ¡i</label>
                   <p className="mt-1">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[project.status] || ""}`}>
                       {statusLabels[project.status] || project.status}
@@ -1034,36 +1034,36 @@ export default function ProjectDetail() {
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tiến độ</label>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tiáº¿n Ä‘á»™</label>
                   <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.progress}%</p>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tệp đính kèm</label>
-                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{fileCount} tệp</p>
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tá»‡p Ä‘Ã­nh kÃ¨m</label>
+                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{fileCount} tá»‡p</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {project.startDate && (
                   <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày bắt đầu</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">NgÃ y báº¯t Ä‘áº§u</label>
                     <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.startDate).toLocaleDateString("vi-VN")}</p>
                   </div>
                 )}
                 {project.dueDate && (
                   <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Hạn chót</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Háº¡n chÃ³t</label>
                     <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.dueDate).toLocaleDateString("vi-VN")}</p>
                   </div>
                 )}
                 {project.estimatedHours && (
                   <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giờ dự kiến</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giá» dá»± kiáº¿n</label>
                     <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.estimatedHours}h</p>
                   </div>
                 )}
                 {project.actualHours && (
                   <div>
-                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giờ thực tế</label>
+                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giá» thá»±c táº¿</label>
                     <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{project.actualHours}h</p>
                   </div>
                 )}
@@ -1127,22 +1127,22 @@ export default function ProjectDetail() {
 
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
             <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thông tin khác</h2>
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ThÃ´ng tin khÃ¡c</h2>
             </div>
             <div className="p-5 space-y-3">
               <div>
-                <label className="text-xs text-zinc-400">Ngày tạo</label>
+                <label className="text-xs text-zinc-400">NgÃ y táº¡o</label>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.createdAt).toLocaleString("vi-VN")}</p>
               </div>
               {project.updatedAt && (
                 <div>
-                  <label className="text-xs text-zinc-400">Cập nhật lần cuối</label>
+                  <label className="text-xs text-zinc-400">Cáº­p nháº­t láº§n cuá»‘i</label>
                   <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.updatedAt).toLocaleString("vi-VN")}</p>
                 </div>
               )}
               {project.completedAt && (
                 <div>
-                  <label className="text-xs text-zinc-400">Hoàn thành lúc</label>
+                  <label className="text-xs text-zinc-400">HoÃ n thÃ nh lÃºc</label>
                   <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{new Date(project.completedAt).toLocaleString("vi-VN")}</p>
                 </div>
               )}
@@ -1153,3 +1153,6 @@ export default function ProjectDetail() {
     </div>
   )
 }
+
+
+

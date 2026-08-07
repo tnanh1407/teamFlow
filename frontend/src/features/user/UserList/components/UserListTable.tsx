@@ -1,5 +1,5 @@
 import { type MouseEvent } from "react"
-import { Copy, Fingerprint } from "lucide-react"
+import { Copy } from "lucide-react"
 import { toast } from "sonner"
 import type { User } from "@/services/user.service"
 import TableStateRow from "@/shared/ui/TableStateRow"
@@ -26,18 +26,18 @@ function getShortUuid(value: string) {
   return `${value.slice(0, 8)}...${value.slice(-4)}`
 }
 
-function getInitials(user: User) {
-  if (user.name.trim()) {
-    const [first = "", second = ""] = user.name.trim().split(/\s+/)
-    return `${first[0] ?? ""}${second[0] ?? first[1] ?? ""}`.toUpperCase()
-  }
+function normalizePositionLabel(positionName: string) {
+  const normalizedPosition = positionName.trim().toLowerCase()
 
-  return user.username.slice(0, 2).toUpperCase()
+  if (normalizedPosition === "leader") return "Trưởng bộ phận"
+  if (normalizedPosition === "manager") return "Quản lý nhóm"
+
+  return positionName
 }
 
 function getRoleLabel(user: User, positionName: string) {
   if (user.role === "admin") return "Quản trị viên"
-  if (positionName !== "—") return positionName
+  if (positionName !== "—") return normalizePositionLabel(positionName)
   return "Nhân viên"
 }
 
@@ -53,11 +53,7 @@ async function copyToClipboard(value: string, successMessage: string) {
 function UserAvatar({ user }: { user: User }) {
   return (
     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-      {user.avatarURL ? (
-        <img src={user.avatarURL} alt="" className="h-full w-full object-cover" />
-      ) : (
-        getInitials(user)
-      )}
+      <img src={user.avatarURL || "/avatarDefault.png"} alt="" className="h-full w-full object-cover" />
     </div>
   )
 }
@@ -84,7 +80,7 @@ export default function UserListTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/60">
-              {showUuid ? <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">UUID</th> : null}
+              {showUuid ? <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Mã định danh</th> : null}
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Avatar</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Mã nhân viên</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Họ và tên</th>
@@ -110,13 +106,12 @@ export default function UserListTable({
                 const positionName = posNameMap.get(user.positionId || "") || "—"
                 const roleLabel = getRoleLabel(user, positionName)
                 const pending = Boolean(pendingStatusMap[user.id])
+
                 return (
                   <tr key={user.id} className="transition hover:bg-muted/40">
                     {showUuid ? (
-                      <td className="px-4 py-3 align-top">
-                        <div className="flex items-center gap-2 font-mono text-xs text-foreground" title={user.id}>
-                          <Fingerprint size={12} className="text-muted-foreground" />
-                          <span>{getShortUuid(user.id)}</span>
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex items-center gap-2 font-mono text-xs text-foreground" title={user.id}>                          <span>{getShortUuid(user.id)}</span>
                           <button
                             type="button"
                             onClick={() => void copyToClipboard(user.id, "Đã sao chép UUID")}
@@ -129,10 +124,12 @@ export default function UserListTable({
                         </div>
                       </td>
                     ) : null}
-                    <td className="px-4 py-3 align-top">
+
+                    <td className="px-4 py-3 align-middle">
                       <UserAvatar user={user} />
                     </td>
-                    <td className="px-4 py-3 align-top">
+
+                    <td className="px-4 py-3 align-middle">
                       <div className="inline-flex items-center gap-2 font-mono text-sm font-medium text-foreground">
                         <span>{user.employeeCode || "—"}</span>
                         {user.employeeCode ? (
@@ -148,7 +145,8 @@ export default function UserListTable({
                         ) : null}
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top">
+
+                    <td className="px-4 py-3 align-middle">
                       <div className="min-w-[220px]">
                         <button
                           type="button"
@@ -161,7 +159,8 @@ export default function UserListTable({
                         <p className="mt-1 text-xs text-muted-foreground">{deptName}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-top">
+
+                    <td className="px-4 py-3 align-middle">
                       <button
                         type="button"
                         onClick={() => onView(user)}
@@ -170,18 +169,19 @@ export default function UserListTable({
                         {user.username || "—"}
                       </button>
                     </td>
-                    <td className="px-4 py-3 align-top">
+
+                    <td className="px-4 py-3 align-middle">
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-                          user.role === "admin"
-                            ? "bg-secondary/15 text-secondary"
-                            : "bg-primary/10 text-primary"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${user.role === "admin"
+                          ? "bg-secondary/15 text-secondary"
+                          : "bg-primary/10 text-primary"
+                          }`}
                       >
                         {roleLabel}
                       </span>
                     </td>
-                    <td className="px-4 py-3 align-top">
+
+                    <td className="px-4 py-3 align-middle">
                       <UserStatusSwitch
                         checked={user.status}
                         disabled={!canEdit(user)}
@@ -189,7 +189,8 @@ export default function UserListTable({
                         onToggle={() => onToggleStatus(user)}
                       />
                     </td>
-                    <td className="px-4 py-3 align-top text-right">
+
+                    <td className="px-4 py-3 align-middle text-right">
                       <UserRowActions
                         user={user}
                         canEdit={canEdit(user)}

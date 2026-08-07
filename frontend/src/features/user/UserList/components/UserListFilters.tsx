@@ -18,6 +18,15 @@ interface UserListFiltersProps {
   onClear: () => void
 }
 
+function getPositionLabel(positionName: string) {
+  const normalized = positionName.trim().toLowerCase()
+
+  if (normalized === "leader") return "Trưởng bộ phận"
+  if (normalized === "manager") return "Quản lý nhóm"
+
+  return positionName
+}
+
 export default function UserListFilters({
   departments,
   positions,
@@ -81,7 +90,7 @@ export default function UserListFilters({
               <option value="role:user">Tài khoản người dùng</option>
               {positions.map((position) => (
                 <option key={position.id} value={`position:${position.id}`}>
-                  {position.name}
+                  {getPositionLabel(position.name)}
                 </option>
               ))}
             </select>

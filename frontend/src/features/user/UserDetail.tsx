@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -13,17 +13,17 @@ import departmentService, { type Department } from "@/services/department.servic
 import positionService, { type Position } from "@/services/position.service"
 
 const userSchema = z.object({
-  employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
-  name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
-  email: z.string().trim().email("Email không hợp lệ"),
+  employeeCode: z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng"),
+  name: z.string().trim().min(1, "Vui lÃ²ng nháº­p há» vÃ  tÃªn"),
+  email: z.string().trim().email("Email khÃ´ng há»£p lá»‡"),
   phone: z.string().trim().optional(),
   birthDate: z.string().optional(),
   hireDate: z.string().optional(),
   leaveDate: z.string().optional(),
   gender: z.enum(["male", "female", "other"]),
-  departmentId: z.string().trim().min(1, "Vui lòng chọn phòng ban"),
-  positionId: z.string().trim().min(1, "Vui lòng chọn chức vụ"),
-  username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
+  departmentId: z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
+  positionId: z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
+  username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nháº­p"),
   password: z.string().optional(),
   status: z.boolean(),
 })
@@ -50,22 +50,30 @@ const inputClass =
   "w-full rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
 const labelClass = "block text-xs font-semibold text-zinc-600 mb-1"
 
+function getPositionLabel(positionName?: string | null) {
+  const normalized = positionName?.trim().toLowerCase()
+  if (!normalized) return "â€”"
+  if (normalized.includes("leader")) return "Trưởng bộ phận"
+  if (normalized.includes("manager")) return "Quản lý nhóm"
+  return positionName ?? "â€”"
+}
+
 function buildUserSchema(departments: Department[], allowAdminEmptyFields: boolean) {
   const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
 
   return z
     .object({
-      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
-      name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
-      email: z.string().trim().email("Email không hợp lệ"),
+      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng"),
+      name: z.string().trim().min(1, "Vui lÃ²ng nháº­p há» vÃ  tÃªn"),
+      email: z.string().trim().email("Email khÃ´ng há»£p lá»‡"),
       phone: z.string().trim().optional(),
       birthDate: z.string().optional(),
       hireDate: z.string().optional(),
       leaveDate: z.string().optional(),
       gender: z.enum(["male", "female", "other"]),
-      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn phòng ban"),
-      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn chức vụ"),
-      username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
+      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
+      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
+      username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nháº­p"),
       password: z.string().optional(),
       status: z.boolean(),
     })
@@ -81,7 +89,7 @@ function buildUserSchema(departments: Department[], allowAdminEmptyFields: boole
         ctx.addIssue({
           code: "custom",
           path: ["departmentId"],
-          message: "Vui lòng chọn phòng ban",
+          message: "Vui lÃ²ng chá»n phÃ²ng ban",
         })
         return
       }
@@ -92,7 +100,7 @@ function buildUserSchema(departments: Department[], allowAdminEmptyFields: boole
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: "Vui lòng nhập mã người dùng",
+          message: "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng",
         })
         return
       }
@@ -101,7 +109,7 @@ function buildUserSchema(departments: Department[], allowAdminEmptyFields: boole
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: `Mã người dùng phải bắt đầu bằng mã phòng ban ${departmentCode}`,
+          message: `MÃ£ ngÆ°á»i dÃ¹ng pháº£i báº¯t Ä‘áº§u báº±ng mÃ£ phÃ²ng ban ${departmentCode}`,
         })
         return
       }
@@ -111,7 +119,7 @@ function buildUserSchema(departments: Department[], allowAdminEmptyFields: boole
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: "Phần sau mã phòng ban phải gồm đúng 6 ký tự chữ hoặc số",
+          message: "Pháº§n sau mÃ£ phÃ²ng ban pháº£i gá»“m Ä‘Ãºng 6 kÃ½ tá»± chá»¯ hoáº·c sá»‘",
         })
       }
     })
@@ -176,9 +184,9 @@ export default function UserDetail() {
     } catch {
       void MySwal.fire({
         icon: "error",
-        title: "Lỗi",
-        text: "Không thể tải thông tin người dùng",
-        confirmButtonText: "Đóng",
+        title: "Lá»—i",
+        text: "KhÃ´ng thá»ƒ táº£i thÃ´ng tin ngÆ°á»i dÃ¹ng",
+        confirmButtonText: "ÄÃ³ng",
         confirmButtonColor: "var(--primary)",
       })
     } finally {
@@ -231,10 +239,10 @@ export default function UserDetail() {
         <div className="space-y-3 text-left">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className={labelClass}>Mã người dùng</label>
+              <label className={labelClass}>MÃ£ ngÆ°á»i dÃ¹ng</label>
               <input {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })} className={inputClass} placeholder="VD: hrABC123" />
               <p className="mt-1 text-[11px] text-zinc-500">
-                Mã phòng ban + 6 ký tự. Ví dụ:{" "}
+                MÃ£ phÃ²ng ban + 6 kÃ½ tá»±. VÃ­ dá»¥:{" "}
                 <span className="font-medium text-zinc-700">
                   {(departments.find((d) => d.id === watch("departmentId"))?.code || "DEPT").trim().toUpperCase()}ABC123
                 </span>
@@ -242,14 +250,14 @@ export default function UserDetail() {
               {errors.employeeCode?.message && <p className="mt-1 text-xs text-red-500">{errors.employeeCode.message}</p>}
             </div>
             <div>
-              <label className={labelClass}>Tên đăng nhập</label>
+              <label className={labelClass}>TÃªn Ä‘Äƒng nháº­p</label>
               <input {...register("username")} className={inputClass} />
               {errors.username?.message && <p className="mt-1 text-xs text-red-500">{errors.username.message}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Họ và tên</label>
+              <label className={labelClass}>Há» vÃ  tÃªn</label>
               <input {...register("name")} className={inputClass} />
               {errors.name?.message && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
             </div>
@@ -261,17 +269,17 @@ export default function UserDetail() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Phòng ban</label>
+              <label className={labelClass}>PhÃ²ng ban</label>
               <select {...register("departmentId")} className={`${inputClass} appearance-none`}>
-                <option value="">-- Chọn --</option>
+                <option value="">-- Chá»n --</option>
                 {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
               {errors.departmentId?.message && <p className="mt-1 text-xs text-red-500">{errors.departmentId.message}</p>}
             </div>
             <div>
-              <label className={labelClass}>Chức vụ</label>
+              <label className={labelClass}>Chá»©c vá»¥</label>
               <select {...register("positionId")} className={`${inputClass} appearance-none`}>
-                <option value="">-- Chọn --</option>
+                <option value="">-- Chá»n --</option>
                 {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
               {errors.positionId?.message && <p className="mt-1 text-xs text-red-500">{errors.positionId.message}</p>}
@@ -279,17 +287,17 @@ export default function UserDetail() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Mật khẩu</label>
+              <label className={labelClass}>Máº­t kháº©u</label>
               <input type="password" {...register("password")} className={inputClass} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Số điện thoại</label>
+              <label className={labelClass}>Sá»‘ Ä‘iá»‡n thoáº¡i</label>
               <input {...register("phone")} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Giới tính</label>
+              <label className={labelClass}>Giá»›i tÃ­nh</label>
               <select {...register("gender")} className={`${inputClass} appearance-none`}>
                 <option value="other">Other</option>
                 <option value="male">Male</option>
@@ -299,42 +307,42 @@ export default function UserDetail() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={labelClass}>Ngày sinh</label>
+              <label className={labelClass}>NgÃ y sinh</label>
               <input type="date" {...register("birthDate")} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Ngày vào làm</label>
+              <label className={labelClass}>NgÃ y vÃ o lÃ m</label>
               <input type="date" {...register("hireDate")} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Ngày nghỉ việc</label>
+              <label className={labelClass}>NgÃ y nghá»‰ viá»‡c</label>
               <input type="date" {...register("leaveDate")} className={inputClass} />
             </div>
           </div>
           <div className="flex items-center gap-2 pt-1">
             <input type="checkbox" {...register("status")} />
-            <span className="text-sm text-zinc-700">Kích hoạt</span>
+            <span className="text-sm text-zinc-700">KÃ­ch hoáº¡t</span>
           </div>
         </div>
       )
     }
 
     const result = await MySwal.fire({
-      title: "Sửa người dùng",
+      title: "Sá»­a ngÆ°á»i dÃ¹ng",
       width: 640,
       html: <FormComponent />,
       showCancelButton: true,
-      confirmButtonText: "Cập nhật",
-      cancelButtonText: "Hủy",
+      confirmButtonText: "Cáº­p nháº­t",
+      cancelButtonText: "Há»§y",
       reverseButtons: true,
       preConfirm: () => {
         const d = dataRef.current
         if (!d) {
-          MySwal.showValidationMessage("Vui lòng nhập đầy đủ thông tin")
+          MySwal.showValidationMessage("Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ thÃ´ng tin")
           return false
         }
         if (!validRef.current) {
-          MySwal.showValidationMessage("Vui lòng kiểm tra lại các trường bắt buộc")
+          MySwal.showValidationMessage("Vui lÃ²ng kiá»ƒm tra láº¡i cÃ¡c trÆ°á»ng báº¯t buá»™c")
           return false
         }
         return d
@@ -363,18 +371,18 @@ export default function UserDetail() {
       await userService.update(editingUser.id, payload)
       void MySwal.fire({
         icon: "success",
-        title: "Thành công",
-        text: "Cập nhật thành công",
-        confirmButtonText: "Đóng",
+        title: "ThÃ nh cÃ´ng",
+        text: "Cáº­p nháº­t thÃ nh cÃ´ng",
+        confirmButtonText: "ÄÃ³ng",
         confirmButtonColor: "var(--primary)",
       })
       fetchDetail()
     } catch (err: any) {
       void MySwal.fire({
         icon: "error",
-        title: "Lỗi",
-        text: err?.response?.data?.message || "Cập nhật thất bại",
-        confirmButtonText: "Đóng",
+        title: "Lá»—i",
+        text: err?.response?.data?.message || "Cáº­p nháº­t tháº¥t báº¡i",
+        confirmButtonText: "ÄÃ³ng",
         confirmButtonColor: "var(--primary)",
       })
     }
@@ -383,12 +391,12 @@ export default function UserDetail() {
   const confirmDelete = async () => {
     if (!user) return
     const confirmed = (await MySwal.fire({
-      title: "Xác nhận xoá",
+      title: "XÃ¡c nháº­n xoÃ¡",
       icon: "warning",
-      html: `Bạn có chắc muốn xoá người dùng <strong>${user.username}</strong>? Hành động này không thể hoàn tác.`,
+      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ ngÆ°á»i dÃ¹ng <strong>${user.username}</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`,
       showCancelButton: true,
-      confirmButtonText: "Xoá",
-      cancelButtonText: "Huỷ",
+      confirmButtonText: "XoÃ¡",
+      cancelButtonText: "Huá»·",
       confirmButtonColor: "#dc2626",
       reverseButtons: true,
     })).isConfirmed
@@ -399,9 +407,9 @@ export default function UserDetail() {
     } catch {
       void MySwal.fire({
         icon: "error",
-        title: "Lỗi",
-        text: "Xoá thất bại",
-        confirmButtonText: "Đóng",
+        title: "Lá»—i",
+        text: "XoÃ¡ tháº¥t báº¡i",
+        confirmButtonText: "ÄÃ³ng",
         confirmButtonColor: "var(--primary)",
       })
     }
@@ -414,10 +422,10 @@ export default function UserDetail() {
   if (!user) {
     return (
       <EmptyState
-        title="Không tìm thấy người dùng"
+        title="KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng"
         action={
           <button onClick={() => navigate("/users")} className="cursor-pointer rounded-lg border-none bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90">
-            Quay lại
+            Quay láº¡i
           </button>
         }
       />
@@ -433,20 +441,20 @@ export default function UserDetail() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{user.username}</h1>
-            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Chi tiết người dùng</p>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Chi tiáº¿t ngÆ°á»i dÃ¹ng</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {canEdit() && (
             <button onClick={openFormDialog} className="flex items-center gap-2 rounded-lg border-none bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90">
               <Pencil size={15} />
-              <span>Sửa</span>
+              <span>Sá»­a</span>
             </button>
           )}
           {canEdit() && (
             <button onClick={confirmDelete} className="flex items-center gap-2 rounded-lg border border-red-200 bg-transparent px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950">
               <Trash2 size={15} />
-              <span>Xoá</span>
+              <span>XoÃ¡</span>
             </button>
           )}
         </div>
@@ -464,19 +472,19 @@ export default function UserDetail() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 p-6 sm:grid-cols-2">
-          <Field label="Mã người dùng" value={user.employeeCode || "—"} />
-          <Field label="Tên đăng nhập" value={user.username} />
-          <Field label="Họ và tên" value={user.name || "—"} />
-          <Field label="Email" value={user.email || "—"} />
-          <Field label="Số điện thoại" value={user.phone || "—"} />
-          <Field label="Ngày vào làm" value={user.hireDate ? user.hireDate.slice(0, 10) : "—"} />
-          <Field label="Ngày nghỉ việc" value={user.leaveDate ? user.leaveDate.slice(0, 10) : "—"} />
-          <Field label="Phòng ban" value={deptNameMap.get(user.departmentId || "") || "—"} />
-          <Field label="Chức vụ" value={posNameMap.get(user.positionId || "") || "—"} />
-          <Field label="Loại tài khoản" value={user.role === "admin" ? "Admin" : "Người dùng"} />
-          <Field label="Trạng thái" value={user.status ? "Hoạt động" : "Vô hiệu"} />
-          <Field label="Ngày tạo" value={new Date(user.createdAt).toLocaleString("vi-VN")} />
-          <Field label="Cập nhật cuối" value={new Date(user.updatedAt).toLocaleString("vi-VN")} />
+          <Field label="MÃ£ ngÆ°á»i dÃ¹ng" value={user.employeeCode || "â€”"} />
+          <Field label="TÃªn Ä‘Äƒng nháº­p" value={user.username} />
+          <Field label="Há» vÃ  tÃªn" value={user.name || "â€”"} />
+          <Field label="Email" value={user.email || "â€”"} />
+          <Field label="Sá»‘ Ä‘iá»‡n thoáº¡i" value={user.phone || "â€”"} />
+          <Field label="NgÃ y vÃ o lÃ m" value={user.hireDate ? user.hireDate.slice(0, 10) : "â€”"} />
+          <Field label="NgÃ y nghá»‰ viá»‡c" value={user.leaveDate ? user.leaveDate.slice(0, 10) : "â€”"} />
+          <Field label="PhÃ²ng ban" value={deptNameMap.get(user.departmentId || "") || "â€”"} />
+          <Field label="Chá»©c vá»¥" value={getPositionLabel(posNameMap.get(user.positionId || ""))} />
+          <Field label="Loáº¡i tÃ i khoáº£n" value={user.role === "admin" ? "Admin" : "NgÆ°á»i dÃ¹ng"} />
+          <Field label="Tráº¡ng thÃ¡i" value={user.status ? "Hoáº¡t Ä‘á»™ng" : "VÃ´ hiá»‡u"} />
+          <Field label="NgÃ y táº¡o" value={new Date(user.createdAt).toLocaleString("vi-VN")} />
+          <Field label="Cáº­p nháº­t cuá»‘i" value={new Date(user.updatedAt).toLocaleString("vi-VN")} />
         </div>
       </div>
     </div>
@@ -491,3 +499,5 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
+
+

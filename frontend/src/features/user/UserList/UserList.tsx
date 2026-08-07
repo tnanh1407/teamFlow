@@ -24,6 +24,24 @@ import openUserFormAddDialog from "./components/UserFormAddDialog"
 const pageSize = 10
 const SEARCH_DEBOUNCE_MS = 450
 
+function getRoleSortRank(user: User) {
+  if (user.role === "admin") return 0
+  if (user.position === "leader") return 1
+  if (user.position === "manager") return 2
+  if (user.position === "staff") return 3
+  if (user.position === "intern") return 4
+  return 5
+}
+
+function getPositionLabel(positionName: string) {
+  const normalized = positionName.trim().toLowerCase()
+
+  if (normalized === "leader") return "Trưởng bộ phận"
+  if (normalized === "manager") return "Quản lý nhóm"
+
+  return positionName
+}
+
 function getErrorMessage(error: unknown, fallback: string) {
   if (typeof error === "object" && error !== null) {
     const response = Reflect.get(error, "response")
@@ -64,7 +82,7 @@ function buildFilterChips(
       const positionId = filters.roleOrPosition.replace("position:", "")
       chips.push({
         key: "roleOrPosition",
-        label: `Chức vụ: ${posNameMap.get(positionId) ?? "Đã chọn"}`,
+        label: `Chức vụ: ${getPositionLabel(posNameMap.get(positionId) ?? "Đã chọn")}`,
       })
     }
   }
@@ -240,8 +258,7 @@ export default function UserList() {
         return new Date(first.hireDate || 0).getTime() - new Date(second.hireDate || 0).getTime()
       }
 
-      const roleOrder: Record<AccountRole, number> = { admin: 0, user: 1 }
-      const roleDelta = roleOrder[first.role] - roleOrder[second.role]
+      const roleDelta = getRoleSortRank(first) - getRoleSortRank(second)
       if (roleDelta !== 0) return roleDelta
       return first.name.localeCompare(second.name)
     })

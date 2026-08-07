@@ -82,6 +82,10 @@ const qualifiedUserColumns = userColumns
   .split(",")
   .map((column) => `users.${column.trim()}`)
   .join(",\n  ");
+const MANAGER_POSITION_ID = "20000000-0000-4000-a000-000000000001";
+const LEADER_POSITION_ID = "20000000-0000-4000-a000-000000000010";
+const STAFF_POSITION_ID = "20000000-0000-4000-a000-000000000005";
+const INTERN_POSITION_ID = "20000000-0000-4000-a000-000000000006";
 
 const normalizeRequiredText = (value: string) => value.trim();
 
@@ -410,11 +414,18 @@ class UserService {
           : options.sortBy === "hire-oldest"
             ? "users.hire_date ASC NULLS LAST, users.created_at DESC"
             : options.sortBy === "role"
-              ? "CASE users.role WHEN 'admin' THEN 0 ELSE 1 END ASC, users.name ASC"
+              ? `CASE
+                   WHEN users.role = 'admin' THEN 0
+                   WHEN users.position_id = '${LEADER_POSITION_ID}' THEN 1
+                   WHEN users.position_id = '${MANAGER_POSITION_ID}' THEN 2
+                   WHEN users.position_id = '${STAFF_POSITION_ID}' THEN 3
+                   WHEN users.position_id = '${INTERN_POSITION_ID}' THEN 4
+                   ELSE 5
+                 END ASC, users.name ASC`
               : "users.name ASC";
 
     const countResult = await pool.query<{ count: string }>(
-      `SELECT COUNT(DISTINCT users.id) AS count
+      `SELECT COUNT(users.id) AS count
        FROM users
        LEFT JOIN departments ON departments.id = users.department_id
        WHERE ${whereClause}`,
@@ -426,7 +437,7 @@ class UserService {
     const offsetParamIndex = values.length;
 
     const { rows } = await pool.query<UserRow>(
-      `SELECT DISTINCT ${qualifiedUserColumns}
+      `SELECT ${qualifiedUserColumns}
        FROM users
        LEFT JOIN departments ON departments.id = users.department_id
        WHERE ${whereClause}

@@ -1,4 +1,4 @@
-import type { TooltipContentProps } from "recharts"
+﻿import type { TooltipContentProps } from "recharts"
 
 interface DepartmentPoint {
   name: string
@@ -24,15 +24,15 @@ export default function DepartmentTooltip({ active, payload }: DepartmentTooltip
 
   return (
     <div className="min-w-64 rounded-2xl border border-border bg-background px-4 py-3 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Phòng ban</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">PhÃ²ng ban</p>
       <p className="mt-0.5 text-sm font-semibold text-foreground">{point.name}</p>
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">Tổng thành viên</span>
+          <span className="text-muted-foreground">Tá»•ng thÃ nh viÃªn</span>
           <span className="font-semibold text-foreground">{totalMembers}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">Nhân sự</span>
+          <span className="text-muted-foreground">NhÃ¢n sá»±</span>
           <span className="font-semibold text-foreground">{staffCount}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
@@ -40,12 +40,14 @@ export default function DepartmentTooltip({ active, payload }: DepartmentTooltip
           <span className="font-semibold text-foreground">{internCount}</span>
         </div>
         <div className="flex items-start justify-between gap-4">
-          <span className="text-muted-foreground">Quản lí</span>
+          <span className="text-muted-foreground">Trưởng bộ phận</span>
           <span className="max-w-40 text-right font-semibold text-foreground">
-            {point.managerName ? `${point.managerName}${managerCode ? ` (${managerCode})` : ""}` : "Chưa phân công"}
+            {point.managerName ? `${point.managerName}${managerCode ? ` (${managerCode})` : ""}` : "ChÆ°a phÃ¢n cÃ´ng"}
           </span>
         </div>
       </div>
     </div>
   )
 }
+
+

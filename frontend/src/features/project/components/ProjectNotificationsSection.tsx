@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Bell, Pin, Pencil, Trash2, Send } from "lucide-react";
 import type { User } from "@/services/user.service";
 import type { ProjectEmployee } from "@/services/project-employee.service";
@@ -80,7 +80,7 @@ export default function ProjectNotificationsSection({
     const cleanTitle = title.trim();
     const cleanContent = content.trim();
     if (!cleanTitle || !cleanContent) {
-      await MySwal.fire({ icon: "warning", title: "Thiếu dữ liệu", text: "Vui lòng nhập tiêu đề và nội dung." });
+      await MySwal.fire({ icon: "warning", title: "Thiáº¿u dá»¯ liá»‡u", text: "Vui lÃ²ng nháº­p tiÃªu Ä‘á» vÃ  ná»™i dung." });
       return;
     }
 
@@ -94,7 +94,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await MySwal.fire({ icon: "success", title: "Thành công", text: "Cap nhat thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
+        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Cap nhat thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
       } else {
         await projectNotificationService.create({
           projectId,
@@ -104,7 +104,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await MySwal.fire({ icon: "success", title: "Thành công", text: "Tao thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
+        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Tao thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
       }
       resetForm();
       await loadNotifications();
@@ -130,19 +130,19 @@ export default function ProjectNotificationsSection({
 
   const handleDelete = async (notification: ProjectNotification) => {
     const confirmed = (await MySwal.fire({
-      title: "Xác nhận xoá",
+      title: "XÃ¡c nháº­n xoÃ¡",
       icon: "warning",
-      html: `Bạn có chắc muốn xoá thông báo <strong>${notification.title}</strong>?`,
+      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ thÃ´ng bÃ¡o <strong>${notification.title}</strong>?`,
       showCancelButton: true,
-      confirmButtonText: "Xoá",
-      cancelButtonText: "Huỷ",
+      confirmButtonText: "XoÃ¡",
+      cancelButtonText: "Huá»·",
       confirmButtonColor: "#dc2626",
       reverseButtons: true,
     })).isConfirmed;
     if (!confirmed) return;
     try {
       await projectNotificationService.delete(notification.id);
-      await MySwal.fire({ icon: "success", title: "Thành công", text: "Xoa thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
+      await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Xoa thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
       await loadNotifications();
     } catch (error: any) {
       await MySwal.fire({
@@ -253,7 +253,7 @@ export default function ProjectNotificationsSection({
           <div className="py-8 text-center text-zinc-400">
             <Bell size={28} className="mx-auto mb-2 opacity-40" />
             <p className="text-sm">Chua co thong bao nao</p>
-            <p className="mt-1 text-xs">Leader co the gui thong bao chung cho toan bo thanh vien du an</p>
+            <p className="mt-1 text-xs">Trưởng bộ phận có thể gửi thông báo chung cho toàn bộ thành viên dự án</p>
           </div>
         ) : (
           notifications.map((notification) => (
@@ -290,7 +290,7 @@ export default function ProjectNotificationsSection({
 
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-zinc-400">
                     <span>
-                      Tạo bởi: <strong className="text-zinc-600 dark:text-zinc-200">{memberById.get(notification.createdBy)?.name || "Leader"}</strong>
+                      Táº¡o bá»Ÿi: <strong className="text-zinc-600 dark:text-zinc-200">{memberById.get(notification.createdBy)?.name || "Trưởng bộ phận"}</strong>
                     </span>
                     <span>{formatDate(notification.createdAt)}</span>
                   </div>
@@ -322,3 +322,7 @@ export default function ProjectNotificationsSection({
     </div>
   );
 }
+
+
+
+

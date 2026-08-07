@@ -40,24 +40,28 @@ const emptyForm: UserFormValues = {
   status: false,
 }
 
-// khởi tạo mã nhân viên
 function generateEmployeeSuffix(length = 6) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
   let suffix = ""
+
   for (let index = 0; index < length; index += 1) {
     suffix += alphabet[Math.floor(Math.random() * alphabet.length)]
   }
+
   return suffix
 }
 
-// giá trị nhập vào mã nhân viên
 function buildEmployeeCode(departmentCode: string) {
   return `${departmentCode.trim().toUpperCase()}${generateEmployeeSuffix()}`
 }
 
 function buildUserSchema(departments: Department[], positions: Position[]) {
-  const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
-  const positionNameMap = new Map(positions.map((position) => [position.id, position.name.trim().toLowerCase()] as const))
+  const departmentCodeMap = new Map(
+    departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const),
+  )
+  const positionNameMap = new Map(
+    positions.map((position) => [position.id, position.name.trim().toLowerCase()] as const),
+  )
 
   return z
     .object({
@@ -81,7 +85,7 @@ function buildUserSchema(departments: Department[], positions: Position[]) {
         ctx.addIssue({
           code: "custom",
           path: ["departmentId"],
-          message: "Leader không được gắn phòng ban",
+          message: "Trưởng bộ phận không được gắn phòng ban",
         })
         return
       }
@@ -102,7 +106,7 @@ function buildUserSchema(departments: Department[], positions: Position[]) {
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: "Vui lòng nhập mã người dùng",
+          message: "Vui lòng nhập mã nhân viên",
         })
         return
       }
@@ -134,7 +138,6 @@ export default async function openUserFormAddDialog({
 }: OpenUserFormDialogParams): Promise<OpenUserFormDialogResult | undefined> {
   const dataRef: { current: UserFormValues | null } = { current: null }
   const validRef: { current: boolean } = { current: false }
-
   const formSchema = buildUserSchema(departments, positions)
 
   function FormComponent() {
@@ -143,7 +146,7 @@ export default async function openUserFormAddDialog({
       watch,
       setValue,
       formState: { errors, isValid },
-    } = useForm({
+    } = useForm<UserFormValues>({
       resolver: zodResolver(formSchema),
       mode: "onChange",
       defaultValues: emptyForm,
@@ -182,35 +185,49 @@ export default async function openUserFormAddDialog({
       const currentCode = (employeeCode ?? "").trim().toUpperCase()
 
       if (!currentCode) {
-        setValue("employeeCode", buildEmployeeCode(departmentCode), { shouldDirty: true, shouldValidate: true })
+        setValue("employeeCode", buildEmployeeCode(departmentCode), {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
         return
       }
 
       if (previousDepartmentId && previousDepartmentId !== selectedDepartmentId) {
-        setValue("employeeCode", buildEmployeeCode(departmentCode), { shouldDirty: true, shouldValidate: true })
+        setValue("employeeCode", buildEmployeeCode(departmentCode), {
+          shouldDirty: true,
+          shouldValidate: true,
+        })
       }
-    }, [departmentId, departments, employeeCode, setValue])
+    }, [departmentId, employeeCode, setValue])
 
     return (
       <div className="space-y-4 text-left">
         <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mã nhân viên</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                Mã nhân viên
+              </label>
               <div className="flex flex-col gap-2">
                 <input
-                  {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })}
+                  {...register("employeeCode", {
+                    setValueAs: (value) =>
+                      typeof value === "string" ? value.toUpperCase() : value,
+                  })}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                   placeholder={employeePlaceholder}
                   readOnly
                   aria-readonly="true"
                 />
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Chọn phòng ban để hệ thống tự sinh mã nhân viên.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Chọn phòng ban để hệ thống tự sinh mã nhân viên.
+                  </p>
                   <button
                     type="button"
                     onClick={async () => {
                       if (!employeeCode) return
+
                       try {
                         await navigator.clipboard.writeText(employeeCode)
                         toast.success("Đã sao chép mã nhân viên")
@@ -228,21 +245,29 @@ export default async function openUserFormAddDialog({
                   </button>
                 </div>
               </div>
-              {errors.employeeCode?.message && <p className="mt-1 text-xs text-destructive">{errors.employeeCode.message}</p>}
+              {errors.employeeCode?.message && (
+                <p className="mt-1 text-xs text-destructive">{errors.employeeCode.message}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Tên đăng nhập</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Tên đăng nhập
+                </label>
                 <input
                   {...register("username")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
-                {errors.username?.message && <p className="mt-1 text-xs text-destructive">{errors.username.message}</p>}
+                {errors.username?.message && (
+                  <p className="mt-1 text-xs text-destructive">{errors.username.message}</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mật khẩu</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Mật khẩu
+                </label>
                 <input
                   type="password"
                   {...register("password")}
@@ -253,22 +278,30 @@ export default async function openUserFormAddDialog({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Họ và tên</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Họ và tên
+                </label>
                 <input
                   {...register("name")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
-                {errors.name?.message && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
+                {errors.name?.message && (
+                  <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Email</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Email
+                </label>
                 <input
                   type="email"
                   {...register("email")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
-                {errors.email?.message && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
+                {errors.email?.message && (
+                  <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
+                )}
               </div>
             </div>
           </div>
@@ -277,35 +310,43 @@ export default async function openUserFormAddDialog({
         <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Phòng ban</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                Phòng ban
+              </label>
               <select
                 {...register("departmentId")}
                 className="w-full appearance-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
               >
                 <option value="">-- Chọn --</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
+                {departments.map((department) => (
+                  <option key={department.id} value={department.id}>
+                    {department.name}
                   </option>
                 ))}
               </select>
-              {errors.departmentId?.message && <p className="mt-1 text-xs text-destructive">{errors.departmentId.message}</p>}
+              {errors.departmentId?.message && (
+                <p className="mt-1 text-xs text-destructive">{errors.departmentId.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Chức vụ</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                Chức vụ
+              </label>
               <select
                 {...register("positionId")}
                 className="w-full appearance-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
               >
                 <option value="">-- Chọn --</option>
-                {positions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
+                {positions.map((position) => (
+                  <option key={position.id} value={position.id}>
+                    {position.name}
                   </option>
                 ))}
               </select>
-              {errors.positionId?.message && <p className="mt-1 text-xs text-destructive">{errors.positionId.message}</p>}
+              {errors.positionId?.message && (
+                <p className="mt-1 text-xs text-destructive">{errors.positionId.message}</p>
+              )}
             </div>
 
             <div className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-2 sm:col-span-2">
@@ -316,7 +357,9 @@ export default async function openUserFormAddDialog({
               />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">Kích hoạt tài khoản</p>
-                <p className="text-xs text-muted-foreground">Bật nếu nhân sự đang hoạt động và có thể đăng nhập.</p>
+                <p className="text-xs text-muted-foreground">
+                  Bật nếu nhân sự đang hoạt động và có thể đăng nhập.
+                </p>
               </div>
             </div>
           </div>
@@ -336,20 +379,24 @@ export default async function openUserFormAddDialog({
     cancelButtonText: "Hủy",
     reverseButtons: true,
     preConfirm: () => {
-      const d = dataRef.current
-      if (!d) {
+      const values = dataRef.current
+
+      if (!values) {
         MySwal.showValidationMessage("Vui lòng nhập đầy đủ thông tin")
         return false
       }
+
       if (!validRef.current) {
         MySwal.showValidationMessage("Vui lòng kiểm tra lại các trường bắt buộc")
         return false
       }
-      if (!d.password?.trim()) {
+
+      if (!values.password.trim()) {
         MySwal.showValidationMessage("Vui lòng nhập mật khẩu")
         return false
       }
-      return d
+
+      return values
     },
   })
 
@@ -365,7 +412,9 @@ export default async function openUserFormAddDialog({
     status: result.value.status,
   }
 
-  if (result.value.password?.trim()) payload.password = result.value.password
+  if (result.value.password.trim()) {
+    payload.password = result.value.password
+  }
 
   await onSubmit(payload)
   return { submitted: true, changed: true }
