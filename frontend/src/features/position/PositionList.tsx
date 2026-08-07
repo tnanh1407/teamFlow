@@ -19,9 +19,9 @@ const emptyForm: FormData = {
 }
 
 const levelLabels: Record<string, string> = {
-  Intern: "Thá»±c táº­p sinh",
-  Junior: "Má»›i Ä‘i lÃ m",
-  Middle: "Kinh nghiá»‡m",
+  Intern: "Thực tập sinh",
+  Junior: "Mới đi làm",
+  Middle: "Kinh nghiệm",
   Senior: "Cao cấp",
   Manager: "Quản lý nhóm",
 }
@@ -47,17 +47,17 @@ function FormContent({
   return (
     <div className="space-y-3">
       <div>
-        <label className={labelClass}>TÃªn chá»©c vá»¥</label>
+        <label className={labelClass}>Tên chức vụ</label>
         <input
           type="text"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-          placeholder="VD: TrÆ°á»Ÿng phÃ²ng"
+          placeholder="VD: Trưởng phòng"
           className={inputClass}
         />
       </div>
       <div>
-        <label className={labelClass}>Cáº¥p báº­c</label>
+        <label className={labelClass}>Cấp bậc</label>
         <div className="relative">
           <button
             type="button"
@@ -65,7 +65,7 @@ function FormContent({
             className={`${inputClass} flex items-center justify-between text-left`}
           >
             <span className={form.level ? "text-zinc-900" : "text-zinc-400"}>
-              {form.level ? levelLabels[form.level] : "Chá»n cáº¥p báº­c"}
+              {form.level ? levelLabels[form.level] : "Chọn cấp bậc"}
             </span>
           </button>
           {levelOpen && (
@@ -90,11 +90,11 @@ function FormContent({
         </div>
       </div>
       <div>
-        <label className={labelClass}>MÃ´ táº£</label>
+        <label className={labelClass}>Mô tả</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
-          placeholder="MÃ´ táº£ chá»©c vá»¥ (khÃ´ng báº¯t buá»™c)"
+          placeholder="Mô tả chức vụ (không bắt buộc)"
           rows={3}
           className={inputClass + " resize-none"}
         />
@@ -143,17 +143,17 @@ export default function Positions() {
   const openCreate = async () => {
     formDataRef.current = emptyForm
     await MySwal.fire({
-      title: "ThÃªm chá»©c vá»¥",
+      title: "Thêm chức vụ",
       width: 420,
       html: <FormContent dataRef={formDataRef} />,
       showCancelButton: true,
-      confirmButtonText: "Táº¡o má»›i",
-      cancelButtonText: "Huá»·",
+      confirmButtonText: "Tạo mới",
+      cancelButtonText: "Huỷ",
       reverseButtons: true,
       preConfirm: async () => {
         const data = formDataRef.current
         if (!data.name.trim()) {
-          MySwal.showValidationMessage("Vui lÃ²ng nháº­p tÃªn chá»©c vá»¥")
+          MySwal.showValidationMessage("Vui lòng nhập tên chức vụ")
           return false
         }
         try {
@@ -162,7 +162,7 @@ export default function Positions() {
           await positionService.create(payload)
           await fetchPositions()
         } catch {
-          MySwal.showValidationMessage("KhÃ´ng thá»ƒ lÆ°u chá»©c vá»¥")
+          MySwal.showValidationMessage("Không thể lưu chức vụ")
           return false
         }
       },
@@ -173,17 +173,17 @@ export default function Positions() {
     e.stopPropagation()
     formDataRef.current = { name: pos.name, description: pos.description, level: pos.level }
     await MySwal.fire({
-      title: "Sá»­a chá»©c vá»¥",
+      title: "Sửa chức vụ",
       width: 420,
       html: <FormContent dataRef={formDataRef} />,
       showCancelButton: true,
-      confirmButtonText: "Cáº­p nháº­t",
-      cancelButtonText: "Huá»·",
+      confirmButtonText: "Cập nhật",
+      cancelButtonText: "Huỷ",
       reverseButtons: true,
       preConfirm: async () => {
         const data = formDataRef.current
         if (!data.name.trim()) {
-          MySwal.showValidationMessage("Vui lÃ²ng nháº­p tÃªn chá»©c vá»¥")
+          MySwal.showValidationMessage("Vui lòng nhập tên chức vụ")
           return false
         }
         try {
@@ -192,7 +192,7 @@ export default function Positions() {
           await positionService.update(pos.id, payload)
           await fetchPositions()
         } catch {
-          MySwal.showValidationMessage("KhÃ´ng thá»ƒ lÆ°u chá»©c vá»¥")
+          MySwal.showValidationMessage("Không thể lưu chức vụ")
           return false
         }
       },
@@ -201,7 +201,7 @@ export default function Positions() {
 
   const openDetail = async (pos: Position) => {
     await MySwal.fire({
-      title: "Chi tiáº¿t chá»©c vá»¥",
+      title: "Chi tiết chức vụ",
       width: 420,
       html: (
         <div className="space-y-4">
@@ -227,7 +227,7 @@ export default function Positions() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(pos.id)
-                    void MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ sao chÃ©p UUID", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+                    void MySwal.fire({ icon: "success", title: "Thành công", text: "Đã sao chép UUID", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
                   }}
                   className="p-1 rounded text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent shrink-0"
                   title="Copy UUID"
@@ -238,17 +238,17 @@ export default function Positions() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">MÃ´ táº£</p>
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{pos.description || "ChÆ°a cÃ³ mÃ´ táº£"}</p>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Mô tả</p>
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{pos.description || "Chưa có mô tả"}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <div>
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">NgÃ y táº¡o</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ngày tạo</p>
                 <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(pos.createdAt).toLocaleDateString("vi-VN")}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cáº­p nháº­t</p>
+                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cập nhật</p>
                 <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{new Date(pos.updatedAt).toLocaleDateString("vi-VN")}</p>
               </div>
             </div>
@@ -256,19 +256,19 @@ export default function Positions() {
         </div>
       ),
       showConfirmButton: true,
-      confirmButtonText: "ÄÃ³ng",
+      confirmButtonText: "Đóng",
     })
   }
 
   const confirmDelete = async (e: React.MouseEvent, pos: Position) => {
     e.stopPropagation()
     const confirmed = (await MySwal.fire({
-      title: "XÃ¡c nháº­n xoÃ¡",
+      title: "Xác nhận xoá",
       icon: "warning",
-      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ chá»©c vá»¥ <strong>${pos.name}</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`,
+      html: `Bạn có chắc muốn xoá chức vụ <strong>${pos.name}</strong>? Hành động này không thể hoàn tác.`,
       showCancelButton: true,
-      confirmButtonText: "XoÃ¡",
-      cancelButtonText: "Huá»·",
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
       confirmButtonColor: "#dc2626",
       reverseButtons: true,
     })).isConfirmed
@@ -287,10 +287,10 @@ export default function Positions() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Quáº£n lÃ­ chá»©c vá»¥
+            Quản lí chức vụ
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Quáº£n lÃ½ chá»©c vá»¥ vÃ  cáº¥p báº­c trong há»‡ thá»‘ng
+            Quản lý chức vụ và cấp bậc trong hệ thống
           </p>
         </div>
       </div>
@@ -304,7 +304,7 @@ export default function Positions() {
           const total = positions.length || 1
           return (
             <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Cáº¥p báº­c</p>
+              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Cấp bậc</p>
               <div className="flex items-start gap-4">
                 <ResponsiveContainer width="55%" height={220}>
                   <PieChart>
@@ -341,7 +341,7 @@ export default function Positions() {
           <button
             onClick={openCreate}
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
-            title="ThÃªm chá»©c vá»¥"
+            title="Thêm chức vụ"
           >
             <Plus size={18} />
           </button>
@@ -361,7 +361,7 @@ export default function Positions() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
-            placeholder="TÃ¬m kiáº¿m theo tÃªn chá»©c vá»¥..."
+            placeholder="Tìm kiếm theo tên chức vụ..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
@@ -375,17 +375,17 @@ export default function Positions() {
             <thead>
               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">UUID</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">TÃªn chá»©c vá»¥</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Cáº¥p báº­c</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">MÃ´ táº£</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Thao tÃ¡c</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Tên chức vụ</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Cấp bậc</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Mô tả</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
-                <TableStateRow colSpan={5} loading title="Äang táº£i..." />
+                <TableStateRow colSpan={5} loading title="Đang tải..." />
               ) : sorted.length === 0 ? (
-                <TableStateRow colSpan={5} title="KhÃ´ng tÃ¬m tháº¥y chá»©c vá»¥ nÃ o" />
+                <TableStateRow colSpan={5} title="Không tìm thấy chức vụ nào" />
               ) : (
                 sorted.map((pos) => (
                   <tr key={pos.id} onClick={() => openDetail(pos)} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer">
@@ -397,7 +397,7 @@ export default function Positions() {
                           onClick={(e) => {
                             e.stopPropagation()
                             navigator.clipboard.writeText(pos.id)
-                            void MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ sao chÃ©p UUID", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+                            void MySwal.fire({ icon: "success", title: "Thành công", text: "Đã sao chép UUID", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
                           }}
                           className="p-0.5 rounded text-zinc-300 hover:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition cursor-pointer border-none bg-transparent"
                           title="Copy UUID"

@@ -56,17 +56,17 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
 
   return z
     .object({
-      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ nhÃ¢n viÃªn"),
-      name: z.string().trim().min(1, "Vui lÃ²ng nháº­p há» vÃ  tÃªn"),
-      email: z.string().trim().email("Email khÃ´ng há»£p lá»‡"),
+      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng nhập mã nhân viên"),
+      name: z.string().trim().min(1, "Vui lòng nhập họ và tên"),
+      email: z.string().trim().email("Email không hợp lệ"),
       phone: z.string().trim().optional(),
       birthDate: z.string().optional(),
       hireDate: z.string().optional(),
       leaveDate: z.string().optional(),
       gender: z.enum(["male", "female", "other"]),
-      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
-      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
-      username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nhập"),
+      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn phòng ban"),
+      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lòng chọn chức vụ"),
+      username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập"),
       password: z.string().optional(),
       status: z.boolean(),
     })
@@ -106,7 +106,7 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng",
+          message: "Vui lòng nhập mã người dùng",
         })
         return
       }
@@ -115,7 +115,7 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: `MÃ£ nhÃ¢n viÃªn pháº£i báº¯t Ä‘áº§u báº±ng mÃ£ phÃ²ng ban ${departmentCode}`,
+          message: `Mã nhân viên phải bắt đầu bằng mã phòng ban ${departmentCode}`,
         })
         return
       }
@@ -125,7 +125,7 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
         ctx.addIssue({
           code: "custom",
           path: ["employeeCode"],
-          message: "Pháº§n sau mÃ£ phÃ²ng ban pháº£i gá»“m Ä‘Ãºng 6 kÃ½ tá»± chá»¯ hoáº·c sá»‘",
+          message: "Phần sau mã phòng ban phải gồm đúng 6 ký tự chữ hoặc số",
         })
       }
     })
@@ -250,7 +250,7 @@ export default async function openUserFormEditDialog({
     const avatarInputRef = useRef<HTMLInputElement | null>(null)
     const selectedDepartment = departments.find((item) => item.id === departmentId)
     const departmentPrefix = selectedDepartment?.code.trim().toUpperCase() || "DEPT"
-    const employeePlaceholder = departmentId ? `${departmentPrefix}ABC123` : "Chá»n phÃ²ng ban trÆ°á»›c"
+    const employeePlaceholder = departmentId ? `${departmentPrefix}ABC123` : "Chọn phòng ban trước"
 
     useEffect(() => {
       dataRef.current = values
@@ -314,8 +314,8 @@ export default async function openUserFormEditDialog({
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">áº¢nh Ä‘áº¡i diá»‡n</p>
-                <p className="text-xs text-muted-foreground">Táº£i áº£nh má»›i hoáº·c xÃ³a áº£nh hiá»‡n táº¡i.</p>
+                <p className="text-sm font-medium text-foreground">Ảnh đại diện</p>
+                <p className="text-xs text-muted-foreground">Tải ảnh mới hoặc xóa ảnh hiện tại.</p>
                 <input
                   type="file"
                   accept="image/*"
@@ -340,7 +340,7 @@ export default async function openUserFormEditDialog({
                     }}
                     className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-medium text-muted-foreground transition hover:bg-muted"
                   >
-                    Há»§y áº£nh má»›i
+                    Hủy ảnh mới
                   </button>
                 )}
                 <button
@@ -354,13 +354,13 @@ export default async function openUserFormEditDialog({
                   disabled={!avatarPreview && !editingUser.avatarURL}
                   className="rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950"
                 >
-                  XÃ³a áº£nh hiá»‡n táº¡i
+                  Xóa ảnh hiện tại
                 </button>
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">MÃ£ nhÃ¢n viÃªn</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mã nhân viên</label>
               <div className="flex flex-col gap-2">
                 <input
                   {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })}
@@ -370,22 +370,22 @@ export default async function openUserFormEditDialog({
                   aria-readonly="true"
                 />
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Chá»n phÃ²ng ban Ä‘á»ƒ há»‡ thá»‘ng tá»± sinh mÃ£ nhÃ¢n viÃªn.</p>
+                  <p className="text-xs text-muted-foreground">Chọn phòng ban để hệ thống tự sinh mã nhân viên.</p>
                   <button
                     type="button"
                     onClick={async () => {
                       if (!employeeCode) return
                       try {
                         await navigator.clipboard.writeText(employeeCode)
-                        toast.success("ÄÃ£ sao chÃ©p mÃ£ nhÃ¢n viÃªn")
+                        toast.success("Đã sao chép mã nhân viên")
                       } catch {
-                        toast.error("KhÃ´ng thá»ƒ sao chÃ©p mÃ£ nhÃ¢n viÃªn")
+                        toast.error("Không thể sao chép mã nhân viên")
                       }
                     }}
                     disabled={!employeeCode}
                     className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label="Sao chÃ©p mÃ£ nhÃ¢n viÃªn"
-                    title="Sao chÃ©p mÃ£ nhÃ¢n viÃªn"
+                    aria-label="Sao chép mã nhân viên"
+                    title="Sao chép mã nhân viên"
                   >
                     <Copy size={12} />
                     <span className="hidden sm:inline">Copy</span>
@@ -397,7 +397,7 @@ export default async function openUserFormEditDialog({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">TÃªn Ä‘Äƒng nháº­p</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Tên đăng nhập</label>
                 <input
                   {...register("username")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
@@ -406,19 +406,19 @@ export default async function openUserFormEditDialog({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Máº­t kháº©u má»›i</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mật khẩu mới</label>
                 <input
                   type="password"
                   {...register("password")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
-                <p className="text-xs text-muted-foreground">Äá»ƒ trá»‘ng náº¿u khÃ´ng muá»‘n Ä‘á»•i máº­t kháº©u.</p>
+                <p className="text-xs text-muted-foreground">Để trống nếu không muốn đổi mật khẩu.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Há» vÃ  tÃªn</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Họ và tên</label>
                 <input
                   {...register("name")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
@@ -439,28 +439,28 @@ export default async function openUserFormEditDialog({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Sá»‘ Ä‘iá»‡n thoáº¡i</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Số điện thoại</label>
                 <input
                   {...register("phone")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
-                  placeholder="Nháº­p sá»‘ Ä‘iá»‡n thoáº¡i"
+                  placeholder="Nhập số điện thoại"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Giá»›i tÃ­nh</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Giới tính</label>
                 <select
                   {...register("gender")}
                   className="w-full appearance-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 >
-                  <option value="other">KhÃ¡c</option>
+                  <option value="other">Khác</option>
                   <option value="male">Nam</option>
-                  <option value="female">Ná»¯</option>
+                  <option value="female">Nữ</option>
                 </select>
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">NgÃ y sinh</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ngày sinh</label>
                 <input
                   type="date"
                   {...register("birthDate")}
@@ -469,7 +469,7 @@ export default async function openUserFormEditDialog({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">NgÃ y tuyá»ƒn dá»¥ng</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ngày tuyển dụng</label>
                 <input
                   type="date"
                   {...register("hireDate")}
@@ -478,13 +478,13 @@ export default async function openUserFormEditDialog({
               </div>
 
               <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">NgÃ y nghá»‰ viá»‡c</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ngày nghỉ việc</label>
                 <input
                   type="date"
                   {...register("leaveDate")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
-                <p className="text-xs text-muted-foreground">Chá»‰ Ä‘iá»n khi muá»‘n Ä‘Ã¡nh dáº¥u nhÃ¢n sá»± Ä‘Ã£ nghá»‰.</p>
+                <p className="text-xs text-muted-foreground">Chỉ điền khi muốn đánh dấu nhân sự đã nghỉ.</p>
               </div>
             </div>
           </div>
@@ -493,12 +493,12 @@ export default async function openUserFormEditDialog({
         <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">PhÃ²ng ban</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Phòng ban</label>
               <select
                 {...register("departmentId")}
                 className="w-full appearance-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
               >
-                <option value="">-- Chá»n --</option>
+                <option value="">-- Chọn --</option>
                 {departments.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
@@ -509,12 +509,12 @@ export default async function openUserFormEditDialog({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Chá»©c vá»¥</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Chức vụ</label>
               <select
                 {...register("positionId")}
                 className="w-full appearance-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
               >
-                <option value="">-- Chá»n --</option>
+                <option value="">-- Chọn --</option>
                 {positions.map((p) => (
                   <option key={p.id} value={p.id}>
                     {getPositionLabel(p.name)}
@@ -531,8 +531,8 @@ export default async function openUserFormEditDialog({
                 className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
               />
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">KÃ­ch hoáº¡t tÃ i khoáº£n</p>
-                <p className="text-xs text-muted-foreground">Báº­t náº¿u nhÃ¢n sá»± Ä‘ang hoáº¡t Ä‘á»™ng vÃ  cÃ³ thá»ƒ Ä‘Äƒng nháº­p.</p>
+                <p className="text-sm font-medium text-foreground">Kích hoạt tài khoản</p>
+                <p className="text-xs text-muted-foreground">Bật nếu nhân sự đang hoạt động và có thể đăng nhập.</p>
               </div>
             </div>
           </div>
@@ -542,23 +542,23 @@ export default async function openUserFormEditDialog({
   }
 
   const result = await MySwal.fire({
-    title: "Sá»­a ngÆ°á»i dÃ¹ng",
+    title: "Sửa người dùng",
     width: "min(96vw, 760px)",
     html: <FormComponent />,
     showCloseButton: true,
-    closeButtonAriaLabel: "ÄÃ³ng",
+    closeButtonAriaLabel: "Đóng",
     showCancelButton: true,
-    confirmButtonText: "Cáº­p nháº­t",
-    cancelButtonText: "Há»§y",
+    confirmButtonText: "Cập nhật",
+    cancelButtonText: "Hủy",
     reverseButtons: true,
     preConfirm: () => {
       const d = dataRef.current
       if (!d) {
-        MySwal.showValidationMessage("Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ thÃ´ng tin")
+        MySwal.showValidationMessage("Vui lòng nhập đầy đủ thông tin")
         return false
       }
       if (!validRef.current) {
-        MySwal.showValidationMessage("Vui lÃ²ng kiá»ƒm tra láº¡i cÃ¡c trÆ°á»ng báº¯t buá»™c")
+        MySwal.showValidationMessage("Vui lòng kiểm tra lại các trường bắt buộc")
         return false
       }
       return d

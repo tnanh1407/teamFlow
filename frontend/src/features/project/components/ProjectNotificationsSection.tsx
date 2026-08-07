@@ -80,7 +80,7 @@ export default function ProjectNotificationsSection({
     const cleanTitle = title.trim();
     const cleanContent = content.trim();
     if (!cleanTitle || !cleanContent) {
-      await MySwal.fire({ icon: "warning", title: "Thiáº¿u dá»¯ liá»‡u", text: "Vui lÃ²ng nháº­p tiÃªu Ä‘á» vÃ  ná»™i dung." });
+      await MySwal.fire({ icon: "warning", title: "Thiếu dữ liệu", text: "Vui lòng nhập tiêu đề và nội dung." });
       return;
     }
 
@@ -94,7 +94,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Cap nhat thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Cap nhat thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
       } else {
         await projectNotificationService.create({
           projectId,
@@ -104,7 +104,7 @@ export default function ProjectNotificationsSection({
           priority,
           isPinned,
         });
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Tao thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Tao thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
       }
       resetForm();
       await loadNotifications();
@@ -130,19 +130,19 @@ export default function ProjectNotificationsSection({
 
   const handleDelete = async (notification: ProjectNotification) => {
     const confirmed = (await MySwal.fire({
-      title: "XÃ¡c nháº­n xoÃ¡",
+      title: "Xác nhận xoá",
       icon: "warning",
-      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ thÃ´ng bÃ¡o <strong>${notification.title}</strong>?`,
+      html: `Bạn có chắc muốn xoá thông báo <strong>${notification.title}</strong>?`,
       showCancelButton: true,
-      confirmButtonText: "XoÃ¡",
-      cancelButtonText: "Huá»·",
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
       confirmButtonColor: "#dc2626",
       reverseButtons: true,
     })).isConfirmed;
     if (!confirmed) return;
     try {
       await projectNotificationService.delete(notification.id);
-      await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Xoa thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
+      await MySwal.fire({ icon: "success", title: "Thành công", text: "Xoa thong bao thanh cong", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" });
       await loadNotifications();
     } catch (error: any) {
       await MySwal.fire({
@@ -290,7 +290,7 @@ export default function ProjectNotificationsSection({
 
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-zinc-400">
                     <span>
-                      Táº¡o bá»Ÿi: <strong className="text-zinc-600 dark:text-zinc-200">{memberById.get(notification.createdBy)?.name || "Trưởng bộ phận"}</strong>
+                      Tạo bởi: <strong className="text-zinc-600 dark:text-zinc-200">{memberById.get(notification.createdBy)?.name || "Trưởng bộ phận"}</strong>
                     </span>
                     <span>{formatDate(notification.createdAt)}</span>
                   </div>

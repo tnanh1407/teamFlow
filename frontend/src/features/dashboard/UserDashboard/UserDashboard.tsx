@@ -103,25 +103,25 @@ export default function UserDashboard() {
 
   const stats: { label: string; value: number; icon: LucideIcon; color: string; onClick?: () => void }[] = [
     {
-      label: "Dá»± Ã¡n Ä‘ang thá»±c hiá»‡n",
+      label: "Dự án đang thực hiện",
       value: activeProjects,
       icon: Activity,
       color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400",
     },
     {
-      label: "Äang Ä‘Ã¡nh giÃ¡",
+      label: "Đang đánh giá",
       value: inReviewCount,
       icon: Gauge,
       color: "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400",
     },
     {
-      label: "Dá»± Ã¡n hoÃ n thÃ nh",
+      label: "Dự án hoàn thành",
       value: completedProjects,
       icon: CheckSquare,
       color: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400",
     },
     {
-      label: "Tá»•ng dá»± Ã¡n",
+      label: "Tổng dự án",
       value: myProjects.length,
       icon: TrendingUp,
       color: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400",
@@ -130,7 +130,7 @@ export default function UserDashboard() {
 
   if (user?.position === "manager") {
     stats.unshift({
-      label: dept ? `PhÃ²ng ${dept.name}` : "ThÃ nh viÃªn",
+      label: dept ? `Phòng ${dept.name}` : "Thành viên",
       value: deptMemberCount,
       icon: Users,
       color: "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400",
@@ -154,10 +154,10 @@ export default function UserDashboard() {
         )}
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Xin chÃ o, {user?.username}
+            Xin chào, {user?.username}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {dept ? `${dept.name} Â· Báº£ng Ä‘iá»u khiá»ƒn` : "Báº£ng Ä‘iá»u khiá»ƒn"}
+            {dept ? `${dept.name} · Bảng điều khiển` : "Bảng điều khiển"}
           </p>
         </div>
       </div>
@@ -192,17 +192,17 @@ export default function UserDashboard() {
 
       {/* Chart Visualizations */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Pie Chart: Tráº¡ng thÃ¡i Dá»± Ã¡n */}
+        {/* Pie Chart: Trạng thái Dự án */}
         <div className="lg:col-span-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Tráº¡ng thÃ¡i Dá»± Ã¡n</h2>
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Trạng thái Dự án</h2>
           <div className="h-52 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={[
-                    { name: "Äang lÃ m", value: activeProjects, color: "#f59e0b" },
-                    { name: "ÄÃ¡nh giÃ¡", value: inReviewCount, color: "#a855f7" },
-                    { name: "HoÃ n thÃ nh", value: completedProjects, color: "#10b981" },
+                    { name: "Đang làm", value: activeProjects, color: "#f59e0b" },
+                    { name: "Đánh giá", value: inReviewCount, color: "#a855f7" },
+                    { name: "Hoàn thành", value: completedProjects, color: "#10b981" },
                   ]}
                   cx="50%"
                   cy="50%"
@@ -212,9 +212,9 @@ export default function UserDashboard() {
                   dataKey="value"
                 >
                   {[
-                    { name: "Äang lÃ m", value: activeProjects, color: "#f59e0b" },
-                    { name: "ÄÃ¡nh giÃ¡", value: inReviewCount, color: "#a855f7" },
-                    { name: "HoÃ n thÃ nh", value: completedProjects, color: "#10b981" },
+                    { name: "Đang làm", value: activeProjects, color: "#f59e0b" },
+                    { name: "Đánh giá", value: inReviewCount, color: "#a855f7" },
+                    { name: "Hoàn thành", value: completedProjects, color: "#10b981" },
                   ].map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
@@ -234,33 +234,33 @@ export default function UserDashboard() {
           <div className="flex items-center justify-center gap-4 text-xs mt-1">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
-              <span className="text-zinc-600 dark:text-zinc-400">Äang lÃ m ({activeProjects})</span>
+              <span className="text-zinc-600 dark:text-zinc-400">Đang làm ({activeProjects})</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block" />
-              <span className="text-zinc-600 dark:text-zinc-400">ÄÃ¡nh giÃ¡ ({inReviewCount})</span>
+              <span className="text-zinc-600 dark:text-zinc-400">Đánh giá ({inReviewCount})</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
-              <span className="text-zinc-600 dark:text-zinc-400">HoÃ n thÃ nh ({completedProjects})</span>
+              <span className="text-zinc-600 dark:text-zinc-400">Hoàn thành ({completedProjects})</span>
             </div>
           </div>
         </div>
 
-        {/* Bar Chart: Thá»‘ng kÃª chá»‰ sá»‘ */}
+        {/* Bar Chart: Thống kê chỉ số */}
         <div className="lg:col-span-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thá»‘ng kÃª chá»‰ sá»‘ tá»•ng quan</h2>
-            <span className="text-xs text-zinc-400 font-medium">Tá»•ng: {myProjects.length} dá»± Ã¡n</span>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thống kê chỉ số tổng quan</h2>
+            <span className="text-xs text-zinc-400 font-medium">Tổng: {myProjects.length} dự án</span>
           </div>
           <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={[
-                  { name: "Äang lÃ m", value: activeProjects, fill: "#f59e0b" },
-                  { name: "ÄÃ¡nh giÃ¡", value: inReviewCount, fill: "#a855f7" },
-                  { name: "HoÃ n thÃ nh", value: completedProjects, fill: "#10b981" },
-                  { name: "ThÃ nh viÃªn PB", value: deptMemberCount, fill: "#06b6d4" },
+                  { name: "Đang làm", value: activeProjects, fill: "#f59e0b" },
+                  { name: "Đánh giá", value: inReviewCount, fill: "#a855f7" },
+                  { name: "Hoàn thành", value: completedProjects, fill: "#10b981" },
+                  { name: "Thành viên PB", value: deptMemberCount, fill: "#06b6d4" },
                 ]}
                 margin={{ top: 10, right: 20, left: -20, bottom: 0 }}
               >
@@ -296,17 +296,17 @@ export default function UserDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
           <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Dá»± Ã¡n gáº§n Ä‘Ã¢y</h2>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Dự án gần đây</h2>
           </div>
           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {recentProjects.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-zinc-400 text-center">ChÆ°a cÃ³ dá»± Ã¡n nÃ o</p>
+              <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có dự án nào</p>
             ) : (
               recentProjects.map((p) => (
                 <div key={p.id} className="px-5 py-3 flex items-center justify-between">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{p.title}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{p.status === "todo" ? "Cáº§n lÃ m" : p.status === "in_progress" ? "Äang lÃ m" : p.status === "review" ? "ÄÃ¡nh giÃ¡" : p.status === "completed" ? "HoÃ n thÃ nh" : "ÄÃ£ huá»·"}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{p.status === "todo" ? "Cần làm" : p.status === "in_progress" ? "Đang làm" : p.status === "review" ? "Đánh giá" : p.status === "completed" ? "Hoàn thành" : "Đã huỷ"}</p>
                   </div>
                   <div className="ml-4 w-20">
                     <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-1.5">
@@ -327,10 +327,10 @@ export default function UserDashboard() {
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
           <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              {dept ? `PhÃ²ng ${dept.name}` : "ThÃ nh viÃªn"}
+              {dept ? `Phòng ${dept.name}` : "Thành viên"}
             </h2>
             {dept && (
-              <span className="text-xs text-zinc-400">{deptMembers.length + 1} thÃ nh viÃªn</span>
+              <span className="text-xs text-zinc-400">{deptMembers.length + 1} thành viên</span>
             )}
           </div>
           <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -365,18 +365,18 @@ export default function UserDashboard() {
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.id ?? "").slice(0, 8)}...</p>
                     </div>
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${m.status ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"}`}>
-                      {m.status ? "Hoáº¡t Ä‘á»™ng" : "VÃ´ hiá»‡u"}
+                      {m.status ? "Hoạt động" : "Vô hiệu"}
                     </span>
                   </div>
                 ))}
                 {deptMembers.length > 6 && (
-                  <p className="px-5 py-2 text-xs text-zinc-400 text-center">...vÃ  {deptMembers.length - 6} thÃ nh viÃªn khÃ¡c</p>
+                  <p className="px-5 py-2 text-xs text-zinc-400 text-center">...và {deptMembers.length - 6} thành viên khác</p>
                 )}
               </>
             ) : (
               <>
                 {members.filter((m) => m.position !== "manager").slice(0, 5).length === 0 ? (
-                  <p className="px-5 py-8 text-sm text-zinc-400 text-center">ChÆ°a cÃ³ thÃ nh viÃªn nÃ o</p>
+                  <p className="px-5 py-8 text-sm text-zinc-400 text-center">Chưa có thành viên nào</p>
                 ) : (
                   members.filter((m) => m.position !== "manager").slice(0, 5).map((m) => (
                     <div key={m.id} className="px-5 py-3 flex items-center gap-3">
@@ -392,7 +392,7 @@ export default function UserDashboard() {
                         <p className="text-xs text-zinc-500 dark:text-zinc-400">{(m.id ?? "").slice(0, 8)}...</p>
                       </div>
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${m.status ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"}`}>
-                        {m.status ? "Hoáº¡t Ä‘á»™ng" : "VÃ´ hiá»‡u"}
+                        {m.status ? "Hoạt động" : "Vô hiệu"}
                       </span>
                     </div>
                   ))

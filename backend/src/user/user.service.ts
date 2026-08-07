@@ -241,7 +241,7 @@ function resolveEmploymentState(status: boolean | undefined, leaveDate: string |
   // lấy ra thời gian nhân sự rời đi
   const normalizedLeaveDate = normalizeOptionalText(leaveDate);
 
-  // nếu tồn tại thì set status thành true
+  // nếu có ngày nghỉ việc thì tài khoản phải ở trạng thái không hoạt động
   if (normalizedLeaveDate) {
     return { status: false, leaveDate: normalizedLeaveDate };
   }

@@ -24,15 +24,15 @@ export default function DepartmentTooltip({ active, payload }: DepartmentTooltip
 
   return (
     <div className="min-w-64 rounded-2xl border border-border bg-background px-4 py-3 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">PhÃ²ng ban</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Phòng ban</p>
       <p className="mt-0.5 text-sm font-semibold text-foreground">{point.name}</p>
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">Tá»•ng thÃ nh viÃªn</span>
+          <span className="text-muted-foreground">Tổng thành viên</span>
           <span className="font-semibold text-foreground">{totalMembers}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
-          <span className="text-muted-foreground">NhÃ¢n sá»±</span>
+          <span className="text-muted-foreground">Nhân sự</span>
           <span className="font-semibold text-foreground">{staffCount}</span>
         </div>
         <div className="flex items-center justify-between gap-4">

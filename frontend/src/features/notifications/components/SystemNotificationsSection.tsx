@@ -22,25 +22,25 @@ const defaultForm = {
 }
 
 const typeLabels: Record<SystemNotification["type"], string> = {
-  announcement: "ThÃ´ng bÃ¡o",
-  reminder: "Nháº¯c nhá»Ÿ",
-  update: "Cáº­p nháº­t",
+  announcement: "Thông báo",
+  reminder: "Nhắc nhở",
+  update: "Cập nhật",
 }
 
 const priorityLabels: Record<SystemNotification["priority"], string> = {
-  low: "Tháº¥p",
-  medium: "Vá»«a",
+  low: "Thấp",
+  medium: "Vừa",
   high: "Cao",
-  critical: "Kháº©n",
+  critical: "Khẩn",
 }
 
 const audienceLabels: Record<SystemNotification["targetAudience"], string> = {
-  all: "ToÃ n há»‡ thá»‘ng",
+  all: "Toàn hệ thống",
   user: "Nhân sự",
   manager: "Quản lý nhóm",
-  staff: "NhÃ¢n viÃªn",
-  intern: "Thá»±c táº­p sinh",
-  admin: "Quáº£n trá»‹ viÃªn",
+  staff: "Nhân viên",
+  intern: "Thực tập sinh",
+  admin: "Quản trị viên",
 }
 
 const sourceLabels: Record<SystemNotification["source"], string> = {
@@ -118,16 +118,16 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
         : true
 
       if (!hasContentChanged) {
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "KhÃ´ng cÃ³ thay Ä‘á»•i nÃ o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Không có thay đổi nào", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
         return
       }
 
       if (editingId) {
         await systemNotificationService.update(editingId, payload)
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ cáº­p nháº­t thÃ´ng bÃ¡o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã cập nhật thông báo", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       } else {
         await systemNotificationService.create(payload)
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ táº¡o thÃ´ng bÃ¡o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã tạo thông báo", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       }
 
       resetForm()
@@ -142,12 +142,12 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
   const handleDelete = async (notification: SystemNotification) => {
     if (!canManage) return
     const confirmed = (await MySwal.fire({
-      title: "XÃ¡c nháº­n xoÃ¡",
+      title: "Xác nhận xoá",
       icon: "warning",
-      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ thÃ´ng bÃ¡o <strong>${notification.title}</strong>?`,
+      html: `Bạn có chắc muốn xoá thông báo <strong>${notification.title}</strong>?`,
       showCancelButton: true,
-      confirmButtonText: "XoÃ¡",
-      cancelButtonText: "Huá»·",
+      confirmButtonText: "Xoá",
+      cancelButtonText: "Huỷ",
       confirmButtonColor: "#dc2626",
       reverseButtons: true,
     })).isConfirmed
@@ -155,7 +155,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
 
     try {
       await systemNotificationService.delete(notification.id)
-      await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ xoÃ¡ thÃ´ng bÃ¡o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+      await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã xoá thông báo", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       if (editingId === notification.id) resetForm()
       await fetchNotifications()
     } catch {
@@ -167,10 +167,10 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
     try {
       if (notification.isRead) {
         await systemNotificationService.markUnread(notification.id)
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ chuyá»ƒn sang chÆ°a Ä‘á»c", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã chuyển sang chưa đọc", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       } else {
         await systemNotificationService.markRead(notification.id)
-        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ Ä‘Ã¡nh dáº¥u Ä‘Ã£ Ä‘á»c", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+        await MySwal.fire({ icon: "success", title: "Thành công", text: "Đã đánh dấu đã đọc", confirmButtonText: "Đóng", confirmButtonColor: "var(--primary)" })
       }
       await fetchNotifications()
     } catch {
@@ -183,15 +183,15 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
         <div>
           <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            {canManage ? "ThÃ´ng bÃ¡o há»‡ thá»‘ng" : "ThÃ´ng bÃ¡o tá»« há»‡ thá»‘ng"}
+            {canManage ? "Thông báo hệ thống" : "Thông báo từ hệ thống"}
           </h2>
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            {canManage ? "Admin táº¡o vÃ  quáº£n lÃ­ thÃ´ng bÃ¡o cho toÃ n há»‡ thá»‘ng." : "ThÃ´ng bÃ¡o phÃ¹ há»£p vá»›i vai trÃ² cá»§a báº¡n."}
+            {canManage ? "Admin tạo và quản lí thông báo cho toàn hệ thống." : "Thông báo phù hợp với vai trò của bạn."}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-            ChÆ°a Ä‘á»c: {unreadCount}
+            Chưa đọc: {unreadCount}
           </span>
           {canManage && (
             <button
@@ -200,7 +200,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
               className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               <Plus size={14} />
-              ThÃ´ng bÃ¡o má»›i
+              Thông báo mới
             </button>
           )}
         </div>
@@ -212,7 +212,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
             <input
               value={form.title}
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-              placeholder="TiÃªu Ä‘á» thÃ´ng bÃ¡o"
+              placeholder="Tiêu đề thông báo"
               className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-0 placeholder:text-zinc-400 focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             />
             <select
@@ -220,19 +220,19 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
               onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value as SystemNotification["type"] }))}
               className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             >
-              <option value="announcement">ThÃ´ng bÃ¡o</option>
-              <option value="reminder">Nháº¯c nhá»Ÿ</option>
-              <option value="update">Cáº­p nháº­t</option>
+              <option value="announcement">Thông báo</option>
+              <option value="reminder">Nhắc nhở</option>
+              <option value="update">Cập nhật</option>
             </select>
             <select
               value={form.priority}
               onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value as SystemNotification["priority"] }))}
               className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             >
-              <option value="low">Æ¯u tiÃªn tháº¥p</option>
-              <option value="medium">Æ¯u tiÃªn vá»«a</option>
-              <option value="high">Æ¯u tiÃªn cao</option>
-              <option value="critical">Kháº©n cáº¥p</option>
+              <option value="low">Ưu tiên thấp</option>
+              <option value="medium">Ưu tiên vừa</option>
+              <option value="high">Ưu tiên cao</option>
+              <option value="critical">Khẩn cấp</option>
             </select>
             <select
               value={form.targetAudience}
@@ -241,11 +241,11 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
               }
               className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             >
-              <option value="all">ToÃ n há»‡ thá»‘ng</option>
+              <option value="all">Toàn hệ thống</option>
               <option value="user">Nhân sự</option>
               <option value="manager">Quản lý nhóm</option>
-              <option value="staff">NhÃ¢n viÃªn</option>
-              <option value="intern">Thá»±c táº­p sinh</option>
+              <option value="staff">Nhân viên</option>
+              <option value="intern">Thực tập sinh</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -253,7 +253,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
           <textarea
             value={form.content}
             onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
-            placeholder="Ná»™i dung thÃ´ng bÃ¡o"
+            placeholder="Nội dung thông báo"
             rows={4}
             className="mt-3 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
           />
@@ -266,7 +266,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                 onChange={(event) => setForm((prev) => ({ ...prev, isPinned: event.target.checked }))}
                 className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
               />
-              Ghim thÃ´ng bÃ¡o
+              Ghim thông báo
             </label>
 
             <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                   onClick={resetForm}
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 >
-                  Huá»·
+                  Huỷ
                 </button>
               )}
               <button
@@ -284,7 +284,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                 disabled={saving}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? "Äang lÆ°u..." : editingId ? "Cáº­p nháº­t" : "Táº¡o thÃ´ng bÃ¡o"}
+                {saving ? "Đang lưu..." : editingId ? "Cập nhật" : "Tạo thông báo"}
               </button>
             </div>
           </div>
@@ -296,7 +296,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
           <LoadingState className="min-h-24" />
         ) : items.length === 0 ? (
           <EmptyState
-            title="ChÆ°a cÃ³ thÃ´ng bÃ¡o nÃ o"
+            title="Chưa có thông báo nào"
             className="min-h-24 px-5 py-8"
           />
         ) : (
@@ -330,7 +330,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                         : "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
                     }`}
                   >
-                    {item.isRead ? "ÄÃ£ Ä‘á»c" : "ChÆ°a Ä‘á»c"}
+                    {item.isRead ? "Đã đọc" : "Chưa đọc"}
                   </span>
                   </div>
                   <h3 className={`mt-2 text-sm font-semibold ${item.isRead ? "text-zinc-800 dark:text-zinc-200" : "text-zinc-950 dark:text-white"}`}>
@@ -350,7 +350,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                     }`}
                   >
                     <CheckCircle2 size={13} />
-                    {item.isRead ? "Bá» Ä‘Ã£ Ä‘á»c" : "ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘ọc"}
+                    {item.isRead ? "Bỏ đã đọc" : "Đánh dấu đã đọc"}
                   </button>
 
                   {canManage && (
