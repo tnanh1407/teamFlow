@@ -12,6 +12,7 @@ export default function DashboardLayout() {
   const user = useAuthStore((state) => state.user)
   const ready = useAuthStore((state) => state.ready)
   const canUseQuickSearch = ready && (user?.role === "admin" || user?.position === "leader")
+
   useHotkeys("ctrl+b", (e) => {
     e.preventDefault()
     setCollapsed(c => !c)

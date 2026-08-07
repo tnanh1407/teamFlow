@@ -10,7 +10,6 @@ import heroImg from "@/assets/hero.png"
 import { useAuth } from "@/stores/auth"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
-import { MySwal } from "@/lib/swal"
 import SystemLogo from "@/shared/ui/SystemLogo"
 import { useLoginMutation } from "../mutations/user.mutations"
 
@@ -57,13 +56,6 @@ export default function Login() {
       }
 
       setUser(loggedInUser)
-      void MySwal.fire({
-        icon: "success",
-        title: "Thành công",
-        text: `Xin chào ${loggedInUser.username}!`,
-        confirmButtonText: "Đóng",
-        confirmButtonColor: "var(--primary)",
-      })
       navigate(loggedInUser.role === "admin" ? "/dashboard" : "/", { replace: true })
     },
     onError: (error) => {

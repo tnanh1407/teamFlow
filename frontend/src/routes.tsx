@@ -6,7 +6,7 @@ import ForgotPassword from "@/features/auth/ForgotPassword";
 const UserList = lazy(() => import("@/features/user/UserList/UserList"));
 const UserTrash = lazy(() => import("@/features/user/UserTrash/UserTrash"));
 const PasswordResetRequests = lazy(() => import("@/features/user/PasswordResetRequests/PasswordResetRequests"));
-const UserDetail = lazy(() => import("@/features/user/UserDetail"));
+const UserDetail = lazy(() => import("@/features/user/UserDetail/UserDetail"));
 const PositionList = lazy(() => import("@/features/position/PositionList"));
 const ProjectList = lazy(() => import("@/features/project/ProjectList"));
 const Settings = lazy(() => import("@/features/user/Settings"));
