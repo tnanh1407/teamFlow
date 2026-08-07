@@ -1,0 +1,86 @@
+import { Router } from "express";
+import userController from "./user.controller.js";
+import { authenticate, authorize, authorizePosition } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validation.middleware.js";
+import { asyncHandler } from "../middlewares/async.middleware.js";
+import { uploadAvatar } from "../middlewares/upload.middleware.js";
+import {
+  createUserSchema,
+  updateUserSchema,
+  loginSchema,
+  updatePassword,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "./user.validation.js";
+import { EAccountPosition, EAccountRole } from "../enums/account-role.enum.js";
+
+const router = Router();
+
+router.post("/login", validate(loginSchema), asyncHandler(userController.login));
+router.post("/logout", authenticate, asyncHandler(userController.logout));
+router.get("/me", authenticate, asyncHandler(userController.me));
+
+// quên mật khẩu: nhập email + mã nhân viên, hệ thống gửi mã 6 số qua mail
+router.post("/forgot-password", validate(forgotPasswordSchema), asyncHandler(userController.forgotPassword));
+
+// nhập mã 6 số nhận được để đặt mật khẩu mới
+router.post("/reset-password", validate(resetPasswordSchema), asyncHandler(userController.resetPassword));
+
+router.get("/", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.getAll));
+router.get("/all", authenticate, asyncHandler(userController.getAllEmployees));
+router.get("/search", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.search));
+router.get("/trash", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.trash));
+router.patch("/:id/restore", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.restore));
+router.delete("/:id/permanent", authenticate, authorize(EAccountRole.ADMIN), asyncHandler(userController.hardDelete));
+router.get("/department/:departmentId", authenticate,  authorizePosition(EAccountPosition.MANAGER) , asyncHandler(userController.getByDepartment));
+router.get("/position/:positionId", authenticate , authorize(EAccountRole.ADMIN),asyncHandler(userController.getByPosition));
+router.get("/:id", authenticate, asyncHandler(userController.getById));
+router.post(
+  "/",
+  authenticate,
+  authorize(EAccountRole.ADMIN),
+  uploadAvatar.single("avatar"),
+  validate(createUserSchema),
+  asyncHandler(userController.create)
+);
+
+// cập nhật mật khẩu cho user và admin
+router.patch(
+  "/updatePs",
+  authenticate,
+  validate(updatePassword),
+  asyncHandler(userController.changePassword)
+);
+
+// tự cập nhật avatar
+router.post(
+  "/me/avatar",
+  authenticate,
+  uploadAvatar.single("avatar"),
+  asyncHandler(userController.updateAvatar)
+);
+
+// xóa avatar về mặc định (null)
+router.delete(
+  "/me/avatar",
+  authenticate,
+  asyncHandler(userController.removeAvatar)
+);
+
+// cập nhật toàn bộ thông tin trừ passowrd
+router.patch(
+  "/:id",
+  authenticate,
+  uploadAvatar.single("avatar"),
+  validate(updateUserSchema),
+  asyncHandler(userController.update)
+);
+
+// xóa người dùng
+router.delete(
+  "/:id",
+  authenticate,
+  asyncHandler(userController.delete)
+);
+
+export default router;

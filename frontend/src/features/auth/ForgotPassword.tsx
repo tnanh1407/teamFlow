@@ -10,9 +10,10 @@ import { useAuth } from "@/stores/auth"
 import AuthPageSkeleton from "@/shared/ui/AuthPageSkeleton"
 import PageSeo, { type PageSeoProps } from "@/shared/ui/PageSeo"
 import SystemLogo from "@/shared/ui/SystemLogo"
-import { useForgotPasswordMutation } from "../mutations/user.mutations"
+import { useActiveDepartmentsQuery, useForgotPasswordMutation } from "../mutations/user.mutations"
 
 const forgotPasswordSchema = z.object({
+  departmentId: z.string().min(1, "Vui lòng chọn phòng ban"),
   email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
   employeeCode: z.string().trim().min(1, "Vui lòng nhập mã người dùng"),
 })
@@ -44,6 +45,7 @@ export default function ForgotPassword() {
       })
     },
   })
+  const departmentsQuery = useActiveDepartmentsQuery()
   const pageSeo: PageSeoProps = {
     title: "Quên mật khẩu",
     description: "Khôi phục mật khẩu cho hệ thống quản lý phòng ban và dự án",
@@ -52,13 +54,16 @@ export default function ForgotPassword() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
+      departmentId: "",
       email: "",
       employeeCode: "",
     },
   })
+  const departmentId = watch("departmentId")
 
   useEffect(() => {
     if (!ready || !user) return
@@ -115,20 +120,48 @@ export default function ForgotPassword() {
             >
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Phòng ban
+                </label>
+                <select
+                  {...register("departmentId")}
+                  aria-invalid={Boolean(errors.departmentId)}
+                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.departmentId ? "border-destructive focus:ring-destructive" : "border-border"}`}
+                >
+                  <option value="">
+                    {departmentsQuery.isLoading ? "Đang tải phòng ban..." : "-- Chọn phòng ban --"}
+                  </option>
+                  {departmentsQuery.data?.map((department) => (
+                    <option key={department.id} value={department.id}>
+                      {department.name} ({department.code})
+                    </option>
+                  ))}
+                </select>
+                {errors.departmentId?.message && (
+                  <p className="mt-1.5 text-xs text-destructive">{errors.departmentId.message}</p>
+                )}
+              </div>
+
+              <p className="-mt-2 text-xs text-muted-foreground">
+                Chọn phòng ban trước khi nhập mã người dùng và email.
+              </p>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
                   Email
                 </label>
                 <input
                   type="email"
+                  disabled={!departmentId}
                   placeholder="Nhập email của bạn"
                   aria-invalid={Boolean(errors.email)}
                   className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.email
-                      ? "border-red-400 focus:ring-red-500"
+                      ? "border-destructive focus:ring-destructive"
                       : "border-border"
                     }`}
                   {...register("email")}
                 />
                 {errors.email?.message && (
-                  <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
+                  <p className="mt-1.5 text-xs text-destructive">{errors.email.message}</p>
                 )}
               </div>
 
@@ -138,16 +171,17 @@ export default function ForgotPassword() {
                 </label>
                 <input
                   type="text"
+                  disabled={!departmentId}
                   placeholder="Nhập mã người dùng"
                   aria-invalid={Boolean(errors.employeeCode)}
                   className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.employeeCode
-                      ? "border-red-400 focus:ring-red-500"
+                      ? "border-destructive focus:ring-destructive"
                       : "border-border"
                     }`}
                   {...register("employeeCode")}
                 />
                 {errors.employeeCode?.message && (
-                  <p className="mt-1.5 text-xs text-red-500">{errors.employeeCode.message}</p>
+                  <p className="mt-1.5 text-xs text-destructive">{errors.employeeCode.message}</p>
                 )}
               </div>
 

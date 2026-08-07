@@ -1,0 +1,39 @@
+[
+  {
+    "id": "20000000-0000-4000-a000-000000000001",
+    "name": "Quản lí",
+    "description": "Nhóm chức vụ quản lý, bao gồm quản lí cấp cao và quản lí phòng ban",
+    "level": "Manager",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "20000000-0000-4000-a000-000000000005",
+    "name": "Nhân viên",
+    "description": "Nhân viên chính thức thực hiện các nhiệm vụ hàng ngày trong hệ thống",
+    "level": "Junior",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "20000000-0000-4000-a000-000000000006",
+    "name": "Thực tập sinh",
+    "description": "Thực tập sinh hỗ trợ công việc cơ bản và học việc trong thời gian thực tập",
+    "level": "Intern",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+  ,
+  {
+    "id": "20000000-0000-4000-a000-000000000010",
+    "name": "Leader",
+    "description": "Nguoi phu trach dieu phoi nhom va theo doi tien do cong viec",
+    "level": "Senior",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "90000000-0000-4000-a000-000000000001",
+    "projectId": "50000000-0000-4000-a000-000000000004",
+    "createdBy": "30000000-0000-4000-a000-000000000008",
+    "title": "Hop kick-off du an",
+    "content": "Toan bo thanh vien du an tham gia hop luc 09:00 sang thu Hai de chot pham vi va ke hoach cong viec.",
+    "type": "announcement",
+    "priority": "high",
+    "isPinned": true,
+    "createdAt": "2026-08-05T02:00:00.000Z",
+    "updatedAt": "2026-08-05T02:00:00.000Z"
+  },
+  {
+    "id": "90000000-0000-4000-a000-000000000002",
+    "projectId": "50000000-0000-4000-a000-000000000004",
+    "createdBy": "30000000-0000-4000-a000-000000000008",
+    "title": "Nhac deadline module giao dien",
+    "content": "De nghi cac thanh vien hoan thanh phan giao dien truoc 17:00 thu Sau de kip tong hop.",
+    "type": "reminder",
+    "priority": "medium",
+    "isPinned": false,
+    "createdAt": "2026-08-05T03:00:00.000Z",
+    "updatedAt": "2026-08-05T03:00:00.000Z"
+  },
+  {
+    "id": "90000000-0000-4000-a000-000000000003",
+    "projectId": "50000000-0000-4000-a000-000000000007",
+    "createdBy": "30000000-0000-4000-a000-000000000007",
+    "title": "Cap nhat tien do tieu chi 1",
+    "content": "Du an dang hoan thanh dung tien do. Cac nhom tiep tuc cap nhat task hang ngay vao 16:30.",
+    "type": "update",
+    "priority": "low",
+    "isPinned": false,
+    "createdAt": "2026-08-05T04:00:00.000Z",
+    "updatedAt": "2026-08-05T04:00:00.000Z"
+  },
+  {
+    "id": "90000000-0000-4000-a000-000000000004",
+    "projectId": "50000000-0000-4000-a000-000000000007",
+    "createdBy": "30000000-0000-4000-a000-000000000007",
+    "title": "Thong bao thay doi pham vi",
+    "content": "Co dieu chinh nho ve pham vi, vui long xem lai phan mo ta task truoc khi bat dau thuc hien.",
+    "type": "announcement",
+    "priority": "high",
+    "isPinned": true,
+    "createdAt": "2026-08-05T05:00:00.000Z",
+    "updatedAt": "2026-08-05T05:00:00.000Z"
+  }
+]

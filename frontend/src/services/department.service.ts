@@ -14,6 +14,9 @@ export interface Department {
 const departmentService = {
   getAll: () => api.get<{ data: Department[] }>("/departments"),
 
+  getActiveOptions: () =>
+    api.get<{ data: Pick<Department, "id" | "name" | "code">[] }>("/departments/active-options"),
+
   getById: (id: string) => api.get<{ data: Department }>(`/departments/${id}`),
 
   getProjectsByDepartment: (id: string) =>

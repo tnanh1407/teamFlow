@@ -1,0 +1,155 @@
+[
+  {
+    "id": "70000000-0000-4000-a000-000000000004",
+    "projectId": "50000000-0000-4000-a000-000000000004",
+    "employeeId": "30000000-0000-4000-a000-000000000008",
+    "content": "Đã hoàn thành kế hoạch chi tiết cho chiến dịch. Đang chờ duyệt ngân sách.",
+    "attachments": "ke-hoach-mkt-q4.pdf",
+    "createdAt": "2025-09-05T00:00:00.000Z",
+    "updatedAt": "2025-09-05T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000009",
+    "projectId": "50000000-0000-4000-a000-000000000008",
+    "employeeId": "30000000-0000-4000-a000-000000000030",
+    "content": "Đã hoàn thành kiến trúc tổng thể cho dashboard. Sử dụng biểu đồ tương tác với dữ liệu thời gian thực.",
+    "attachments": "dashboard-architecture.pdf",
+    "createdAt": "2025-09-01T00:00:00.000Z",
+    "updatedAt": "2025-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000010",
+    "projectId": "50000000-0000-4000-a000-000000000008",
+    "employeeId": "30000000-0000-4000-a000-000000000032",
+    "content": "Kết nối dữ liệu từ các nguồn API và database hoàn tất. Đang xây dựng các biểu đồ cho module tài chính.",
+    "attachments": null,
+    "createdAt": "2025-09-10T00:00:00.000Z",
+    "updatedAt": "2025-09-10T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000011",
+    "projectId": "50000000-0000-4000-a000-000000000009",
+    "employeeId": "30000000-0000-4000-a000-000000000007",
+    "content": "Đã xây dựng tiêu chí đánh giá cho từng phòng ban. Đang tổng hợp kết quả tự đánh giá từ nhân viên.",
+    "attachments": "tieu-chi-danh-gia-q4.pdf",
+    "createdAt": "2025-11-15T00:00:00.000Z",
+    "updatedAt": "2025-11-15T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000012",
+    "projectId": "50000000-0000-4000-a000-000000000009",
+    "employeeId": "30000000-0000-4000-a000-000000000010",
+    "content": "Đã hoàn thành đánh giá cho phòng HR. Các phòng ban khác đang trong quá trình tổng hợp.",
+    "attachments": null,
+    "createdAt": "2025-11-22T00:00:00.000Z",
+    "updatedAt": "2025-11-22T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000013",
+    "projectId": "50000000-0000-4000-a000-000000000010",
+    "employeeId": "30000000-0000-4000-a000-000000000019",
+    "content": "Đã khảo sát và lựa chọn giải pháp CRM phù hợp. Đang lên kế hoạch triển khai chi tiết.",
+    "attachments": "crm-khao-sat-giai-phap.pdf",
+    "createdAt": "2025-09-15T00:00:00.000Z",
+    "updatedAt": "2025-09-15T00:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000016",
+    "projectId": "50000000-0000-4000-a000-000000000013",
+    "employeeId": "30000000-0000-4000-a000-000000000019",
+    "content": "Báo cáo tài chính đã dựng xong phần khung, còn thiếu biểu đồ lợi nhuận theo quý.",
+    "attachments": null,
+    "createdAt": "2026-01-08T14:20:00.000Z",
+    "updatedAt": "2026-01-08T14:20:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000017",
+    "projectId": "50000000-0000-4000-a000-000000000014",
+    "employeeId": "30000000-0000-4000-a000-000000000007",
+    "content": "Quy trình tuyển dụng đã rút gọn còn 3 bước, cần review lại email phản hồi ứng viên.",
+    "attachments": null,
+    "createdAt": "2025-11-25T09:40:00.000Z",
+    "updatedAt": "2025-11-25T09:40:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000018",
+    "projectId": "50000000-0000-4000-a000-000000000015",
+    "employeeId": "30000000-0000-4000-a000-000000000008",
+    "content": "Form phản hồi nhân sự đã chạy ổn định, chỉ còn bổ sung xác nhận khi gửi.",
+    "attachments": null,
+    "createdAt": "2025-12-10T11:10:00.000Z",
+    "updatedAt": "2025-12-10T11:10:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000021",
+    "projectId": "50000000-0000-4000-a000-000000000018",
+    "employeeId": "30000000-0000-4000-a000-000000000020",
+    "content": "Báo cáo tuần đã tự động chạy đúng lịch, cần bổ sung thêm file đính kèm PDF.",
+    "attachments": null,
+    "createdAt": "2025-11-27T15:00:00.000Z",
+    "updatedAt": "2025-11-27T15:00:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000022",
+    "projectId": "50000000-0000-4000-a000-000000000019",
+    "employeeId": "30000000-0000-4000-a000-000000000013",
+    "content": "Đã làm sạch xong dữ liệu nhân viên của phòng Kế toán, đang đối chiếu mã phòng ban.",
+    "attachments": null,
+    "createdAt": "2026-03-12T10:10:00.000Z",
+    "updatedAt": "2026-03-12T10:10:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000023",
+    "projectId": "50000000-0000-4000-a000-000000000020",
+    "employeeId": "30000000-0000-4000-a000-000000000011",
+    "content": "Portal phúc lợi đã chốt danh mục quyền lợi cơ bản, đang thêm bước xác nhận đăng ký.",
+    "attachments": null,
+    "createdAt": "2026-03-22T09:20:00.000Z",
+    "updatedAt": "2026-03-22T09:20:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000025",
+    "projectId": "50000000-0000-4000-a000-000000000022",
+    "employeeId": "30000000-0000-4000-a000-000000000027",
+    "content": "Kho tài liệu quy trình đã đưa lên bản dùng chung, chỉ còn rà soát tên biểu mẫu.",
+    "attachments": null,
+    "createdAt": "2025-10-20T11:25:00.000Z",
+    "updatedAt": "2025-10-20T11:25:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000026",
+    "projectId": "50000000-0000-4000-a000-000000000023",
+    "employeeId": "30000000-0000-4000-a000-000000000012",
+    "content": "Luồng nghỉ phép đang chờ kiểm thử ở màn hình duyệt đơn và lịch tháng.",
+    "attachments": null,
+    "createdAt": "2026-01-14T08:35:00.000Z",
+    "updatedAt": "2026-01-14T08:35:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000030",
+    "projectId": "50000000-0000-4000-a000-000000000027",
+    "employeeId": "30000000-0000-4000-a000-000000000021",
+    "content": "Bản tin nội bộ đang chờ thêm phần duyệt nội dung trước khi public.",
+    "attachments": null,
+    "createdAt": "2026-05-03T08:10:00.000Z",
+    "updatedAt": "2026-05-03T08:10:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000031",
+    "projectId": "50000000-0000-4000-a000-000000000028",
+    "employeeId": "30000000-0000-4000-a000-000000000028",
+    "content": "Chấm công theo dự án đã map xong dữ liệu mẫu, chuẩn bị chạy thử báo cáo hiệu suất.",
+    "attachments": null,
+    "createdAt": "2026-06-02T09:25:00.000Z",
+    "updatedAt": "2026-06-02T09:25:00.000Z"
+  },
+  {
+    "id": "70000000-0000-4000-a000-000000000032",
+    "projectId": "50000000-0000-4000-a000-000000000029",
+    "employeeId": "30000000-0000-4000-a000-000000000022",
+    "content": "Các biểu đồ phân tích đã hiển thị ổn, cần tối ưu màu sắc và tooltip.",
+    "attachments": null,
+    "createdAt": "2026-06-20T15:45:00.000Z",
+    "updatedAt": "2026-06-20T15:45:00.000Z"
+  }
+]

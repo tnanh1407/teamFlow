@@ -1,0 +1,72 @@
+[
+  {
+    "id": "10000000-0000-4000-a000-000000000001",
+    "name": "Công nghệ thông tin",
+    "code": "IT",
+    "description": "Phòng Công nghệ thông tin - phụ trách hệ thống phần mềm và hạ tầng CNTT",
+    "managerId": null,
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-a000-000000000002",
+    "name": "Nhân sự",
+    "code": "HR",
+    "description": "Phòng Nhân sự - phụ trách tuyển dụng, đào tạo và quản lý nhân viên",
+    "managerId": "30000000-0000-4000-a000-000000000007",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-a000-000000000003",
+    "name": "Kế toán",
+    "code": "ACC",
+    "description": "Phòng Kế toán - phụ trách tài chính và kế toán công ty",
+    "managerId": "30000000-0000-4000-a000-000000000013",
+    "isActive": true,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-a000-000000000004",
+    "name": "Marketing",
+    "code": "MKT",
+    "description": "Phòng Marketing - phụ trách truyền thông và quảng bá thương hiệu",
+    "managerId": "30000000-0000-4000-a000-000000000019",
+    "isActive": true,
+    "createdAt": "2025-02-01T00:00:00.000Z",
+    "updatedAt": "2025-02-01T00:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-a000-000000000005",
+    "name": "Vận hành",
+    "code": "OPS",
+    "description": "Phòng Vận hành - phụ trách quy trình và vận hành doanh nghiệp",
+    "managerId": "30000000-0000-4000-a000-000000000025",
+    "isActive": true,
+    "createdAt": "2025-03-01T00:00:00.000Z",
+    "updatedAt": "2025-03-01T00:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-a000-000000000006",
+    "name": "Kỹ thuật",
+    "code": "ENG",
+    "description": "Phòng Kỹ thuật - phụ trách nghiên cứu và phát triển sản phẩm",
+    "managerId": "30000000-0000-4000-a000-000000000030",
+    "isActive": true,
+    "createdAt": "2025-03-15T00:00:00.000Z",
+    "updatedAt": "2025-03-15T00:00:00.000Z"
+  },
+  {
+    "id": "10000000-0000-4000-a000-000000000007",
+    "name": "Thiết kế",
+    "code": "DSG",
+    "description": "Phòng Thiết kế - phụ trách thiết kế UI/UX, đồ họa và trải nghiệm người dùng",
+    "managerId": "30000000-0000-4000-a000-000000000035",
+    "isActive": true,
+    "createdAt": "2025-04-01T00:00:00.000Z",
+    "updatedAt": "2025-04-01T00:00:00.000Z"
+  }
+]

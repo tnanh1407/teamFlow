@@ -65,6 +65,17 @@ export function useDepartmentsQuery() {
   })
 }
 
+export function useActiveDepartmentsQuery() {
+  return useQuery<Pick<Department, "id" | "name" | "code">[]>({
+    queryKey: ["departments", "active-options"],
+    queryFn: async () => {
+      const { data } = await departmentService.getActiveOptions()
+      return data.data
+    },
+    staleTime: 5 * 60_000,
+  })
+}
+
 export function usePositionsQuery() {
   return useQuery<Position[]>({
     queryKey: userQueryKeys.positions,

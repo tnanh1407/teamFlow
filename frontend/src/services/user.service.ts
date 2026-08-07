@@ -44,6 +44,7 @@ export interface UpdatePasswordPayload {
 }
 
 export interface ForgotPasswordPayload {
+  departmentId: string;
   email: string;
   employeeCode: string;
 }
