@@ -36,8 +36,8 @@ export default function UserRowActions({
           type="button"
           onClick={(event) => onDelete(event, user)}
           className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/30"
-          title="Xóa"
-          aria-label="Xóa"
+          title="Vô hiệu hóa"
+          aria-label="Vô hiệu hóa"
         >
           <Trash2 size={16} />
         </button>

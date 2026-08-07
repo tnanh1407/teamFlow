@@ -21,6 +21,9 @@ export interface User {
   position: AccountPosition | null;
   status: boolean;
   avatarURL: string;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  deletionReason: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,6 +84,9 @@ type BackendUser = {
   position?: AccountPosition | string | null;
   status?: boolean | null;
   avatarURL?: string | null;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
+  deletionReason?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -112,6 +118,9 @@ const normalizeUser = (user: BackendUser): User => ({
           : null)) as AccountPosition | null,
   status: user.status ?? true,
   avatarURL: user.avatarURL ?? "",
+  deletedAt: user.deletedAt ?? null,
+  deletedBy: user.deletedBy ?? null,
+  deletionReason: user.deletionReason ?? null,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
@@ -163,6 +172,32 @@ const userService = {
       },
     };
   },
+
+  getTrash: async (params: { page?: number; limit?: number } = {}) => {
+    const { data } = await api.get<{
+      data: BackendUser[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>("/users/trash", { params });
+    return {
+      data: {
+        data: data.data.map(normalizeUser),
+        total: data.total,
+        page: data.page,
+        limit: data.limit,
+        totalPages: data.totalPages,
+      },
+    };
+  },
+
+  restore: async (id: string) => {
+    const { data } = await api.patch<{ data: BackendUser }>(`/users/${id}/restore`);
+    return { data: { data: normalizeUser(data.data) } };
+  },
+
+  hardDelete: (id: string) => api.delete(`/users/${id}/permanent`),
 
   getById: async (id: string) => {
     const { data } = await api.get<{ data: BackendUser }>(`/users/${id}`);

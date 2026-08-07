@@ -16,6 +16,7 @@ import projectTaskRouter from "./project/task/project-task.router.js";
 import systemNotificationRouter from "./notification/system-notification.router.js";
 import sessionRouter from "./session/session.router.js";
 import searchRouter from "./search/search.router.js";
+import userService from "./user/user.service.js";
 import { apiReference } from "@scalar/express-api-reference";
 import { apiSpec } from "./docs-api/index.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -58,8 +59,25 @@ app.use(errorHandler);
 
 const start = async () => {
   try {
+    if (env.DATABASE_URL) {
+      await pool.query(`
+        ALTER TABLE users
+          ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS deleted_by UUID,
+          ADD COLUMN IF NOT EXISTS deletion_reason TEXT;
+        CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users (deleted_at);
+      `);
+    }
     await pool.query("SELECT 1");
     console.log("Database connected");
+    void userService.purgeExpiredTrash().catch((error: unknown) => {
+      console.error("Trash cleanup failed:", error);
+    });
+    setInterval(() => {
+      void userService.purgeExpiredTrash().catch((error: unknown) => {
+        console.error("Trash cleanup failed:", error);
+      });
+    }, 24 * 60 * 60 * 1000);
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

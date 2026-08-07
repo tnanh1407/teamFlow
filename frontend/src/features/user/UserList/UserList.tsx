@@ -383,11 +383,11 @@ export default function UserList() {
 
     const confirmed = (
       await MySwal.fire({
-        title: "Xác nhận xóa",
+        title: "Đưa nhân viên vào thùng rác?",
         icon: "warning",
-        html: `Bạn có chắc muốn xóa nhân viên <strong>${user.name || user.username}</strong>? Hành động này không thể hoàn tác.`,
+        html: `Nhân viên <strong>${user.name || user.username}</strong> sẽ bị vô hiệu hóa và chuyển vào thùng rác. Bạn vẫn có thể khôi phục trong thời hạn lưu trữ.`,
         showCancelButton: true,
-        confirmButtonText: "Xóa",
+        confirmButtonText: "Đưa vào thùng rác",
         cancelButtonText: "Hủy",
         confirmButtonColor: "var(--destructive)",
         reverseButtons: true,
@@ -423,20 +423,20 @@ export default function UserList() {
     if (!canEdit(user) || pendingStatusMap[user.id]) return
 
     const nextStatus = !user.status
-    const confirmation =
-      nextStatus ||
-      (
-        await MySwal.fire({
-          icon: "warning",
-          title: "Ngừng hoạt động nhân viên?",
-          html: `Nhân viên <strong>${user.name || user.username}</strong> sẽ bị ngừng hoạt động và không thể đăng nhập cho đến khi được kích hoạt lại.`,
-          showCancelButton: true,
-          confirmButtonText: "Ngừng hoạt động",
-          cancelButtonText: "Hủy",
-          confirmButtonColor: "var(--destructive)",
-          reverseButtons: true,
-        })
-      ).isConfirmed
+    const confirmation = (
+      await MySwal.fire({
+        icon: "warning",
+        title: nextStatus ? "Kích hoạt nhân viên?" : "Ngừng hoạt động nhân viên?",
+        html: nextStatus
+          ? `Nhân viên <strong>${user.name || user.username}</strong> sẽ được phép đăng nhập và hoạt động trở lại.`
+          : `Nhân viên <strong>${user.name || user.username}</strong> sẽ bị ngừng hoạt động và không thể đăng nhập cho đến khi được kích hoạt lại.`,
+        showCancelButton: true,
+        confirmButtonText: nextStatus ? "Kích hoạt" : "Ngừng hoạt động",
+        cancelButtonText: "Hủy",
+        confirmButtonColor: nextStatus ? "var(--primary)" : "var(--destructive)",
+        reverseButtons: true,
+      })
+    ).isConfirmed
 
     if (!confirmation) return
 
@@ -453,13 +453,7 @@ export default function UserList() {
         },
       })
 
-      void MySwal.fire({
-        icon: "success",
-        title: "Thành công",
-        text: nextStatus ? "Đã kích hoạt nhân viên" : "Đã ngừng hoạt động nhân viên",
-        confirmButtonText: "Đóng",
-        confirmButtonColor: "var(--primary)",
-      })
+      toast.success(nextStatus ? "Đã kích hoạt nhân viên" : "Đã ngừng hoạt động nhân viên")
     } catch (error: unknown) {
       setStatusOverrides((current) => {
         const next = { ...current }

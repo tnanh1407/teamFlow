@@ -28,6 +28,9 @@ interface UserRow {
   role: EAccountRole;
   status: boolean;
   avatarURL: string;
+  deletedAt: Date | null;
+  deletedBy: string | null;
+  deletionReason: string | null;
   lastLogin: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -288,10 +291,10 @@ class UserService {
 
   async findAll(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM users`)
+    const countResult = await pool.query<{ count: string }>(`SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL`)
     const total = parseInt(countResult.rows[0].count, 10);
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]
+      `SELECT ${userColumns} FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2`, [limit, offset]
     );
     return { data: await Promise.all(rows.map((row) => hydrateUser(row))), total, page, limit, totalPages: Math.ceil(total / limit) };
   }
@@ -338,7 +341,7 @@ class UserService {
 
   async findByDepartment(departmentId: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users WHERE department_id = $1 ORDER BY created_at DESC`,
+      `SELECT ${userColumns} FROM users WHERE department_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`,
       [departmentId]
     );
     return Promise.all(rows.map((row) => hydrateUser(row)));
@@ -346,7 +349,7 @@ class UserService {
 
   async findByPosition(positionId: string) {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users WHERE position_id = $1 ORDER BY created_at DESC`,
+      `SELECT ${userColumns} FROM users WHERE position_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`,
       [positionId]
     );
     return Promise.all(rows.map((row) => hydrateUser(row)));
@@ -354,7 +357,7 @@ class UserService {
 
   async findAllRaw() {
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns} FROM users ORDER BY created_at DESC`
+      `SELECT ${userColumns} FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC`
     );
     return Promise.all(rows.map((row) => hydrateUser(row)));
   }
@@ -371,13 +374,13 @@ class UserService {
 
     const values: Array<string | number | boolean> = [`%${q}%`];
     const conditions = [
-      `(users.name ILIKE $1
+      `(users.deleted_at IS NULL AND (users.name ILIKE $1
           OR users.id::text ILIKE $1
           OR users.email ILIKE $1
           OR users.username ILIKE $1
           OR users.employee_code ILIKE $1
           OR departments.name ILIKE $1
-          OR users.phone ILIKE $1)`,
+          OR users.phone ILIKE $1))`,
     ];
 
     if (options.departmentId) {
@@ -726,10 +729,68 @@ class UserService {
     );
   }
 
-  async delete(id: string) : Promise<void> {
+  async findTrash(page = 1, limit = 10) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.min(100, Math.max(1, limit));
+    const offset = (safePage - 1) * safeLimit;
+    const countResult = await pool.query<{ count: string }>(
+      `SELECT COUNT(*) AS count FROM users WHERE deleted_at IS NOT NULL`,
+    );
     const { rows } = await pool.query<UserRow>(
-      `UPDATE users SET status = false, leave_date = COALESCE(leave_date, $2) WHERE id = $1 RETURNING ${userColumns}`,
-      [id, todayDate()]
+      `SELECT ${userColumns}
+       FROM users
+       WHERE deleted_at IS NOT NULL
+       ORDER BY deleted_at DESC
+       LIMIT $1 OFFSET $2`,
+      [safeLimit, offset],
+    );
+    const total = Number.parseInt(countResult.rows[0]?.count ?? "0", 10);
+    return { data: await Promise.all(rows.map((row) => hydrateUser(row))), total, page: safePage, limit: safeLimit, totalPages: Math.ceil(total / safeLimit) };
+  }
+
+  async restore(id: string) {
+    const { rows } = await pool.query<UserRow>(
+      `UPDATE users
+       SET status = true, leave_date = NULL, deleted_at = NULL, deleted_by = NULL, deletion_reason = NULL, updated_at = NOW()
+       WHERE id = $1 AND deleted_at IS NOT NULL
+       RETURNING ${userColumns}`,
+      [id],
+    );
+    if (!rows[0]) throw new AppError("Deleted user not found", 404);
+    return hydrateUser(rows[0]);
+  }
+
+  async hardDelete(id: string) {
+    const { rows } = await pool.query<{ id: string }>(
+      `DELETE FROM users WHERE id = $1 AND deleted_at IS NOT NULL RETURNING id`,
+      [id],
+    );
+    if (!rows[0]) throw new AppError("Deleted user not found", 404);
+    await sessionService.revokeAllByUserId(id);
+  }
+
+  async purgeExpiredTrash(retentionDays = 30) {
+    const { rowCount } = await pool.query(
+      `DELETE FROM users
+       WHERE deleted_at IS NOT NULL
+         AND deleted_at < NOW() - ($1 * INTERVAL '1 day')`,
+      [retentionDays],
+    );
+    return rowCount ?? 0;
+  }
+
+  async delete(id: string, deletedBy: string, reason = "Đưa vào thùng rác") : Promise<void> {
+    const { rows } = await pool.query<UserRow>(
+      `UPDATE users
+       SET status = false,
+           leave_date = COALESCE(leave_date, $2),
+           deleted_at = NOW(),
+           deleted_by = $3,
+           deletion_reason = $4,
+           updated_at = NOW()
+       WHERE id = $1 AND deleted_at IS NULL
+       RETURNING ${userColumns}`,
+      [id, todayDate(), deletedBy, reason]
     );
     if (!rows[0]) throw new AppError("User not found", 404);
     await sessionService.revokeAllByUserId(id);

@@ -4,6 +4,7 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import Login from "@/features/auth/Login";
 import ForgotPassword from "@/features/auth/ForgotPassword";
 const UserList = lazy(() => import("@/features/user/UserList/UserList"));
+const UserTrash = lazy(() => import("@/features/user/UserTrash/UserTrash"));
 const UserDetail = lazy(() => import("@/features/user/UserDetail"));
 const PositionList = lazy(() => import("@/features/position/PositionList"));
 const ProjectList = lazy(() => import("@/features/project/ProjectList"));
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><AdminDashboard /></Suspense></RoleRedirect> },
       { path: "notifications", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><SystemNotificationsPage /></Suspense></RoleRedirect> },
       { path: "users", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserList /></Suspense></RoleRedirect> },
+      { path: "users/trash", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><UserTrash /></Suspense></RoleRedirect> },
       { path: "users/:id", element: <RoleRedirect roles={["admin", "user"]}><Suspense fallback={<RouteFallback />}><UserDetail /></Suspense></RoleRedirect> },
       { path: "departments", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><DepartmentList /></Suspense></RoleRedirect> },
       { path: "departments/:id", element: <RoleRedirect roles={["admin"]}><Suspense fallback={<RouteFallback />}><DepartmentDetail /></Suspense></RoleRedirect> },

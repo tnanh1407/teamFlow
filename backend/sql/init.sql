@@ -59,6 +59,9 @@ CREATE TABLE IF NOT EXISTS users (
   role EUserRole DEFAULT 'user' NOT NULL,
   status BOOLEAN NOT NULL DEFAULT true,
   avatar_url VARCHAR,
+  deleted_at TIMESTAMPTZ,
+  deleted_by UUID,
+  deletion_reason TEXT,
   last_login TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()

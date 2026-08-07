@@ -55,6 +55,22 @@ class UserController {
     res.json(result);
   }
 
+  async trash(req: AuthRequest, res: Response) {
+    const page = Math.max(1, Number.parseInt(String(req.query.page ?? "1"), 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit ?? "10"), 10) || 10));
+    res.json(await userService.findTrash(page, limit));
+  }
+
+  async restore(req: AuthRequest, res: Response) {
+    const user = await userService.restore(req.params.id as string);
+    res.json({ message: "User restored successfully", data: user });
+  }
+
+  async hardDelete(req: AuthRequest, res: Response) {
+    await userService.hardDelete(req.params.id as string);
+    res.json({ message: "User permanently deleted" });
+  }
+
   async getById(req: AuthRequest, res: Response) {
     const id = req.params.id as string;
     const user = await userService.findById(id);
@@ -147,6 +163,10 @@ class UserController {
   async delete(req: AuthRequest, res: Response) {
     const id = req.params.id as string;
     const currentUser = req.user!;
+    if (currentUser.role !== EAccountRole.ADMIN && currentUser.position !== EAccountPosition.MANAGER) {
+      throw new AppError("Only admins and managers can delete users", 403);
+    }
+
     const target = await userService.findById(id);
     if (!target) throw new AppError("User not found", 404);
 
@@ -165,7 +185,7 @@ class UserController {
       }
     }
 
-    await userService.delete(id);
+    await userService.delete(id, currentUser.id);
     res.json({ message: "User deleted successfully" });
   }
 
