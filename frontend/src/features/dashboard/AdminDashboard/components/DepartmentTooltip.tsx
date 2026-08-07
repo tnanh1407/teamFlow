@@ -1,4 +1,4 @@
-﻿import type { TooltipContentProps } from "recharts"
+import type { TooltipContentProps } from "recharts"
 
 interface DepartmentPoint {
   name: string
@@ -42,7 +42,7 @@ export default function DepartmentTooltip({ active, payload }: DepartmentTooltip
         <div className="flex items-start justify-between gap-4">
           <span className="text-muted-foreground">Trưởng bộ phận</span>
           <span className="max-w-40 text-right font-semibold text-foreground">
-            {point.managerName ? `${point.managerName}${managerCode ? ` (${managerCode})` : ""}` : "ChÆ°a phÃ¢n cÃ´ng"}
+            {point.managerName ? `${point.managerName}${managerCode ? ` (${managerCode})` : ""}` : "Chưa phân công"}
           </span>
         </div>
       </div>

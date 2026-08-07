@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -8,6 +8,7 @@ import { type User } from "@/services/user.service"
 import type { Department } from "@/services/department.service"
 import type { Position } from "@/services/position.service"
 import { MySwal } from "@/lib/swal"
+import { getPositionLabel, isLeaderPosition } from "@/shared/utils/position"
 
 type OpenUserFormEditDialogParams = {
   editingUser: User
@@ -65,7 +66,7 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
       gender: z.enum(["male", "female", "other"]),
       departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
       positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
-      username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nháº­p"),
+      username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nhập"),
       password: z.string().optional(),
       status: z.boolean(),
     })
@@ -74,7 +75,7 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
       const departmentId = data.departmentId?.trim() || ""
       const positionId = data.positionId?.trim() || ""
       const positionName = positionNameMap.get(positionId) ?? ""
-      const isLeader = positionName.includes("leader")
+      const isLeader = isLeaderPosition(positionName)
 
       if (allowAdminEmptyFields && !employeeCode && !departmentId) return
 
@@ -516,7 +517,7 @@ export default async function openUserFormEditDialog({
                 <option value="">-- Chá»n --</option>
                 {positions.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {getPositionLabel(p.name)}
                   </option>
                 ))}
               </select>

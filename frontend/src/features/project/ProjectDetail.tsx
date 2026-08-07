@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Trash2, Pencil, X, Paperclip, File, FileImage, Download, Check, UserPlus } from "lucide-react"
 import projectService, { type Project, type FileAttachment } from "@/services/project.service"

@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import type { Department } from "@/services/department.service"
 import type { Position } from "@/services/position.service"
 import { MySwal } from "@/lib/swal"
+import { getPositionLabel, isLeaderPosition } from "@/shared/utils/position"
 
 type OpenUserFormDialogParams = {
   departments: Department[]
@@ -79,7 +80,7 @@ function buildUserSchema(departments: Department[], positions: Position[]) {
       const departmentId = data.departmentId?.trim() || ""
       const positionId = data.positionId?.trim() || ""
       const positionName = positionNameMap.get(positionId) ?? ""
-      const isLeader = positionName.includes("leader")
+      const isLeader = isLeaderPosition(positionName)
 
       if (isLeader && departmentId) {
         ctx.addIssue({
@@ -340,7 +341,7 @@ export default async function openUserFormAddDialog({
                 <option value="">-- Chọn --</option>
                 {positions.map((position) => (
                   <option key={position.id} value={position.id}>
-                    {position.name}
+                    {getPositionLabel(position.name)}
                   </option>
                 ))}
               </select>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 import { Users, CheckSquare, Activity, TrendingUp, Gauge, Building2, UserCircle, type LucideIcon } from "lucide-react"
@@ -170,7 +170,7 @@ export default function UserDashboard() {
               <Building2 size={24} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">PhÃ²ng ban</p>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Phòng ban</p>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mt-0.5">{dept.name}</h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{dept.description || dept.code}</p>
             </div>

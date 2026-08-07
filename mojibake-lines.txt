@@ -1,0 +1,334 @@
+﻿C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:59:      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ nhÃ¢n viÃªn"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:60:      name: z.string().trim().min(1, "Vui lÃ²ng nháº­p há» vÃ  tÃªn"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:61:      email: z.string().trim().email("Email khÃ´ng há»£p lá»‡"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:67:      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:68:      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:69:      username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nhập"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:109:          message: "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:118:          message: `MÃ£ nhÃ¢n viÃªn pháº£i báº¯t Ä‘áº§u báº±ng mÃ£ phÃ²ng ban ${departmentCode}`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:128:          message: "Pháº§n sau mÃ£ phÃ²ng ban pháº£i gá»“m Ä‘Ãºng 6 kÃ½ tá»± chá»¯ hoáº·c sá»‘",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:253:    const employeePlaceholder = departmentId ? `${departmentPrefix}ABC123` : "Chá»n phÃ²ng ban trÆ°á»›c"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:317:                <p className="text-sm font-medium text-foreground">áº¢nh Ä‘áº¡i diá»‡n</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:318:                <p className="text-xs text-muted-foreground">Táº£i áº£nh má»›i hoáº·c xÃ³a áº£nh hiá»‡n táº¡i.</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:343:                    Há»§y áº£nh má»›i
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:357:                  XÃ³a áº£nh hiá»‡n táº¡i
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:363:              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">MÃ£ nhÃ¢n viÃªn</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:373:                  <p className="text-xs text-muted-foreground">Chá»n phÃ²ng ban Ä‘á»ƒ há»‡ thá»‘ng tá»± sinh mÃ£ nhÃ¢n viÃªn.</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:380:                        toast.success("ÄÃ£ sao chÃ©p mÃ£ nhÃ¢n viÃªn")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:382:                        toast.error("KhÃ´ng thá»ƒ sao chÃ©p mÃ£ nhÃ¢n viÃªn")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:387:                    aria-label="Sao chÃ©p mÃ£ nhÃ¢n viÃªn"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:388:                    title="Sao chÃ©p mÃ£ nhÃ¢n viÃªn"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:400:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">TÃªn Ä‘Äƒng nháº­p</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:409:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Máº­t kháº©u má»›i</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:415:                <p className="text-xs text-muted-foreground">Äá»ƒ trá»‘ng náº¿u khÃ´ng muá»‘n Ä‘á»•i máº­t kháº©u.</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:421:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Há» vÃ  tÃªn</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:442:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Sá»‘ Ä‘iá»‡n thoáº¡i</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:446:                  placeholder="Nháº­p sá»‘ Ä‘iá»‡n thoáº¡i"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:451:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Giá»›i tÃ­nh</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:456:                  <option value="other">KhÃ¡c</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:458:                  <option value="female">Ná»¯</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:463:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">NgÃ y sinh</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:472:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">NgÃ y tuyá»ƒn dá»¥ng</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:481:                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">NgÃ y nghá»‰ viá»‡c</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:487:                <p className="text-xs text-muted-foreground">Chá»‰ Ä‘iá»n khi muá»‘n Ä‘Ã¡nh dáº¥u nhÃ¢n sá»± Ä‘Ã£ nghá»‰.</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:496:              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">PhÃ²ng ban</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:501:                <option value="">-- Chá»n --</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:512:              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Chá»©c vá»¥</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:517:                <option value="">-- Chá»n --</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:534:                <p className="text-sm font-medium text-foreground">KÃ­ch hoáº¡t tÃ i khoáº£n</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:535:                <p className="text-xs text-muted-foreground">Báº­t náº¿u nhÃ¢n sá»± Ä‘ang hoáº¡t Ä‘á»™ng vÃ  cÃ³ thá»ƒ Ä‘Äƒng nháº­p.</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:545:    title: "Sá»­a ngÆ°á»i dÃ¹ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:549:    closeButtonAriaLabel: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:551:    confirmButtonText: "Cáº­p nháº­t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:552:    cancelButtonText: "Há»§y",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:557:        MySwal.showValidationMessage("Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ thÃ´ng tin")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserList\components\UserFormEditDialog.tsx:561:        MySwal.showValidationMessage("Vui lÃ²ng kiá»ƒm tra láº¡i cÃ¡c trÆ°á»ng báº¯t buá»™c")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:17:  employeeCode: z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:18:  name: z.string().trim().min(1, "Vui lÃ²ng nháº­p há» vÃ  tÃªn"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:19:  email: z.string().trim().email("Email khÃ´ng há»£p lá»‡"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:25:  departmentId: z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:26:  positionId: z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:27:  username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nháº­p"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:67:      employeeCode: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:68:      name: z.string().trim().min(1, "Vui lÃ²ng nháº­p há» vÃ  tÃªn"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:69:      email: z.string().trim().email("Email khÃ´ng há»£p lá»‡"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:75:      departmentId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n phÃ²ng ban"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:76:      positionId: allowAdminEmptyFields ? z.string().trim().optional() : z.string().trim().min(1, "Vui lÃ²ng chá»n chá»©c vá»¥"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:77:      username: z.string().trim().min(1, "Vui lÃ²ng nháº­p tÃªn Ä‘Äƒng nháº­p"),
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:93:          message: "Vui lÃ²ng chá»n phÃ²ng ban",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:104:          message: "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:113:          message: `MÃ£ ngÆ°á»i dÃ¹ng pháº£i báº¯t Ä‘áº§u báº±ng mÃ£ phÃ²ng ban ${departmentCode}`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:123:          message: "Pháº§n sau mÃ£ phÃ²ng ban pháº£i gá»“m Ä‘Ãºng 6 kÃ½ tá»± chá»¯ hoáº·c sá»‘",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:188:        title: "Lá»—i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:189:        text: "KhÃ´ng thá»ƒ táº£i thÃ´ng tin ngÆ°á»i dÃ¹ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:190:        confirmButtonText: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:243:              <label className={labelClass}>MÃ£ ngÆ°á»i dÃ¹ng</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:246:                MÃ£ phÃ²ng ban + 6 kÃ½ tá»±. VÃ­ dá»¥:{" "}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:254:              <label className={labelClass}>TÃªn Ä‘Äƒng nháº­p</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:261:              <label className={labelClass}>Há» vÃ  tÃªn</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:273:              <label className={labelClass}>PhÃ²ng ban</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:275:                <option value="">-- Chá»n --</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:281:              <label className={labelClass}>Chá»©c vá»¥</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:283:                <option value="">-- Chá»n --</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:291:              <label className={labelClass}>Máº­t kháº©u</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:297:              <label className={labelClass}>Sá»‘ Ä‘iá»‡n thoáº¡i</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:301:              <label className={labelClass}>Giá»›i tÃ­nh</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:311:              <label className={labelClass}>NgÃ y sinh</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:315:              <label className={labelClass}>NgÃ y vÃ o lÃ m</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:319:              <label className={labelClass}>NgÃ y nghá»‰ viá»‡c</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:325:            <span className="text-sm text-zinc-700">KÃ­ch hoáº¡t</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:332:      title: "Sá»­a ngÆ°á»i dÃ¹ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:336:      confirmButtonText: "Cáº­p nháº­t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:337:      cancelButtonText: "Há»§y",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:342:          MySwal.showValidationMessage("Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ thÃ´ng tin")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:346:          MySwal.showValidationMessage("Vui lÃ²ng kiá»ƒm tra láº¡i cÃ¡c trÆ°á»ng báº¯t buá»™c")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:375:        title: "ThÃ nh cÃ´ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:376:        text: "Cáº­p nháº­t thÃ nh cÃ´ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:377:        confirmButtonText: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:384:        title: "Lá»—i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:385:        text: err?.response?.data?.message || "Cáº­p nháº­t tháº¥t báº¡i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:386:        confirmButtonText: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:395:      title: "XÃ¡c nháº­n xoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:397:      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ ngÆ°á»i dÃ¹ng <strong>${user.username}</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:399:      confirmButtonText: "XoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:400:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:411:        title: "Lá»—i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:412:        text: "XoÃ¡ tháº¥t báº¡i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:413:        confirmButtonText: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:426:        title="KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:429:            Quay láº¡i
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:445:            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Chi tiáº¿t ngÆ°á»i dÃ¹ng</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:452:              <span>Sá»­a</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:458:              <span>XoÃ¡</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:476:          <Field label="MÃ£ ngÆ°á»i dÃ¹ng" value={user.employeeCode || "â€”"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:477:          <Field label="TÃªn Ä‘Äƒng nháº­p" value={user.username} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:478:          <Field label="Há» vÃ  tÃªn" value={user.name || "â€”"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:480:          <Field label="Sá»‘ Ä‘iá»‡n thoáº¡i" value={user.phone || "â€”"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:481:          <Field label="NgÃ y vÃ o lÃ m" value={user.hireDate ? user.hireDate.slice(0, 10) : "â€”"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:482:          <Field label="NgÃ y nghá»‰ viá»‡c" value={user.leaveDate ? user.leaveDate.slice(0, 10) : "â€”"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:483:          <Field label="PhÃ²ng ban" value={deptNameMap.get(user.departmentId || "") || "â€”"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:484:          <Field label="Chá»©c vá»¥" value={getPositionLabel(posNameMap.get(user.positionId || ""))} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:485:          <Field label="Loáº¡i tÃ i khoáº£n" value={user.role === "admin" ? "Admin" : "NgÆ°á»i dÃ¹ng"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:486:          <Field label="Tráº¡ng thÃ¡i" value={user.status ? "Hoáº¡t Ä‘á»™ng" : "VÃ´ hiá»‡u"} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:487:          <Field label="NgÃ y táº¡o" value={new Date(user.createdAt).toLocaleString("vi-VN")} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\user\UserDetail.tsx:488:          <Field label="Cáº­p nháº­t cuá»‘i" value={new Date(user.updatedAt).toLocaleString("vi-VN")} />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:32:  low: "Tháº¥p",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:33:  medium: "Trung bÃ¬nh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:35:  critical: "Kháº©n cáº¥p",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:39:  todo: "Cáº§n lÃ m",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:40:  in_progress: "Äang lÃ m",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:41:  review: "ÄÃ¡nh giÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:42:  completed: "HoÃ n thÃ nh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:43:  cancelled: "ÄÃ£ huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:62:  created: "Táº¡o má»›i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:63:  updated: "Cáº­p nháº­t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:64:  assigned: "PhÃ¢n cÃ´ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:65:  completed: "HoÃ n thÃ nh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:66:  commented: "BÃ¬nh luáº­n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:284:            <label className={labelClass}>Chá»n phÃ²ng ban</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:294:                    : "Chá»n phÃ²ng ban..."}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:301:                    <p className="px-3 py-2 text-sm text-zinc-400">KhÃ´ng cÃ²n phÃ²ng ban nÃ o</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:328:                <label className={labelClass}>Chá»n thÃ nh viÃªn ({availableEmps.length} ngÆ°á»i)</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:331:                    <p className="px-3 py-4 text-sm text-zinc-400 text-center">Táº¥t cáº£ ngÆ°á»i dÃ¹ng phÃ²ng ban nÃ y Ä‘Ã£ á»Ÿ trong dá»± Ã¡n</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:377:      title: "ThÃªm phÃ²ng ban vÃ  thÃ nh viÃªn",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:380:      confirmButtonText: "ThÃªm",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:381:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:385:          MySwal.showValidationMessage("Vui lÃ²ng chá»n phÃ²ng ban")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:389:          MySwal.showValidationMessage("Vui lÃ²ng chá»n thÃ nh viÃªn")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:488:            <label className={labelClass}>TiÃªu Ä‘á»</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:493:              placeholder="Nháº­p tiÃªu Ä‘á» project"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:498:            <label className={labelClass}>MÃ´ táº£</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:502:              placeholder="MÃ´ táº£ project (khÃ´ng báº¯t buá»™c)"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:509:              <label className={labelClass}>Má»©c Ä‘á»™</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:549:              <label className={labelClass}>Tráº¡ng thÃ¡i</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:579:              Tiáº¿n Ä‘á»™: <span className="text-blue-600 font-bold">{form.progress}%</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:592:              <label className={labelClass}>NgÃ y báº¯t Ä‘áº§u</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:601:              <label className={labelClass}>NgÃ y káº¿t thÃºc</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:611:            <label className={labelClass}>Thá»i gian dá»± kiáº¿n (giá»)</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:623:            <label className={labelClass}>Tá»‡p Ä‘Ã­nh kÃ¨m</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:627:                {uploading ? "Äang táº£i..." : "Chá»n tá»‡p"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:636:              <span className="text-xs text-zinc-400">HÃ¬nh áº£nh, PDF, DOC, XLS, ZIP... Tá»‘i Ä‘a 50MB/tá»‡p</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:660:                        title="Táº£i xuá»‘ng"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:668:                        title="XoÃ¡"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:683:      title: "Sá»­a project",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:686:      confirmButtonText: "Cáº­p nháº­t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:687:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:691:          MySwal.showValidationMessage("Vui lÃ²ng nháº­p tiÃªu Ä‘á»")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:717:        title: "tiÃªu Ä‘á»",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:718:        description: "mÃ´ táº£",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:719:        priority: "má»©c Ä‘á»™",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:720:        status: "tráº¡ng thÃ¡i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:721:        progress: "tiáº¿n Ä‘á»™",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:722:        startDate: "ngÃ y báº¯t Ä‘áº§u",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:723:        dueDate: "háº¡n chÃ³t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:724:        estimatedHours: "giá» dá»± kiáº¿n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:728:        if (!val) return "trá»‘ng"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:738:        staff: "NhÃ¢n viÃªn",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:739:        intern: "Thá»±c táº­p sinh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:759:            : `[${roleStr}] thÃ´ng tin project`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:774:      title: "Chi tiáº¿t hoáº¡t Ä‘á»™ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:787:              <p className="text-xs text-zinc-400">{emp?.employeeCode ? `MÃ£ ngÆ°á»i dÃ¹ng: ${emp.employeeCode}` : ""}</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:792:              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">HÃ nh Ä‘á»™ng</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:805:              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Thá»i gian</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:812:            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Chi tiáº¿t</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:819:      confirmButtonText: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:826:      title: "XÃ¡c nháº­n xoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:828:      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ project <strong>${project.title}</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:830:      confirmButtonText: "XoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:831:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:854:          description: `PhÃ²ng ban ${dept?.name || ""}`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:917:          description: commentText.trim() || "Ä‘Ã£ bÃ¬nh luáº­n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:937:          description: "Ä‘Ã£ xoÃ¡ má»™t bÃ¬nh luáº­n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:949:        <p className="text-sm text-zinc-400">Äang táº£i...</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:957:        <p className="text-sm text-zinc-500">KhÃ´ng tÃ¬m tháº¥y project</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:958:        <button onClick={() => navigate("/projects")} className="rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:opacity-90 transition cursor-pointer border-none">Quay láº¡i</button>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:978:            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Chi tiáº¿t project</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:988:              <span>ThÃªm thÃ nh viÃªn</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:994:              <span>Sá»­a</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1000:              <span>XoÃ¡</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1010:              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ThÃ´ng tin project</h2>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1015:                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">MÃ´ táº£</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1021:                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Má»©c Ä‘á»™</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1029:                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tráº¡ng thÃ¡i</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1037:                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tiáº¿n Ä‘á»™</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1041:                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Tá»‡p Ä‘Ã­nh kÃ¨m</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1042:                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100">{fileCount} tá»‡p</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1048:                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">NgÃ y báº¯t Ä‘áº§u</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1054:                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Háº¡n chÃ³t</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1060:                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giá» dá»± kiáº¿n</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1066:                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Giá» thá»±c táº¿</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1130:              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">ThÃ´ng tin khÃ¡c</h2>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1134:                <label className="text-xs text-zinc-400">NgÃ y táº¡o</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1139:                  <label className="text-xs text-zinc-400">Cáº­p nháº­t láº§n cuá»‘i</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\ProjectDetail.tsx:1145:                  <label className="text-xs text-zinc-400">HoÃ n thÃ nh lÃºc</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:83:      await MySwal.fire({ icon: "warning", title: "Thiáº¿u dá»¯ liá»‡u", text: "Vui lÃ²ng nháº­p tiÃªu Ä‘á» vÃ  ná»™i dung." });
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:97:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Cap nhat thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:107:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Tao thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:133:      title: "XÃ¡c nháº­n xoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:135:      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ thÃ´ng bÃ¡o <strong>${notification.title}</strong>?`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:137:      confirmButtonText: "XoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:138:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:145:      await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "Xoa thong bao thanh cong", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" });
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\project\components\ProjectNotificationsSection.tsx:293:                      Táº¡o bá»Ÿi: <strong className="text-zinc-600 dark:text-zinc-200">{memberById.get(notification.createdBy)?.name || "Trưởng bộ phận"}</strong>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:22:  Intern: "Thá»±c táº­p sinh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:23:  Junior: "Má»›i Ä‘i lÃ m",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:24:  Middle: "Kinh nghiá»‡m",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:50:        <label className={labelClass}>TÃªn chá»©c vá»¥</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:55:          placeholder="VD: TrÆ°á»Ÿng phÃ²ng"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:60:        <label className={labelClass}>Cáº¥p báº­c</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:68:              {form.level ? levelLabels[form.level] : "Chá»n cáº¥p báº­c"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:93:        <label className={labelClass}>MÃ´ táº£</label>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:97:          placeholder="MÃ´ táº£ chá»©c vá»¥ (khÃ´ng báº¯t buá»™c)"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:146:      title: "ThÃªm chá»©c vá»¥",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:150:      confirmButtonText: "Táº¡o má»›i",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:151:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:156:          MySwal.showValidationMessage("Vui lÃ²ng nháº­p tÃªn chá»©c vá»¥")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:165:          MySwal.showValidationMessage("KhÃ´ng thá»ƒ lÆ°u chá»©c vá»¥")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:176:      title: "Sá»­a chá»©c vá»¥",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:180:      confirmButtonText: "Cáº­p nháº­t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:181:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:186:          MySwal.showValidationMessage("Vui lÃ²ng nháº­p tÃªn chá»©c vá»¥")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:195:          MySwal.showValidationMessage("KhÃ´ng thá»ƒ lÆ°u chá»©c vá»¥")
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:204:      title: "Chi tiáº¿t chá»©c vá»¥",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:230:                    void MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ sao chÃ©p UUID", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:241:              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">MÃ´ táº£</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:242:              <p className="text-sm text-zinc-700 dark:text-zinc-300 mt-1">{pos.description || "ChÆ°a cÃ³ mÃ´ táº£"}</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:247:                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">NgÃ y táº¡o</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:251:                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Cáº­p nháº­t</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:259:      confirmButtonText: "ÄÃ³ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:266:      title: "XÃ¡c nháº­n xoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:268:      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ chá»©c vá»¥ <strong>${pos.name}</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:270:      confirmButtonText: "XoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:271:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:290:            Quáº£n lÃ­ chá»©c vá»¥
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:293:            Quáº£n lÃ½ chá»©c vá»¥ vÃ  cáº¥p báº­c trong há»‡ thá»‘ng
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:307:              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Cáº¥p báº­c</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:344:            title="ThÃªm chá»©c vá»¥"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:364:            placeholder="TÃ¬m kiáº¿m theo tÃªn chá»©c vá»¥..."
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:378:                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">TÃªn chá»©c vá»¥</th>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:379:                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Cáº¥p báº­c</th>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:380:                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">MÃ´ táº£</th>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:381:                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Thao tÃ¡c</th>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:386:                <TableStateRow colSpan={5} loading title="Äang táº£i..." />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:388:                <TableStateRow colSpan={5} title="KhÃ´ng tÃ¬m tháº¥y chá»©c vá»¥ nÃ o" />
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\position\PositionList.tsx:400:                            void MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ sao chÃ©p UUID", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:25:  announcement: "ThÃ´ng bÃ¡o",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:26:  reminder: "Nháº¯c nhá»Ÿ",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:27:  update: "Cáº­p nháº­t",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:31:  low: "Tháº¥p",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:32:  medium: "Vá»«a",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:34:  critical: "Kháº©n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:38:  all: "ToÃ n há»‡ thá»‘ng",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:41:  staff: "NhÃ¢n viÃªn",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:42:  intern: "Thá»±c táº­p sinh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:43:  admin: "Quáº£n trá»‹ viÃªn",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:121:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "KhÃ´ng cÃ³ thay Ä‘á»•i nÃ o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:127:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ cáº­p nháº­t thÃ´ng bÃ¡o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:130:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ táº¡o thÃ´ng bÃ¡o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:145:      title: "XÃ¡c nháº­n xoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:147:      html: `Báº¡n cÃ³ cháº¯c muá»‘n xoÃ¡ thÃ´ng bÃ¡o <strong>${notification.title}</strong>?`,
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:149:      confirmButtonText: "XoÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:150:      cancelButtonText: "Huá»·",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:158:      await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ xoÃ¡ thÃ´ng bÃ¡o", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:170:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ chuyá»ƒn sang chÆ°a Ä‘á»c", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:173:        await MySwal.fire({ icon: "success", title: "ThÃ nh cÃ´ng", text: "ÄÃ£ Ä‘Ã¡nh dáº¥u Ä‘Ã£ Ä‘á»c", confirmButtonText: "ÄÃ³ng", confirmButtonColor: "var(--primary)" })
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:186:            {canManage ? "ThÃ´ng bÃ¡o há»‡ thá»‘ng" : "ThÃ´ng bÃ¡o tá»« há»‡ thá»‘ng"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:189:            {canManage ? "Admin táº¡o vÃ  quáº£n lÃ­ thÃ´ng bÃ¡o cho toÃ n há»‡ thá»‘ng." : "ThÃ´ng bÃ¡o phÃ¹ há»£p vá»›i vai trÃ² cá»§a báº¡n."}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:194:            ChÆ°a Ä‘á»c: {unreadCount}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:203:              ThÃ´ng bÃ¡o má»›i
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:215:              placeholder="TiÃªu Ä‘á» thÃ´ng bÃ¡o"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:223:              <option value="announcement">ThÃ´ng bÃ¡o</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:224:              <option value="reminder">Nháº¯c nhá»Ÿ</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:225:              <option value="update">Cáº­p nháº­t</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:232:              <option value="low">Æ¯u tiÃªn tháº¥p</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:233:              <option value="medium">Æ¯u tiÃªn vá»«a</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:234:              <option value="high">Æ¯u tiÃªn cao</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:235:              <option value="critical">Kháº©n cáº¥p</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:244:              <option value="all">ToÃ n há»‡ thá»‘ng</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:247:              <option value="staff">NhÃ¢n viÃªn</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:248:              <option value="intern">Thá»±c táº­p sinh</option>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:256:            placeholder="Ná»™i dung thÃ´ng bÃ¡o"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:269:              Ghim thÃ´ng bÃ¡o
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:279:                  Huá»·
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:287:                {saving ? "Äang lÆ°u..." : editingId ? "Cáº­p nháº­t" : "Táº¡o thÃ´ng bÃ¡o"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:299:            title="ChÆ°a cÃ³ thÃ´ng bÃ¡o nÃ o"
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:333:                    {item.isRead ? "ÄÃ£ Ä‘á»c" : "ChÆ°a Ä‘á»c"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\notifications\components\SystemNotificationsSection.tsx:353:                    {item.isRead ? "Bá» Ä‘Ã£ Ä‘á»c" : "ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘ọc"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:106:      label: "Dá»± Ã¡n Ä‘ang thá»±c hiá»‡n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:112:      label: "Äang Ä‘Ã¡nh giÃ¡",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:118:      label: "Dá»± Ã¡n hoÃ n thÃ nh",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:124:      label: "Tá»•ng dá»± Ã¡n",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:133:      label: dept ? `PhÃ²ng ${dept.name}` : "ThÃ nh viÃªn",
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:157:            Xin chÃ o, {user?.username}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:160:            {dept ? `${dept.name} Â· Báº£ng Ä‘iá»u khiá»ƒn` : "Báº£ng Ä‘iá»u khiá»ƒn"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:195:        {/* Pie Chart: Tráº¡ng thÃ¡i Dá»± Ã¡n */}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:197:          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Tráº¡ng thÃ¡i Dá»± Ã¡n</h2>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:203:                    { name: "Äang lÃ m", value: activeProjects, color: "#f59e0b" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:204:                    { name: "ÄÃ¡nh giÃ¡", value: inReviewCount, color: "#a855f7" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:205:                    { name: "HoÃ n thÃ nh", value: completedProjects, color: "#10b981" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:215:                    { name: "Äang lÃ m", value: activeProjects, color: "#f59e0b" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:216:                    { name: "ÄÃ¡nh giÃ¡", value: inReviewCount, color: "#a855f7" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:217:                    { name: "HoÃ n thÃ nh", value: completedProjects, color: "#10b981" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:237:              <span className="text-zinc-600 dark:text-zinc-400">Äang lÃ m ({activeProjects})</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:241:              <span className="text-zinc-600 dark:text-zinc-400">ÄÃ¡nh giÃ¡ ({inReviewCount})</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:245:              <span className="text-zinc-600 dark:text-zinc-400">HoÃ n thÃ nh ({completedProjects})</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:250:        {/* Bar Chart: Thá»‘ng kÃª chá»‰ sá»‘ */}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:253:            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Thá»‘ng kÃª chá»‰ sá»‘ tá»•ng quan</h2>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:254:            <span className="text-xs text-zinc-400 font-medium">Tá»•ng: {myProjects.length} dá»± Ã¡n</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:260:                  { name: "Äang lÃ m", value: activeProjects, fill: "#f59e0b" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:261:                  { name: "ÄÃ¡nh giÃ¡", value: inReviewCount, fill: "#a855f7" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:262:                  { name: "HoÃ n thÃ nh", value: completedProjects, fill: "#10b981" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:263:                  { name: "ThÃ nh viÃªn PB", value: deptMemberCount, fill: "#06b6d4" },
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:299:            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Dá»± Ã¡n gáº§n Ä‘Ã¢y</h2>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:303:              <p className="px-5 py-8 text-sm text-zinc-400 text-center">ChÆ°a cÃ³ dá»± Ã¡n nÃ o</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:309:                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{p.status === "todo" ? "Cáº§n lÃ m" : p.status === "in_progress" ? "Äang lÃ m" : p.status === "review" ? "ÄÃ¡nh giÃ¡" : p.status === "completed" ? "HoÃ n thÃ nh" : "ÄÃ£ huá»·"}</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:330:              {dept ? `PhÃ²ng ${dept.name}` : "ThÃ nh viÃªn"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:333:              <span className="text-xs text-zinc-400">{deptMembers.length + 1} thÃ nh viÃªn</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:368:                      {m.status ? "Hoáº¡t Ä‘á»™ng" : "VÃ´ hiá»‡u"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:373:                  <p className="px-5 py-2 text-xs text-zinc-400 text-center">...vÃ  {deptMembers.length - 6} thÃ nh viÃªn khÃ¡c</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:379:                  <p className="px-5 py-8 text-sm text-zinc-400 text-center">ChÆ°a cÃ³ thÃ nh viÃªn nÃ o</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\UserDashboard\UserDashboard.tsx:395:                        {m.status ? "Hoáº¡t Ä‘á»™ng" : "VÃ´ hiá»‡u"}
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\AdminDashboard\components\DepartmentTooltip.tsx:27:      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">PhÃ²ng ban</p>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\AdminDashboard\components\DepartmentTooltip.tsx:31:          <span className="text-muted-foreground">Tá»•ng thÃ nh viÃªn</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\AdminDashboard\components\DepartmentTooltip.tsx:35:          <span className="text-muted-foreground">NhÃ¢n sá»±</span>
+C:\Users\tnanh\Desktop\TeamFlow\frontend\src\features\dashboard\AdminDashboard\AdminDashboard.tsx:409:  // BIỂU ĐỒ NHÂN VIÊN ĐÓNG GÓP

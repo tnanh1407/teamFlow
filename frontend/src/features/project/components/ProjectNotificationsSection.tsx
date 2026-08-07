@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, Pin, Pencil, Trash2, Send } from "lucide-react";
 import type { User } from "@/services/user.service";
 import type { ProjectEmployee } from "@/services/project-employee.service";

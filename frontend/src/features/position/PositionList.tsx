@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Search, Plus, Pencil, Trash2, ArrowUpDown, Fingerprint, Copy } from "lucide-react"
 import { Cell, PieChart, Pie, Tooltip, ResponsiveContainer } from "recharts"
 import positionService, { type Position } from "@/services/position.service"
@@ -22,7 +22,7 @@ const levelLabels: Record<string, string> = {
   Intern: "Thá»±c táº­p sinh",
   Junior: "Má»›i Ä‘i lÃ m",
   Middle: "Kinh nghiá»‡m",
-  Senior: "Cao cáº¥p",
+  Senior: "Cao cấp",
   Manager: "Quản lý nhóm",
 }
 
@@ -421,10 +421,10 @@ export default function Positions() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={(e) => openEdit(e, pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sá»­a">
+                        <button onClick={(e) => openEdit(e, pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:bg-blue-950 transition-colors cursor-pointer border-none" title="Sửa">
                           <Pencil size={15} />
                         </button>
-                        <button onClick={(e) => confirmDelete(e, pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="XoÃ¡">
+                        <button onClick={(e) => confirmDelete(e, pos)} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950 transition-colors cursor-pointer border-none" title="Xoá">
                           <Trash2 size={15} />
                         </button>
                       </div>

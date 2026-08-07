@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { CheckCircle2, Edit2, Pin, Plus, Trash2 } from "lucide-react"
 import { useAuth } from "@/stores/auth"
 import systemNotificationService, { type SystemNotification } from "@/services/system-notification.service"
@@ -36,7 +36,7 @@ const priorityLabels: Record<SystemNotification["priority"], string> = {
 
 const audienceLabels: Record<SystemNotification["targetAudience"], string> = {
   all: "ToÃ n há»‡ thá»‘ng",
-  user: "NhÃ¢n sá»±",
+  user: "Nhân sự",
   manager: "Quản lý nhóm",
   staff: "NhÃ¢n viÃªn",
   intern: "Thá»±c táº­p sinh",
@@ -242,7 +242,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
               className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             >
               <option value="all">ToÃ n há»‡ thá»‘ng</option>
-              <option value="user">NhÃ¢n sá»±</option>
+              <option value="user">Nhân sự</option>
               <option value="manager">Quản lý nhóm</option>
               <option value="staff">NhÃ¢n viÃªn</option>
               <option value="intern">Thá»±c táº­p sinh</option>
@@ -350,7 +350,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                     }`}
                   >
                     <CheckCircle2 size={13} />
-                    {item.isRead ? "Bá» Ä‘Ã£ Ä‘á»c" : "ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘á»c"}
+                    {item.isRead ? "Bá» Ä‘Ã£ Ä‘á»c" : "ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘ọc"}
                   </button>
 
                   {canManage && (
@@ -361,7 +361,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                         className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                       >
                         <Edit2 size={13} />
-                        Sá»­a
+                        Sửa
                       </button>
                       <button
                         type="button"
@@ -369,7 +369,7 @@ export default function SystemNotificationsSection({ mode = "view" }: SystemNoti
                         className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-950/30"
                       >
                         <Trash2 size={13} />
-                        XoÃ¡
+                        Xoá
                       </button>
                     </div>
                   )}

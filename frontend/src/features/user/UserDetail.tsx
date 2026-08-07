@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -11,6 +11,7 @@ import EmptyState from "@/shared/ui/EmptyState"
 import userService, { type User } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
+import { getPositionLabel as getSharedPositionLabel } from "@/shared/utils/position"
 
 const userSchema = z.object({
   employeeCode: z.string().trim().min(1, "Vui lÃ²ng nháº­p mÃ£ ngÆ°á»i dÃ¹ng"),
@@ -280,7 +281,7 @@ export default function UserDetail() {
               <label className={labelClass}>Chá»©c vá»¥</label>
               <select {...register("positionId")} className={`${inputClass} appearance-none`}>
                 <option value="">-- Chá»n --</option>
-                {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                {positions.map((p) => <option key={p.id} value={p.id}>{getSharedPositionLabel(p.name)}</option>)}
               </select>
               {errors.positionId?.message && <p className="mt-1 text-xs text-red-500">{errors.positionId.message}</p>}
             </div>
