@@ -121,11 +121,10 @@ export default function ForgotPassword() {
                   type="email"
                   placeholder="Nhập email của bạn"
                   aria-invalid={Boolean(errors.email)}
-                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
-                    errors.email
+                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.email
                       ? "border-red-400 focus:ring-red-500"
                       : "border-border"
-                  }`}
+                    }`}
                   {...register("email")}
                 />
                 {errors.email?.message && (
@@ -141,11 +140,10 @@ export default function ForgotPassword() {
                   type="text"
                   placeholder="Nhập mã người dùng"
                   aria-invalid={Boolean(errors.employeeCode)}
-                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${
-                    errors.employeeCode
+                  className={`block w-full rounded-lg border bg-background/60 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary transition ${errors.employeeCode
                       ? "border-red-400 focus:ring-red-500"
                       : "border-border"
-                  }`}
+                    }`}
                   {...register("employeeCode")}
                 />
                 {errors.employeeCode?.message && (
