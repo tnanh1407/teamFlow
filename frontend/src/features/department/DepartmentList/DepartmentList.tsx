@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Pencil, Trash2, ArrowUpDown, Building2, FileText, Copy } from "lucide-react"
+import { Plus, Pencil, Trash2, Building2, FileText, Copy } from "lucide-react"
 import departmentService, { type Department } from "@/services/department.service"
 import { MySwal } from "@/lib/swal"
 import TableStateRow from "@/shared/ui/TableStateRow"
@@ -11,10 +11,6 @@ export default function Departments() {
   const navigate = useNavigate()
   const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState("")
-
-  const [sortDir, setSortDir] = useState<"asc" | "desc" | null>(null)
-
   const fetchDepartments = async () => {
     try {
       const { data } = await departmentService.getAll()
@@ -29,21 +25,6 @@ export default function Departments() {
   useEffect(() => {
     fetchDepartments()
   }, [])
-
-  const filtered = departments.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase()) ||
-    d.code.toLowerCase().includes(search.toLowerCase())
-  )
-
-  const sorted = [...filtered].sort((a, b) => {
-    if (!sortDir) return 0
-    const cmp = a.name.localeCompare(b.name)
-    return sortDir === "asc" ? cmp : -cmp
-  })
-
-  const toggleSort = () => {
-    setSortDir((prev) => (prev === null ? "asc" : prev === "asc" ? "desc" : null))
-  }
 
   const openCreate = () => {
     openFormDialog()
@@ -157,48 +138,17 @@ export default function Departments() {
       />
       <PageHeader title="Quản lí phòng ban" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
 
-      {/* Search & Actions */}
-      <div className="flex items-center justify-between rounded-2xl px-6 py-2 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={openCreate}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-zinc-400 hover:text-blue-500 hover:shadow-sm transition-all cursor-pointer border-none"
-            title="Thêm phòng ban"
-          >
-            <Plus size={18} />
-          </button>
-          <button
-            onClick={toggleSort}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-none hover:bg-white dark:hover:bg-zinc-800"
-            title={
-              sortDir === null ? "Sắp xếp A-Z" : sortDir === "asc" ? "Sắp xếp Z-A" : "Bỏ sắp xếp"
-            }
-          >
-            <ArrowUpDown
-              size={16}
-              className={`transition-all duration-200 ${sortDir === "desc" ? "rotate-180" : ""
-                } ${sortDir ? "text-blue-500" : "text-zinc-400"}`}
-            />
-            {sortDir && (
-              <span className="text-zinc-600 dark:text-zinc-300">
-                {sortDir === "asc" ? "A-Z" : "Z-A"}
-              </span>
-            )}
-          </button>
-        </div>
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-          />
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo tên hoặc mã phòng ban..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 pl-10 pr-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-          />
-        </div>
+      {/* Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
+        <button
+          type="button"
+          onClick={openCreate}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30"
+          title="Thêm phòng ban"
+        >
+          <Plus size={16} />
+          <span>Thêm phòng ban</span>
+        </button>
       </div>
 
       {/* Table */}
@@ -227,10 +177,10 @@ export default function Departments() {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {loading ? (
                 <TableStateRow colSpan={5} loading title="Đang tải..." />
-              ) : sorted.length === 0 ? (
+              ) : departments.length === 0 ? (
                 <TableStateRow colSpan={5} title="Không tìm thấy phòng ban nào" />
               ) : (
-                sorted.map((department) => (
+                departments.map((department) => (
                   <tr
                     key={department.id}
                     onClick={() => navigate(`/departments/${department.id}`)}
