@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "
 import userService, {
   type ForgotPasswordPayload,
   type LoginPayload,
+  type PaginatedUsersResponse,
   type User,
+  type UserSearchParams,
 } from "@/services/user.service"
 import departmentService, { type Department } from "@/services/department.service"
 import positionService, { type Position } from "@/services/position.service"
@@ -12,11 +14,10 @@ type UserPayload = Record<string, unknown> | FormData
 
 export const userQueryKeys = {
   all: ["users"] as const,
+  search: (params: UserSearchParams) => ["users", "search", params] as const,
   departments: ["users", "departments"] as const,
   positions: ["users", "positions"] as const,
 }
-
-
 
 export function useForgotPasswordMutation(
   options?: UseMutationOptions<{ message: string; data?: { devCode?: string } }, MutationError, ForgotPasswordPayload>
@@ -30,14 +31,26 @@ export function useForgotPasswordMutation(
   })
 }
 
-export function useUsersQuery() { // custom hook
-  return useQuery<User[]>({ // biết dữ liệu trả về
-    queryKey: userQueryKeys.all, // tên định danh của query
-    queryFn: async () => { // hàm gọi api
+export function useUsersQuery() {
+  return useQuery<User[]>({
+    queryKey: userQueryKeys.all,
+    queryFn: async () => {
       const { data } = await userService.getAll()
-      return data.data 
+      return data.data
     },
-    staleTime: 30_000, // thời gian data được xem là mới (30s)
+    staleTime: 30_000,
+  })
+}
+
+export function useUsersSearchQuery(params: UserSearchParams, enabled: boolean) {
+  return useQuery<PaginatedUsersResponse>({
+    queryKey: userQueryKeys.search(params),
+    queryFn: async () => {
+      const { data } = await userService.search(params)
+      return data
+    },
+    enabled,
+    staleTime: 30_000,
   })
 }
 

@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react"
-import { Bell, Briefcase, Building2, CheckSquare, LayoutDashboard, Settings, Shield, Users, Medal } from "lucide-react"
+import { Bell, Briefcase, Building2, CheckSquare, LayoutDashboard, Medal, Settings, Shield, Users } from "lucide-react"
 
 export interface SidebarItem {
   label: string
@@ -25,7 +25,7 @@ export const sidebarItems: SidebarItem[] = [
     icon: Shield,
     children: [
       {
-        label: "Nhân viên",
+        label: "Quản lý nhân viên",
         to: "/users",
         icon: Briefcase,
       },
@@ -75,21 +75,21 @@ export const breadcrumbRoutes: BreadcrumbRoute[] = [
     path: "/users",
     breadcrumbs: [
       { label: "Quản trị" },
-      { label: "Quản lí người dùng" },
+      { label: "Quản lý nhân viên" },
     ],
   },
   {
     path: "/departments",
     breadcrumbs: [
       { label: "Quản trị" },
-      { label: "Quản lí phòng ban" },
+      { label: "Quản lý phòng ban" },
     ],
   },
   {
     path: "/positions",
     breadcrumbs: [
       { label: "Quản trị" },
-      { label: "Quản lí chức vụ" },
+      { label: "Quản lý chức vụ" },
     ],
   },
   {

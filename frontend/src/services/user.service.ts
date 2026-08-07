@@ -45,6 +45,25 @@ export interface ForgotPasswordPayload {
   employeeCode: string;
 }
 
+export interface PaginatedUsersResponse {
+  data: User[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface UserSearchParams {
+  q: string;
+  page?: number;
+  limit?: number;
+  departmentId?: string;
+  role?: AccountRole;
+  positionId?: string;
+  status?: "active" | "inactive" | "all";
+  sortBy?: "name-asc" | "name-desc" | "hire-newest" | "hire-oldest" | "role";
+}
+
 type BackendUser = {
   id: string;
   departmentId: string | null;
@@ -122,6 +141,27 @@ const userService = {
   getAll: async () => {
     const { data } = await api.get<{ data: BackendUser[] }>("/users/all");
     return { data: { data: data.data.map(normalizeUser) } };
+  },
+
+  search: async (params: UserSearchParams) => {
+    const { data } = await api.get<{
+      data: BackendUser[];
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    }>("/users/search", {
+      params,
+    });
+    return {
+      data: {
+        data: data.data.map(normalizeUser),
+        total: data.total,
+        page: data.page,
+        limit: data.limit,
+        totalPages: data.totalPages,
+      },
+    };
   },
 
   getById: async (id: string) => {

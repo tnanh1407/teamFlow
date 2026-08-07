@@ -1,7 +1,10 @@
 import { type MouseEvent } from "react"
-import { Copy, Fingerprint, Pencil, Trash2 } from "lucide-react"
-import { type User } from "@/services/user.service"
+import { Copy, Fingerprint } from "lucide-react"
+import { toast } from "sonner"
+import type { User } from "@/services/user.service"
 import TableStateRow from "@/shared/ui/TableStateRow"
+import UserRowActions from "./UserRowActions"
+import UserStatusSwitch from "./UserStatusSwitch"
 
 interface UserListTableProps {
   loading: boolean
@@ -10,10 +13,53 @@ interface UserListTableProps {
   posNameMap: Map<string, string>
   canEdit: (user: User) => boolean
   canDelete: (user: User) => boolean
+  pendingStatusMap: Record<string, boolean>
+  showUuid: boolean
   onView: (user: User) => void
   onEdit: (user: User) => void
   onToggleStatus: (user: User) => void
-  onDelete: (e: MouseEvent, user: User) => void
+  onDelete: (event: MouseEvent, user: User) => void
+}
+
+function getShortUuid(value: string) {
+  if (value.length <= 16) return value
+  return `${value.slice(0, 8)}...${value.slice(-4)}`
+}
+
+function getInitials(user: User) {
+  if (user.name.trim()) {
+    const [first = "", second = ""] = user.name.trim().split(/\s+/)
+    return `${first[0] ?? ""}${second[0] ?? first[1] ?? ""}`.toUpperCase()
+  }
+
+  return user.username.slice(0, 2).toUpperCase()
+}
+
+function getRoleLabel(user: User, positionName: string) {
+  if (user.role === "admin") return "Quản trị viên"
+  if (positionName !== "—") return positionName
+  return "Nhân viên"
+}
+
+async function copyToClipboard(value: string, successMessage: string) {
+  try {
+    await navigator.clipboard.writeText(value)
+    toast.success(successMessage)
+  } catch {
+    toast.error("Không thể sao chép")
+  }
+}
+
+function UserAvatar({ user }: { user: User }) {
+  return (
+    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+      {user.avatarURL ? (
+        <img src={user.avatarURL} alt="" className="h-full w-full object-cover" />
+      ) : (
+        getInitials(user)
+      )}
+    </div>
+  )
 }
 
 export default function UserListTable({
@@ -23,151 +69,134 @@ export default function UserListTable({
   posNameMap,
   canEdit,
   canDelete,
+  pendingStatusMap,
+  showUuid,
   onView,
   onEdit,
   onToggleStatus,
   onDelete,
 }: UserListTableProps) {
+  const colSpan = showUuid ? 8 : 7
+
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">UUID</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Avatar</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Mã người dùng</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Họ và tên</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Tên đăng nhập</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Chức vụ</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Trạng thái</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Thao tác</th>
+            <tr className="border-b border-border bg-muted/60">
+              {showUuid ? <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">UUID</th> : null}
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Avatar</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Mã nhân viên</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Họ và tên</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Tên đăng nhập</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Chức vụ / vai trò</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Trạng thái</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground">Thao tác</th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          <tbody className="divide-y divide-border">
             {loading ? (
-              <TableStateRow colSpan={8} loading title="Đang tải..." />
+              <TableStateRow colSpan={colSpan} loading title="Đang tải danh sách nhân viên..." />
             ) : users.length === 0 ? (
-              <TableStateRow colSpan={8} title="Không tìm thấy người dùng nào" />
+              <TableStateRow
+                colSpan={colSpan}
+                title="Không tìm thấy nhân viên phù hợp"
+                description="Hãy thử thay đổi từ khóa tìm kiếm, sắp xếp hoặc bộ lọc."
+              />
             ) : (
-              users.map((item) => {
-                const deptName = deptNameMap.get(item.departmentId || "") || "—"
-                const posName = posNameMap.get(item.positionId || "") || "—"
-
+              users.map((user) => {
+                const deptName = deptNameMap.get(user.departmentId || "") || "—"
+                const positionName = posNameMap.get(user.positionId || "") || "—"
+                const roleLabel = getRoleLabel(user, positionName)
+                const pending = Boolean(pendingStatusMap[user.id])
                 return (
-                  <tr key={item.id} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-400">
-                        <Fingerprint size={12} />
-                        {item.id}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigator.clipboard.writeText(item.id)
-                          }}
-                          className="border-none bg-transparent p-0.5 text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-500 dark:hover:bg-zinc-800"
-                        >
-                          <Copy size={12} />
-                        </button>
-                      </span>
+                  <tr key={user.id} className="transition hover:bg-muted/40">
+                    {showUuid ? (
+                      <td className="px-4 py-3 align-top">
+                        <div className="flex items-center gap-2 font-mono text-xs text-foreground" title={user.id}>
+                          <Fingerprint size={12} className="text-muted-foreground" />
+                          <span>{getShortUuid(user.id)}</span>
+                          <button
+                            type="button"
+                            onClick={() => void copyToClipboard(user.id, "Đã sao chép UUID")}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                            aria-label="Sao chép UUID"
+                            title="Sao chép UUID"
+                          >
+                            <Copy size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    ) : null}
+                    <td className="px-4 py-3 align-top">
+                      <UserAvatar user={user} />
                     </td>
-
-                    <td className="px-4 py-3">
-                      <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-xs font-bold text-white">
-                        {item.avatarURL ? (
-                          <img src={item.avatarURL} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          item.username.slice(0, 2).toUpperCase()
-                        )}
+                    <td className="px-4 py-3 align-top">
+                      <div className="inline-flex items-center gap-2 font-mono text-sm font-medium text-foreground">
+                        <span>{user.employeeCode || "—"}</span>
+                        {user.employeeCode ? (
+                          <button
+                            type="button"
+                            onClick={() => void copyToClipboard(user.employeeCode || "", "Đã sao chép mã nhân viên")}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                            aria-label="Sao chép mã nhân viên"
+                            title="Sao chép mã nhân viên"
+                          >
+                            <Copy size={13} />
+                          </button>
+                        ) : null}
                       </div>
                     </td>
-
-                    <td className="px-4 py-3">
-                      <div className="inline-flex items-center gap-1.5 font-mono text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                        {item.employeeCode || "—"}
+                    <td className="px-4 py-3 align-top">
+                      <div className="min-w-[220px]">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigator.clipboard.writeText(item.employeeCode || "")
-                          }}
-                          className="border-none bg-transparent p-0.5 text-zinc-300 transition hover:bg-zinc-100 hover:text-zinc-500 dark:hover:bg-zinc-800"
+                          type="button"
+                          onClick={() => onView(user)}
+                          className="text-left text-sm font-semibold text-foreground transition hover:text-primary"
                         >
-                          <Copy size={12} />
+                          {user.name || "—"}
                         </button>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{user.email || "—"}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{deptName}</p>
                       </div>
                     </td>
-
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100">{item.name || "—"}</div>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {deptName} · {posName}
-                      </p>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => onView(item)}
-                        className="border-none bg-transparent text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
-                      >
-                        {item.username}
-                      </button>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          item.role === "admin"
-                            ? "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"
-                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                        }`}
-                      >
-                        {item.role === "admin" ? "Admin" : posName}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 align-top">
                       <button
                         type="button"
-                        onClick={() => canEdit(item) && onToggleStatus(item)}
-                        disabled={!canEdit(item)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors ${
-                          item.status
-                            ? "border-emerald-200 bg-emerald-500 dark:border-emerald-500/40 dark:bg-emerald-500"
-                            : "border-zinc-300 bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-700"
-                        } ${!canEdit(item) ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                        title={item.status ? "Đang hoạt động" : "Đang vô hiệu"}
-                        aria-label={item.status ? "Đang hoạt động" : "Đang vô hiệu"}
+                        onClick={() => onView(user)}
+                        className="text-left text-sm font-medium text-primary transition hover:underline"
                       >
-                        <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${
-                            item.status ? "translate-x-5" : "translate-x-1"
-                          }`}
-                        />
+                        {user.username || "—"}
                       </button>
                     </td>
-
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {canEdit(item) && (
-                          <button
-                            onClick={() => onEdit(item)}
-                            className="border-none rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400"
-                            title="Sửa"
-                          >
-                            <Pencil size={15} />
-                          </button>
-                        )}
-                        {canDelete(item) && (
-                          <button
-                            onClick={(e) => onDelete(e, item)}
-                            className="border-none rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
-                            title="Xoá"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        )}
-                      </div>
+                    <td className="px-4 py-3 align-top">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                          user.role === "admin"
+                            ? "bg-secondary/15 text-secondary"
+                            : "bg-primary/10 text-primary"
+                        }`}
+                      >
+                        {roleLabel}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 align-top">
+                      <UserStatusSwitch
+                        checked={user.status}
+                        disabled={!canEdit(user)}
+                        pending={pending}
+                        onToggle={() => onToggleStatus(user)}
+                      />
+                    </td>
+                    <td className="px-4 py-3 align-top text-right">
+                      <UserRowActions
+                        user={user}
+                        canEdit={canEdit(user)}
+                        canDelete={canDelete(user)}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
                     </td>
                   </tr>
                 )

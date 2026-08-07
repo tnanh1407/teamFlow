@@ -33,8 +33,26 @@ class UserController {
 
   async search(req: AuthRequest, res: Response) {
     const keyword = (req.query.q as string) || "";
-    const users = await userService.search(keyword);
-    res.json({ data: users });
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const departmentId = (req.query.departmentId as string) || undefined;
+    const role = (req.query.role as EAccountRole | undefined) || undefined;
+    const positionId = (req.query.positionId as string) || undefined;
+    const status = (req.query.status as "active" | "inactive" | "all" | undefined) || undefined;
+    const sortBy =
+      (req.query.sortBy as "name-asc" | "name-desc" | "hire-newest" | "hire-oldest" | "role" | undefined) || undefined;
+
+    const result = await userService.search({
+      keyword,
+      page,
+      limit,
+      departmentId,
+      role,
+      positionId,
+      status,
+      sortBy,
+    });
+    res.json(result);
   }
 
   async getById(req: AuthRequest, res: Response) {

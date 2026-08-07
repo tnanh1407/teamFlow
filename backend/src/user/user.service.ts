@@ -66,8 +66,22 @@ export interface ResetPasswordInput {
   code: string;
   newPassword: string;
 }
+export interface SearchUsersOptions {
+  keyword: string;
+  page?: number;
+  limit?: number;
+  departmentId?: string;
+  role?: EAccountRole;
+  positionId?: string;
+  status?: "active" | "inactive" | "all";
+  sortBy?: "name-asc" | "name-desc" | "hire-newest" | "hire-oldest" | "role";
+}
 
 const userColumns = UserSchema.columns;
+const qualifiedUserColumns = userColumns
+  .split(",")
+  .map((column) => `users.${column.trim()}`)
+  .join(",\n  ");
 
 const normalizeRequiredText = (value: string) => value.trim();
 
@@ -341,23 +355,94 @@ class UserService {
     return Promise.all(rows.map((row) => hydrateUser(row)));
   }
 
-  async search(keyword: string) {
-    const q = keyword.trim();
-    if (!q) return [];
+  async search(options: SearchUsersOptions) {
+    const q = options.keyword.trim();
+    const page = Math.max(1, options.page ?? 1);
+    const limit = Math.min(100, Math.max(1, options.limit ?? 10));
+    const offset = (page - 1) * limit;
+
+    if (!q) {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
+
+    const values: Array<string | number | boolean> = [`%${q}%`];
+    const conditions = [
+      `(users.name ILIKE $1
+          OR users.id::text ILIKE $1
+          OR users.email ILIKE $1
+          OR users.username ILIKE $1
+          OR users.employee_code ILIKE $1
+          OR departments.name ILIKE $1
+          OR users.phone ILIKE $1)`,
+    ];
+
+    if (options.departmentId) {
+      values.push(options.departmentId);
+      conditions.push(`users.department_id = $${values.length}`);
+    }
+
+    if (options.role) {
+      values.push(options.role);
+      conditions.push(`users.role = $${values.length}`);
+    }
+
+    if (options.positionId) {
+      values.push(options.positionId);
+      conditions.push(`users.position_id = $${values.length}`);
+    }
+
+    if (options.status === "active") {
+      values.push(true);
+      conditions.push(`users.status = $${values.length}`);
+    }
+
+    if (options.status === "inactive") {
+      values.push(false);
+      conditions.push(`users.status = $${values.length}`);
+    }
+
+    const whereClause = conditions.join(" AND ");
+    const orderBy =
+      options.sortBy === "name-desc"
+        ? "users.name DESC"
+        : options.sortBy === "hire-newest"
+          ? "users.hire_date DESC NULLS LAST, users.created_at DESC"
+          : options.sortBy === "hire-oldest"
+            ? "users.hire_date ASC NULLS LAST, users.created_at DESC"
+            : options.sortBy === "role"
+              ? "CASE users.role WHEN 'admin' THEN 0 ELSE 1 END ASC, users.name ASC"
+              : "users.name ASC";
+
+    const countResult = await pool.query<{ count: string }>(
+      `SELECT COUNT(DISTINCT users.id) AS count
+       FROM users
+       LEFT JOIN departments ON departments.id = users.department_id
+       WHERE ${whereClause}`,
+      values
+    );
+
+    values.push(limit, offset);
+    const limitParamIndex = values.length - 1;
+    const offsetParamIndex = values.length;
 
     const { rows } = await pool.query<UserRow>(
-      `SELECT ${userColumns}
+      `SELECT DISTINCT ${qualifiedUserColumns}
        FROM users
-       WHERE name ILIKE $1
-          OR id::text ILIKE $1
-          OR email ILIKE $1
-          OR username ILIKE $1
-          OR employee_code ILIKE $1
-          OR phone ILIKE $1
-       ORDER BY created_at DESC`,
-      [`%${q}%`]
+       LEFT JOIN departments ON departments.id = users.department_id
+       WHERE ${whereClause}
+       ORDER BY ${orderBy}
+       LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}`,
+      values
     );
-    return Promise.all(rows.map((row) => hydrateUser(row)));
+
+    const total = parseInt(countResult.rows[0]?.count ?? "0", 10);
+    return {
+      data: await Promise.all(rows.map((row) => hydrateUser(row))),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async create(data: CreateUserDataInput) {
