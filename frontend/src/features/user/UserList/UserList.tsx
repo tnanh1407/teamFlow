@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 import { useAuth } from "@/stores/auth"
 import { MySwal } from "@/lib/swal"
 import PageHeader from "@/shared/ui/PageHeader"
@@ -340,6 +341,7 @@ export default function UserList() {
             editingUser,
             departments: departmentsQuery.data ?? [],
             positions: positionsQuery.data ?? [],
+            canEditEmployeeCode: isAdmin,
             onSubmit: async (payload) => {
               await updateUserMutation.mutateAsync({ id: editingUser.id, payload })
             },
@@ -354,13 +356,17 @@ export default function UserList() {
 
       if (!result || !result.changed) return
 
-      void MySwal.fire({
-        icon: "success",
-        title: "Thành công",
-        text: editingUser ? "Cập nhật nhân viên thành công" : "Thêm nhân viên thành công",
-        confirmButtonText: "Đóng",
-        confirmButtonColor: "var(--primary)",
-      })
+      if (editingUser) {
+        toast.success("Cập nhật nhân viên thành công")
+      } else {
+        void MySwal.fire({
+          icon: "success",
+          title: "Thành công",
+          text: "Thêm nhân viên thành công",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "var(--primary)",
+        })
+      }
     } catch (error: unknown) {
       void MySwal.fire({
         icon: "error",

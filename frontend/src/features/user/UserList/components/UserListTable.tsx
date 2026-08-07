@@ -181,6 +181,7 @@ export default function UserListTable({
                       </span>
                     </td>
 
+                    {/* Trạng thái hoạt động */}
                     <td className="px-4 py-3 align-middle">
                       <UserStatusSwitch
                         checked={user.status}

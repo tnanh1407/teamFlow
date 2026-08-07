@@ -117,6 +117,16 @@ class UserController {
       }
     }
 
+    const requestedEmployeeCode = typeof req.body.employeeCode === "string"
+      ? req.body.employeeCode.trim().toUpperCase()
+      : req.body.employeeCode;
+    const currentEmployeeCode = target.employeeCode?.trim().toUpperCase() ?? null;
+    const departmentChanged = req.body.departmentId !== undefined && req.body.departmentId !== target.departmentId;
+
+    if (currentUser.role !== EAccountRole.ADMIN && !departmentChanged && requestedEmployeeCode !== currentEmployeeCode) {
+      throw new AppError("Only admins can manually change employee codes", 403);
+    }
+
     const data = { ...req.body };
     if (req.file) {
       if (target.avatarURL) {

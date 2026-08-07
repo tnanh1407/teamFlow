@@ -111,8 +111,31 @@ body,
   font-weight: 700 !important;
 }
 
+.swal-theme-close {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  z-index: 3 !important;
+  margin: 0 !important;
+}
+
 .swal-theme-html {
   color: var(--muted-foreground) !important;
+  max-height: calc(100vh - 10rem) !important;
+  overflow-y: auto !important;
+}
+
+.user-edit-dialog-popup {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.user-edit-dialog-html {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
 }
 
 .swal-theme-confirm,

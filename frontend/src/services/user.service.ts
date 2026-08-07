@@ -180,12 +180,16 @@ const userService = {
   },
 
   create: async (data: FormData | Record<string, unknown>) => {
-    const { data: response } = await api.post<{ data: BackendUser }>("/users", data);
+    const { data: response } = await api.post<{ data: BackendUser }>("/users", data, {
+      headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined,
+    });
     return { data: { data: normalizeUser(response.data) } };
   },
 
   update: async (id: string, data: FormData | Record<string, unknown>) => {
-    const { data: response } = await api.patch<{ data: BackendUser }>(`/users/${id}`, data);
+    const { data: response } = await api.patch<{ data: BackendUser }>(`/users/${id}`, data, {
+      headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined,
+    });
     return { data: { data: normalizeUser(response.data) } };
   },
 

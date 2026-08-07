@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Copy } from "lucide-react"
+import { Copy, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { type User } from "@/services/user.service"
 import type { Department } from "@/services/department.service"
@@ -14,6 +14,7 @@ type OpenUserFormEditDialogParams = {
   editingUser: User
   departments: Department[]
   positions: Position[]
+  canEditEmployeeCode: boolean
   onSubmit: (payload: Record<string, unknown> | FormData) => Promise<void>
 }
 
@@ -50,6 +51,46 @@ function buildEmployeeCode(departmentCode: string) {
   return `${departmentCode.trim().toUpperCase()}${generateEmployeeSuffix()}`
 }
 
+function parseDateOnly(value: string | undefined) {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
+  const [year, month, day] = value.split("-").map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date : null
+}
+
+function addEmploymentDateIssues(
+  data: Pick<UserEditFormValues, "birthDate" | "hireDate" | "leaveDate">,
+  ctx: z.RefinementCtx,
+) {
+  const birthDate = parseDateOnly(data.birthDate)
+  const hireDate = parseDateOnly(data.hireDate)
+  const leaveDate = parseDateOnly(data.leaveDate)
+
+  if (data.birthDate && !birthDate) {
+    ctx.addIssue({ code: "custom", path: ["birthDate"], message: "Ngày sinh không hợp lệ" })
+  }
+  if (data.hireDate && !hireDate) {
+    ctx.addIssue({ code: "custom", path: ["hireDate"], message: "Ngày tuyển dụng không hợp lệ" })
+  }
+  if (data.leaveDate && !leaveDate) {
+    ctx.addIssue({ code: "custom", path: ["leaveDate"], message: "Ngày nghỉ việc không hợp lệ" })
+  }
+
+  if (birthDate && hireDate) {
+    const minimumHireDate = new Date(birthDate)
+    minimumHireDate.setUTCFullYear(minimumHireDate.getUTCFullYear() + 18)
+    if (hireDate < birthDate) {
+      ctx.addIssue({ code: "custom", path: ["hireDate"], message: "Ngày tuyển dụng không được trước ngày sinh" })
+    } else if (hireDate < minimumHireDate) {
+      ctx.addIssue({ code: "custom", path: ["hireDate"], message: "Ngày tuyển dụng phải cách ngày sinh ít nhất 18 năm" })
+    }
+  }
+
+  if (hireDate && leaveDate && leaveDate < hireDate) {
+    ctx.addIssue({ code: "custom", path: ["leaveDate"], message: "Ngày nghỉ việc không được trước ngày tuyển dụng" })
+  }
+}
+
 function buildEditUserSchema(departments: Department[], positions: Position[], allowAdminEmptyFields: boolean) {
   const departmentCodeMap = new Map(departments.map((department) => [department.id, department.code.trim().toUpperCase()] as const))
   const positionNameMap = new Map(positions.map((position) => [position.id, position.name.trim().toLowerCase()] as const))
@@ -71,6 +112,7 @@ function buildEditUserSchema(departments: Department[], positions: Position[], a
       status: z.boolean(),
     })
     .superRefine((data, ctx) => {
+      addEmploymentDateIssues(data, ctx)
       const employeeCode = (data.employeeCode ?? "").trim().toUpperCase()
       const departmentId = data.departmentId?.trim() || ""
       const positionId = data.positionId?.trim() || ""
@@ -195,9 +237,19 @@ function normalizeComparable(value: string | null | undefined) {
   return trimmed ? trimmed : undefined
 }
 
+function normalizeDateComparable(value: unknown) {
+  if (typeof value !== "string") return undefined
+  const trimmed = value.trim()
+  return trimmed ? trimmed.slice(0, 10) : undefined
+}
+
 function normalizePayloadValue(value: unknown) {
   if (typeof value !== "string") return undefined
   return normalizeComparable(value)
+}
+
+function getPayloadValue(payload: Record<string, unknown> | FormData, key: string) {
+  return payload instanceof FormData ? payload.get(key) : payload[key]
 }
 
 function isSameEditPayload(editingUser: User, payload: Record<string, unknown>) {
@@ -206,9 +258,9 @@ function isSameEditPayload(editingUser: User, payload: Record<string, unknown>) 
     normalizePayloadValue(payload.name) === normalizeComparable(editingUser.name) &&
     normalizePayloadValue(payload.email) === normalizeComparable(editingUser.email) &&
     normalizePayloadValue(payload.phone) === normalizeComparable(editingUser.phone) &&
-    normalizePayloadValue(payload.birthDate) === normalizeComparable(editingUser.birthDate || undefined) &&
-    normalizePayloadValue(payload.hireDate) === normalizeComparable(editingUser.hireDate || undefined) &&
-    normalizePayloadValue(payload.leaveDate) === normalizeComparable(editingUser.leaveDate || undefined) &&
+    normalizeDateComparable(payload.birthDate) === normalizeDateComparable(editingUser.birthDate) &&
+    normalizeDateComparable(payload.hireDate) === normalizeDateComparable(editingUser.hireDate) &&
+    normalizeDateComparable(payload.leaveDate) === normalizeDateComparable(editingUser.leaveDate) &&
     String(payload.gender ?? "") === editingUser.gender &&
     String(payload.departmentId ?? "") === editingUser.departmentId &&
     String(payload.positionId ?? "") === editingUser.positionId &&
@@ -221,6 +273,7 @@ export default async function openUserFormEditDialog({
   editingUser,
   departments,
   positions,
+  canEditEmployeeCode,
   onSubmit,
 }: OpenUserFormEditDialogParams): Promise<OpenUserFormEditDialogResult | undefined> {
   const dataRef: { current: UserEditFormValues | null } = { current: null }
@@ -247,6 +300,7 @@ export default async function openUserFormEditDialog({
     const previousDepartmentIdRef = useRef<string | undefined>(undefined)
     const [avatarFile, setAvatarFile] = useState<File | null>(null)
     const [avatarPreview, setAvatarPreview] = useState(editingUser.avatarURL || "")
+    const [showPassword, setShowPassword] = useState(false)
     const avatarInputRef = useRef<HTMLInputElement | null>(null)
     const selectedDepartment = departments.find((item) => item.id === departmentId)
     const departmentPrefix = selectedDepartment?.code.trim().toUpperCase() || "DEPT"
@@ -300,17 +354,15 @@ export default async function openUserFormEditDialog({
     }, [departmentId, departments, employeeCode, setValue])
 
     return (
-      <div className="space-y-4 text-left">
-        <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4">
+      <div className="space-y-5 text-left">
+        <div className="rounded-2xl bg-muted/30 p-3 sm:p-4">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-3 sm:flex-row sm:items-center">
               <div className="h-14 w-14 overflow-hidden rounded-2xl border border-border bg-muted">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt={editingUser.name} className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                    {editingUser.name.slice(0, 2).toUpperCase()}
-                  </div>
+                  <img src="/avatarDefault.png" alt="Ảnh đại diện mặc định" className="h-full w-full object-cover" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -320,13 +372,20 @@ export default async function openUserFormEditDialog({
                   type="file"
                   accept="image/*"
                   ref={avatarInputRef}
-                  className="mt-2 block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+                  className="sr-only"
                   onChange={(e) => {
                     const file = e.target.files?.[0] ?? null
                     avatarRemovedRef.current = false
                     setAvatarFile(file)
                   }}
                 />
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="mt-2 inline-flex min-h-9 items-center rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                >
+                  Chọn ảnh
+                </button>
               </div>
               <div className="flex flex-wrap gap-2 sm:justify-end">
                 {avatarFile && (
@@ -359,18 +418,23 @@ export default async function openUserFormEditDialog({
               </div>
             </div>
 
+            <div className="border-t border-border/70 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Thông tin tài khoản</p>
+            </div>
+
             <div className="flex flex-col gap-1.5">
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mã nhân viên</label>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                Mã nhân viên{canEditEmployeeCode ? " (Admin có thể sửa)" : ""}
+              </label>
               <div className="flex flex-col gap-2">
-                <input
-                  {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
-                  placeholder={employeePlaceholder}
-                  readOnly
-                  aria-readonly="true"
-                />
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Chọn phòng ban để hệ thống tự sinh mã nhân viên.</p>
+                <div className="relative">
+                  <input
+                    {...register("employeeCode", { setValueAs: (value) => (typeof value === "string" ? value.toUpperCase() : value) })}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 pr-20 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
+                    placeholder={employeePlaceholder}
+                    readOnly={!canEditEmployeeCode}
+                    aria-readonly={!canEditEmployeeCode}
+                  />
                   <button
                     type="button"
                     onClick={async () => {
@@ -383,14 +447,19 @@ export default async function openUserFormEditDialog({
                       }
                     }}
                     disabled={!employeeCode}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+                    className="absolute right-1 top-1 inline-flex min-h-8 items-center gap-1 rounded-lg border border-border bg-card px-2 text-[11px] font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label="Sao chép mã nhân viên"
                     title="Sao chép mã nhân viên"
                   >
                     <Copy size={12} />
-                    <span className="hidden sm:inline">Copy</span>
+                    <span>Copy</span>
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {canEditEmployeeCode
+                    ? "Đổi phòng ban sẽ sinh mã mới; mã sửa thủ công cần xác nhận."
+                    : "Chọn phòng ban để hệ thống tự sinh mã nhân viên."}
+                </p>
               </div>
               {errors.employeeCode?.message && <p className="mt-1 text-xs text-destructive">{errors.employeeCode.message}</p>}
             </div>
@@ -407,13 +476,28 @@ export default async function openUserFormEditDialog({
 
               <div className="flex flex-col gap-1.5">
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mật khẩu mới</label>
-                <input
-                  type="password"
-                  {...register("password")}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2 pr-11 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute right-1 top-1 inline-flex min-h-8 min-w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
                 <p className="text-xs text-muted-foreground">Để trống nếu không muốn đổi mật khẩu.</p>
               </div>
+            </div>
+
+            <div className="border-t border-border/70 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Thông tin cá nhân</p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -437,6 +521,10 @@ export default async function openUserFormEditDialog({
               </div>
             </div>
 
+            <div className="border-t border-border/70 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Thời gian làm việc</p>
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Số điện thoại</label>
@@ -451,7 +539,7 @@ export default async function openUserFormEditDialog({
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Giới tính</label>
                 <select
                   {...register("gender")}
-                  className="w-full appearance-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
+                  className="w-full cursor-pointer appearance-none rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="other">Khác</option>
                   <option value="male">Nam</option>
@@ -463,34 +551,43 @@ export default async function openUserFormEditDialog({
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ngày sinh</label>
                 <input
                   type="date"
+                  lang="en-GB"
                   {...register("birthDate")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
+                {errors.birthDate?.message && <p className="mt-1 text-xs text-destructive">{errors.birthDate.message}</p>}
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ngày tuyển dụng</label>
                 <input
                   type="date"
+                  lang="en-GB"
                   {...register("hireDate")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
+                {errors.hireDate?.message && <p className="mt-1 text-xs text-destructive">{errors.hireDate.message}</p>}
               </div>
 
-              <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Ngày nghỉ việc</label>
+              <div className="flex flex-col gap-1.5 rounded-xl border border-warning/30 bg-warning/5 p-3 sm:col-span-2">
+                <label className="mb-1.5 block text-xs font-semibold text-foreground">Ngày nghỉ việc</label>
                 <input
                   type="date"
+                  lang="en-GB"
                   {...register("leaveDate")}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                 />
+                {errors.leaveDate?.message && <p className="mt-1 text-xs text-destructive">{errors.leaveDate.message}</p>}
                 <p className="text-xs text-muted-foreground">Chỉ điền khi muốn đánh dấu nhân sự đã nghỉ.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-muted/30 p-3 sm:p-4">
+        <div className="rounded-2xl bg-muted/30 p-3 sm:p-4">
+          <div className="mb-3 border-b border-border/70 pb-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Phân quyền và trạng thái</p>
+          </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Phòng ban</label>
@@ -543,8 +640,16 @@ export default async function openUserFormEditDialog({
 
   const result = await MySwal.fire({
     title: "Sửa người dùng",
-    width: "min(96vw, 760px)",
+    width: "min(96vw, 920px)",
     html: <FormComponent />,
+    customClass: {
+      popup: "swal-theme-popup user-edit-dialog-popup",
+      title: "swal-theme-title",
+      htmlContainer: "swal-theme-html user-edit-dialog-html",
+      confirmButton: "swal-theme-confirm",
+      cancelButton: "swal-theme-cancel",
+      closeButton: "swal-theme-close",
+    },
     showCloseButton: true,
     closeButtonAriaLabel: "Đóng",
     showCancelButton: true,
@@ -569,9 +674,39 @@ export default async function openUserFormEditDialog({
 
   const nextPayload = buildEditPayload(result.value, avatarFileRef.current, avatarRemovedRef.current)
 
+  const employeeCodeChanged =
+    normalizePayloadValue(getPayloadValue(nextPayload, "employeeCode")) !==
+    normalizeComparable(editingUser.employeeCode)
+
+  if (canEditEmployeeCode && employeeCodeChanged) {
+    const confirmation = await MySwal.fire({
+      icon: "warning",
+      title: "Xác nhận đổi mã nhân viên",
+      text: "Mã nhân viên là dữ liệu định danh nghiệp vụ. Bạn có chắc muốn thay đổi mã này?",
+      showCancelButton: true,
+      confirmButtonText: "Xác nhận đổi mã",
+      cancelButtonText: "Giữ mã cũ",
+      reverseButtons: true,
+    })
+
+    if (!confirmation.isConfirmed) return
+  }
+
   if (!avatarFileRef.current && !avatarRemovedRef.current && isSameEditPayload(editingUser, nextPayload as Record<string, unknown>)) {
     return { submitted: false, changed: false }
   }
+
+  const confirmation = await MySwal.fire({
+    icon: "question",
+    title: "Xác nhận cập nhật",
+    text: `Bạn có chắc muốn cập nhật thông tin của ${editingUser.name || editingUser.username}?`,
+    showCancelButton: true,
+    confirmButtonText: "Xác nhận cập nhật",
+    cancelButtonText: "Hủy",
+    reverseButtons: true,
+  })
+
+  if (!confirmation.isConfirmed) return
 
   await onSubmit(nextPayload)
   return { submitted: true, changed: true }

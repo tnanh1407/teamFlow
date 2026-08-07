@@ -561,7 +561,11 @@ class UserService {
     const employment = resolveEmploymentState(data.status, data.leaveDate);
     const nextRole = data.role ?? previous.role;
     const assignments = await resolveUserAssignments(nextRole, data.departmentId ?? previous.departmentId, data.positionId ?? previous.positionId);
-    const nextEmployeeCode = data.employeeCode ?? previous.employeeCode;
+    const departmentChanged = data.departmentId !== undefined && data.departmentId !== previous.departmentId;
+    const generatedEmployeeCode = departmentChanged && assignments.departmentId
+      ? buildEmployeeCode(await resolveEmployeeCodePrefix(assignments.departmentId))
+      : undefined;
+    const nextEmployeeCode = generatedEmployeeCode ?? data.employeeCode ?? previous.employeeCode;
     const normalizedEmployeeCode = await normalizeAndValidateEmployeeCode(
       nextRole,
       assignments.departmentId,
@@ -571,7 +575,7 @@ class UserService {
 
     if (data.departmentId !== undefined || nextRole === EAccountRole.ADMIN) payload.departmentId = assignments.departmentId;
     if (data.positionId !== undefined || nextRole === EAccountRole.ADMIN) payload.positionId = assignments.positionId;
-    if (data.employeeCode !== undefined) payload.employeeCode = normalizedEmployeeCode;
+    if (data.employeeCode !== undefined || departmentChanged) payload.employeeCode = normalizedEmployeeCode;
     if (data.name !== undefined) payload.name = normalizeRequiredText(data.name);
     if (data.email !== undefined) payload.email = normalizeRequiredText(data.email).toLowerCase();
     if (data.phone !== undefined) payload.phone = normalizeOptionalText(data.phone) ?? undefined;
