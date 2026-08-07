@@ -21,17 +21,17 @@ export default function ChartCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="rounded-xl border border-zinc-200/70 bg-white shadow-sm dark:border-zinc-700/50 dark:bg-zinc-900"
+      className="rounded-2xl border border-border bg-card shadow-sm"
     >
-      <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
+      <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold uppercase text-zinc-900 dark:text-zinc-100">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{subtitle}</p>}
+          <h2 className="text-[15px] font-semibold text-foreground sm:text-base">{title}</h2>
+          {subtitle ? <p className="mt-1 text-sm leading-6 text-muted-foreground">{subtitle}</p> : null}
         </div>
-        {rightContent && <div className="flex items-center gap-3">{rightContent}</div>}
+        {rightContent ? <div className="flex flex-wrap items-center gap-2.5 text-sm text-muted-foreground">{rightContent}</div> : null}
       </div>
 
-      <div className="p-5">{children}</div>
+      <div className="p-4 sm:p-5">{children}</div>
     </motion.div>
   )
 }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Building2, Briefcase, CheckCircle2, ClipboardList, CircleDashed, UserCheck, UserX, Users, type LucideIcon } from "lucide-react"
 import PageHeader from "@/shared/ui/PageHeader"
 import PageSeo from "@/shared/ui/PageSeo"
-import { chartPalette } from "@/shared/ui/chartColors"
+import { chartPalette, semanticChartColors } from "@/shared/ui/chartColors"
 import StatsGrid from "./components/StatsGrid"
 import EmployeeTrendChart from "./components/GrowthChart"
 import DonutChartCard from "./components/DonutChartCard"
@@ -22,29 +22,53 @@ import projectCommentService, { type ProjectComment } from "@/services/project-c
 import projectTaskService, { type ProjectTask } from "@/services/project-task.service"
 
 
-type TimeRangeKey = "all" | "12m" | "6m" | "3m"
+type TimeRangeKey = "7d" | "30d" | "3m" | "6m" | "1y" | "all"
 
-const timeRangeOptions: Array<{ key: TimeRangeKey; label: string; months: number }> = [
-  { key: "all", label: "Tất cả", months: Number.POSITIVE_INFINITY },
-  { key: "12m", label: "1 năm", months: 12 },
-  { key: "6m", label: "6 tháng", months: 6 },
-  { key: "3m", label: "3 tháng", months: 3 },
+const timeRangeOptions: Array<
+  | { key: "7d"; label: string; unit: "days"; value: number }
+  | { key: "30d"; label: string; unit: "days"; value: number }
+  | { key: "3m"; label: string; unit: "months"; value: number }
+  | { key: "6m"; label: string; unit: "months"; value: number }
+  | { key: "1y"; label: string; unit: "months"; value: number }
+  | { key: "all"; label: string; unit: "all"; value: number }
+> = [
+  { key: "7d", label: "7 ngày", unit: "days", value: 7 },
+  { key: "30d", label: "30 ngày", unit: "days", value: 30 },
+  { key: "3m", label: "3 tháng", unit: "months", value: 3 },
+  { key: "6m", label: "6 tháng", unit: "months", value: 6 },
+  { key: "1y", label: "1 năm", unit: "months", value: 12 },
+  { key: "all", label: "Tất cả", unit: "all", value: 0 },
 ]
 
-function getRangeMonths(range: TimeRangeKey) {
-  return timeRangeOptions.find((option) => option.key === range)?.months ?? 12
+function getRangeLabel(range: TimeRangeKey) {
+  return timeRangeOptions.find((option) => option.key === range)?.label ?? "Tất cả"
 }
 
 function getPreviousRangeWindow(range: TimeRangeKey) {
-  const selectedMonths = getRangeMonths(range)
-  if (!Number.isFinite(selectedMonths)) return null
+  const option = timeRangeOptions.find((item) => item.key === range)
+  if (!option || option.unit === "all") return null
 
-  const today = new Date()
-  const currentStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (selectedMonths - 1), 1))
   const currentEnd = new Date()
+  const currentStart = new Date(currentEnd)
+
+  if (option.unit === "days") {
+    currentStart.setHours(0, 0, 0, 0)
+    currentStart.setDate(currentStart.getDate() - (option.value - 1))
+    const previousEnd = new Date(currentStart)
+    previousEnd.setMilliseconds(previousEnd.getMilliseconds() - 1)
+    const previousStart = new Date(previousEnd)
+    previousStart.setDate(previousStart.getDate() - (option.value - 1))
+    previousStart.setHours(0, 0, 0, 0)
+
+    return { currentStart, currentEnd, previousStart, previousEnd }
+  }
+
+  currentStart.setUTCDate(1)
+  currentStart.setUTCHours(0, 0, 0, 0)
+  currentStart.setUTCMonth(currentStart.getUTCMonth() - (option.value - 1))
   const previousEnd = new Date(currentStart)
   previousEnd.setUTCMilliseconds(previousEnd.getUTCMilliseconds() - 1)
-  const previousStart = new Date(Date.UTC(previousEnd.getUTCFullYear(), previousEnd.getUTCMonth() - (selectedMonths - 1), 1))
+  const previousStart = new Date(Date.UTC(previousEnd.getUTCFullYear(), previousEnd.getUTCMonth() - (option.value - 1), 1))
 
   return { currentStart, currentEnd, previousStart, previousEnd }
 }
@@ -97,7 +121,9 @@ function countIncompleteProjectsAt(projects: Project[], end: Date) {
 }
 
 function formatComparisonLabel(range: TimeRangeKey) {
-  if (range === "12m") return "1 năm trước"
+  if (range === "7d") return "7 ngày trước"
+  if (range === "30d") return "30 ngày trước"
+  if (range === "1y") return "1 năm trước"
   if (range === "6m") return "6 tháng trước"
   if (range === "3m") return "3 tháng trước"
   return ""
@@ -150,6 +176,41 @@ function formatComparisonText(currentValue: number, previousValue: number | null
     trendDeltaText: `${delta > 0 ? "+" : ""}${delta.toLocaleString("en-US")}`,
     trendDirection: delta > 0 ? ("up" as const) : ("down" as const),
   }
+}
+
+function isDateWithinRange(value: string, rangeStart: Date | null, rangeEnd: Date) {
+  const timestamp = new Date(value).getTime()
+  if (Number.isNaN(timestamp)) return false
+
+  if (!rangeStart) return timestamp <= rangeEnd.getTime()
+  return timestamp >= rangeStart.getTime() && timestamp <= rangeEnd.getTime()
+}
+
+function isDateWithinWindow(value: string | null | undefined, rangeStart: Date | null, rangeEnd: Date) {
+  if (!value) return false
+  return isDateWithinRange(value, rangeStart, rangeEnd)
+}
+
+function employmentOverlapsRange(user: User, rangeStart: Date | null, rangeEnd: Date) {
+  if (!isBeforeOrAt(user.hireDate, rangeEnd)) return false
+
+  if (!rangeStart) {
+    return !user.leaveDate || new Date(user.leaveDate).getTime() > rangeEnd.getTime()
+  }
+
+  if (!user.leaveDate) return true
+
+  const leaveTime = new Date(user.leaveDate).getTime()
+  if (Number.isNaN(leaveTime)) return true
+
+  return leaveTime >= rangeStart.getTime()
+}
+
+function filterChartDataByRange<T extends { periodStart: string }>(items: T[], range: TimeRangeKey) {
+  const window = getPreviousRangeWindow(range)
+  if (!window) return items
+
+  return items.filter((item) => isDateWithinRange(item.periodStart, window.currentStart, window.currentEnd))
 }
 // ================================
 // SKELETON CHO DASHBOAR
@@ -215,7 +276,7 @@ function DashboardSkeleton() {
         <SkeletonBlock className="mt-6 h-72 w-full" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:gap-7">
         <div className="rounded-xl border border-border bg-background p-5 shadow-sm">
           <div className="space-y-2">
             <SkeletonBlock className="h-5 w-48" />
@@ -253,10 +314,10 @@ function DashboardSkeleton() {
 
 
 const projectPalette = {
-  low: "var(--chart-7)",
-  medium: "var(--chart-3)",
-  high: "var(--chart-2)",
-  critical: "var(--chart-5)",
+  low: "var(--muted-foreground)",
+  medium: "var(--primary)",
+  high: "var(--warning)",
+  critical: "var(--destructive)",
 }
 
 interface DepartmentChartPoint {
@@ -269,8 +330,8 @@ interface DepartmentChartPoint {
   managerCode: string
 }
 
-function buildActiveDepartmentData(users: User[], departments: Department[]): DepartmentChartPoint[] {
-  const activeUsers = users.filter((user) => user.status === true)
+function buildActiveDepartmentData(users: User[], departments: Department[], rangeStart: Date | null, rangeEnd: Date): DepartmentChartPoint[] {
+  const activeUsers = users.filter((user) => employmentOverlapsRange(user, rangeStart, rangeEnd))
   const userById = new Map(users.map((user) => [user.id, user]))
 
   return departments
@@ -374,11 +435,13 @@ function buildEmployeeContributionData(
   assignments: ProjectEmployee[],
   comments: ProjectComment[], // bình luận
   tasks: ProjectTask[],
+  rangeStart: Date | null,
+  rangeEnd: Date,
 ): DashboardContributionPoint[] {
   const projectById = new Map(projects.map((project) => [project.id, project])) // tra cứ nhanh project id
   const departmentById = new Map(departments.map((department) => [department.id, department.name]))
   const positionById = new Map(positions.map((position) => [position.id, position.name]))
-  const activeUsers = users.filter((user) => user.status === true)  // lọc nhân viên
+  const activeUsers = users.filter((user) => employmentOverlapsRange(user, rangeStart, rangeEnd))
   const activeUserIds = new Set(activeUsers.map((user) => user.id)) // kiểm tra nhanh nhân viên có active hay không
   const commentCounts = new Map<string, number>() // lưu số bình luận của từng user
   const taskCounts = new Map<string, number>()
@@ -452,8 +515,12 @@ interface DashboardChartPoint {
   value: number
   color?: string
 }
-function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
-  const incompleteProjects = projects.filter((project) => project.status !== "completed")
+function buildProjectPriorityData(projects: Project[], rangeStart: Date | null, end: Date): DashboardChartPoint[] {
+  const incompleteProjects = projects.filter((project) => {
+    if (!isBeforeOrAt(project.createdAt, end)) return false
+    if (rangeStart && !isDateWithinWindow(project.createdAt, rangeStart, end)) return false
+    return !isBeforeOrAt(getProjectCompletedAt(project), end)
+  })
 
   return [
     { name: "Thấp", value: incompleteProjects.filter((project) => project.priority === "low").length, color: projectPalette.low },
@@ -465,6 +532,7 @@ function buildProjectPriorityData(projects: Project[]): DashboardChartPoint[] {
 
 // data cho biểu đồ project lineChart
 interface ProjectOverviewPoint {
+  periodStart: string
   month: string
   total: number
   completed: number
@@ -514,6 +582,7 @@ function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
     const incomplete = Math.max(total - completed, 0)
     const [year, month] = key.split("-")
     result.push({
+      periodStart: `${key}-01T00:00:00Z`,
       month: `${Number.parseInt(month, 10)}/${year}`,
       total,
       completed,
@@ -527,6 +596,7 @@ function buildProjectOverviewData(projects: Project[]): ProjectOverviewPoint[] {
 // dữ liệu cho biểu đồ nhân sự
 
 interface DashboardGrowthPoint {
+  periodStart: string
   month: string
   active: number
   departed: number
@@ -575,6 +645,7 @@ function buildGrowthData(users: User[]): DashboardGrowthPoint[] {
 
     const [year, month] = key.split("-")
     result.push({
+      periodStart: `${key}-01T00:00:00Z`,
       month: `${Number.parseInt(month, 10)}/${year}`,
       active,
       departed,
@@ -609,7 +680,7 @@ export default function AdminDashboard() {
   const [projectEmployees, setProjectEmployees] = useState<ProjectEmployee[]>([])
   const [projectComments, setProjectComments] = useState<ProjectComment[]>([])
   const [projectTasks, setProjectTasks] = useState<ProjectTask[]>([])
-  const [range, setRange] = useState<TimeRangeKey>("12m")
+  const [range, setRange] = useState<TimeRangeKey>("1y")
   const [loading, setLoading] = useState(true)
 
 
@@ -655,9 +726,12 @@ export default function AdminDashboard() {
     }
   }, [])
 
-  const completedProjectsCount = projects.filter((project) => project.status === "completed").length
-  const incompleteProjectsCount = projects.length - completedProjectsCount
-  const activeUsersCount = countUsersActiveAt(users, new Date())
+  const currentWindow = getPreviousRangeWindow(range)
+  const currentRangeStart = currentWindow?.currentStart ?? null
+  const currentRangeEnd = currentWindow?.currentEnd ?? new Date()
+  const completedProjectsCount = countCompletedProjectsAt(projects, currentRangeEnd)
+  const incompleteProjectsCount = countIncompleteProjectsAt(projects, currentRangeEnd)
+  const activeUsersCount = countUsersActiveAt(users, currentRangeEnd)
 
   const stats = useMemo(() => {
     const window = getPreviousRangeWindow(range)
@@ -679,9 +753,9 @@ export default function AdminDashboard() {
 
     const filteredStats: DashboardStat[] = [
       {
-        label: "Tổng tài khoản",
+        label: "Tổng nhân viên",
         value: countCreatedUpTo(users, rangeEnd, (user) => user.createdAt),
-        color: chartPalette[0],
+        color: semanticChartColors.primary,
         icon: Users,
         href: "/users",
         ...formatComparisonText(
@@ -693,7 +767,7 @@ export default function AdminDashboard() {
       {
         label: "Đang làm",
         value: countUsersActiveAt(users, rangeEnd),
-        color: chartPalette[1],
+        color: semanticChartColors.success,
         icon: UserCheck,
         href: "/users",
         ...formatComparisonText(
@@ -705,7 +779,7 @@ export default function AdminDashboard() {
       {
         label: "Đã nghỉ",
         value: countUsersDepartedAt(users, rangeEnd),
-        color: chartPalette[2],
+        color: semanticChartColors.destructive,
         icon: UserX,
         href: "/users",
         ...formatComparisonText(
@@ -717,7 +791,7 @@ export default function AdminDashboard() {
       {
         label: "Phòng ban",
         value: countDepartmentsAt(departments, rangeEnd),
-        color: chartPalette[3],
+        color: chartPalette[5],
         icon: Building2,
         href: "/departments",
         ...formatComparisonText(
@@ -729,7 +803,7 @@ export default function AdminDashboard() {
       {
         label: "Chức vụ",
         value: countPositionsAt(positions, rangeEnd),
-        color: chartPalette[4],
+        color: chartPalette[1],
         icon: Briefcase,
         href: "/positions",
         ...formatComparisonText(
@@ -741,7 +815,7 @@ export default function AdminDashboard() {
       {
         label: "Dự án hoàn thành",
         value: countCompletedProjectsAt(projects, rangeEnd),
-        color: chartPalette[5],
+        color: semanticChartColors.success,
         icon: CheckCircle2,
         href: "/projects",
         ...formatComparisonText(
@@ -753,7 +827,7 @@ export default function AdminDashboard() {
       {
         label: "Tổng dự án",
         value: countProjectsAt(projects, rangeEnd),
-        color: chartPalette[6],
+        color: semanticChartColors.primary,
         icon: ClipboardList,
         href: "/projects",
         ...formatComparisonText(
@@ -765,7 +839,7 @@ export default function AdminDashboard() {
       {
         label: "Dự án chưa hoàn thành",
         value: countIncompleteProjectsAt(projects, rangeEnd),
-        color: chartPalette[7],
+        color: semanticChartColors.warning,
         icon: CircleDashed,
         href: "/projects",
         ...formatComparisonText(
@@ -779,74 +853,105 @@ export default function AdminDashboard() {
     return filteredStats
   }, [departments, positions, projects, range, users])
 
+  const visibleProjects = projects.filter((project) => isDateWithinWindow(project.createdAt, currentRangeStart, currentRangeEnd))
+  const visibleProjectDepartments = projectDepartments.filter((assignment) => isDateWithinWindow(assignment.assignedAt, currentRangeStart, currentRangeEnd))
+  const visibleProjectEmployees = projectEmployees.filter((assignment) => isDateWithinWindow(assignment.assignedAt, currentRangeStart, currentRangeEnd))
+  const visibleProjectComments = projectComments.filter((comment) => isDateWithinWindow(comment.createdAt, currentRangeStart, currentRangeEnd))
+  const visibleProjectTasks = projectTasks.filter((task) => isDateWithinWindow(task.createdAt, currentRangeStart, currentRangeEnd))
+
   const growthData = buildGrowthData(users)
-  const deptData = buildActiveDepartmentData(users, departments)
-  const projPriorityData = buildProjectPriorityData(projects)
+  const deptData = buildActiveDepartmentData(users, departments, currentRangeStart, currentRangeEnd)
+  const projPriorityData = buildProjectPriorityData(projects, currentRangeStart, currentRangeEnd)
   const projectOverviewData = buildProjectOverviewData(projects)
-  const departmentContributionData = buildDepartmentContributionData(projects, departments, projectDepartments) // biều đồ phòng ban đóng góp
+  const departmentContributionData = buildDepartmentContributionData(visibleProjects, departments, visibleProjectDepartments) // biều đồ phòng ban đóng góp
   const employeeContributionData = buildEmployeeContributionData( // biểu đồ nhân viên đóng góp
-    projects,
+    visibleProjects,
     users,
     departments,
     positions,
-    projectEmployees,
-    projectComments,
-    projectTasks
+    visibleProjectEmployees,
+    visibleProjectComments,
+    visibleProjectTasks,
+    currentRangeStart,
+    currentRangeEnd
   )
+  const primaryStats = stats.filter((stat) => ["Tổng nhân viên", "Đang làm", "Đã nghỉ", "Tổng dự án"].includes(stat.label))
+  const secondaryStats = stats.filter((stat) => ["Phòng ban", "Chức vụ", "Dự án hoàn thành", "Dự án chưa hoàn thành"].includes(stat.label))
+  const visibleGrowthData = filterChartDataByRange(growthData, range)
+  const visibleProjectOverviewData = filterChartDataByRange(projectOverviewData, range)
+  const rangeLabel = getRangeLabel(range)
 
   if (loading) {
     return <DashboardSkeleton />
   }
 
   return (
-      <div className="space-y-8 text-foreground">
+      <div className="space-y-8 text-foreground xl:space-y-10">
       <PageSeo
-        title="Dashboard Admin"
-        description="Thống kê tổng quan toàn bộ thông số trong hệ thống TeamFlow"
+        title="Tổng quan Admin"
+        description="Theo dõi tình hình nhân sự và tiến độ dự án trong hệ thống TeamFlow"
       />
-      <PageHeader title="Dashboard" desc="Thống kê tổng quan toàn bộ thông số trong hệ thống" />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between xl:gap-5">
+        <PageHeader title="Tổng quan" desc="Theo dõi tình hình nhân sự và tiến độ dự án trong hệ thống" />
+        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-card p-1.5 shadow-sm">
+          {timeRangeOptions.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => setRange(option.key)}
+              className={`rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                range === option.key
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <StatsGrid
-        stats={stats}
-        range={range}
-        onRangeChange={setRange}
+        primaryStats={primaryStats}
+        secondaryStats={secondaryStats}
+        rangeLabel={rangeLabel}
         onCardClick={(href) => navigate(href)}
       />
-      <EmployeeTrendChart data={growthData} currentTotal={activeUsersCount} />
+      <EmployeeTrendChart data={visibleGrowthData} currentTotal={activeUsersCount} />
       <ProjectOverviewChart
-        data={projectOverviewData}
-        currentTotal={projects.length}
+        data={visibleProjectOverviewData}
+        currentTotal={countProjectsAt(projects, currentRangeEnd)}
         completedTotal={completedProjectsCount}
         incompleteTotal={incompleteProjectsCount}
       />
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:gap-7">
         <ContributionBarChart
           title="Đóng góp dự án theo phòng ban"
           description="Xếp hạng phòng ban theo điểm đóng góp tổng hợp."
           data={departmentContributionData}
-          accent="var(--chart-2)"
+          accent="var(--secondary)"
           emptyText="Chưa có dữ liệu phân công cho phòng ban"
         />
         <ContributionBarChart
           title="Đóng góp dự án theo nhân sự"
           description="Xếp hạng nhân sự đang hoạt động theo điểm đóng góp tổng hợp."
           data={employeeContributionData}
-          accent="var(--chart-1)"
+          accent="var(--primary)"
           emptyText="Chưa có dữ liệu phân công cho nhân sự"
           tooltipContent={<EmployeeContributionTooltip />}
         />
       </div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:gap-7">
         <DonutChartCard
           title="Phân bố nhân sự đang hoạt động theo phòng ban"
           data={deptData}
-          total={activeUsersCount || 1}
+          total={deptData.reduce((sum, item) => sum + item.value, 0) || 1}
           tooltipContent={<DepartmentTooltip />}
         />
         <DonutChartCard
           title="Phân bố độ ưu tiên dự án chưa hoàn thành"
           data={projPriorityData}
-          total={incompleteProjectsCount || 1}
-          tooltipContent={<ProjectPriorityTooltip total={incompleteProjectsCount || 1} />}
+          total={projPriorityData.reduce((sum, item) => sum + item.value, 0) || 1}
+          tooltipContent={<ProjectPriorityTooltip total={projPriorityData.reduce((sum, item) => sum + item.value, 0) || 1} />}
         />
       </div>
     </div>

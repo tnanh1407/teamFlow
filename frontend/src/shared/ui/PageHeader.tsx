@@ -5,9 +5,9 @@ interface PageHeaderProps {
 
 export default function PageHeader({ title, desc }: PageHeaderProps) {
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-foreground capitalize">{title}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+    <div className="max-w-3xl">
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{title}</h1>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-[15px]">{desc}</p>
     </div>
   )
 }

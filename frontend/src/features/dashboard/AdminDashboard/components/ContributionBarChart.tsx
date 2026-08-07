@@ -114,47 +114,47 @@ export default function ContributionBarChart({
   emptyText,
   tooltipContent,
 }: ContributionBarChartProps) {
-  const chartHeight = Math.max(240, data.length * 48 + 40)
+  const chartHeight = Math.max(220, data.length * 40 + 24)
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-xl border border-border bg-background shadow-sm"
+      className="rounded-2xl border border-border bg-card shadow-sm"
     >
       <div className="border-b border-border px-5 py-4">
-        <h2 className="text-base font-semibold uppercase text-foreground">{title}</h2>
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </div>
 
       <div className="p-5">
         {data.length === 0 ? (
-          <div className="flex h-56 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
+          <div className="flex h-52 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted-foreground">
             {emptyText}
           </div>
         ) : (
           <div style={{ height: chartHeight }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, left: 24, bottom: 4 }}>
+              <BarChart data={data} layout="vertical" margin={{ top: 2, right: 8, left: 8, bottom: 2 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" horizontal={false} />
                 <XAxis
                   type="number"
                   tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
-                  tickLine={true}
-                  axisLine={true}
+                  tickLine={false}
+                  axisLine={false}
                   allowDecimals={false}
                 />
-                <YAxis 
+                <YAxis
                   type="category"
                   dataKey="label"
-                  width={180}
-                  tick={{ fontSize: 14, fill: "var(--chart-label-color)" }}
-                  tickLine={true}
-                  axisLine={true}
+                  width={168}
+                  tick={{ fontSize: 12, fill: "var(--chart-label-color)" }}
+                  tickLine={false}
+                  axisLine={false}
                 />
                 <Tooltip content={tooltipContent ?? <ContributionTooltip />} />
-                <Bar dataKey="value" fill={accent}  barSize={20} />
+                <Bar dataKey="value" fill={accent} radius={[0, 8, 8, 0]} barSize={16} />
               </BarChart>
             </ResponsiveContainer>
           </div>

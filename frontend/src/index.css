@@ -14,6 +14,12 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 }
 
 
@@ -29,16 +35,20 @@
   --primary-foreground: #ffffff;
   --secondary: #ea580c;
   --secondary-foreground: #ffffff;
-  --danger: #dc2626;
   --success: #16a34a;
+  --success-foreground: #ffffff;
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
   --chart-1: var(--primary);
   --chart-2: var(--secondary);
-  --chart-3: #0891b2;
-  --chart-4: #7c3aed;
-  --chart-5: #16a34a;
-  --chart-6: #dc2626;
-  --chart-7: #d97706;
-  --chart-8: #db2777;
+  --chart-3: var(--success);
+  --chart-4: var(--warning);
+  --chart-5: var(--destructive);
+  --chart-6: var(--muted-foreground);
+  --chart-7: color-mix(in srgb, var(--primary) 60%, var(--muted-foreground));
+  --chart-8: color-mix(in srgb, var(--secondary) 60%, var(--muted-foreground));
   --chart-grid-color: #e2e8f0;
   --chart-label-color: #64748b;
 }
@@ -59,16 +69,20 @@
   --secondary-foreground: #ffffff;
   --secondary-600: #c2410c;
   --secondary-700: #9a3412;
-  --danger: #dc2626;
   --success: #16a34a;
+  --success-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #0f172a;
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
   --chart-1: #60a5fa;
   --chart-2: #fb923c;
-  --chart-3: #22d3ee;
-  --chart-4: #a78bfa;
-  --chart-5: #4ade80;
-  --chart-6: #f87171;
-  --chart-7: #fbbf24;
-  --chart-8: #f472b6;
+  --chart-3: var(--success);
+  --chart-4: var(--warning);
+  --chart-5: var(--destructive);
+  --chart-6: var(--muted-foreground);
+  --chart-7: color-mix(in srgb, var(--primary) 55%, var(--muted-foreground));
+  --chart-8: color-mix(in srgb, var(--secondary) 55%, var(--muted-foreground));
   --chart-grid-color: #334155;
   --chart-label-color: #94a3b8;
 }
